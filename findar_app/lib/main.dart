@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import './features/home/home.dart';
+import './features/search/screens/filtering.dart';
 
 void main() {
   runApp(const MainApp());
@@ -9,13 +11,13 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      
-      home: Scaffold(
-        body: Center(
-          child: Text('Hello World!'),
-        ),
-      ),
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      initialRoute: '/home',
+      routes: {
+        '/home': (context) => HomeScreen(),
+        '/filtering': (context) => FilteringScreen(),
+      },
     );
   }
 }
