@@ -9,6 +9,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  group_button: ^5.3.4
+  main_button: ^0.0.19
 
 dev_dependencies:
   flutter_test:
