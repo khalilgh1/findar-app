@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import './features/home/home.dart';
 import './features/search/screens/filtering.dart';
 import 'core/theme/app_theme.dart';
+import './features/landing/screens/splash_screen.dart';
+import './features/auth/screens/login_screen.dart';
+import './features/auth/screens/register_screen.dart';
+
 void main() {
   runApp(const MainApp());
 }
@@ -17,8 +21,11 @@ class MainApp extends StatelessWidget {
       darkTheme: darkTheme,
       themeMode: ThemeMode.light,
       debugShowCheckedModeBanner: false,
-      initialRoute: '/home',
+      initialRoute: '/landing',
       routes: {
+        '/landing': (context) =>  SplashScreen(),
+        '/login': (context) =>  LoginScreen(),
+        '/register': (context) =>  RegisterScreen(),
         '/home': (context) => HomeScreen(),
         '/filtering': (context) => FilteringScreen(),
       },
