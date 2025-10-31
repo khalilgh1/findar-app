@@ -1,19 +1,118 @@
 import 'package:flutter/material.dart';
+import '../../core/widgets/appbar.dart';
+import 'search_bar.dart';
+import 'categories.dart';
+import 'property.dart';
+import 'listings.dart';
+import 'sponsored.dart';
 
-class HomeScreen extends StatelessWidget {
-  HomeScreen();
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final sponsored = [
+    Property(
+      image: "lib/assets/house1.jpg",
+      price: "\$1,200,000",
+      address: "123 Luxury Ave, Beverly Hills, CA",
+      details: "4 Bed | 3 Bath | 2,500 sqft",
+    ),
+    Property(
+      image: "lib/assets/house2.jpg",
+      price: "\$850,000",
+      address: "456 Suburb Rd, Austin, TX",
+      details: "3 Bed | 2 Bath | 2,200 sqft",
+    ),
+    Property(
+      image: "lib/assets/house3.jpg",
+      price: "\$980,000",
+      address: "101 Garden Ln, San Francisco, CA",
+      details: "3 Bed | 2 Bath | 2,100 sqft",
+    ),
+  ];
+
+  final recent = [
+    Property(
+      image: "lib/assets/house1.jpg",
+      price: "\$1,200,000",
+      address: "123 Luxury Ave, Beverly Hills, CA",
+      details: "4 Bed | 3 Bath | 2,500 sqft",
+    ),
+    Property(
+      image: "lib/assets/house2.jpg",
+      price: "\$850,000",
+      address: "456 Suburb Rd, Austin, TX",
+      details: "3 Bed | 2 Bath | 2,200 sqft",
+    ),
+    Property(
+      image: "lib/assets/house3.jpg",
+      price: "\$980,000",
+      address: "101 Garden Ln, San Francisco, CA",
+      details: "3 Bed | 2 Bath | 2,100 sqft",
+    ),
+  ];
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
+      backgroundColor: theme.colorScheme.surface,
       appBar: AppBar(
-        title: const Text('Home Screen'),
+        forceMaterialTransparency: false,
+        primary: true,
+        toolbarOpacity: 1,
+        leading: Icon(Icons.settings),
+        actions: [Icon(Icons.notifications)],
+        actionsPadding: EdgeInsets.only(right: 14),
+        centerTitle: true,
+        title: Text('FinDar'),
+        elevation: 0,
       ),
-      body: Center(
-        child: ElevatedButton(
-          onPressed: () {
-            Navigator.pushNamed(context, '/filtering');
-          },
-          child: const Text('Go to Filtering Screen'),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(14.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(height: 15),
+              SearchBarWidget(),
+              SizedBox(height: 15),
+              CategoryBar(),
+              SizedBox(height: 20),
+              Text(
+                "Sponsored Properties",
+                style: theme.textTheme.headlineLarge?.copyWith(
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
+              SizedBox(height: 12),
+              SizedBox(
+                height: 230,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: sponsored.length,
+                  itemBuilder: (context, index) =>
+                      PropertyCard(property: sponsored[index]),
+                ),
+              ),
+              SizedBox(height: 25),
+              Text(
+                "Recent Listings",
+                style: theme.textTheme.headlineLarge?.copyWith(
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
+              SizedBox(height: 15),
+              Column(
+                children: recent.map((p) => ListingTile(property: p)).toList(),
+              ),
+            ],
+          ),
         ),
       ),
     );
