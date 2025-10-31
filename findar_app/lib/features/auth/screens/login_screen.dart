@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:findar_app/core/widgets/appbar_title.dart';
-import 'package:findar_app/core/widgets/label.dart';
-import 'package:main_button/main_button.dart';
+
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
