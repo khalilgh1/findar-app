@@ -46,18 +46,26 @@ class _FilteringScreenState extends State<FilteringScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    var theme = Theme.of(context);
     return Scaffold(
+      backgroundColor: theme.colorScheme.surface,
       appBar: AppBar(
-        title: const Text('tefeg'),
-        centerTitle: true,
+        forceMaterialTransparency: false,
+        primary: true,
+        toolbarOpacity: 1,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
+        title: const Text('Advanced Search'),
+        centerTitle: true,
+        actions: [
+          IconButton(icon: const Icon(Icons.bookmark_outline), onPressed: null),
+        ],
+        elevation: 0,
       ),
       body: Container(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
@@ -66,14 +74,16 @@ class _FilteringScreenState extends State<FilteringScreen> {
             const SizedBox(height: 8),
             TextField(
               controller: locationController,
-              
               decoration: InputDecoration(
                 enabledBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.grey),
+                  borderSide: BorderSide(color: theme.colorScheme.secondary),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.blue, width: 2),
+                  borderSide: BorderSide(
+                    color: theme.colorScheme.primary,
+                    width: 2,
+                  ),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 hintText: 'Enter a city, zip code, or neighborhood',
@@ -87,7 +97,7 @@ class _FilteringScreenState extends State<FilteringScreen> {
             const SizedBox(height: 24),
 
             // Price Range
-            const Text('Price range'),
+            Text('Price range', style: theme.textTheme.headlineSmall),
 
             RangeSlider(
               values: priceRange,
@@ -98,7 +108,7 @@ class _FilteringScreenState extends State<FilteringScreen> {
                 _formatPrice(priceRange.start),
                 _formatPrice(priceRange.end),
               ),
-              activeColor: Colors.blue,
+              activeColor: theme.colorScheme.primary,
               onChanged: (values) => setState(() => priceRange = values),
             ),
             Row(
@@ -112,7 +122,7 @@ class _FilteringScreenState extends State<FilteringScreen> {
             const SizedBox(height: 24),
 
             // Property Type
-            const Text('Propoerty type'),
+            Text('Propoerty type', style: theme.textTheme.headlineSmall),
 
             const SizedBox(height: 8),
             Row(
@@ -124,13 +134,14 @@ class _FilteringScreenState extends State<FilteringScreen> {
                     label: Text(type),
                     selected: isSelected,
                     onSelected: (_) => setState(() => propertyType = type),
-                    selectedColor: Colors.blue,
-                    iconTheme: IconThemeData(
-                      color: isSelected ? Colors.white : Colors.black,
-                    ),
+                    selectedColor: theme.colorScheme.primary,
                     labelStyle: TextStyle(
-                      color: isSelected ? Colors.white : Colors.black,
+                      color: isSelected
+                          ? theme.colorScheme.onPrimary
+                          : theme.colorScheme.onSurface,
                     ),
+                    side: BorderSide.none,
+                    showCheckmark: false,
                   ),
                 );
               }).toList(),
@@ -139,7 +150,7 @@ class _FilteringScreenState extends State<FilteringScreen> {
             const SizedBox(height: 24),
 
             // Building Type
-            const Text('Building Type'),
+            Text('Building Type', style: theme.textTheme.headlineSmall),
             const SizedBox(height: 8),
             Column(
               children: [
@@ -161,18 +172,24 @@ class _FilteringScreenState extends State<FilteringScreen> {
             const SizedBox(height: 24),
 
             // Beds & Baths
-            const Text('Beds & Baths'),
+            Text('Beds & Baths', style: theme.textTheme.headlineSmall),
             const SizedBox(height: 8),
             _buildCounterRow(
-                'Bedrooms', bedrooms, (v) => setState(() => bedrooms = v)),
+              'Bedrooms',
+              bedrooms,
+              (v) => setState(() => bedrooms = v),
+            ),
             const SizedBox(height: 8),
             _buildCounterRow(
-                'Bathrooms', bathrooms, (v) => setState(() => bathrooms = v)),
+              'Bathrooms',
+              bathrooms,
+              (v) => setState(() => bathrooms = v),
+            ),
 
             const SizedBox(height: 24),
 
             // Square Footage
-            const Text('Square Footage'),
+            Text('Square Footage', style: theme.textTheme.headlineSmall),
             const SizedBox(height: 8),
             Row(
               children: [
@@ -181,17 +198,23 @@ class _FilteringScreenState extends State<FilteringScreen> {
                     decoration: InputDecoration(
                       labelText: 'Min',
                       labelStyle: const TextStyle(
-                          color: Colors.grey), // default (unfocused)
-                      floatingLabelStyle: const TextStyle(
-                          color: Colors.blue,
-                          fontWeight: FontWeight.w600), // on focus
+                        color: Colors.grey,
+                      ), // default (unfocused)
+                      floatingLabelStyle: TextStyle(
+                        color: theme.colorScheme.primary,
+                        fontWeight: FontWeight.w600,
+                      ), // on focus
                       enabledBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(color: Colors.grey),
+                        borderSide: BorderSide(
+                          color: theme.colorScheme.secondary,
+                        ),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       focusedBorder: OutlineInputBorder(
-                        borderSide:
-                            const BorderSide(color: Colors.blue, width: 2),
+                        borderSide: BorderSide(
+                          color: theme.colorScheme.primary,
+                          width: 2,
+                        ),
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
@@ -203,16 +226,22 @@ class _FilteringScreenState extends State<FilteringScreen> {
                   child: TextField(
                     decoration: InputDecoration(
                       labelText: 'Max',
-                      labelStyle: const TextStyle(color: Colors.grey),
-                      floatingLabelStyle: const TextStyle(
-                          color: Colors.blue, fontWeight: FontWeight.w600),
+                      labelStyle: TextStyle(color: theme.colorScheme.secondary),
+                      floatingLabelStyle: TextStyle(
+                        color: theme.colorScheme.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
                       enabledBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(color: Colors.grey),
+                        borderSide: BorderSide(
+                          color: theme.colorScheme.secondary,
+                        ),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       focusedBorder: OutlineInputBorder(
-                        borderSide:
-                            const BorderSide(color: Colors.blue, width: 2),
+                        borderSide: BorderSide(
+                          color: theme.colorScheme.primary,
+                          width: 2,
+                        ),
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
@@ -225,27 +254,27 @@ class _FilteringScreenState extends State<FilteringScreen> {
             const SizedBox(height: 24),
 
             // Listed By
-            const Text('Listed by'),
+            Text('Listed by', style: theme.textTheme.headlineSmall),
             Column(
               children: [
                 RadioListTile<String>(
-                  title: const Text('Any'),
+                  title: Text('Any'),
                   value: 'Any',
-                  activeColor: Colors.blue,
+                  activeColor: theme.colorScheme.primary,
                   groupValue: listedBy,
                   onChanged: (v) => setState(() => listedBy = v),
                 ),
                 RadioListTile<String>(
-                  title: const Text('Private Owner'),
+                  title: Text('Private Owner'),
                   value: 'Private Owner',
-                  activeColor: Colors.blue,
+                  activeColor: theme.colorScheme.primary,
                   groupValue: listedBy,
                   onChanged: (v) => setState(() => listedBy = v),
                 ),
                 RadioListTile<String>(
                   title: const Text('Real Estate Agent'),
                   value: 'Real Estate Agent',
-                  activeColor: Colors.blue,
+                  activeColor: theme.colorScheme.primary,
                   groupValue: listedBy,
                   onChanged: (v) => setState(() => listedBy = v),
                 ),
@@ -253,7 +282,6 @@ class _FilteringScreenState extends State<FilteringScreen> {
             ),
 
             const SizedBox(height: 24),
-
           ],
         ),
       ),
@@ -264,7 +292,7 @@ class _FilteringScreenState extends State<FilteringScreen> {
             Expanded(
               child: MainButton(
                 label: 'Reset',
-                backgroundColor: Colors.grey,
+                backgroundColor: theme.colorScheme.secondary,
                 onPressed: resetFilters,
               ),
             ),
@@ -272,7 +300,7 @@ class _FilteringScreenState extends State<FilteringScreen> {
             Expanded(
               child: MainButton(
                 label: 'Show results',
-                backgroundColor: Colors.blue,
+                backgroundColor: theme.colorScheme.primary,
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Showing 42 results')),
@@ -291,7 +319,7 @@ class _FilteringScreenState extends State<FilteringScreen> {
       title: Text(type),
       value: type,
       groupValue: buildingType,
-      activeColor: Colors.blue,
+      activeColor: Theme.of(context).colorScheme.primary,
       onChanged: (value) {
         setState(() {
           buildingType = value!;
@@ -303,7 +331,10 @@ class _FilteringScreenState extends State<FilteringScreen> {
   }
 
   Widget _buildCounterRow(
-      String label, int value, ValueChanged<int> onChanged) {
+    String label,
+    int value,
+    ValueChanged<int> onChanged,
+  ) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -312,17 +343,17 @@ class _FilteringScreenState extends State<FilteringScreen> {
           children: [
             IconButton(
               onPressed: value > 0 ? () => onChanged(value - 1) : null,
-              icon: const Icon(
+              icon: Icon(
                 Icons.remove_circle,
-                color: Colors.blue,
+                color: Theme.of(context).colorScheme.primary,
               ),
             ),
             Text('$value', style: const TextStyle(fontSize: 16)),
             IconButton(
               onPressed: () => onChanged(value + 1),
-              icon: const Icon(
+              icon: Icon(
                 Icons.add_circle,
-                color: Colors.blue,
+                color: Theme.of(context).colorScheme.primary,
               ),
             ),
           ],
