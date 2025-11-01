@@ -11,7 +11,7 @@ class ProfileAvatar extends StatelessWidget {
       children: [
         const CircleAvatar(
           radius: 50,
-          backgroundImage: AssetImage('lib/assets/house1.jpg'),
+          backgroundImage: AssetImage('assets/house1.jpg'),
           backgroundColor: Colors.transparent,
         ),
         Container(

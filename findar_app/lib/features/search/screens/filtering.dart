@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:findar_app/core/widgets/appbar_title.dart';
-import 'package:findar_app/core/widgets/label.dart';
 import 'package:main_button/main_button.dart';
 
 class FilteringScreen extends StatefulWidget {
@@ -51,7 +49,7 @@ class _FilteringScreenState extends State<FilteringScreen> {
     final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const AppbarTitle(title: 'Advanced Search'),
+        title: const Text('tefeg'),
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -89,7 +87,7 @@ class _FilteringScreenState extends State<FilteringScreen> {
             const SizedBox(height: 24),
 
             // Price Range
-            const FormLabel(text: 'Price Range'),
+            const Text('Price range'),
 
             RangeSlider(
               values: priceRange,
@@ -114,7 +112,7 @@ class _FilteringScreenState extends State<FilteringScreen> {
             const SizedBox(height: 24),
 
             // Property Type
-            const FormLabel(text: 'Location'),
+            const Text('Propoerty type'),
 
             const SizedBox(height: 8),
             Row(

@@ -15,12 +15,12 @@ class ProfileScreen extends StatelessWidget {
 
     var myListings = [
       {
-        "imagePath": 'lib/assets/house1.jpg',
+        "imagePath": 'assets/house1.jpg',
         "title": 'house 1',
         "price": '\$127,000',
       },
       {
-        "imagePath": 'lib/assets/house1.jpg',
+        "imagePath": 'assets/house1.jpg',
         "title": 'house 1',
         "price": '\$127,000',
       },
