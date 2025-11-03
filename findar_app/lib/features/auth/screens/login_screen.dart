@@ -22,7 +22,6 @@ class _LoginScreenState extends State<LoginScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
-
             children: [
               const SizedBox(height: 180),
               const Text(
@@ -151,7 +150,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       Navigator.pushNamed(context, '/register');
                     },
                     child: const Text(
-                      'Sign Up',
+                      'Register',
                       style: TextStyle(
                         color: Colors.blue,
                         fontWeight: FontWeight.bold,
