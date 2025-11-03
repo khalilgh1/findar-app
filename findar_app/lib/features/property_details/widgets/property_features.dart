@@ -1,0 +1,67 @@
+import 'package:flutter/material.dart';
+
+class PropertyFeatures extends StatelessWidget {
+  final int bedrooms;
+  final int bathrooms;
+  final String sqft;
+
+  const PropertyFeatures({
+    super.key,
+    required this.bedrooms,
+    required this.bathrooms,
+    required this.sqft,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Row(
+          children: [
+            _FeatureItem(
+              icon: Icons.bed_outlined,
+              text: '$bedrooms Bedrooms',
+            ),
+            const SizedBox(width: 24),
+            _FeatureItem(
+              icon: Icons.bathtub_outlined,
+              text: '$bathrooms Bathrooms',
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        _FeatureItem(
+          icon: Icons.square_foot,
+          text: sqft,
+        ),
+      ],
+    );
+  }
+}
+
+class _FeatureItem extends StatelessWidget {
+  final IconData icon;
+  final String text;
+
+  const _FeatureItem({
+    required this.icon,
+    required this.text,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, size: 20, color: Colors.grey[800]),
+        const SizedBox(width: 8),
+        Text(
+          text,
+          style: const TextStyle(
+            fontSize: 14,
+            color: Colors.black87,
+          ),
+        ),
+      ],
+    );
+  }
+}

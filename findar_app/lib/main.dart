@@ -12,6 +12,7 @@ import './features/search/screens/search_results.dart';
 import './features/demoscreen.dart';
 import './features/settings/settings_screen.dart';
 import 'core/theme/theme_provider.dart';
+import './features/property_details/screens/property_details_screen.dart';
 
 void main() {
   runApp(const MainApp());
@@ -43,6 +44,7 @@ class MainApp extends StatelessWidget {
               '/search-results': (context) => const SearchResultsScreen(),
               '/demoscreen': (context) => const Demoscreen(),
               '/settings': (context) => const SettingsScreen(),
+              '/property-details': (context) => const PropertyDetailsScreen(),
             },
           );
         },
