@@ -62,6 +62,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
       appBar: AppBar(
+        scrolledUnderElevation: 0,
         forceMaterialTransparency: false,
         primary: true,
         toolbarOpacity: 1,

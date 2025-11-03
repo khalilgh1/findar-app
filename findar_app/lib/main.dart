@@ -36,7 +36,7 @@ class MainApp extends StatelessWidget {
             darkTheme: darkTheme,
             themeMode: themeProvider.themeMode,
             debugShowCheckedModeBanner: false,
-            initialRoute: '/demoscreen',
+            initialRoute: '/home',
             routes: {
               '/landing': (context) => const SplashScreen(),
               '/login': (context) => const LoginScreen(),
