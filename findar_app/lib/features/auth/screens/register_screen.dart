@@ -198,7 +198,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 height: 48,
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.pushNamed(context, '/property_details');
+                    Navigator.pushNamed(context, '/home');
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
