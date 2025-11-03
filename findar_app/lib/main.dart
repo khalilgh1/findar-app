@@ -15,7 +15,7 @@ import './features/settings/settings_screen.dart';
 import 'core/theme/theme_provider.dart';
 import './features/profile/profile.dart';
 import './features/property_details/screens/property_details_screen.dart';
-
+import 'features/profile/profile.dart';
 void main() {
   runApp(const MainApp());
 }

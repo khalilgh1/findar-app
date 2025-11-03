@@ -248,10 +248,13 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
               Navigator.pushNamed(context, '/home');
               break;
             case 1:
+              Navigator.pushNamed(context, '/saved-listings');
               break;
             case 2:
+              Navigator.pushNamed(context, '/create-listing');
               break;
             case 3:
+              Navigator.pushNamed(context, '/profile');
               break;
           }
         },

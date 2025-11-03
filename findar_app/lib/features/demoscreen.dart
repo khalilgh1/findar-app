@@ -11,8 +11,7 @@ class Demoscreen extends StatelessWidget {
         title: const Text('Home Screen'),
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        child: ListView(
           children: [
             ElevatedButton(
               onPressed: () {
@@ -96,6 +95,13 @@ class Demoscreen extends StatelessWidget {
                 Navigator.pushNamed(context, '/create-listing');
               },
               child: const Text('Go to Create Listing Screen'),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pushNamed(context, '/profile');
+              },
+              child: const Text('Go to Profile Screen'),
             ),
           ],
         

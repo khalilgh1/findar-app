@@ -12,9 +12,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-      ),
+      backgroundColor: Theme.of(  context).colorScheme.background ,
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -22,18 +20,18 @@ class _SplashScreenState extends State<SplashScreen> {
           children: [
             const Spacer(),
             Column(
-              children: const [
+              children:  [
                 Text(
                   'Rent. Buy. Sell.',
                   style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black),
+                      color: Theme.of( context).colorScheme.onSurface),
                 ),
                 SizedBox(height: 10),
                 Text(
                   'All in one app',
-                  style: TextStyle(fontSize: 16, color: Colors.black),
+                  style: TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.onSurface),
                 ),
                 SizedBox(height: 20),
                 Text(

@@ -14,13 +14,15 @@ class AgentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Listed by',
-          style: TextStyle(
-            fontSize: 18,
+          style: textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -28,9 +30,9 @@ class AgentCard extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: colorScheme.surface,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.blue),
+            border: Border.all(color: colorScheme.primary),
           ),
           child: Row(
             children: [
@@ -45,29 +47,28 @@ class AgentCard extends StatelessWidget {
                   children: [
                     Text(
                       agentName,
-                      style: const TextStyle(
-                        fontSize: 16,
+                      style: textTheme.bodyLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       agentCompany,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
-                        color: Colors.grey,
+                        color: colorScheme.onSurface.withOpacity(0.7),
                       ),
                     ),
                   ],
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.phone, color: Color(0xFF2196F3)),
+                icon: Icon(Icons.phone, color: colorScheme.primary),
                 onPressed: () {
                   // Handle phone call
                 },
                 style: IconButton.styleFrom(
-                  backgroundColor: Colors.white,
+                  backgroundColor: colorScheme.surface,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -75,12 +76,12 @@ class AgentCard extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               IconButton(
-                icon: const Icon(Icons.message, color: Color(0xFF2196F3)),
+                icon: Icon(Icons.message, color: colorScheme.primary),
                 onPressed: () {
                   // Handle message
                 },
                 style: IconButton.styleFrom(
-                  backgroundColor: Colors.white,
+                  backgroundColor: colorScheme.surface,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),

@@ -32,7 +32,7 @@ class Description extends StatelessWidget {
         ),
         hintText: 'Describe the property details here...',
         hintStyle: TextStyle(
-          color: theme.colorScheme.onSecondary,
+          color: theme.colorScheme.onSurface,
           fontSize: 15,
         ),
         border: OutlineInputBorder(

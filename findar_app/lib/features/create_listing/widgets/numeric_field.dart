@@ -33,7 +33,7 @@ class NumericField extends StatelessWidget {
       children: [
         Text(
           label,
-          style: theme.textTheme.headlineSmall
+          style: theme.textTheme.headlineSmall?.copyWith(color: theme.colorScheme.onSurface)
         ),
         const SizedBox(height: 10),
         TextField(
@@ -41,10 +41,10 @@ class NumericField extends StatelessWidget {
           enabled: enabled,
           keyboardType: keyboardType,
           inputFormatters: inputFormatters,
-          style: const TextStyle(
+          style:  TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w500,
-            color: Color(0xFF111827),
+            color: Theme.of(context).colorScheme.onSurface,
           ),
           decoration: InputDecoration(
             fillColor: theme.colorScheme.secondaryContainer,
@@ -63,7 +63,7 @@ class NumericField extends StatelessWidget {
 
             hintText: hint,
             hintStyle: TextStyle(
-              color: Colors.grey[400],
+              color: theme.colorScheme.onSurface,
               fontSize: 15,
               fontWeight: FontWeight.w400,
             ),

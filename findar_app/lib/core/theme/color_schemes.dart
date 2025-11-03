@@ -12,7 +12,7 @@ const lightColorScheme = ColorScheme(
   // Secondary colors - Complementary colors
   secondary: Color.fromARGB(255, 232, 235, 240),       // Muted slate gray
   onSecondary: Color(0xFFFFFFFF),     // White text on secondary
-  secondaryContainer: Color(0xFFF0F4F8), // Very light blue-gray
+  secondaryContainer: Color.fromARGB(255, 237, 243, 248), // Very light blue-gray
   onSecondaryContainer: Color(0xFF374151), // Dark gray text
   
   // Surface colors - Background hierarchy

@@ -29,15 +29,15 @@ class ProfileScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(  context).colorScheme.surface,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () {},
+          icon:  Icon(Icons.arrow_back, color: Theme.of( context).colorScheme.onSurface, size: 30),
+          onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
+        title:  Text(
           'Profile',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600),
+          style: TextStyle(color: Theme.of( context).colorScheme.onSurface, fontWeight: FontWeight.w600),
         ),
         centerTitle: true,
         actions: [
