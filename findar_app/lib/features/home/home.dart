@@ -16,19 +16,19 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final sponsored = [
     Property(
-      image: "assets/house1.jpg",
+      image: "assets/find-dar-test1.jpg",
       price: "\$1,200,000",
       address: "123 Luxury Ave, Beverly Hills, CA",
       details: "4 Bed | 3 Bath | 2,500 sqft",
     ),
     Property(
-      image: "assets/house2.jpg",
+      image: "assets/find-dar-test2.jpg",
       price: "\$850,000",
       address: "456 Suburb Rd, Austin, TX",
       details: "3 Bed | 2 Bath | 2,200 sqft",
     ),
     Property(
-      image: "assets/house3.jpg",
+      image: "assets/find-dar-test3.jpg",
       price: "\$980,000",
       address: "101 Garden Ln, San Francisco, CA",
       details: "3 Bed | 2 Bath | 2,100 sqft",
@@ -37,19 +37,19 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final recent = [
     Property(
-      image: "assets/house1.jpg",
+      image: "assets/find-dar-test1.jpg",
       price: "\$1,200,000",
       address: "123 Luxury Ave, Beverly Hills, CA",
       details: "4 Bed | 3 Bath | 2,500 sqft",
     ),
     Property(
-      image: "assets/house2.jpg",
+      image: "assets/find-dar-test2.jpg",
       price: "\$850,000",
       address: "456 Suburb Rd, Austin, TX",
       details: "3 Bed | 2 Bath | 2,200 sqft",
     ),
     Property(
-      image: "assets/house3.jpg",
+      image: "assets/find-dar-test3.jpg",
       price: "\$980,000",
       address: "101 Garden Ln, San Francisco, CA",
       details: "3 Bed | 2 Bath | 2,100 sqft",
