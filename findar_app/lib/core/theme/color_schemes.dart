@@ -5,7 +5,7 @@ const lightColorScheme = ColorScheme(
 
   primary: Color(0xFF007BFF), // blue brand color
   onPrimary: Color(0xFFFFFFFF), // text color on buttons ..etc
-  secondary: Color(0xFFACAEB0), // light color for text ( description ..ect )
+  secondary: Color.fromARGB(255, 204, 221, 238), // light color for text ( description ..ect )
   onSecondary: Color(0xFF8F9AA3), // grey color for (labels, icons)
   error: Color(0xFFF7CBCB), // Error background
   onError: Color(0xFFED1515), // Error text
@@ -19,12 +19,16 @@ const lightColorScheme = ColorScheme(
 const darkColorScheme = ColorScheme(
   brightness: Brightness.dark,
   
-  primary: Color(0xFF007BFF), // blue brand color
-  secondary: Color(0xFF3A4756), // dark secondary color
+  primary: Color.fromARGB(255, 1, 75, 153), // blue brand color
+  secondary: Color.fromARGB(255, 58, 62, 66), // dark secondary color
   onPrimary: Color(0xFFFFFFFF), // text color on buttons ..etc
   onSecondary: Color(0xFFCFE3F6), // Text on secondary (labels, icons)
   error: Color(0xFFED1515), // Error background
   onError: Color(0xFFF7CBCB), // Error text
   surface: Color(0xFF1E1E1E), // background for cards, sheets
   onSurface: Color(0xFFFFFFFF), // App background for scaffolds
+  secondaryContainer: Color.fromARGB(255, 6, 26, 56), // text headings inside cards
+  onSecondaryContainer: Color(0xFFB0B0B0), // Text on secondary container
+  shadow: Color.fromARGB(255, 107, 104, 104), // containers shadow
+  
 );

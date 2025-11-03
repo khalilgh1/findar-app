@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import '../theme/color_schemes.dart';
 class SegmentedControl extends StatefulWidget {
   final List<String> options;
   final String? initialValue;
@@ -37,7 +37,7 @@ class _SegmentedControlState extends State<SegmentedControl> {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey[200],
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(8),
       ),
       padding: const EdgeInsets.all(4),
@@ -65,8 +65,8 @@ class _SegmentedControlState extends State<SegmentedControl> {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: isSelected
-                        ? widget.activeTextColor
-                        : widget.inactiveTextColor,
+                        ? Theme.of(context).colorScheme.onPrimary
+                        : Theme.of(context).colorScheme.onSurface,
                     fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                   ),
                 ),
