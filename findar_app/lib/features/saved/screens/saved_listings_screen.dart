@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../../core/widgets/appbar_title.dart';
 import '../../../core/widgets/property_card.dart';
 import '../../../core/theme/theme_provider.dart';
+import '../../../core/widgets/build_bottom_bar.dart';
+
 class SavedListingsScreen extends StatefulWidget {
   const SavedListingsScreen({super.key});
 
@@ -14,7 +16,8 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
     {
       'title': 'Luxury Villa',
       'id': '1',
-      'imageUrl': 'https://images.pexels.com/photos/206172/pexels-photo-206172.jpeg',
+      'imageUrl':
+          'https://images.pexels.com/photos/206172/pexels-photo-206172.jpeg',
       'price': '\$550,000',
       'location': '123 Ocean View Dr, Malibu',
       'beds': 3,
@@ -25,7 +28,8 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
     {
       'title': 'Charming Bungalow',
       'id': '2',
-      'imageUrl': 'https://images.pexels.com/photos/20708166/pexels-photo-20708166.jpeg',
+      'imageUrl':
+          'https://images.pexels.com/photos/20708166/pexels-photo-20708166.jpeg',
       'price': '\$320,000',
       'location': '456 Maple St, Springfield',
       'beds': 4,
@@ -36,7 +40,8 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
     {
       'title': 'Modern Apartment',
       'id': '3',
-      'imageUrl': 'https://images.pexels.com/photos/206172/pexels-photo-206172.jpeg',
+      'imageUrl':
+          'https://images.pexels.com/photos/206172/pexels-photo-206172.jpeg',
       'price': '\$780,000',
       'location': '789 City Center, Apt 12B',
       'beds': 2,
@@ -47,7 +52,8 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
     {
       'title': 'Cozy Cottage',
       'id': '4',
-      'imageUrl': 'https://images.pexels.com/photos/206172/pexels-photo-206172.jpeg',
+      'imageUrl':
+          'https://images.pexels.com/photos/206172/pexels-photo-206172.jpeg',
       'price': '\$250,000',
       'location': '101 Forest Ln, Greenwood',
       'beds': 2,
@@ -99,14 +105,14 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
     final orientation = MediaQuery.of(context).orientation; // ADDED
 
     return Scaffold(
-      backgroundColor: theme.colorScheme.background,
+      backgroundColor: theme.colorScheme.surface,
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back,
-            color: Theme.of(  context).colorScheme.onSurface ,
+            color: Theme.of(context).colorScheme.onSurface,
             size: 30,
           ),
           onPressed: () => Navigator.pop(context),
@@ -121,16 +127,14 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
               color: Theme.of(context).colorScheme.onSurface,
               size: 30,
             ),
-            onPressed: () {
-              
-            },
+            onPressed: () {},
           ),
         ],
       ),
       body: _savedProperties.isEmpty
           ? _buildEmptyState()
           : _buildSavedPropertiesView(orientation), // UPDATED
-      bottomNavigationBar: _buildBottomNavBar(),
+      bottomNavigationBar: BuildBottomNavBar(index: 1),
     );
   }
 
@@ -138,8 +142,6 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
   Widget _buildSavedPropertiesView(Orientation orientation) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-
-    
 
     return ListView.builder(
       padding: EdgeInsets.only(
@@ -196,68 +198,6 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildBottomNavBar() {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final screenWidth = MediaQuery.of(context).size.width;
-
-    return Container(
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        boxShadow: [
-          BoxShadow(
-            color: colorScheme.onSurface.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -5),
-          ),
-        ],
-      ),
-      child: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: colorScheme.surface,
-        selectedItemColor: colorScheme.primary,
-        unselectedItemColor: colorScheme.onSecondary,
-        currentIndex: 1,
-        elevation: 0,
-        iconSize: screenWidth * 0.06,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.bookmark),
-            label: 'Saved',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.add_circle_outline),
-            label: 'Post',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            label: 'Profile',
-          ),
-        ],
-        onTap: (index) {
-          switch (index) {
-            case 0:
-              Navigator.pushNamed(context, '/home');
-              break;
-            case 1:
-              Navigator.pushNamed(context, '/saved-listings');
-              break;
-            case 2:
-              Navigator.pushNamed(context, '/create-listing');
-              break;
-            case 3:
-              Navigator.pushNamed(context, '/profile');
-              break;
-          }
-        },
       ),
     );
   }
