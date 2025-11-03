@@ -31,7 +31,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
   String _classification = 'For Sale';
   String _propertyType = 'Apartment';
   String _status = 'Online';
-  final List<String> _photos = ['assets/house1.jpg', 'assets/house2.jpg'];
+  final List<String> _photos = ['find-dar-test1.jpg', 'find-dar-test2.jpg'];
 
   @override
   Widget build(BuildContext context) {
@@ -226,7 +226,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
                             right: 8,
                             child: GestureDetector(
                               onTap: () {
-                                setState(() => _photos.removeAt(0));
+                                // setState(() => _photos.removeAt(0));
                               },
                               child: Container(
                                 width: 28,
@@ -267,7 +267,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
                             right: 8,
                             child: GestureDetector(
                               onTap: () {
-                                setState(() => _photos.removeAt(1));
+                                // setState(() => _photos.removeAt(1));
                               },
                               child: Container(
                                 width: 28,
