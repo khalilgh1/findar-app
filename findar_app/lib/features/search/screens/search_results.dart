@@ -60,8 +60,9 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
     final screenHeight = MediaQuery.of(context).size.height;
     
     return Scaffold(
-      backgroundColor: Theme.of(  context).colorScheme.background,
+      backgroundColor: Theme.of(  context).colorScheme.surface,
       appBar: AppBar(
+        scrolledUnderElevation: 0,
         backgroundColor: Theme.of(  context).colorScheme.surface,
         elevation: 0,
         leading: IconButton(
