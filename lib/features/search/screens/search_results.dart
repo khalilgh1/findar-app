@@ -67,8 +67,8 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back,
-            color: Theme.of(context).colorScheme.onSurface,
-            size: 30,
+            color: Colors.black,
+            size: screenWidth * 0.06,
           ),
           onPressed: () => Navigator.pop(context),
         ),
@@ -77,8 +77,8 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
           IconButton(
             icon: Icon(
               Icons.map_outlined,
-              color: Theme.of(context).colorScheme.onSurface,
-              size: 30,
+              color: Colors.black,
+              size: screenWidth * 0.06,
             ),
             onPressed: () {
               // Handle map view

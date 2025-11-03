@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'primary_button.dart';
-import '../theme/color_schemes.dart';
+
 class PropertyListingCard extends StatelessWidget {
   final String imageUrl;
   final String price;
@@ -43,8 +43,9 @@ class PropertyListingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme; // UPDATED: Get color scheme from theme
-    final textTheme = Theme.of(context).textTheme; // UPDATED: Get text theme
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme; // UPDATED: Get color scheme from theme
+    final textTheme = theme.textTheme; // UPDATED: Get text theme
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
@@ -68,7 +69,7 @@ class PropertyListingCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(screenWidth * 0.04),
         ),
         elevation: 2,
-        color: Theme.of(context).colorScheme.secondary, // UPDATED: Use theme surface color
+        color: Theme.of(context).colorScheme.surface, // UPDATED: Use theme surface color
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -177,7 +178,7 @@ class PropertyListingCard extends StatelessWidget {
                   Text(
                     location,
                     style: textTheme.bodyMedium?.copyWith( // UPDATED: Use theme bodyMedium
-                      color: colorScheme.onSecondaryContainer, // UPDATED: Use theme onSecondary color
+                      color: colorScheme.onSecondary, // UPDATED: Use theme onSecondary color
                       fontSize: fontSize * 0.95,
                     ),
                     maxLines: 1,
@@ -296,7 +297,7 @@ class PropertyListingCard extends StatelessWidget {
     return Text(
       text,
       style: textTheme.bodyMedium?.copyWith( // UPDATED: Use theme bodyMedium
-            color: colorScheme.onSecondaryContainer, // UPDATED: Use theme onSecondary color
+            color: colorScheme.onSecondary, // UPDATED: Use theme onSecondary color
             fontSize: fontSize * 0.9,
           ),
     );
