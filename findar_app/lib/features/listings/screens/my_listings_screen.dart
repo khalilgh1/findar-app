@@ -18,7 +18,7 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
   final List<Map<String, dynamic>> _onlineListings = [
     {
       'id': '1',
-      'imageUrl': 'https://picsum.photos/seed/luxury1/800/600',
+      'imageUrl': 'https://images.pexels.com/photos/4700551/pexels-photo-4700551.jpeg',
       'title': 'Luxury Villa with Ocean View',
       'location': '123 Ocean Drive, Miami FL',
       'price': '\$1,200,000',
@@ -71,7 +71,7 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
             icon: Icon(
               Icons.settings_outlined,
               color: Theme.of(context).colorScheme.onSurface,
-              size: 40,
+              size: 25,
             ),
             onPressed: () {
               Navigator.pushNamed(context, '/settings');
