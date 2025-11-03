@@ -1,3 +1,4 @@
+import 'package:findar/features/create_listing/create_listing.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import './features/home/home.dart';
@@ -45,6 +46,7 @@ class MainApp extends StatelessWidget {
               '/demoscreen': (context) => const Demoscreen(),
               '/settings': (context) => const SettingsScreen(),
               '/property-details': (context) => const PropertyDetailsScreen(),
+              '/create-listing': (context) => const CreateListingScreen(),
             },
           );
         },
