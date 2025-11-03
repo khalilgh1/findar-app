@@ -42,15 +42,22 @@ class BottomBar extends StatelessWidget {
       onTap: (index) {
         switch (index) {
           case 0:
+            Navigator.pop(context);
             Navigator.pushNamed(context, '/home');
             break;
           case 1:
+            Navigator.pop(context);
+
             Navigator.pushNamed(context, '/saved-listings');
             break;
           case 2:
+            Navigator.pop(context);
+
             Navigator.pushNamed(context, '/my-listings');
             break;
           case 3:
+            Navigator.pop(context);
+
             Navigator.pushNamed(context, '/profile');
             break;
         }

@@ -57,7 +57,9 @@ class PropertyListingCard extends StatelessWidget {
     final priceFontSize = 25.0;
 
     return GestureDetector(
-      onTap: onTap,
+      onTap : (){
+        Navigator.pushNamed(context, '/property-details');
+      },
       child: Card(
         margin: EdgeInsets.symmetric(
           horizontal: cardMargin,
@@ -100,7 +102,7 @@ class PropertyListingCard extends StatelessWidget {
                   top: screenHeight * 0.015,
                   right: screenWidth * 0.03,
 
-                  child: Row(
+                  child: Stack(
                     children: [
                       GestureDetector(
                         onTap: onSaveToggle,
