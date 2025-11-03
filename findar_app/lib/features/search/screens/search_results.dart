@@ -3,6 +3,7 @@ import '../../../../core/widgets/appbar_title.dart';
 import '../../../../core/widgets/property_card.dart';
 import '../../../../core/widgets/sort_and_filter.dart';
 import '../../../../core/theme/color_schemes.dart';
+
 class SearchResultsScreen extends StatefulWidget {
   const SearchResultsScreen({super.key});
 
@@ -15,7 +16,8 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
   final List<Map<String, dynamic>> _properties = [
     {
       'id': '1',
-      'imageUrl': 'https://images.pexels.com/photos/206172/pexels-photo-206172.jpeg',
+      'imageUrl':
+          'https://images.pexels.com/photos/206172/pexels-photo-206172.jpeg',
       'title': 'Luxury Villa with Ocean View',
       'price': '\$500,000',
       'location': 'New York, NY',
@@ -26,7 +28,8 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
     },
     {
       'id': '2',
-      'imageUrl': 'https://images.pexels.com/photos/20708166/pexels-photo-20708166.jpeg',
+      'imageUrl':
+          'https://images.pexels.com/photos/20708166/pexels-photo-20708166.jpeg',
       'title': 'Modern Apartment in the City',
       'price': '\$750,000',
       'location': 'San Francisco, CA',
@@ -37,7 +40,8 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
     },
     {
       'id': '3',
-      'imageUrl': 'https://images.pexels.com/photos/1396132/pexels-photo-1396132.jpeg',
+      'imageUrl':
+          'https://images.pexels.com/photos/1396132/pexels-photo-1396132.jpeg',
       'title': 'Cozy Cottage in the Suburbs',
       'price': '\$320,000',
       'location': 'Austin, TX',
@@ -58,12 +62,12 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    
+
     return Scaffold(
-      backgroundColor: Theme.of(  context).colorScheme.surface,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         scrolledUnderElevation: 0,
-        backgroundColor: Theme.of(  context).colorScheme.surface,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         leading: IconButton(
           icon: Icon(
@@ -84,7 +88,6 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
             onPressed: () {
               Navigator.pushNamed(context, '/filtering');
             },
-            
           ),
         ],
       ),
@@ -92,7 +95,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
         children: [
           // Filter buttons
           Container(
-            color: Theme.of(  context).colorScheme.surface,
+            color: Theme.of(context).colorScheme.surface,
             padding: EdgeInsets.symmetric(
               horizontal: screenWidth * 0.04,
               vertical: screenHeight * 0.015,
@@ -158,7 +161,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
   Widget _buildEmptyState() {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -193,7 +196,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
   void _showSortBottomSheet(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    
+
     showModalBottomSheet(
       context: context,
       shape: RoundedRectangleBorder(
@@ -229,10 +232,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
 
   Widget _buildSortOption(String title, double screenWidth) {
     return ListTile(
-      title: Text(
-        title,
-        style: TextStyle(fontSize: screenWidth * 0.04),
-      ),
+      title: Text(title, style: TextStyle(fontSize: screenWidth * 0.04)),
       onTap: () {
         Navigator.pop(context);
         // Apply sort
@@ -242,7 +242,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
 
   void _showFilterBottomSheet(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    
+
     showModalBottomSheet(
       context: context,
       shape: RoundedRectangleBorder(

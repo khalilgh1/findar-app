@@ -67,8 +67,22 @@ class _HomeScreenState extends State<HomeScreen> {
         forceMaterialTransparency: false,
         primary: true,
         toolbarOpacity: 1,
-        leading: Icon(Icons.settings),
-        actions: [Icon(Icons.notifications)],
+        leading: IconButton(
+          icon: Icon(
+            Icons.settings,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
+          onPressed: () => Navigator.pushNamed(context, '/settings'),
+        ),
+        actions: [
+          IconButton(
+            icon: Icon(
+              Icons.person,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+            onPressed: () => Navigator.pushNamed(context, '/profile'),
+          ),
+        ],
         actionsPadding: EdgeInsets.only(right: 14),
         centerTitle: true,
         title: Text('FinDar'),
@@ -98,8 +112,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   itemCount: sponsored.length,
-                  itemBuilder: (context, index) =>
-                      PropertyCard(property: sponsored[index]),
+                  itemBuilder: (context, index) => GestureDetector(
+                    onTap: () => {
+                      Navigator.pushNamed(context, '/property-details'),
+                    },
+                    child: PropertyCard(property: sponsored[index]),
+                  ),
                 ),
               ),
               SizedBox(height: 25),
@@ -111,7 +129,16 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               SizedBox(height: 15),
               Column(
-                children: recent.map((p) => ListingTile(property: p)).toList(),
+                children: recent
+                    .map(
+                      (p) => GestureDetector(
+                        onTap: () => {
+                          Navigator.pushNamed(context, '/property-details'),
+                        },
+                        child: ListingTile(property: p),
+                      ),
+                    )
+                    .toList(),
               ),
             ],
           ),

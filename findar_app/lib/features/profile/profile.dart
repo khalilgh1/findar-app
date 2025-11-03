@@ -4,8 +4,6 @@ import 'listings.dart';
 import 'profile_info.dart';
 import '../../../core/widgets/build_bottom_bar.dart';
 
-
-
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
@@ -81,12 +79,23 @@ class ProfileScreen extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Listings',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                TextButton(
+                  onPressed: () => {
+                    Navigator.pushNamed(context, '/my-listings'),
+                  },
+                  child: Text(
+                    'Listings',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                  ),
                 ),
                 ElevatedButton.icon(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/create-listing');
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: theme.colorScheme.primary,
                     shape: RoundedRectangleBorder(
@@ -129,7 +138,9 @@ class ProfileScreen extends StatelessWidget {
 
             const SizedBox(height: 30),
             ElevatedButton.icon(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.pushNamed(context, '/login');
+              },
               icon: const Icon(Icons.logout, color: Colors.red),
               label: const Text(
                 'Logout',
@@ -151,7 +162,7 @@ class ProfileScreen extends StatelessWidget {
           ],
         ),
       ),
-      bottomNavigationBar:BuildBottomNavBar(index: 3)
+      bottomNavigationBar: BuildBottomNavBar(index: 3),
     );
   }
 }

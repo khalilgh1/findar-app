@@ -48,7 +48,7 @@ class ListingCard extends StatelessWidget {
                     fontSize: 15,
                   ),
                 ),
-                const SizedBox(height: 5),
+                const SizedBox(height: 4),
                 Text(
                   price,
                   style: TextStyle(
@@ -57,24 +57,28 @@ class ListingCard extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: 14),
                 Center(
                   child: Container(
                     width: double.infinity,
-                    margin: const EdgeInsets.fromLTRB(4, 6, 4, 0),
+                    margin: const EdgeInsets.fromLTRB(4, 4, 4, 0),
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
                       color: theme.colorScheme.surface,
                     ),
-                    child: Text(
-                      'View Listing',
+                    child: TextButton(
+                      onPressed: () => {
+                        Navigator.pushNamed(context, '/property-details'),
+                      },
+                      child: Text(
+                        'View Listing',
 
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.onSecondaryContainer,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.onSecondaryContainer,
+                        ),
+                        textAlign: TextAlign.center,
                       ),
-                      textAlign: TextAlign.center,
                     ),
                   ),
                 ),
