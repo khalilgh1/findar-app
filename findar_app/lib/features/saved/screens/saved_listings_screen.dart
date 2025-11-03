@@ -36,7 +36,7 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
     {
       'title': 'Modern Apartment',
       'id': '3',
-      'imageUrl': 'https://images.pexels.com/photos/206172/pexels-photo-206172.jpeg',
+      'imageUrl': 'https://images.pexels.com/photos/4700551/pexels-photo-4700551.jpeg',
       'price': '\$780,000',
       'location': '789 City Center, Apt 12B',
       'beds': 2,
@@ -47,7 +47,7 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
     {
       'title': 'Cozy Cottage',
       'id': '4',
-      'imageUrl': 'https://images.pexels.com/photos/206172/pexels-photo-206172.jpeg',
+      'imageUrl': 'https://images.pexels.com/photos/18610869/pexels-photo-18610869.jpeg',
       'price': '\$250,000',
       'location': '101 Forest Ln, Greenwood',
       'beds': 2,
@@ -93,14 +93,15 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final colorScheme = Theme.of(context).colorScheme;
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
     final orientation = MediaQuery.of(context).orientation; // ADDED
 
     return Scaffold(
-      backgroundColor: theme.colorScheme.background,
+      backgroundColor: colorScheme.surface,
       appBar: AppBar(
+        scrolledUnderElevation: 0,
         backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         leading: IconButton(
@@ -122,6 +123,7 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
               size: 30,
             ),
             onPressed: () {
+              
               
             },
           ),
@@ -228,6 +230,7 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.home_outlined),
             label: 'Home',
+            
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.bookmark),
