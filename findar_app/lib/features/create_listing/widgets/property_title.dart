@@ -29,7 +29,7 @@ class PropertyTitle extends StatelessWidget {
         ),
         hintText: 'e.g. Spacious 3 Bedroom Apartment',
         hintStyle: TextStyle(
-          color: theme.colorScheme.onSecondary,
+          color: theme.colorScheme.onSurface,
           fontSize: 15,
         ),
         border: OutlineInputBorder(

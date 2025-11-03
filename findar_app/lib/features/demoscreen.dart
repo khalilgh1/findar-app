@@ -97,6 +97,13 @@ class Demoscreen extends StatelessWidget {
               },
               child: const Text('Go to Create Listing Screen'),
             ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pushNamed(context, '/profile');
+              },
+              child: const Text('Go to Profile Screen'),
+            ),
           ],
         
         ),

@@ -16,7 +16,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.background,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -33,10 +33,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               const SizedBox(height: 10),
-              const Text(
+               Text(
                 'Welcome Back!',
                 style: TextStyle(
-                  color: Colors.black,
+                  color: Theme.of( context).colorScheme.onSurface,
                   fontSize: 25,
                   fontWeight: FontWeight.w600,
                 ),

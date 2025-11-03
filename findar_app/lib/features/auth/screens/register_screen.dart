@@ -19,7 +19,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.background,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -36,17 +36,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
               ),
               const SizedBox(height: 10),
-              const Text(
+               Text(
                 'Complete Your Registration',
                 style: TextStyle(
-                  color: Colors.black,
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontSize: 25,
                   fontWeight: FontWeight.w600,
                 ),
               ),
               const SizedBox(height: 20),
               DropdownButtonFormField<String>(
+                dropdownColor: Theme.of(context).colorScheme.surface,
                 decoration: InputDecoration(
+                  hintText: 'Select Account Type',
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                     ),
@@ -55,7 +57,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
                 ),
-                hint: Text('Select Account Type', style: TextStyle(color: Colors.grey[800]),),
+                hint: Text('Select Account Type', style: TextStyle(color: Theme.of(context).colorScheme.onSecondaryContainer),),
                 items: <String>['Individual', 'Agency'].map((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
@@ -71,7 +73,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 child: Text(
                   'Full Name',
                   style: TextStyle(
-                    color: Colors.black,
+                    color: Theme.of(context).colorScheme.onPrimary,
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                   ),
@@ -82,6 +84,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 controller: _nameController,
                 decoration: InputDecoration(
                   hintText: 'Enter your full name',
+
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -94,7 +97,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 child: Text(
                   'Email Address',
                   style: TextStyle(
-                    color: Colors.black,
+                    color: Theme.of(context).colorScheme.onPrimary,
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                   ),
@@ -117,7 +120,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 child: Text(
                   'Phone Number',
                   style: TextStyle(
-                    color: Colors.black,
+                    color: Theme.of(context).colorScheme.onPrimary,
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                   ),
@@ -140,7 +143,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 child: Text(
                   'Password',
                   style: TextStyle(
-                    color: Colors.black,
+                    color: Theme.of(context).colorScheme.onPrimary,
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                   ),
@@ -155,7 +158,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   suffixIcon: IconButton(
                     icon: Icon(
                       _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                      color: Colors.grey,
+                      color: Theme.of(context).colorScheme.onPrimary,
                     ),
                     onPressed: () {
                       setState(() {
@@ -175,7 +178,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 child: Text(
                   'National Identification Number (NIN)',
                   style: TextStyle(
-                    color: Colors.black,
+                    color: Theme.of(context).colorScheme.onPrimary,
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                   ),
@@ -201,16 +204,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     Navigator.pushNamed(context, '/home');
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
+                    backgroundColor: Theme.of(context).colorScheme.primary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  child: const Text(
+                  child:  Text(
                     'Register Now',
                     style: TextStyle(
                       fontSize: 16,
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.onPrimary,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -220,18 +223,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text(
+                   Text(
                     "Already have an account?",
-                    style: TextStyle(color: Colors.black87, fontSize: 14),
+                    style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 14),
                   ),
                   TextButton(
                     onPressed: () {
                       Navigator.pushNamed(context, '/login');
                     },
-                    child: const Text(
+                    child:  Text(
                       'Login',
                       style: TextStyle(
-                        color: Colors.blue,
+                        color: Theme.of(context).colorScheme.primary,
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
                       ),

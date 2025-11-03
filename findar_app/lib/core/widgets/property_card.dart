@@ -68,7 +68,7 @@ class PropertyListingCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(screenWidth * 0.04),
         ),
         elevation: 2,
-        color: Theme.of(context).colorScheme.secondary, // UPDATED: Use theme surface color
+        color: Theme.of(context).colorScheme.secondaryContainer, // UPDATED: Use theme surface color
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

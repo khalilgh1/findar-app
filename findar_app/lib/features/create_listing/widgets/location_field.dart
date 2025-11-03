@@ -29,7 +29,7 @@ class LocationField extends StatelessWidget {
 
         hintText: 'e.g. 15 Rue Didouche Mourad, Algiers',
         hintStyle: TextStyle(
-          color: theme.colorScheme.onSecondary,
+          color: theme.colorScheme.onSurface,
           fontSize: 15,
         ),
         prefixIcon: Icon(

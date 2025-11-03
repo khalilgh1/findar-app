@@ -46,7 +46,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text('Create New Listing', style: theme.textTheme.headlineLarge),
+        title: Text('Create New Listing', style: theme.textTheme.headlineLarge?.copyWith(color: theme.colorScheme.onSurface),),
         centerTitle: true,
         elevation: 0,
       ),
@@ -298,7 +298,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
                 child: Container(
                   height: 100,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Theme.of(  context).colorScheme.secondary ,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: Colors.grey.shade300,

@@ -27,7 +27,7 @@ class priceField extends StatelessWidget {
         ),
         hintText: '250 000',
         hintStyle: TextStyle(
-          color: theme.colorScheme.onSecondary,
+          color: theme.colorScheme.onSurface,
           fontSize: 15,
         ),
         prefixText: 'DA ',
