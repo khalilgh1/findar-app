@@ -66,7 +66,7 @@ class ListingTile extends StatelessWidget {
                   Text(
                     property.details,
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSecondary,
+                      color: theme.colorScheme.onSecondaryContainer,
                     ),
                   ),
                 ],
