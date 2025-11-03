@@ -77,13 +77,14 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
         actions: [
           IconButton(
             icon: Icon(
-              Icons.map_outlined,
+              Icons.filter_alt_rounded,
               color: Theme.of(context).colorScheme.onSurface,
               size: 30,
             ),
             onPressed: () {
-              // Handle map view
+              Navigator.pushNamed(context, '/filtering');
             },
+            
           ),
         ],
       ),

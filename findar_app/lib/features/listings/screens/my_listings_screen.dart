@@ -72,6 +72,7 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
               size: 40,
             ),
             onPressed: () {
+              Navigator.pushNamed(context, '/settings');
               // Handle settings
             },
           ),
@@ -108,6 +109,7 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           // Handle add new listing
+          Navigator.pushNamed(context, '/create-listing');
         },
         backgroundColor: theme.colorScheme.primary,
         child: Icon(

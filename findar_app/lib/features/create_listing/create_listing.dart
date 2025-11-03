@@ -359,6 +359,8 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Listing Created Successfully!')),
             );
+              Navigator.pushNamed(context, '/my-listings');
+
           },
         ),
       ),

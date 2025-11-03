@@ -37,9 +37,14 @@ class SearchBarWidget extends StatelessWidget {
                   fontSize: 14,
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
+          
                 hintText: "Search for properties, agents, or locations",
                 border: InputBorder.none,
               ),
+                onSubmitted: (value) {
+                  Navigator.pushNamed(context, '/search-results', arguments: value);
+                },
+
             ),
           ),
         ],
