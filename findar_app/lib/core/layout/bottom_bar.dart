@@ -31,8 +31,8 @@ class BottomBar extends StatelessWidget {
           label: 'Saved',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.add_circle_outline),
-          label: 'Post',
+          icon: Icon(Icons.article_outlined),
+          label: 'My Posts',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.person_outline),
@@ -48,7 +48,7 @@ class BottomBar extends StatelessWidget {
             Navigator.pushNamed(context, '/saved-listings');
             break;
           case 2:
-            Navigator.pushNamed(context, '/create-listing');
+            Navigator.pushNamed(context, '/my-listings');
             break;
           case 3:
             Navigator.pushNamed(context, '/profile');

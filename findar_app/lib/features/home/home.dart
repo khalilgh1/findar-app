@@ -5,6 +5,7 @@ import 'categories.dart';
 import 'property.dart';
 import 'listings.dart';
 import 'sponsored.dart';
+import '../../../core/widgets/build_bottom_bar.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -115,6 +116,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
+      bottomNavigationBar: BuildBottomNavBar(index: 0),
     );
   }
 }

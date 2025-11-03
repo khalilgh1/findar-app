@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'profile_avatar.dart';
 import 'listings.dart';
 import 'profile_info.dart';
+import '../../../core/widgets/build_bottom_bar.dart';
+
+
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -140,6 +143,7 @@ class ProfileScreen extends StatelessWidget {
           ],
         ),
       ),
+      bottomNavigationBar:BuildBottomNavBar(index: 3)
     );
   }
 }

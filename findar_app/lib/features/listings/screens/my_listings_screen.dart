@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../../core/widgets/property_card.dart';
 import '../../../core/widgets/segment_control.dart';
 import '../../../core/theme/color_schemes.dart';
+import '../../../core/widgets/build_bottom_bar.dart';
+
 class MyListingsScreen extends StatefulWidget {
   const MyListingsScreen({super.key});
 
@@ -114,6 +116,7 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
           size: 40,
         ),
       ),
+      bottomNavigationBar: BuildBottomNavBar(index: 2),
     );
   }
 
