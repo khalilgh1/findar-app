@@ -3,6 +3,8 @@ import '../../../core/widgets/appbar_title.dart';
 import '../../../core/widgets/property_card.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/widgets/build_bottom_bar.dart';
+import 'package:provider/provider.dart';
+import '../../../core/theme/theme_provider.dart';
 
 class SavedListingsScreen extends StatefulWidget {
   const SavedListingsScreen({super.key});
@@ -101,6 +103,7 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
     final orientation = MediaQuery.of(context).orientation; // ADDED
+    final themeProvider = Provider.of<ThemeProvider>(context); 
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
@@ -120,13 +123,14 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
         actions: [
           IconButton(
             icon: Icon(
-              theme.brightness == Brightness.light
+              themeProvider.isDarkMode
                   ? Icons.dark_mode_outlined
                   : Icons.light_mode_outlined,
               color: Theme.of(context).colorScheme.onSurface,
               size: 30,
             ),
-            onPressed: () {},
+            onPressed: () {              themeProvider.toggleTheme(!themeProvider.isDarkMode);
+},
           ),
         ],
       ),

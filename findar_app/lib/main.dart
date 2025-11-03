@@ -32,11 +32,11 @@ class MainApp extends StatelessWidget {
         builder: (context, themeProvider, child) {
           return MaterialApp(
             // theme: lightTheme,
-            theme: darkTheme,
+            theme: lightTheme,
             darkTheme: darkTheme,
             themeMode: themeProvider.themeMode,
             debugShowCheckedModeBanner: false,
-            initialRoute: '/home',
+            initialRoute: '/demoscreen',
             routes: {
               '/landing': (context) => const SplashScreen(),
               '/login': (context) => const LoginScreen(),
