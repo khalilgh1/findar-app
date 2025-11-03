@@ -14,31 +14,32 @@ class PropertyHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           title,
-          style: const TextStyle(
-            fontSize: 24,
+          style: textTheme.headlineSmall?.copyWith(
             fontWeight: FontWeight.bold,
           ),
         ),
         const SizedBox(height: 8),
         Text(
           address,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 14,
-            color: Colors.grey,
+            color: colorScheme.onSurface.withOpacity(0.7),
           ),
         ),
         const SizedBox(height: 16),
         Text(
           price,
-          style: const TextStyle(
-            fontSize: 28,
+          style: textTheme.headlineMedium?.copyWith(
             fontWeight: FontWeight.bold,
-            color: Color(0xFF2196F3),
+            color: colorScheme.primary,
           ),
         ),
       ],
