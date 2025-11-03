@@ -29,7 +29,7 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
     },
     {
       'id': '2',
-      'imageUrl': 'https://www.pexels.com/photo/house-lights-turned-on-106399/',
+      'imageUrl': 'https://images.pexels.com/photos/259588/pexels-photo-259588.jpeg',
       'title': 'Spacious Family Home',
       'location': '456 Maple Avenue, Suburbia USA',
       'price': '\$750,000',
@@ -49,8 +49,9 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
     final screenHeight = MediaQuery.of(context).size.height;
     
     return Scaffold(
-      backgroundColor: Theme.of(  context).colorScheme.background,
+      backgroundColor: Theme.of(  context).colorScheme.surface,
       appBar: AppBar(
+        scrolledUnderElevation: 0,
         backgroundColor: Theme.of(  context).colorScheme.surface,
         elevation: 0,
         leading: IconButton(
@@ -73,6 +74,7 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
               size: 40,
             ),
             onPressed: () {
+              Navigator.pushNamed(context, '/settings');
               // Handle settings
             },
           ),
@@ -109,6 +111,7 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           // Handle add new listing
+          Navigator.pushNamed(context, '/create-listing');
         },
         backgroundColor: theme.colorScheme.primary,
         child: Icon(

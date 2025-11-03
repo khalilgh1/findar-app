@@ -59,9 +59,7 @@ class _FilteringScreenState extends State<FilteringScreen> {
         ),
         title: const Text('Advanced Search'),
         centerTitle: true,
-        actions: [
-          IconButton(icon: const Icon(Icons.bookmark_outline), onPressed: null),
-        ],
+    
         elevation: 0,
       ),
       body: Container(
@@ -87,7 +85,7 @@ class _FilteringScreenState extends State<FilteringScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 hintText: 'Enter a city, zip code, or neighborhood',
-                prefixIcon: const Icon(Icons.search),
+                prefixIcon: const Icon(Icons.location_on),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -304,7 +302,9 @@ class _FilteringScreenState extends State<FilteringScreen> {
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Showing 42 results')),
+                    
                   );
+                  Navigator.pushNamed(context,'/search-results');
                 },
               ),
             ),

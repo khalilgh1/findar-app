@@ -50,15 +50,17 @@ class _FeatureItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Row(
       children: [
-        Icon(icon, size: 20, color: Colors.grey[800]),
+        Icon(icon, size: 20, color: colorScheme.onSurface.withOpacity(0.8)),
         const SizedBox(width: 8),
         Text(
           text,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 14,
-            color: Colors.black87,
+            color: colorScheme.onSurface,
           ),
         ),
       ],

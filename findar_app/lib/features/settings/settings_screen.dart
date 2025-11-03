@@ -222,6 +222,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           bottom: BorderSide(
             color: colorScheme.onSurface.withOpacity(0.1),
             width: 1,
+            
+            
           ),
         ),
       ),

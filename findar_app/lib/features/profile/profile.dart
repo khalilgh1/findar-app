@@ -18,12 +18,12 @@ class ProfileScreen extends StatelessWidget {
 
     var myListings = [
       {
-        "imagePath": 'assets/house1.jpg',
+        "imagePath": 'assets/find-dar-test1.jpg',
         "title": 'house 1',
         "price": '\$127,000',
       },
       {
-        "imagePath": 'assets/house1.jpg',
+        "imagePath": 'assets/find-dar-test1.jpg',
         "title": 'house 1',
         "price": '\$127,000',
       },
@@ -32,15 +32,23 @@ class ProfileScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
       appBar: AppBar(
-        backgroundColor: Theme.of(  context).colorScheme.surface,
+        scrolledUnderElevation: 0,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         leading: IconButton(
-          icon:  Icon(Icons.arrow_back, color: Theme.of( context).colorScheme.onSurface, size: 30),
+          icon: Icon(
+            Icons.arrow_back,
+            color: Theme.of(context).colorScheme.onSurface,
+            size: 30,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
-        title:  Text(
+        title: Text(
           'Profile',
-          style: TextStyle(color: Theme.of( context).colorScheme.onSurface, fontWeight: FontWeight.w600),
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface,
+            fontWeight: FontWeight.w600,
+          ),
         ),
         centerTitle: true,
         actions: [

@@ -60,8 +60,9 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
     final screenHeight = MediaQuery.of(context).size.height;
     
     return Scaffold(
-      backgroundColor: Theme.of(  context).colorScheme.background,
+      backgroundColor: Theme.of(  context).colorScheme.surface,
       appBar: AppBar(
+        scrolledUnderElevation: 0,
         backgroundColor: Theme.of(  context).colorScheme.surface,
         elevation: 0,
         leading: IconButton(
@@ -76,13 +77,14 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
         actions: [
           IconButton(
             icon: Icon(
-              Icons.map_outlined,
+              Icons.filter_alt_rounded,
               color: Theme.of(context).colorScheme.onSurface,
               size: 30,
             ),
             onPressed: () {
-              // Handle map view
+              Navigator.pushNamed(context, '/filtering');
             },
+            
           ),
         ],
       ),

@@ -11,8 +11,7 @@ class Demoscreen extends StatelessWidget {
         title: const Text('Home Screen'),
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        child: ListView(
           children: [
             ElevatedButton(
               onPressed: () {
