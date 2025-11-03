@@ -20,7 +20,8 @@ class ListingCard extends StatelessWidget {
       width: 235,
       margin: const EdgeInsets.only(right: 16),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
+        color: theme.colorScheme.onPrimary,
+        // color: theme.colorScheme.secondaryContainer,
         borderRadius: BorderRadius.circular(14),
       ),
       child: Column(
@@ -64,11 +65,15 @@ class ListingCard extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
-                      color: const Color.fromARGB(255, 237, 241, 241),
+                      color: theme.colorScheme.surface,
                     ),
-                    child: const Text(
+                    child: Text(
                       'View Listing',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.onSecondaryContainer,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                   ),
