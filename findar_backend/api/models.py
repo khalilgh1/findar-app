@@ -9,6 +9,8 @@ from django.db import models
 """
     1 . pictures need to be have a random name (post and profile)
     2 . Report model needs to be bigger
+    3 . main pic should not be an attribute of post, but rather a an boolean attribute in photos is_main
+    4 . Credit attribute in user should be integer not float
 """
 
 
@@ -88,7 +90,6 @@ class SavedPosts(models.Model):
         return f"{self.user} : {self.post}"
     
 ################# Report Model
-
 class Report(models.Model):
 
     reporter_user    = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='reporter_user')
@@ -99,3 +100,29 @@ class Report(models.Model):
 
     def __str__(self):
         return f"{self.reporter_user} reported {self.reported_user}"
+    
+
+################# Business Plan Model
+BOOSTING_PLAN_CHOICES = [
+    ('basic'   , 'Basic'),
+    ('premium' , 'Premium'),
+    ('gold'    , 'Gold')
+]
+BUSINESS_PLAN_TARGET_CHOICES = [
+    ('individuals' , 'Individuals'),
+    ('agencies'   , 'Agencies')
+]
+class BoostingPlan(models.Model):
+    plan_type           = models.CharField(max_length=20, choices=BOOSTING_PLAN_CHOICES, null = True)
+    target_audience     = models.CharField(max_length=20, choices=BUSINESS_PLAN_TARGET_CHOICES, null = True)
+    credit_cost         = models.FloatField(default=0.0)
+    duration            = models.IntegerField() #not sure if in days, hours or seconds
+################# Boosting Model
+
+
+class Boosting(models.Model):
+    boost_plan      = models.ForeignKey(BoostingPlan, on_delete=models.CASCADE)
+    post            = models.ForeignKey(Post, on_delete=models.CASCADE)
+    created_at      = models.DateTimeField(auto_now=True)
+    expires_at      = models.DateTimeField()
+
