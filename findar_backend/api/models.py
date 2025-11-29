@@ -72,7 +72,7 @@ class Post(models.Model):
 
 class Photos(models.Model):
 
-    post    = models.ForeignKey(Post)    
+    post    = models.ForeignKey(Post, on_delete=models.CASCADE)    
     picture = models.ImageField(upload_to="profiles/" , blank=True , null=True)
 
 
@@ -80,8 +80,8 @@ class Photos(models.Model):
 
 class SavedPosts(models.Model):
 
-    user    = models.ForeignKey(CustomUser)
-    post    = models.ForeignKey(Post)    
+    user    = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    post    = models.ForeignKey(Post, on_delete=models.CASCADE)    
     saved_at= models.DateTimeField(auto_now=True)
 
     def __str__(self):
@@ -91,9 +91,9 @@ class SavedPosts(models.Model):
 
 class Report(models.Model):
 
-    reporter_user    = models.ForeignKey(CustomUser)
-    reported_user    = models.ForeignKey(CustomUser)
-    post             = models.ForeignKey(Post , null=True , blank=True)   
+    reporter_user    = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='reporter_user')
+    reported_user    = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='reported_user')
+    post             = models.ForeignKey(Post , null=True , blank=True, on_delete=models.CASCADE)   
     description      = models.TextField(max_length=1000) 
     created_at       = models.DateTimeField(auto_now=True)
 
