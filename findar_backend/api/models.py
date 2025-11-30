@@ -117,6 +117,8 @@ class BoostingPlan(models.Model):
     target_audience     = models.CharField(max_length=20, choices=BUSINESS_PLAN_TARGET_CHOICES, null = True)
     credit_cost         = models.FloatField(default=0.0)
     duration            = models.IntegerField() #not sure if in days, hours or seconds
+
+    
 ################# Boosting Model
 
 
