@@ -38,3 +38,21 @@ class BoostingSerializers(serializers.ModelSerializer):
         model = Boosting
         fields= "__all__"
 
+
+class RegisterSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = CustomUser
+        fields = ("username", "email", "password", "phone_number", "profile_pic", "account_type")
+
+    def create(self, validated_data):
+        user = CustomUser.objects.create_user(
+            username      = validated_data["username"],
+            email         = validated_data["email"],
+            password      = validated_data["password"],
+            phone_number  = validated_data.get("phone_number"),
+            profile_pic   = validated_data.get("profile_pic"),
+            account_type  = validated_data.get("account_type", "user"),
+        )
+        return user

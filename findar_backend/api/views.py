@@ -1,14 +1,12 @@
-from django.shortcuts import render
 from .models import *
 from .serializers import *
-from django.db.models import Q
+from django.contrib.auth import authenticate
+from rest_framework import status
 from rest_framework.response import Response 
-from rest_framework import  status
 from rest_framework.decorators import api_view
-from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import RefreshToken
 
-# Create your views here.
-#########LISTINGS VIEW#########
+#########  LISTINGS VIEW  #########
 
 
 @api_view(['GET'])
@@ -28,68 +26,47 @@ def create_listing(request):
     return Response(serializer.errors, status=400)
 
 
+#########  Create User  #########
 
-#########User VIEW#########
+@api_view(["POST"])
+def register(request):
+    serializer = RegisterSerializer(data=request.data)
 
-@api_view(['GET'])
-def get_user(request , id):
-    try:
-        user = CustomUser.objects.get(id=id)
-    except CustomUser.DoesNotExist:
-        return Response({"error": f"User with id {id} not found"}, status=status.HTTP_404_NOT_FOUND)
-    serializer = CustomUserSerializers(user)
-    return Response(serializer.data , status=status.HTTP_200_OK)
-
-@api_view(['GET'])
-def get_users(request):
-    users = CustomUser.objects.all()
-    serializer = CustomUserSerializers(users,many=True)
-    return Response(serializer.data , status=status.HTTP_200_OK)
-
-# still need authentication
-@api_view(['POST'])
-def post(request):
-    serializer = CustomUserSerializers(data=request.data)
-    serializer.is_valid( raise_exception=True )
-    serializer.save()
-    return Response(serializer.data,status=status.HTTP_201_CREATED)
-
-
-#########Reports VIEW#########
-
-class ReportView(APIView):
-    def get(request):
-        reports = Report.objects.all()
-        serializer = ReportSerializers(data=reports)
-        return Response(serializer.data , status=status.HTTP_302_FOUND)
-
-    def post(request):
-        serializer = ReportSerializers(data=request.data)
-        serializer.is_valid( raise_exception=True )
-        serializer.save()
-        return Response(serializer.data,status=status.HTTP_201_CREATED)
-
-
-#########Boosting Plan VIEW#########
-
-class BoostingPlanView(APIView):
-    def get(request):
-        plans = BoostingPlan.objects.all()
-        serializer = BoostingPlanSerializers(data=plans)
-        return Response(serializer.data , status=status.HTTP_302_FOUND)
-
-    def post(request):
-        serializer = BoostingPlanSerializers(data=request.data)
-        serializer.is_valid( raise_exception=True )
-        serializer.save()
-        return Response(serializer.data,status=status.HTTP_201_CREATED)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-#########Boostings VIEW#########
+    user = serializer.save()
+    refresh = RefreshToken.for_user(user)
+    return Response({
+                    "message": "User created",
+                    "access": str(refresh.access_token),
+                    "username": user.username,
+                    "email": user.email,
+                    "account_type": user.account_type,
+                    }, status=status.HTTP_201_CREATED)
 
-# for now , no logic for creating ( boosting ur post )
-class BoostingsView(APIView):
-    def get(request):
-        boosts = Boosting.objects.all()
-        serializer = BoostingSerializers(data=boosts)
-        return Response(serializer.data , status=status.HTTP_302_FOUND)
-    
+#########  Login as User  #########
+
+@api_view(["POST"])
+def login(request):
+    username = request.data.get("username")
+    password = request.data.get("password")
+
+    user = authenticate(username=username, password=password)
+
+    if not user:
+        return Response({"error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
+
+    refresh = RefreshToken.for_user(user)
+
+    return Response({
+        "refresh": str(refresh),
+        "access": str(refresh.access_token),
+        "username": user.username,
+        "email": user.email,
+        "account_type": user.account_type,
+        "credits": user.credits,
+    })
+
+
+
