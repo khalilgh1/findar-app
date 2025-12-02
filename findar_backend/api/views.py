@@ -3,13 +3,19 @@ from .serializers import *
 from django.contrib.auth import authenticate
 from rest_framework import status
 from rest_framework.response import Response 
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view , permission_classes
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.permissions import IsAuthenticated
+
+"""
+    for every view that needs a user ( authenticated user ) do 
+    @api_view(['GET'])
+    @permission_classes([IsAuthenticated])
+"""
 
 #########  LISTINGS VIEW  #########
 
 
-@api_view(['GET'])
 def get_listings(request):
     posts = Post.objects.all()
     serializer = PostSerializers(posts, many=True)
@@ -17,6 +23,7 @@ def get_listings(request):
 
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def create_listing(request):
     print(request)
     serializer = PostSerializers(data=request.data)
