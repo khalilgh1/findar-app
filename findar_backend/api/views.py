@@ -68,18 +68,30 @@ def listing_details(request, listing_id):
 
 
 ######## My Listings VIEW#########
-def my_listings(request, user_id):
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def my_listings(request):
     """
     user can view his own listings
     in the ui there is an option to filter by online / offline listings
     """
-    pass
+    posts = Post.objects.filter(owner=request.user)
+    active_posts   = posts.filter(active=True )
+    inactive_posts = posts.filter(active=False)
+    active_posts   = PostSerializers(active_posts , many=True).data
+    inactive_posts = PostSerializers(inactive_posts , many=True).data
+    return Response({
+            "active":active_posts,
+            "inactive":inactive_posts,
+        },
+        status=status.HTTP_200_OK
+    )
 
-
+######## create Listings VIEW#########
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def create_listing(request):
-    print(request)
+    request.data['owner'] = request.user.id
     serializer = PostSerializers(data=request.data)
     if serializer.is_valid():
         serializer.save()
