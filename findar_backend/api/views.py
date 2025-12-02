@@ -47,6 +47,21 @@ class UserView(APIView):
         serializer.save()
         return Response(serializer.data,status=status.HTTP_201_CREATED)
     
+
+#########Reports VIEW#########
+
+class ReportView(APIView):
+    def get(request):
+        reports = Report.objects.all()
+        serializer = ReportSerializers(data=reports)
+        return Response(serializer.data , status=status.HTTP_302_FOUND)
+
+    def post(request):
+        serializer = ReportSerializers(data=request.data)
+        serializer.is_valid( raise_exception=True )
+        serializer.save()
+        return Response(serializer.data,status=status.HTTP_201_CREATED)
+
 #########Boosting Plan VIEW#########
 
 class BoostingPlanView(APIView):
@@ -60,3 +75,4 @@ class BoostingPlanView(APIView):
         serializer.is_valid( raise_exception=True )
         serializer.save()
         return Response(serializer.data,status=status.HTTP_201_CREATED)
+    
