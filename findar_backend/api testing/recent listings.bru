@@ -1,0 +1,21 @@
+meta {
+  name: recent listings
+  type: http
+  seq: 4
+}
+
+get {
+  url: http://127.0.0.1:8000/api/recent-listings/?q=s&listing_type=rent
+  body: none
+  auth: inherit
+}
+
+params:query {
+  q: s
+  listing_type: rent
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

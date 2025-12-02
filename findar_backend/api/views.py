@@ -6,6 +6,10 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view , permission_classes
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
+from django.db.models import Q
+from django.db.models import F, FloatField
+from django.db.models.functions import ACos, Cos, Radians, Sin
+
 
 """
     for every view that needs a user ( authenticated user ) do 
@@ -35,13 +39,22 @@ def recent_listings(request):
     # maybe we need pagination here
     #in the ui there is a search bar
     #also in the ui there is an option on the top to select the property type
-    recent_posts = Post.objects.filter(active=True).order_by('-created_at')[:20] # get the 20 most recent active posts
+    q = request.query_params.get('q' , None)
+    q = '' if q is None else q
+    listing_type = request.query_params.get('listing_type' , None) # rent / sale
+
+    recent_posts = Post.objects.filter(active=True)
+    if listing_type in ['rent' , 'sale']:
+        recent_posts = recent_posts.filter(listing_type=listing_type)
+    recent_posts = recent_posts.filter(Q(title__icontains=q) | Q(description__icontains=q))
+    recent_posts = recent_posts.order_by('-created_at')[:20] # for now, get the 20 most recent active posts after filtering
     serialized_posts = PostSerializers(recent_posts , many=True).data
     return Response(serialized_posts , status=status.HTTP_200_OK)
 
 #########Advanced Search VIEW#########
 
-
+@api_view(['GET'])
+# @permission_classes([IsAuthenticated])
 def advanced_search(request):
     """
     this will be used after submitting the advanced search screen to go the search results screen
@@ -52,11 +65,60 @@ def advanced_search(request):
         - Building type (House, apartment, condo , townhouse)
         - # bedrooms, # bathrooms
     """
-    pass
+    #constants
+    radius_km = 20
+    earth_radius_km = 6371
+    posts = Post.objects.filter(active=True)
+    # filtering logic here
+    latitude        = request.query_params.get('latitude' , None)
+    longitude       = request.query_params.get('longitude' , None)
+    min_price       = request.query_params.get('min_price' , None)
+    max_price       = request.query_params.get('max_price' , None)
+    listing_type    = request.query_params.get('listing_type' , None) # rent / sale
+    building_type   = request.query_params.get('building_type' , None)
+    num_bedrooms    = request.query_params.get('num_bedrooms' , None)
+    num_bathrooms   = request.query_params.get('num_bathrooms' , None)
+    min_sqft        = request.query_params.get('min_sqft' , None)
+    max_sqft        = request.query_params.get('max_sqft' , None)
+    listed_by       = request.query_params.get('listed_by' , None) # normal / agency
+
+    if latitude and longitude:
+        latitude  = float(latitude)
+        longitude = float(longitude)
+        # calculate distance using Haversine formula
+        posts = posts.annotate(
+        distance=earth_radius_km * ACos(
+            Cos(Radians(latitude)) * Cos(Radians(F('latitude'))) *
+            Cos(Radians(F('longitude')) - Radians(longitude)) +
+            Sin(Radians(latitude)) * Sin(Radians(F('latitude')))
+        )
+        ).filter(distance__lte=radius_km)
+    if min_price:
+        posts = posts.filter(price__gte=float(min_price))
+    if max_price:
+        posts = posts.filter(price__lte=float(max_price))
+    if listing_type in ['rent' , 'sale']:
+        posts = posts.filter(listing_type=listing_type)
+    if building_type in dict(BUILDING_TYPE_CHOICES).keys():
+        posts = posts.filter(building_type=building_type)
+    if num_bedrooms:
+        posts = posts.filter(bedrooms__gte=int(num_bedrooms))
+    if num_bathrooms:
+        posts = posts.filter(bathrooms__gte=int(num_bathrooms))
+    if min_sqft:
+        posts = posts.filter(area__gte=float(min_sqft))
+    if max_sqft:
+        posts = posts.filter(area__lte=float(max_sqft))
+    if listed_by in dict(ACCOUNT_CHOICES).keys():
+        posts = posts.filter(owner__account_type=listed_by)
+    serialized_posts = PostSerializers(posts , many=True).data
+    return Response(serialized_posts , status=status.HTTP_200_OK)
+
+    
 
 ######## Saved listing VIEW#########
 
-def saved_listings(request, user_id):
+def saved_listings(request):
     """
     user can view his saved listings
     """

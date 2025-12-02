@@ -52,7 +52,7 @@ BUILDING_TYPE_CHOICES = [
 class Post(models.Model):
 
     owner        = models.ForeignKey(CustomUser , on_delete=models.CASCADE)
-    titel        = models.CharField(max_length=255)
+    title        = models.CharField(max_length=255)
     price        = models.FloatField()
     description  = models.TextField(max_length=1000) 
     created_at   = models.DateTimeField(auto_now=True)
@@ -65,11 +65,11 @@ class Post(models.Model):
     bathrooms    = models.IntegerField(default=0  , null=True)
     livingrooms  = models.IntegerField(default=0  , null=True)
     area         = models.FloatField(default=0.0  , null=True)
-    listingtype  = models.CharField(max_length=50 , choices=LISTING_TYPE_CHOICES, null=True)  
-    buildingtype = models.CharField(max_length=50 , choices=BUILDING_TYPE_CHOICES, null=True)  
+    listing_type  = models.CharField(max_length=50 , choices=LISTING_TYPE_CHOICES, null=True)  
+    building_type = models.CharField(max_length=50 , choices=BUILDING_TYPE_CHOICES, null=True)  
 
     def __str__(self):
-        return f"{self.owner} : {self.titel}"
+        return f"{self.owner} : {self.title}"
 
 ################# Photos Model
 
