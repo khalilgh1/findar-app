@@ -11,11 +11,64 @@ from rest_framework.views import APIView
 #########LISTINGS VIEW#########
 
 
+#########Home VIEWS#########
+
+
 @api_view(['GET'])
-def get_listings(request):
-    posts = Post.objects.all()
-    serializer = PostSerializers(posts, many=True)
-    return Response(serializer.data)
+def sponsored_listings(request):
+    pass
+
+@api_view(['GET'])
+
+def recent_listings(request):
+    # maybe we need pagination here
+    #in the ui there is a search bar
+    #also in the ui there is an option on the top to select the property type
+    pass
+
+
+#########Advanced Search VIEW#########
+
+
+def advanced_search(request):
+    """
+    this will be used after submitting the advanced search screen to go the search results screen
+    user can filter by :
+        - location (latitude , longitude)
+        - price range (min , max)
+        - property type (Any ,for sale, for rent)
+        - Building type (House, apartment, condo , townhouse)
+        - # bedrooms, # bathrooms
+    """
+    pass
+
+######## Saved listing VIEW#########
+
+def saved_listings(request, user_id):
+    """
+    user can view his saved listings
+    """
+    pass
+
+
+######## Listing details VIEW#########
+
+
+def listing_details(request, listing_id):
+    """
+    user can view the details of a specific listing
+    """
+    pass
+
+
+
+######## My Listings VIEW#########
+def my_listings(request, user_id):
+    """
+    user can view his own listings
+    in the ui there is an option to filter by online / offline listings
+    """
+    pass
 
 
 @api_view(['POST'])
