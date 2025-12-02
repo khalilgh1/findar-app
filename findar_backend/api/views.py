@@ -116,27 +116,64 @@ def advanced_search(request):
 
     
 
+######## Save a listing VIEW#########
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def save_listing(request , listing_id ):
+    try:
+        post = Post.objects.get(id=listing_id)
+    except Post.DoesNotExist:
+        return Response({'errors':"not found"} , status=status.HTTP_404_NOT_FOUND)
+    
+    if post.owner == request.user:
+        return Response({"error" : "you cant save your posts"} , status=status.HTTP_400_BAD_REQUEST)
+    
+    data = {
+        "user": request.user.id,
+        "post": post.id
+    }
+
+    serializer = SavedPostsSerializers(data=data)
+    
+    if not serializer.is_valid():
+        return Response({"errors" : serializer.errors},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    serializer.save()
+    return Response(status=status.HTTP_200_OK)
+
+
 ######## Saved listing VIEW#########
 
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def saved_listings(request):
-    """
-    user can view his saved listings
-    """
-    pass
+    saved_posts = SavedPosts.objects.filter(user=request.user.id)
+
+    
 
 
 ######## Listing details VIEW#########
 
-
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def listing_details(request, listing_id):
     """
     user can view the details of a specific listing
     """
-    pass
-
-
+    try:
+        post = Post.objects.get(id=listing_id)
+        post_images  = Photos.objects.filter(post=post.id)
+    except Post.DoesNotExist:
+        return Response({'errors':"not found"} , status=status.HTTP_404_NOT_FOUND)
+    
+    post = PostSerializers(post).data
+    post_images = PhotosSerializers(post_images,many=True).data
+    return Response({'post' : post , 'images' : post_images} , status=status.HTTP_200_OK)
+    
 
 ######## My Listings VIEW#########
+
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def my_listings(request):
@@ -157,15 +194,36 @@ def my_listings(request):
     )
 
 ######## create Listings VIEW#########
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def create_listing(request):
+    """
+     get users location for post position or we will get it from frontend?
+    """
     request.data['owner'] = request.user.id
     serializer = PostSerializers(data=request.data)
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data, status=201)
     return Response(serializer.errors, status=400)
+
+######## toggle active-unactive Listing VIEW#########
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def toggle_active_listing(request , listing_id):
+    try:
+        post = Post.objects.get(id=listing_id)
+    except Post.DoesNotExist:
+        return Response({'errors':"not found"} , status=status.HTTP_404_NOT_FOUND)
+    
+    if post.owner.id != request.user.id:
+        return Response({"error" : "dont have permission"} , status=status.HTTP_401_UNAUTHORIZED)
+    
+    post.active = not post.active
+    post.save()
+    return Response(status=status.HTTP_200_OK)
 
 
 #########  Create User  #########
@@ -181,6 +239,7 @@ def register(request):
     refresh = RefreshToken.for_user(user)
     return Response({
                     "message": "User created",
+                    "refresh": str(refresh),
                     "access": str(refresh.access_token),
                     "username": user.username,
                     "email": user.email,
