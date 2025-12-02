@@ -20,17 +20,24 @@ from rest_framework.permissions import IsAuthenticated
 
 
 @api_view(['GET'])
+# @permission_classes([IsAuthenticated])
 def sponsored_listings(request):
-    pass
+    sponsored_posts = Post.objects.filter(boosted=True , active=True)
+    serialized_posts = PostSerializers(sponsored_posts , many=True).data
+    return Response(serialized_posts , status=status.HTTP_200_OK)
+
+    
+
 
 @api_view(['GET'])
-
+# @permission_classes([IsAuthenticated])
 def recent_listings(request):
     # maybe we need pagination here
     #in the ui there is a search bar
     #also in the ui there is an option on the top to select the property type
-    pass
-
+    recent_posts = Post.objects.filter(active=True).order_by('-created_at')[:20] # get the 20 most recent active posts
+    serialized_posts = PostSerializers(recent_posts , many=True).data
+    return Response(serialized_posts , status=status.HTTP_200_OK)
 
 #########Advanced Search VIEW#########
 

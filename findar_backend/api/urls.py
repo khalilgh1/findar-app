@@ -6,4 +6,6 @@ urlpatterns = [
     path('my_listings/', my_listings, name='listings'),
     path('login/', login, name='login'),
     path('register/', register, name='register'),
+    path('sponsored-listings/', sponsored_listings, name='sponsored-listings'),
+    path('recent-listings/', recent_listings, name='recent-listings'),
 ]
