@@ -96,49 +96,43 @@ class PropertyListingCard extends StatelessWidget {
                     },
                   ),
                 ),
-                // Save/Bookmark Button
-                Positioned(
-                  top: screenHeight * 0.015,
-                  right: screenWidth * 0.03,
-
-                  child: Stack(
-                    children: [
-                      GestureDetector(
-                        onTap: onSaveToggle,
-                        child: Container(
-                          padding: EdgeInsets.all(4),
-
-                          decoration: BoxDecoration(
-                            color: colorScheme.surface,
-                             // reduce the size of the button
-
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: colorScheme.onSurface.withOpacity(0.1), // UPDATED: Use theme onSurface color
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Icon(
-                        isSaved ? Icons.bookmark : Icons.bookmark_border,
-                        color: colorScheme.primary, // UPDATED: Use theme primary color
-                        size: iconSize,
+                // 3-dot menu button (replaces save icon when showMenu is true)
+                if (showMenu)
+                  Positioned(
+                    top: screenHeight * 0.015,
+                    right: screenWidth * 0.03,
+                    child: _buildMenuButton(context, screenWidth, colorScheme),
+                  )
+                else
+                  // Save/Bookmark Button (only show when menu is not shown)
+                  Positioned(
+                    top: screenHeight * 0.015,
+                    right: screenWidth * 0.03,
+                    child: GestureDetector(
+                      onTap: onSaveToggle,
+                      child: Container(
+                        padding: EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: colorScheme.surface,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: colorScheme.onSurface.withOpacity(0.1),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Icon(
+                          isSaved ? Icons.bookmark : Icons.bookmark_border,
+                          color: colorScheme.primary,
+                          size: iconSize,
+                        ),
                       ),
                     ),
                   ),
-                  if (showMenu)
-                  Positioned(
-                    top: screenHeight * 0.015,
-                    right: screenWidth * 0.15,
-                    child: _buildMenuButton(context, screenWidth, colorScheme), // UPDATED: Pass colorScheme
-                  ),
-              ]),
-                // 3-dot menu button
-                
-                ),
-          ]),
+              ],
+            ),
             // Property Details
             Padding(
               padding: EdgeInsets.all(20),
@@ -258,10 +252,8 @@ class PropertyListingCard extends StatelessWidget {
           child: Row(
             children: [
               Icon(Icons.edit_outlined, size: 20, color: colorScheme.onSurface), 
-              SizedBox(width: 15),
-
-              Text('Edit', style: TextStyle(fontSize: 10, color: colorScheme.onSurface)), // UPDATED: Use theme color
-
+              SizedBox(width: 12),
+              Text('Edit', style: TextStyle(fontSize: 14, color: colorScheme.onSurface)),
             ],
           ),
         ),
@@ -269,9 +261,9 @@ class PropertyListingCard extends StatelessWidget {
           value: 'remove',
           child: Row(
             children: [
-              Icon(Icons.delete_outline, size: 20, color: colorScheme.error), // UPDATED: Use theme error color
-              SizedBox(width: 15),
-              Text('Remove', style: TextStyle(fontSize: 10, color: colorScheme.onSurface)), // UPDATED: Use theme color
+              Icon(Icons.delete_outline, size: 20, color: colorScheme.error),
+              SizedBox(width: 12),
+              Text('Remove', style: TextStyle(fontSize: 14, color: colorScheme.onSurface)),
             ],
           ),
         ),
@@ -279,11 +271,11 @@ class PropertyListingCard extends StatelessWidget {
           value: 'toggle',
           child: Row(
             children: [
-              Icon(Icons.cloud_off_outlined, size: 20, color: colorScheme.onSurface), // UPDATED: Use theme color
-              SizedBox(width: 15),
+              Icon(Icons.cloud_off_outlined, size: 20, color: colorScheme.onSurface),
+              SizedBox(width: 12),
               Text(
                 menuToggleText ?? 'Toggle Status',
-                style: TextStyle(fontSize: 10, color: colorScheme.onSurface), // UPDATED: Use theme color
+                style: TextStyle(fontSize: 14, color: colorScheme.onSurface),
               ),
             ],
           ),

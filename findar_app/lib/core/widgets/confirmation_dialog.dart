@@ -51,11 +51,20 @@ class ConfirmationDialog extends StatelessWidget {
             Navigator.of(context).pop();
             if (onCancel != null) onCancel!();
           },
-          child: Text(
-            cancelText,
-            style: TextStyle(
-              color: theme.colorScheme.onSurfaceVariant,
-              fontWeight: FontWeight.w500,
+          style: TextButton.styleFrom(
+            backgroundColor: theme.colorScheme.primary,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            child: Text(
+              cancelText,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
         ),
@@ -64,20 +73,11 @@ class ConfirmationDialog extends StatelessWidget {
             Navigator.of(context).pop();
             onConfirm();
           },
-          style: TextButton.styleFrom(
-            backgroundColor: confirmColor ?? Colors.red,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-            child: Text(
-              confirmText,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
-              ),
+          child: Text(
+            confirmText,
+            style: TextStyle(
+              color: confirmColor ?? theme.colorScheme.primary,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ),

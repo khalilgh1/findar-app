@@ -1,10 +1,10 @@
 import '../services/api_service.dart';
-import '../models/listing.dart';
+import '../models/property_listing_model.dart';
 import '../models/return_result.dart';
 
 class ListingRepository {
   final ApiService apiService;
-  List<Listing> _cachedListings = [];
+  List<PropertyListing> _cachedListings = [];
 
   ListingRepository({required this.apiService});
 
@@ -22,7 +22,7 @@ class ListingRepository {
 
       // Parse listings from response
       final listingsData = response['data'] as List?;
-      _cachedListings = listingsData?.map((json) => Listing.fromJson(json)).toList() ?? [];
+      _cachedListings = listingsData?.map((json) => PropertyListing.fromJson(json)).toList() ?? [];
 
       return ReturnResult(
         state: true,
@@ -37,7 +37,7 @@ class ListingRepository {
   }
 
   /// Get cached listings
-  List<Listing> getCachedListings() {
+  List<PropertyListing> getCachedListings() {
     return List.from(_cachedListings);
   }
 
@@ -86,7 +86,7 @@ class ListingRepository {
       }
 
       // Update cached listing
-      final updatedListing = Listing.fromJson(response['data']);
+      final updatedListing = PropertyListing.fromJson(response['data']);
       final index = _cachedListings.indexWhere((l) => l.id == id);
       if (index != -1) {
         _cachedListings[index] = updatedListing;
@@ -140,7 +140,7 @@ class ListingRepository {
       }
 
       // Update cached listing
-      final updatedListing = Listing.fromJson(response['data']);
+      final updatedListing = PropertyListing.fromJson(response['data']);
       final index = _cachedListings.indexWhere((l) => l.id == id);
       if (index != -1) {
         _cachedListings[index] = updatedListing;

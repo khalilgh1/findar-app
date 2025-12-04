@@ -9,7 +9,7 @@ import './features/landing/screens/splash_screen.dart';
 import './features/auth/screens/login_screen.dart';
 import './features/auth/screens/register_screen.dart';
 import './features/listings/screens/my_listings_screen.dart';
-import './features/listings/screens/edit_listing_screen.dart';
+import './features/listings/screens/edit_listing/edit_listing_screen.dart';
 import './features/saved/screens/saved_listings_screen.dart';
 import './features/search/screens/search_results.dart';
 import './features/demoscreen.dart';
@@ -30,7 +30,7 @@ import 'logic/cubits/property_details_cubit.dart';
 import 'logic/cubits/my_listings_cubit.dart';
 import 'logic/cubits/profile_cubit.dart';
 import 'logic/cubits/settings_cubit.dart';
-import 'core/models/listing.dart';
+import 'core/models/property_listing_model.dart';
 
 void main() {
   runApp(const MainApp());
@@ -70,7 +70,7 @@ class MainApp extends StatelessWidget {
                 if (settings.name == '/edit-listing') {
                   final listing = settings.arguments;
                   return MaterialPageRoute(
-                    builder: (context) => EditListingScreen(listing: listing as Listing),
+                    builder: (context) => EditListingScreen(listing: listing as PropertyListing),
                   );
                 }
                 // Default routes

@@ -73,39 +73,6 @@ class ListingsCubit extends Cubit<Map<String, dynamic>> {
     await fetchListings();
   }
 
-  /// Get user's own listings
-  Future<void> fetchUserListings() async {
-    emit({
-      ...state,
-      'state': 'loading',
-      'message': ''
-    });
-
-    try {
-      final result = await listingsRepository.fetchUserListings();
-
-      if (result.state) {
-        emit({
-          ...state,
-          'state': 'done',
-          'message': result.message,
-        });
-      } else {
-        emit({
-          ...state,
-          'state': 'error',
-          'message': result.message,
-        });
-      }
-    } catch (e) {
-      emit({
-        ...state,
-        'state': 'error',
-        'message': 'Error fetching user listings: ${e.toString()}',
-      });
-    }
-  }
-
   /// Save a listing to favorites
   Future<void> saveListing(int listingId) async {
     try {

@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:findar/core/models/listing.dart';
+import 'package:findar/core/models/property_listing_model.dart';
 import 'package:findar/logic/cubits/listing_cubit.dart';
-import '../../create_listing/widgets/property_title.dart';
-import '../../create_listing/widgets/description.dart';
-import '../../create_listing/widgets/custom_selector.dart';
-import '../../create_listing/widgets/price_field.dart';
-import '../../create_listing/widgets/numeric_field.dart';
-import '../../create_listing/widgets/location_field.dart';
-import '../../../core/widgets/progress_button.dart';
+import '../../../create_listing/widgets/property_title.dart';
+import '../../../create_listing/widgets/description.dart';
+import '../../../create_listing/widgets/custom_selector.dart';
+import '../../../create_listing/widgets/price_field.dart';
+import '../../../create_listing/widgets/numeric_field.dart';
+import '../../../create_listing/widgets/location_field.dart';
+import '../../../../core/widgets/progress_button.dart';
 
 class EditListingScreen extends StatefulWidget {
-  final Listing listing;
+  final PropertyListing listing;
 
   const EditListingScreen({super.key, required this.listing});
 
@@ -31,20 +31,18 @@ class _EditListingScreenState extends State<EditListingScreen> {
   late String _classification;
   late String _propertyType;
 
-  final _formKey = GlobalKey<FormState>();
-
   @override
   void initState() {
     super.initState();
     // Pre-fill controllers with existing listing data
     _titleController = TextEditingController(text: widget.listing.title);
-    _descriptionController = TextEditingController(text: widget.listing.description ?? '');
+    _descriptionController = TextEditingController(text: widget.listing.description);
     _priceController = TextEditingController(text: widget.listing.price.toString());
-    _bedroomsController = TextEditingController(text: widget.listing.bedrooms?.toString() ?? '');
-    _bathroomsController = TextEditingController(text: widget.listing.bathrooms?.toString() ?? '');
+    _bedroomsController = TextEditingController(text: widget.listing.bedrooms.toString());
+    _bathroomsController = TextEditingController(text: widget.listing.bathrooms.toString());
     _locationController = TextEditingController(text: widget.listing.location);
-    _classification = widget.listing.classification ?? 'For Sale';
-    _propertyType = widget.listing.propertyType ?? 'Apartment';
+    _classification = widget.listing.classification;
+    _propertyType = widget.listing.propertyType;
   }
 
   @override
@@ -58,87 +56,65 @@ class _EditListingScreenState extends State<EditListingScreen> {
     super.dispose();
   }
 
-  String? _validateTitle(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please enter a property title';
-    }
-    if (value.length < 5) {
-      return 'Title must be at least 5 characters';
-    }
-    return null;
-  }
-
-  String? _validateDescription(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please enter a description';
-    }
-    if (value.length < 20) {
-      return 'Description must be at least 20 characters';
-    }
-    return null;
-  }
-
-  String? _validatePrice(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please enter a price';
-    }
-    if (double.tryParse(value) == null) {
-      return 'Please enter a valid price';
-    }
-    if (double.parse(value) <= 0) {
-      return 'Price must be greater than 0';
-    }
-    return null;
-  }
-
-  String? _validateLocation(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please enter a location';
-    }
-    return null;
-  }
-
-  String? _validateBedrooms(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please enter number of bedrooms';
-    }
-    if (int.tryParse(value) == null || int.parse(value) < 0) {
-      return 'Please enter a valid number';
-    }
-    return null;
-  }
-
-  String? _validateBathrooms(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please enter number of bathrooms';
-    }
-    if (int.tryParse(value) == null || int.parse(value) < 0) {
-      return 'Please enter a valid number';
-    }
-    return null;
-  }
-
   void _handleUpdate() {
-    if (_formKey.currentState?.validate() ?? false) {
-      context.read<ListingCubit>().updateListing(
-        id: widget.listing.id,
-        title: _titleController.text,
-        description: _descriptionController.text,
-        price: double.parse(_priceController.text),
-        location: _locationController.text,
-        bedrooms: int.tryParse(_bedroomsController.text),
-        bathrooms: int.tryParse(_bathroomsController.text),
-        classification: _classification,
-        propertyType: _propertyType,
-      );
-
+    // Simple validation - check required fields
+    if (_titleController.text.trim().isEmpty ||
+        _descriptionController.text.trim().isEmpty ||
+        _priceController.text.trim().isEmpty ||
+        _locationController.text.trim().isEmpty ||
+        _bedroomsController.text.trim().isEmpty ||
+        _bathroomsController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Updating listing...')),
+        const SnackBar(
+          content: Text('Please fill all required fields'),
+          backgroundColor: Colors.red,
+        ),
       );
-
-      // Navigate back after update
-      Navigator.pop(context);
+      return;
     }
+
+    final price = double.tryParse(_priceController.text);
+    final bedrooms = int.tryParse(_bedroomsController.text);
+    final bathrooms = int.tryParse(_bathroomsController.text);
+
+    if (price == null || price <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a valid price'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    if (bedrooms == null || bedrooms < 0 || bathrooms == null || bathrooms < 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter valid numbers for bedrooms and bathrooms'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    context.read<ListingCubit>().updateListing(
+      id: widget.listing.id,
+      title: _titleController.text,
+      description: _descriptionController.text,
+      price: price,
+      location: _locationController.text,
+      bedrooms: bedrooms,
+      bathrooms: bathrooms,
+      classification: _classification,
+      propertyType: _propertyType,
+    );
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Updating listing...')),
+    );
+
+    // Navigate back after update
+    Navigator.pop(context);
   }
 
   @override
@@ -163,14 +139,12 @@ class _EditListingScreenState extends State<EditListingScreen> {
         centerTitle: true,
         elevation: 0,
       ),
-      body: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
                 // Property Title Section
                 Text('Property Title', style: theme.textTheme.headlineSmall),
                 const SizedBox(height: 12),
@@ -312,7 +286,7 @@ class _EditListingScreenState extends State<EditListingScreen> {
                   builder: (context, state) {
                     final isLoading = state['state'] == 'loading';
                     return ProgressButton(
-                      buttonText: 'Update Listing',
+                      label: 'Update Listing',
                       onPressed: isLoading ? null : _handleUpdate,
                       isLoading: isLoading,
                     );
@@ -323,7 +297,6 @@ class _EditListingScreenState extends State<EditListingScreen> {
             ),
           ),
         ),
-      ),
-    );
+      );
   }
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:findar/logic/cubits/listing_cubit.dart';
-import 'package:findar/core/models/listing.dart';
+import 'package:findar/core/models/property_listing_model.dart';
 import '../../../core/widgets/property_card.dart';
 import '../../../core/widgets/segment_control.dart';
 import '../../../core/widgets/progress_button.dart';
@@ -196,7 +196,7 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
   }
 
   // UPDATED: Edit handler
-  void _handleEdit(Listing listing) {
+  void _handleEdit(PropertyListing listing) {
     // Navigate to edit screen
     Navigator.pushNamed(
       context,
@@ -206,7 +206,7 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
   }
 
   // UPDATED: Remove handler
-  void _handleRemove(Listing listing) {
+  void _handleRemove(PropertyListing listing) {
     ConfirmationDialog.show(
       context: context,
       title: 'Remove Listing',
@@ -221,21 +221,12 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
   }
 
   // UPDATED: Toggle online/offline handler
-  void _handleToggleStatus(Listing listing) {
-    final newStatus = !listing.isOnline;
-    context.read<ListingCubit>().toggleListingStatus(listing.id, newStatus);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Moving to ${listing.isOnline ? 'Offline' : 'Online'}...',
-        ),
-        duration: const Duration(seconds: 2),
-      ),
-    );
+  void _handleToggleStatus(PropertyListing listing) {
+    // Disabled - no action
   }
 
   // UPDATED: Boost handler
-  void _handleBoost(Listing listing) {
+  void _handleBoost(PropertyListing listing) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
