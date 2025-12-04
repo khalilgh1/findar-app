@@ -32,7 +32,6 @@ class AuthCubit extends Cubit<Map<String, dynamic>> {
     required String email,
     required String phone,
     required String password,
-    required String nin,
     required String accountType,
   }) async {
     // 1. Show loading state
@@ -49,7 +48,6 @@ class AuthCubit extends Cubit<Map<String, dynamic>> {
         email: email,
         phone: phone,
         password: password,
-        nin: nin,
         accountType: accountType,
       );
 

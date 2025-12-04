@@ -115,7 +115,6 @@ class _DemoTestScreenState extends State<DemoTestScreen> {
             email: 'john@example.com',
             phone: '+1234567890',
             password: 'password123',
-            nin: '12345678',
             accountType: 'individual',
           ),
         ),

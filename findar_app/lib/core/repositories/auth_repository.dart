@@ -70,7 +70,6 @@ class AuthRepository {
     required String email,
     required String phone,
     required String password,
-    required String nin,
     required String accountType,
   }) async {
     try {
@@ -107,7 +106,6 @@ class AuthRepository {
           'email': email,
           'phone': phone,
           'password': password,
-          'nin': nin,
           'account_type': accountType,
         },
       );

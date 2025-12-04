@@ -16,7 +16,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phonenumberController = TextEditingController();
-  final TextEditingController _ninController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _obscurePassword = true;
 
@@ -224,29 +223,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
                   ),
                 ),
-                              const SizedBox(height: 20),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'National Identification Number (NIN)',
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.onPrimary,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 6),
-                TextField(
-                  controller: _ninController,
-                  decoration: InputDecoration(
-                    hintText: 'Enter your NIN',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                  ),
-                ),
                 const SizedBox(height: 20),
                 BlocConsumer<AuthCubit, Map<String, dynamic>>(
                   listener: (context, state) {
@@ -300,13 +276,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           return;
                         }
 
-                        if (_ninController.text.isEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('NIN is required')),
-                          );
-                          return;
-                        }
-
                         if (_selectedAccountType == null) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(content: Text('Please select an account type')),
@@ -320,7 +289,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           email: _emailController.text,
                           phone: _phonenumberController.text,
                           password: _passwordController.text,
-                          nin: _ninController.text,
                           accountType: _selectedAccountType!,
                         );
                       },
