@@ -9,6 +9,7 @@ import './features/landing/screens/splash_screen.dart';
 import './features/auth/screens/login_screen.dart';
 import './features/auth/screens/register_screen.dart';
 import './features/listings/screens/my_listings_screen.dart';
+import './features/listings/screens/edit_listing_screen.dart';
 import './features/saved/screens/saved_listings_screen.dart';
 import './features/search/screens/search_results.dart';
 import './features/demoscreen.dart';
@@ -22,12 +23,14 @@ import './features/demo/demo_test_screen.dart';
 import 'logic/cubits/auth_cubit.dart';
 import 'logic/cubits/create_listing_cubit.dart';
 import 'logic/cubits/listings_cubit.dart';
+import 'logic/cubits/listing_cubit.dart';
 import 'logic/cubits/search_cubit.dart';
 import 'logic/cubits/saved_listings_cubit.dart';
 import 'logic/cubits/property_details_cubit.dart';
 import 'logic/cubits/my_listings_cubit.dart';
 import 'logic/cubits/profile_cubit.dart';
 import 'logic/cubits/settings_cubit.dart';
+import 'core/models/listing.dart';
 
 void main() {
   runApp(const MainApp());
@@ -43,6 +46,7 @@ class MainApp extends StatelessWidget {
         BlocProvider(create: (_) => AuthCubit()),
         BlocProvider(create: (_) => CreateListingCubit()),
         BlocProvider(create: (_) => ListingsCubit()),
+        BlocProvider(create: (_) => ListingCubit()),
         BlocProvider(create: (_) => SearchCubit()),
         BlocProvider(create: (_) => SavedListingsCubit()),
         BlocProvider(create: (_) => PropertyDetailsCubit()),
@@ -61,22 +65,41 @@ class MainApp extends StatelessWidget {
               themeMode: themeProvider.themeMode,
               debugShowCheckedModeBanner: false,
               initialRoute: '/demoscreen',
-              routes: {
-                '/landing': (context) => const SplashScreen(),
-                '/login': (context) => const LoginScreen(),
-                '/register': (context) => RegisterScreen(),
-                '/home': (context) => const HomeScreen(),
-                '/filtering': (context) => const FilteringScreen(),
-                '/my-listings': (context) => const MyListingsScreen(),
-                '/saved-listings': (context) => const SavedListingsScreen(),
-                '/search-results': (context) => const SearchResultsScreen(),
-                '/demoscreen': (context) => const Demoscreen(),
-                '/demo-test': (context) => const DemoTestScreen(),
-                '/settings': (context) => const SettingsScreen(),
-                '/property-details': (context) => const PropertyDetailsScreen(),
-                '/create-listing': (context) => const CreateListingScreen(),
-                '/profile': (context) => const ProfileScreen(),
-                '/edit-profile': (context) => const EditProfileScreen(),
+              onGenerateRoute: (settings) {
+                // Handle edit listing route with arguments
+                if (settings.name == '/edit-listing') {
+                  final listing = settings.arguments;
+                  return MaterialPageRoute(
+                    builder: (context) => EditListingScreen(listing: listing as Listing),
+                  );
+                }
+                // Default routes
+                final routes = {
+                  '/landing': (context) => const SplashScreen(),
+                  '/login': (context) => const LoginScreen(),
+                  '/register': (context) => RegisterScreen(),
+                  '/home': (context) => const HomeScreen(),
+                  '/filtering': (context) => const FilteringScreen(),
+                  '/my-listings': (context) => const MyListingsScreen(),
+                  '/saved-listings': (context) => const SavedListingsScreen(),
+                  '/search-results': (context) => const SearchResultsScreen(),
+                  '/demoscreen': (context) => const Demoscreen(),
+                  '/demo-test': (context) => const DemoTestScreen(),
+                  '/settings': (context) => const SettingsScreen(),
+                  '/property-details': (context) => const PropertyDetailsScreen(),
+                  '/create-listing': (context) => const CreateListingScreen(),
+                  '/profile': (context) => const ProfileScreen(),
+                  '/edit-profile': (context) => const EditProfileScreen(),
+                };
+                
+                final builder = routes[settings.name];
+                if (builder != null) {
+                  return MaterialPageRoute(builder: builder);
+                }
+                
+                return MaterialPageRoute(
+                  builder: (context) => const SplashScreen(),
+                );
               },
             );
           },

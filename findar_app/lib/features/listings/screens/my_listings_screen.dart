@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:findar/logic/cubits/my_listings_cubit.dart';
+import 'package:findar/logic/cubits/listing_cubit.dart';
+import 'package:findar/core/models/listing.dart';
 import '../../../core/widgets/property_card.dart';
 import '../../../core/widgets/segment_control.dart';
 import '../../../core/widgets/progress_button.dart';
 import '../../../core/widgets/build_bottom_bar.dart';
+import '../../../core/widgets/confirmation_dialog.dart';
 
 class MyListingsScreen extends StatefulWidget {
   const MyListingsScreen({super.key});
@@ -16,39 +18,11 @@ class MyListingsScreen extends StatefulWidget {
 class _MyListingsScreenState extends State<MyListingsScreen> {
   String _selectedTab = 'Online';
 
-  // Sample data
-  final List<Map<String, dynamic>> _onlineListings = [
-    {
-      'id': '1',
-      'imageUrl': 'https://images.pexels.com/photos/4700551/pexels-photo-4700551.jpeg',
-      'title': 'Luxury Villa with Ocean View',
-      'location': '123 Ocean Drive, Miami FL',
-      'price': '\$1,200,000',
-      'beds': 3,
-      'baths': 2,
-      'sqft': 1800,
-      'isSaved': false,
-    },
-    {
-      'id': '2',
-      'imageUrl': 'https://images.pexels.com/photos/259588/pexels-photo-259588.jpeg',
-      'title': 'Spacious Family Home',
-      'location': '456 Maple Avenue, Suburbia USA',
-      'price': '\$750,000',
-      'beds': 4,
-      'baths': 3,
-      'sqft': 2200,
-      'isSaved': false,
-    },
-  ];
-
-  final List<Map<String, dynamic>> _offlineListings = [];
-
   @override
   void initState() {
     super.initState();
     // Fetch listings when screen loads
-    context.read<MyListingsCubit>().fetchMyListings();
+    context.read<ListingCubit>().fetchUserListings();
   }
 
   @override
@@ -110,7 +84,7 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
           Divider(height: 1, color: Theme.of( context).colorScheme.onSurface.withOpacity(0.2)),
           // Listings
           Expanded(
-            child: BlocBuilder<MyListingsCubit, Map<String, dynamic>>(
+            child: BlocBuilder<ListingCubit, Map<String, dynamic>>(
               builder: (context, state) {
                 if (state['state'] == 'loading') {
                   return const Center(child: CircularProgressIndicator());
@@ -128,7 +102,7 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
                           backgroundColor: Theme.of(context).colorScheme.primary,
                           textColor: Theme.of(context).colorScheme.onPrimary,
                           onPressed: () {
-                            context.read<MyListingsCubit>().fetchMyListings();
+                            context.read<ListingCubit>().fetchUserListings();
                           },
                         ),
                       ],
@@ -136,10 +110,9 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
                   );
                 }
 
-                final allListings = (state['data'] as List?)?.isEmpty ?? true ? _onlineListings : (state['data'] as List?);
-                final listings = _selectedTab == 'Online'
-                    ? allListings?.where((item) => item['status'] != 'Offline').toList() ?? _onlineListings
-                    : allListings?.where((item) => item['status'] == 'Offline').toList() ?? _offlineListings;
+                // Use cubit getters for filtered listings
+                final cubit = context.read<ListingCubit>();
+                final listings = _selectedTab == 'Online' ? cubit.onlineListings : cubit.offlineListings;
 
                 if (listings.isEmpty) {
                   return Center(
@@ -182,21 +155,21 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
                   itemBuilder: (context, index) {
                     final listing = listings[index];
                     return PropertyListingCard(
-                      imageUrl: listing['imageUrl'],
-                      title: listing['title'],
-                      price: listing['price'],
-                      location: listing['location'],
-                      beds: listing['beds'],
-                      baths: listing['baths'],
-                      sqft: listing['sqft'],
-                      isSaved: listing['isSaved'],
+                      imageUrl: listing.image ?? '',
+                      title: listing.title,
+                      price: listing.price.toString(),
+                      location: listing.location,
+                      beds: listing.bedrooms ?? 0,
+                      baths: listing.bathrooms ?? 0,
+                      sqft: 0, // Not in model, using default
+                      isSaved: false, // Not in model, using default
                       showMenu: true,
-                      onEdit: () => _handleEdit(index),
-                      onRemove: () => _handleRemove(index),
-                      onToggleStatus: () => _handleToggleStatus(index),
+                      onEdit: () => _handleEdit(listing),
+                      onRemove: () => _handleRemove(listing),
+                      onToggleStatus: () => _handleToggleStatus(listing),
                       menuToggleText: _selectedTab == 'Online' ? 'Make Offline' : 'Make Online',
                       showBoostButton: true,
-                      onBoost: () => _handleBoost(index),
+                      onBoost: () => _handleBoost(listing),
                       onTap: () {},
                     );
                   },
@@ -223,70 +196,38 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
   }
 
   // UPDATED: Edit handler
-  void _handleEdit(int index) {
-    final listing = _selectedTab == 'Online' ? _onlineListings[index] : _offlineListings[index];
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Edit "${listing['title']}"'),
-        duration: const Duration(seconds: 2),
-      ),
+  void _handleEdit(Listing listing) {
+    // Navigate to edit screen
+    Navigator.pushNamed(
+      context,
+      '/edit-listing',
+      arguments: listing,
     );
-    // Add edit logic here
   }
 
   // UPDATED: Remove handler
-  void _handleRemove(int index) {
-    final listing = _selectedTab == 'Online' ? _onlineListings[index] : _offlineListings[index];
-    
-    showDialog(
+  void _handleRemove(Listing listing) {
+    ConfirmationDialog.show(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Remove Listing'),
-        content: Text('Are you sure you want to remove "${listing['title']}"?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              setState(() {
-                if (_selectedTab == 'Online') {
-                  _onlineListings.removeAt(index);
-                } else {
-                  _offlineListings.removeAt(index);
-                }
-              });
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Listing removed')),
-              );
-            },
-            child: const Text('Remove', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
+      title: 'Remove Listing',
+      message: 'Are you sure you want to remove "${listing.title}"?',
+      onConfirm: () {
+        context.read<ListingCubit>().deleteListing(listing.id);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Removing listing...')),
+        );
+      },
     );
   }
 
   // UPDATED: Toggle online/offline handler
-  void _handleToggleStatus(int index) {
-    final listing = _selectedTab == 'Online' ? _onlineListings[index] : _offlineListings[index];
-    
-    setState(() {
-      if (_selectedTab == 'Online') {
-        _onlineListings.removeAt(index);
-        _offlineListings.add(listing);
-      } else {
-        _offlineListings.removeAt(index);
-        _onlineListings.add(listing);
-      }
-    });
-    
+  void _handleToggleStatus(Listing listing) {
+    final newStatus = !listing.isOnline;
+    context.read<ListingCubit>().toggleListingStatus(listing.id, newStatus);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          'Moved to ${_selectedTab == 'Online' ? 'Offline' : 'Online'}',
+          'Moving to ${listing.isOnline ? 'Offline' : 'Online'}...',
         ),
         duration: const Duration(seconds: 2),
       ),
@@ -294,14 +235,12 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
   }
 
   // UPDATED: Boost handler
-  void _handleBoost(int index) {
-    final listing = _selectedTab == 'Online' ? _onlineListings[index] : _offlineListings[index];
-    
+  void _handleBoost(Listing listing) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Boost Listing'),
-        content: Text('Boost "${listing['title']}" to get more visibility?'),
+        content: Text('Boost "${listing.title}" to get more visibility?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -312,7 +251,7 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('${listing['title']} has been boosted!'),
+                  content: Text('${listing.title} has been boosted!'),
                   duration: const Duration(seconds: 2),
                 ),
               );
