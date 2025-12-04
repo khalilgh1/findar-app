@@ -38,9 +38,11 @@ class _SplashScreenState extends State<SplashScreen>
           _animationController.contentController,
         ]),
         builder: (context, child) {
+          final backgroundColor = Theme.of(context).colorScheme.background;
+          
           return Container(
-            decoration: const BoxDecoration(
-              color: Colors.white,
+            decoration: BoxDecoration(
+              color: backgroundColor,
             ),
             child: Stack(
               children: [
@@ -83,6 +85,9 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   Widget _buildBackgroundCircles() {
+    final primaryColor = Theme.of(context).colorScheme.primary;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Stack(
       children: [
         Positioned(
@@ -95,7 +100,7 @@ class _SplashScreenState extends State<SplashScreen>
               height: 300,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: const Color(0xFF0066FF).withValues(alpha: 0.05),
+                color: primaryColor.withValues(alpha: isDark ? 0.1 : 0.05),
               ),
             ),
           ),
@@ -110,7 +115,7 @@ class _SplashScreenState extends State<SplashScreen>
               height: 200,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.blue.withValues(alpha: 0.05),
+                color: primaryColor.withValues(alpha: isDark ? 0.1 : 0.05),
               ),
             ),
           ),
@@ -121,6 +126,7 @@ class _SplashScreenState extends State<SplashScreen>
 
   Widget _buildFinDARText() {
     const letters = ['F', 'i', 'n', 'D', 'A', 'R'];
+    final primaryColor = Theme.of(context).colorScheme.primary;
     
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -139,10 +145,10 @@ class _SplashScreenState extends State<SplashScreen>
                         .letterScaleAnimations[index].value,
                     child: Text(
                       letters[index],
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 80,
                         fontWeight: FontWeight.bold,
-                        color: Colors.blue,
+                        color: primaryColor,
                         letterSpacing: 2,
                       ),
                     ),
@@ -160,13 +166,13 @@ class _SplashScreenState extends State<SplashScreen>
         // Welcome heading
         FadeTransition(
           opacity: _animationController.welcomeFadeAnimation,
-          child: const Text(
+          child: Text(
             'Welcome',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 32,
               fontWeight: FontWeight.bold,
-              color: Colors.blue,
+              color: Theme.of(context).colorScheme.primary,
             ),
           ),
         ),
@@ -176,12 +182,12 @@ class _SplashScreenState extends State<SplashScreen>
         // Subtitle
         FadeTransition(
           opacity: _animationController.subtitleFadeAnimation,
-          child: const Text(
+          child: Text(
             'Your property marketplace',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 17,
-              color: Colors.blue,
+              color: Theme.of(context).colorScheme.primary,
             ),
           ),
         ),
@@ -215,35 +221,40 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   Widget _buildGlassBadge(String label) {
+    final primaryColor = Theme.of(context).colorScheme.primary;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.blue.withValues(alpha: 0.15),
+        color: primaryColor.withValues(alpha: isDark ? 0.2 : 0.15),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: Colors.blue.withValues(alpha: 0.3),
+          color: primaryColor.withValues(alpha: isDark ? 0.4 : 0.3),
           width: 1,
         ),
       ),
       child: Text(
         label,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w600,
-          color: Colors.blue,
+          color: primaryColor,
         ),
       ),
     );
   }
 
   Widget _buildGetStartedButton() {
+    final primaryColor = Theme.of(context).colorScheme.primary;
+    
     return Container(
       width: double.infinity,
       height: 56,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Colors.blue,
+          color: primaryColor,
           width: 2,
         ),
       ),
@@ -256,12 +267,12 @@ class _SplashScreenState extends State<SplashScreen>
             borderRadius: BorderRadius.circular(12),
           ),
         ),
-        child: const Text(
+        child: Text(
           'Get Started',
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Colors.blue,
+            color: primaryColor,
           ),
         ),
       ),
