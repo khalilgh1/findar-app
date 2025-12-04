@@ -10,7 +10,7 @@ class SegmentedControl extends StatefulWidget {
   final Color inactiveTextColor;
 
   const SegmentedControl({
-    Key? key,
+    super.key,
     required this.options,
     this.initialValue,
     this.onChanged,
@@ -18,7 +18,7 @@ class SegmentedControl extends StatefulWidget {
     this.inactiveColor = Colors.grey,
     this.activeTextColor = Colors.white,
     this.inactiveTextColor = Colors.black87,
-  }) : super(key: key);
+  });
 
   @override
   State<SegmentedControl> createState() => _SegmentedControlState();
@@ -81,7 +81,7 @@ class _SegmentedControlState extends State<SegmentedControl> {
 
 // Example usage
 class SegmentedControlExample extends StatelessWidget {
-  const SegmentedControlExample({Key? key}) : super(key: key);
+  const SegmentedControlExample({super.key});
 
   @override
   Widget build(BuildContext context) {

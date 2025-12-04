@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class ProfileAvatar extends StatelessWidget {
-  ProfileAvatar({super.key});
+  const ProfileAvatar({super.key});
 
   @override
   Widget build(BuildContext context) {
