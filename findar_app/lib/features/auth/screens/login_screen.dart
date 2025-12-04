@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:findar/logic/cubits/auth_cubit.dart';
+import '../../../core/widgets/progress_button.dart';
 
 
 class LoginScreen extends StatefulWidget {
@@ -12,6 +15,18 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _obscurePassword = true;
+
+  /// Validate email format
+  String? _validateEmail(String email) {
+    if (email.isEmpty) {
+      return 'Email is required';
+    }
+    final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+    if (!emailRegex.hasMatch(email)) {
+      return 'Please enter a valid email address';
+    }
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -112,28 +127,53 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 const SizedBox(height: 10),
-                SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: ElevatedButton(
-                    onPressed: () {
+                BlocConsumer<AuthCubit, Map<String, dynamic>>(
+                  listener: (context, state) {
+                    if (state['state'] == 'done') {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Login successful'),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
                       Navigator.pushNamed(context, '/home');
-                    },
-                    style: ElevatedButton.styleFrom(
+                    }
+                  },
+                  builder: (context, state) {
+                    final isLoading = state['state'] == 'loading';
+                    final isError = state['state'] == 'error';
+                    final errorMessage = isError ? (state['message'] as String?) : null;
+
+                    return ProgressButton(
+                      onPressed: () {
+                        final emailError = _validateEmail(_emailController.text);
+                        if (emailError != null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(emailError)),
+                          );
+                          return;
+                        }
+
+                        if (_passwordController.text.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Password is required')),
+                          );
+                          return;
+                        }
+
+                        context.read<AuthCubit>().login(
+                          email: _emailController.text,
+                          password: _passwordController.text,
+                        );
+                      },
+                      label: 'Login',
+                      isLoading: isLoading,
+                      isError: isError,
+                      errorMessage: errorMessage,
                       backgroundColor: Colors.blue,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: const Text(
-                      'Login',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
+                      textColor: Colors.white,
+                    );
+                  },
                 ),
                 const SizedBox(height: 20),
                 Row(

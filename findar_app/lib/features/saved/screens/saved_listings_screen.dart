@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:findar/logic/cubits/saved_listings_cubit.dart';
 import '../../../core/widgets/appbar_title.dart';
 import '../../../core/widgets/property_card.dart';
+import '../../../core/widgets/progress_button.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/widgets/build_bottom_bar.dart';
 import 'package:provider/provider.dart';
-import '../../../core/theme/theme_provider.dart';
 
 class SavedListingsScreen extends StatefulWidget {
   const SavedListingsScreen({super.key});
@@ -63,6 +65,13 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
     },
   ];
 
+  @override
+  void initState() {
+    super.initState();
+    // Fetch saved listings when screen loads
+    context.read<SavedListingsCubit>().fetchSavedListings();
+  }
+
   void _toggleSave(int index) {
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -98,11 +107,7 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final colorScheme = Theme.of(context).colorScheme;
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-    final orientation = MediaQuery.of(context).orientation; // ADDED
     final themeProvider = Provider.of<ThemeProvider>(context); 
 
     return Scaffold(
@@ -129,21 +134,55 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
               color: Theme.of(context).colorScheme.onSurface,
               size: 30,
             ),
-            onPressed: () {              themeProvider.toggleTheme(!themeProvider.isDarkMode);
-},
+            onPressed: () {
+              themeProvider.toggleTheme(!themeProvider.isDarkMode);
+            },
           ),
         ],
       ),
-      body: _savedProperties.isEmpty
-          ? _buildEmptyState()
-          : _buildSavedPropertiesView(orientation), // UPDATED
+      body: BlocBuilder<SavedListingsCubit, Map<String, dynamic>>(
+        builder: (context, state) {
+          if (state['state'] == 'loading') {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (state['state'] == 'error') {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('Error: ${state['message'] ?? 'Unknown error'}'),
+                  SizedBox(height: 16),
+                  ProgressButton(
+                    label: 'Retry',
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    textColor: Theme.of(context).colorScheme.onPrimary,
+                    onPressed: () {
+                      context.read<SavedListingsCubit>().fetchSavedListings();
+                    },
+                  ),
+                ],
+              ),
+            );
+          }
+
+          final savedListings =
+              (state['data'] as List?)?.isEmpty ?? true ? _savedProperties : (state['data'] as List?);
+
+          return savedListings!.isEmpty
+              ? _buildEmptyState()
+              : _buildSavedPropertiesView(
+                  MediaQuery.of(context).orientation,
+                  savedListings,
+                );
+        },
+      ),
       bottomNavigationBar: BuildBottomNavBar(index: 1),
     );
   }
 
   // ADDED: GridView in landscape, ListView in portrait
-  Widget _buildSavedPropertiesView(Orientation orientation) {
-    final screenWidth = MediaQuery.of(context).size.width;
+  Widget _buildSavedPropertiesView(Orientation orientation, List<dynamic> properties) {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return ListView.builder(
@@ -151,9 +190,9 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
         top: screenHeight * 0.01,
         bottom: screenHeight * 0.02,
       ),
-      itemCount: _savedProperties.length,
+      itemCount: properties.length,
       itemBuilder: (context, index) {
-        final property = _savedProperties[index];
+        final property = properties[index];
         return PropertyListingCard(
           title: property['title'],
           imageUrl: property['imageUrl'],
@@ -171,10 +210,8 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
   }
 
   Widget _buildEmptyState() {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final textTheme = theme.textTheme;
-    final screenWidth = MediaQuery.of(context).size.width;
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Center(

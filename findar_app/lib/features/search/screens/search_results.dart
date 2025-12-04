@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:findar/logic/cubits/search_cubit.dart';
 import '../../../../core/widgets/appbar_title.dart';
 import '../../../../core/widgets/property_card.dart';
 import '../../../../core/widgets/sort_and_filter.dart';
-import '../../../../core/theme/color_schemes.dart';
+import '../../../../core/widgets/progress_button.dart';
 
 class SearchResultsScreen extends StatefulWidget {
   const SearchResultsScreen({super.key});
@@ -51,6 +53,22 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
       'isSaved': false,
     },
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    // Perform search when screen loads
+    context.read<SearchCubit>().search(
+      query: '',
+      minPrice: 0,
+      maxPrice: double.infinity,
+      location: '',
+      minBedrooms: 0,
+      maxBedrooms: 10,
+      propertyType: '',
+      classification: '',
+    );
+  }
 
   void _toggleSave(int index) {
     setState(() {
@@ -123,35 +141,73 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
           Divider(height: 1, color: Theme.of(context).dividerColor),
           // Properties list
           Expanded(
-            child: _properties.isEmpty
-                ? _buildEmptyState()
-                : ListView.builder(
-                    padding: EdgeInsets.only(
-                      top: screenHeight * 0.01,
-                      bottom: screenHeight * 0.02,
+            child: BlocBuilder<SearchCubit, Map<String, dynamic>>(
+              builder: (context, state) {
+                if (state['state'] == 'loading') {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                if (state['state'] == 'error') {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text('Error: ${state['message'] ?? 'Unknown error'}'),
+                        SizedBox(height: 16),
+                        ProgressButton(
+                          label: 'Retry',
+                          backgroundColor: Theme.of(context).colorScheme.primary,
+                          textColor: Theme.of(context).colorScheme.onPrimary,
+                          onPressed: () {
+                            context.read<SearchCubit>().search(
+                              query: '',
+                              minPrice: 0,
+                              maxPrice: double.infinity,
+                              location: '',
+                              minBedrooms: 0,
+                              maxBedrooms: 10,
+                              propertyType: '',
+                              classification: '',
+                            );
+                          },
+                        ),
+                      ],
                     ),
-                    itemCount: _properties.length,
-                    itemBuilder: (context, index) {
-                      final property = _properties[index];
-                      // NO CHANGES: Search results don't show boost button or menu
-                      return PropertyListingCard(
-                        title: property['title'],
-                        imageUrl: property['imageUrl'],
-                        price: property['price'],
-                        location: property['location'],
-                        beds: property['beds'],
-                        baths: property['baths'],
-                        sqft: property['sqft'],
-                        isSaved: property['isSaved'],
-                        onSaveToggle: () => _toggleSave(index),
-                        onTap: () {
-                          // Navigate to property details
+                  );
+                }
+
+                final properties = (state['data'] as List?)?.isEmpty ?? true
+                    ? _properties
+                    : (state['data'] as List?);
+
+                return properties!.isEmpty
+                    ? _buildEmptyState()
+                    : ListView.builder(
+                        padding: EdgeInsets.only(
+                          top: screenHeight * 0.01,
+                          bottom: screenHeight * 0.02,
+                        ),
+                        itemCount: properties.length,
+                        itemBuilder: (context, index) {
+                          final property = properties[index];
+                          return PropertyListingCard(
+                            title: property['title'],
+                            imageUrl: property['imageUrl'],
+                            price: property['price'],
+                            location: property['location'],
+                            beds: property['beds'],
+                            baths: property['baths'],
+                            sqft: property['sqft'],
+                            isSaved: property['isSaved'],
+                            onSaveToggle: () => _toggleSave(index),
+                            onTap: () {
+                              Navigator.pushNamed(context, '/property-details');
+                            },
+                          );
                         },
-                        // showBoostButton defaults to false
-                        // showMenu defaults to false
                       );
-                    },
-                  ),
+              },
+            ),
           ),
         ],
       ),

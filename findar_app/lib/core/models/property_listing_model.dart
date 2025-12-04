@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+
 
 class PropertyListing {
   final String id;

@@ -1,6 +1,7 @@
 //flutter imports
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 //widgets
 import './widgets/property_title.dart';
@@ -10,7 +11,10 @@ import './widgets/price_field.dart';
 import './widgets/numeric_field.dart';
 import './widgets/location_field.dart';
 //package imports
-import 'package:main_button/main_button.dart';
+import 'package:findar/logic/cubits/create_listing_cubit.dart';
+
+//widgets
+import '../../core/widgets/progress_button.dart';
 
 class CreateListingScreen extends StatefulWidget {
   const CreateListingScreen({super.key});
@@ -32,6 +36,56 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
   String _propertyType = 'Apartment';
   String _status = 'Online';
   final List<String> _photos = ['find-dar-test1.jpg', 'find-dar-test2.jpg'];
+
+  String? _validateTitle(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please enter a property title';
+    }
+    if (value.length < 5) {
+      return 'Title must be at least 5 characters';
+    }
+    return null;
+  }
+
+  String? _validateDescription(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please enter a description';
+    }
+    if (value.length < 20) {
+      return 'Description must be at least 20 characters';
+    }
+    return null;
+  }
+
+  String? _validatePrice(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please enter a price';
+    }
+    if (double.tryParse(value) == null) {
+      return 'Please enter a valid price';
+    }
+    if (double.parse(value) <= 0) {
+      return 'Price must be greater than 0';
+    }
+    return null;
+  }
+
+  String? _validateLocation(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please enter a location';
+    }
+    return null;
+  }
+
+  String? _validateBedrooms(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please enter number of bedrooms';
+    }
+    if (int.tryParse(value) == null || int.parse(value) < 0) {
+      return 'Please enter a valid number';
+    }
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -352,16 +406,93 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
       // Create Listing Button
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: MainButton(
-          label: 'Create Listing',
-          backgroundColor: theme.colorScheme.primary,
-          onPressed: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Listing Created Successfully!')),
-            );
+        child: BlocListener<CreateListingCubit, Map<String, dynamic>>(
+          listener: (context, state) {
+            if (state['state'] == 'done') {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Listing Created Successfully!'),
+                  backgroundColor: Colors.green,
+                ),
+              );
               Navigator.pushNamed(context, '/my-listings');
-
+            } else if (state['state'] == 'error') {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state['message'] ?? 'Failed to create listing'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
           },
+          child: BlocBuilder<CreateListingCubit, Map<String, dynamic>>(
+            builder: (context, state) {
+              final isLoading = state['state'] == 'loading';
+              final isError = state['state'] == 'error';
+              final errorMessage = isError ? (state['message'] as String?) : null;
+
+              return ProgressButton(
+                label: 'Create Listing',
+                backgroundColor: theme.colorScheme.primary,
+                textColor: theme.colorScheme.onPrimary,
+                isLoading: isLoading,
+                isError: isError,
+                errorMessage: errorMessage,
+                onPressed: () {
+                  // Validate all fields
+                  final titleError = _validateTitle(_titleController.text);
+                  final descError = _validateDescription(_descriptionController.text);
+                  final priceError = _validatePrice(_priceController.text);
+                  final locationError = _validateLocation(_locationController.text);
+                  final bedroomsError = _validateBedrooms(_bedroomsController.text);
+
+                  if (titleError != null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(titleError), backgroundColor: Colors.red),
+                    );
+                    return;
+                  }
+                  if (descError != null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(descError), backgroundColor: Colors.red),
+                    );
+                    return;
+                  }
+                  if (priceError != null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(priceError), backgroundColor: Colors.red),
+                    );
+                    return;
+                  }
+                  if (locationError != null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(locationError), backgroundColor: Colors.red),
+                    );
+                    return;
+                  }
+                  if (bedroomsError != null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(bedroomsError), backgroundColor: Colors.red),
+                    );
+                    return;
+                  }
+
+                  // Call cubit to create listing
+                  context.read<CreateListingCubit>().createListing(
+                    title: _titleController.text,
+                    description: _descriptionController.text,
+                    price: double.parse(_priceController.text),
+                    location: _locationController.text,
+                    bedrooms: int.parse(_bedroomsController.text),
+                    bathrooms: 1,
+                    classification: _classification,
+                    propertyType: _propertyType,
+                    image: _photos.first,
+                  );
+                },
+              );
+            },
+          ),
         ),
       ),
     );

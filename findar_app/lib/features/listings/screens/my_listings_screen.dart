@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:findar/logic/cubits/my_listings_cubit.dart';
 import '../../../core/widgets/property_card.dart';
 import '../../../core/widgets/segment_control.dart';
-import '../../../core/theme/color_schemes.dart';
+import '../../../core/widgets/progress_button.dart';
 import '../../../core/widgets/build_bottom_bar.dart';
 
 class MyListingsScreen extends StatefulWidget {
@@ -43,10 +45,15 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
   final List<Map<String, dynamic>> _offlineListings = [];
 
   @override
+  void initState() {
+    super.initState();
+    // Fetch listings when screen loads
+    context.read<MyListingsCubit>().fetchMyListings();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
     
     return Scaffold(
       backgroundColor: Theme.of(  context).colorScheme.surface,
@@ -103,7 +110,99 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
           Divider(height: 1, color: Theme.of( context).colorScheme.onSurface.withOpacity(0.2)),
           // Listings
           Expanded(
-            child: _buildListingsView(),
+            child: BlocBuilder<MyListingsCubit, Map<String, dynamic>>(
+              builder: (context, state) {
+                if (state['state'] == 'loading') {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                if (state['state'] == 'error') {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text('Error: ${state['message'] ?? 'Unknown error'}'),
+                        SizedBox(height: 16),
+                        ProgressButton(
+                          label: 'Retry',
+                          backgroundColor: Theme.of(context).colorScheme.primary,
+                          textColor: Theme.of(context).colorScheme.onPrimary,
+                          onPressed: () {
+                            context.read<MyListingsCubit>().fetchMyListings();
+                          },
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                final allListings = (state['data'] as List?)?.isEmpty ?? true ? _onlineListings : (state['data'] as List?);
+                final listings = _selectedTab == 'Online'
+                    ? allListings?.where((item) => item['status'] != 'Offline').toList() ?? _onlineListings
+                    : allListings?.where((item) => item['status'] == 'Offline').toList() ?? _offlineListings;
+
+                if (listings.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.home_outlined,
+                          size: 60,
+                          color: Colors.grey[400],
+                        ),
+                        SizedBox(height: 30),
+                        Text(
+                          'No $_selectedTab listings',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey[700],
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          'Add your first property listing',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                return ListView.builder(
+                  padding: EdgeInsets.only(
+                    top: 8.0,
+                    bottom: 80.0,
+                  ),
+                  itemCount: listings.length,
+                  itemBuilder: (context, index) {
+                    final listing = listings[index];
+                    return PropertyListingCard(
+                      imageUrl: listing['imageUrl'],
+                      title: listing['title'],
+                      price: listing['price'],
+                      location: listing['location'],
+                      beds: listing['beds'],
+                      baths: listing['baths'],
+                      sqft: listing['sqft'],
+                      isSaved: listing['isSaved'],
+                      showMenu: true,
+                      onEdit: () => _handleEdit(index),
+                      onRemove: () => _handleRemove(index),
+                      onToggleStatus: () => _handleToggleStatus(index),
+                      menuToggleText: _selectedTab == 'Online' ? 'Make Offline' : 'Make Online',
+                      showBoostButton: true,
+                      onBoost: () => _handleBoost(index),
+                      onTap: () {},
+                    );
+                  },
+                );
+              },
+            ),
           ),
         ],
       ),
@@ -120,78 +219,6 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
         ),
       ),
       bottomNavigationBar: BuildBottomNavBar(index: 2),
-    );
-  }
-
-  Widget _buildListingsView() {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-    final listings = _selectedTab == 'Online' ? _onlineListings : _offlineListings;
-
-    if (listings.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.home_outlined,
-              size: 60,
-              color: Colors.grey[400],
-            ),
-            SizedBox(height: 30),
-            Text(
-              'No $_selectedTab listings',
-              style: TextStyle(
-                fontSize: screenWidth * 0.05,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey[700],
-              ),
-            ),
-            SizedBox(height: screenHeight * 0.01),
-            Text(
-              'Add your first property listing',
-              style: TextStyle(
-                fontSize: screenWidth * 0.035,
-                color: Colors.grey[600],
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return ListView.builder(
-      padding: EdgeInsets.only(
-        top: screenHeight * 0.01,
-        bottom: screenHeight * 0.1,
-      ),
-      itemCount: listings.length,
-      itemBuilder: (context, index) {
-        final listing = listings[index];
-        // UPDATED: Using new PropertyListingCard parameters
-        return PropertyListingCard(
-          imageUrl: listing['imageUrl'],
-          title: listing['title'],
-          price: listing['price'],
-          location: listing['location'],
-          beds: listing['beds'],
-          baths: listing['baths'],
-          sqft: listing['sqft'],
-          isSaved: listing['isSaved'],
-          // UPDATED: Show 3-dot menu instead of trailing widget
-          showMenu: true,
-          onEdit: () => _handleEdit(index),
-          onRemove: () => _handleRemove(index),
-          onToggleStatus: () => _handleToggleStatus(index),
-          menuToggleText: _selectedTab == 'Online' ? 'Make Offline' : 'Make Online',
-          // UPDATED: Show boost button in card
-          showBoostButton: true,
-          onBoost: () => _handleBoost(index),
-          onTap: () {
-            // Navigate to property details
-          },
-        );
-      },
     );
   }
 

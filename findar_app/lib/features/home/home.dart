@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:findar/logic/cubits/listings_cubit.dart';
+import '../../core/widgets/progress_button.dart';
 // import '../../core/widgets/appbar.dart';
 import 'search_bar.dart';
 import 'categories.dart';
@@ -56,6 +59,13 @@ class _HomeScreenState extends State<HomeScreen> {
       details: "3 Bed | 2 Bath | 2,100 sqft",
     ),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    // Fetch listings when screen loads
+    context.read<ListingsCubit>().fetchListings();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -128,17 +138,47 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               SizedBox(height: 15),
-              Column(
-                children: recent
-                    .map(
-                      (p) => GestureDetector(
-                        onTap: () => {
-                          Navigator.pushNamed(context, '/property-details'),
-                        },
-                        child: ListingTile(property: p),
+              BlocBuilder<ListingsCubit, Map<String, dynamic>>(
+                builder: (context, state) {
+                  if (state['state'] == 'loading') {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  if (state['state'] == 'error') {
+                    return Center(
+                      child: Column(
+                        children: [
+                          Text('Error: ${state['message'] ?? 'Unknown error'}'),
+                          SizedBox(height: 16),
+                          ProgressButton(
+                            label: 'Retry',
+                            backgroundColor: theme.colorScheme.primary,
+                            textColor: theme.colorScheme.onPrimary,
+                            onPressed: () {
+                              context.read<ListingsCubit>().fetchListings();
+                            },
+                          ),
+                        ],
                       ),
-                    )
-                    .toList(),
+                    );
+                  }
+
+                  final listings = (state['data'] as List?)?.cast<Property>() ?? [];
+                  final displayListings = listings.isEmpty ? recent : listings;
+
+                  return Column(
+                    children: displayListings
+                        .map(
+                          (p) => GestureDetector(
+                            onTap: () => {
+                              Navigator.pushNamed(context, '/property-details'),
+                            },
+                            child: ListingTile(property: p),
+                          ),
+                        )
+                        .toList(),
+                  );
+                },
               ),
             ],
           ),

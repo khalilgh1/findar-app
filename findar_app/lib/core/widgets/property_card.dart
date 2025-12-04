@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'primary_button.dart';
-import '../theme/color_schemes.dart';
 class PropertyListingCard extends StatelessWidget {
   final String imageUrl;
   final String price;
