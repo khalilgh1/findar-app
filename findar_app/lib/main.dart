@@ -14,7 +14,8 @@ import './features/search/screens/search_results.dart';
 import './features/demoscreen.dart';
 import './features/settings/settings_screen.dart';
 import 'core/theme/theme_provider.dart';
-import './features/profile/profile.dart';
+import './features/profile/screens/profile_screen/profile_screen.dart';
+import './features/profile/screens/edit_profile/edit_profile_screen.dart';
 import './features/property_details/screens/property_details_screen.dart';
 import './features/demo/demo_test_screen.dart';
 // Import all cubits
@@ -75,6 +76,7 @@ class MainApp extends StatelessWidget {
                 '/property-details': (context) => const PropertyDetailsScreen(),
                 '/create-listing': (context) => const CreateListingScreen(),
                 '/profile': (context) => const ProfileScreen(),
+                '/edit-profile': (context) => const EditProfileScreen(),
               },
             );
           },

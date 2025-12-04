@@ -254,12 +254,24 @@ class AuthRepository {
   /// Returns: ReturnResult with success state and message
   Future<ReturnResult> updateProfile({
     String? name,
+    String? email,
     String? phone,
     String? profilePic,
   }) async {
     try {
+      // Validate email if provided
+      if (email != null && email.isNotEmpty) {
+        if (!email.contains('@')) {
+          return ReturnResult(
+            state: false,
+            message: 'Please enter a valid email',
+          );
+        }
+      }
+      
       final body = <String, dynamic>{};
       if (name != null) body['name'] = name;
+      if (email != null) body['email'] = email;
       if (phone != null) body['phone'] = phone;
       if (profilePic != null) body['profile_pic'] = profilePic;
 

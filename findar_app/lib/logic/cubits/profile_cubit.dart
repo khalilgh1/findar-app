@@ -62,6 +62,7 @@ class ProfileCubit extends Cubit<Map<String, dynamic>> {
   /// Update user profile
   Future<void> updateProfile({
     String? name,
+    String? email,
     String? phone,
     String? profilePic,
   }) async {
@@ -70,6 +71,7 @@ class ProfileCubit extends Cubit<Map<String, dynamic>> {
     try {
       final result = await authRepository.updateProfile(
         name: name,
+        email: email,
         phone: phone,
         profilePic: profilePic,
       );
