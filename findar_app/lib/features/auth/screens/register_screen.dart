@@ -12,7 +12,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phonenumberController = TextEditingController();
-  final TextEditingController _ninController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _obscurePassword = true;
 
@@ -169,30 +168,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
                 ),
               ),
-                            const SizedBox(height: 20),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'National Identification Number (NIN)',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 6),
-              TextField(
-                controller: _ninController,
-                decoration: InputDecoration(
-                  hintText: 'Enter your NIN',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                ),
-              ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 30),
               SizedBox(
                 width: double.infinity,
                 height: 48,
