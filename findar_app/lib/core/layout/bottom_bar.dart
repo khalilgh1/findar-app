@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class BottomBar extends StatelessWidget {
@@ -23,7 +24,7 @@ class BottomBar extends StatelessWidget {
       unselectedItemColor: theme.colorScheme.onSurfaceVariant,
       currentIndex: index,
       elevation: 0,
-      iconSize: screenWidth * 0.06,
+      iconSize: screenWidth.clamp(10, 25),
       items: const [
         BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: 'Home'),
         BottomNavigationBarItem(
