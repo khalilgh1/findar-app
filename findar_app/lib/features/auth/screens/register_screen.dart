@@ -171,7 +171,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   child: Text(
                     'Phone Number',
                     style: TextStyle(
-                      color: Theme.of(context).colorScheme.onPrimary,
+                      color: Theme.of(context).colorScheme.onSurface,
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                     ),

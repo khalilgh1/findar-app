@@ -149,7 +149,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         final emailError = _validateEmail(_emailController.text);
                         if (emailError != null) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(emailError), backgroundColor: Colors.red,),
+                            SnackBar(content: Text(emailError), backgroundColor:Theme.of(context).colorScheme.error),
                           );
                           return;
                         }
