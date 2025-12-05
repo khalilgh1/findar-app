@@ -149,14 +149,14 @@ class _LoginScreenState extends State<LoginScreen> {
                         final emailError = _validateEmail(_emailController.text);
                         if (emailError != null) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(emailError)),
+                            SnackBar(content: Text(emailError), backgroundColor: Colors.red,),
                           );
                           return;
                         }
 
                         if (_passwordController.text.isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Password is required')),
+                            const SnackBar(content: Text('Password is required'),backgroundColor: Colors.red,),
                           );
                           return;
                         }

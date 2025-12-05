@@ -247,7 +247,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         // Validate all fields
                         if (_nameController.text.isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Name is required')),
+                            const SnackBar(content: Text('Name is required'), backgroundColor: Colors.red,),
                           );
                           return;
                         }
@@ -255,7 +255,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         final emailError = _validateEmail(_emailController.text);
                         if (emailError != null) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(emailError)),
+                            SnackBar(content: Text(emailError), backgroundColor: Colors.red,),
                           );
                           return;
                         }
@@ -263,7 +263,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         final phoneError = _validatePhone(_phonenumberController.text);
                         if (phoneError != null) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(phoneError)),
+                            SnackBar(content: Text(phoneError), backgroundColor: Colors.red,),
                           );
                           return;
                         }
@@ -271,14 +271,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         final passwordError = _validatePassword(_passwordController.text);
                         if (passwordError != null) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(passwordError)),
+                            SnackBar(content: Text(passwordError), backgroundColor: Colors.red,),
                           );
                           return;
                         }
 
                         if (_selectedAccountType == null) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Please select an account type')),
+                            const SnackBar(content: Text('Please select an account type'), backgroundColor: Colors.red,),
                           );
                           return;
                         }
