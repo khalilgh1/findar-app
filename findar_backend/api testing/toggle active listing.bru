@@ -1,0 +1,20 @@
+meta {
+  name: toggle active listing
+  type: http
+  seq: 9
+}
+
+post {
+  url: http://127.0.0.1:8000/api/toggle_active_listing/
+  body: none
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY0NzEyMjgzLCJpYXQiOjE3NjQ3MTE5ODMsImp0aSI6ImRhNmY1NjMyMGVlYjQ4NjViNTYyYTM1YzA4NjM5YzU0IiwidXNlcl9pZCI6IjEifQ.6HtNtldUJq_G1z9Rp2mQKf-7uQiV_oV54-P-dsjArVY
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

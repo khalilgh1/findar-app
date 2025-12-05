@@ -1,0 +1,28 @@
+meta {
+  name: create listing
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://127.0.0.1:8000/api/create-listing/
+  body: json
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY0NzEwNDUyLCJpYXQiOjE3NjQ3MTAxNTIsImp0aSI6IjFmZTkwODFmMTkwMTRiY2VhMTcxZTQxMzIxYTBiOGQ5IiwidXNlcl9pZCI6IjEifQ.jji7KDPBIe0yyM7z5ghx1ics0taS-TYVhcSIz6mWOOY
+}
+
+body:json {
+  {
+    "title":"hedqfllo",
+    "price":12245787845.7,
+    "description":"hello idsqdqsdqs dsqdqsdqsthe definitdsqdsqdion of hi"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

@@ -1,0 +1,20 @@
+meta {
+  name: get listing details
+  type: http
+  seq: 9
+}
+
+get {
+  url: http://127.0.0.1:8000/api/listing-details/1
+  body: none
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY0NzEwODIwLCJpYXQiOjE3NjQ3MTA1MjAsImp0aSI6ImFmOGI0ZWM1YWE4YzQwNjM4ZDExMGI1Y2Y5YTU3NGMxIiwidXNlcl9pZCI6IjEifQ.d-dcMJT_WYwGq9e58wo_c86dbQfmKKj2-_hFN6Sr-O8
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

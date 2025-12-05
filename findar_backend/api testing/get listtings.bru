@@ -1,0 +1,20 @@
+meta {
+  name: get listtings
+  type: http
+  seq: 4
+}
+
+get {
+  url: http://127.0.0.1:8000/api/my_listings/
+  body: none
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY0NzEwNDUyLCJpYXQiOjE3NjQ3MTAxNTIsImp0aSI6IjFmZTkwODFmMTkwMTRiY2VhMTcxZTQxMzIxYTBiOGQ5IiwidXNlcl9pZCI6IjEifQ.jji7KDPBIe0yyM7z5ghx1ics0taS-TYVhcSIz6mWOOY
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
