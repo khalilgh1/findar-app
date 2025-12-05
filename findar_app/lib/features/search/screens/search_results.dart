@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:findar/logic/cubits/search_cubit.dart';
+import 'package:findar/logic/cubits/sort_cubit.dart';
 import '../../../../core/widgets/appbar_title.dart';
 import '../../../../core/widgets/property_card.dart';
 import '../../../../core/widgets/sort_and_filter.dart';
 import '../../../../core/widgets/progress_button.dart';
+import '../../../core/cubits/base_state.dart';
 
 class SearchResultsScreen extends StatefulWidget {
   const SearchResultsScreen({super.key});
@@ -70,9 +72,15 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
     );
   }
 
-  void _toggleSave(int index) {
+  void _toggleSave(String propertyId) {
     setState(() {
-      _properties[index]['isSaved'] = !_properties[index]['isSaved'];
+      final propertyIndex = _properties.indexWhere(
+        (p) => p['id'] == propertyId,
+      );
+      if (propertyIndex != -1) {
+        _properties[propertyIndex]['isSaved'] =
+            !_properties[propertyIndex]['isSaved'];
+      }
     });
   }
 
@@ -142,21 +150,25 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
           // Properties list
           Expanded(
             child: BlocBuilder<SearchCubit, Map<String, dynamic>>(
-              builder: (context, state) {
-                if (state['state'] == 'loading') {
+              builder: (context, searchState) {
+                if (searchState['state'] == 'loading') {
                   return const Center(child: CircularProgressIndicator());
                 }
 
-                if (state['state'] == 'error') {
+                if (searchState['state'] == 'error') {
                   return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text('Error: ${state['message'] ?? 'Unknown error'}'),
+                        Text(
+                          'Error: ${searchState['message'] ?? 'Unknown error'}',
+                        ),
                         SizedBox(height: 16),
                         ProgressButton(
                           label: 'Retry',
-                          backgroundColor: Theme.of(context).colorScheme.primary,
+                          backgroundColor: Theme.of(
+                            context,
+                          ).colorScheme.primary,
                           textColor: Theme.of(context).colorScheme.onPrimary,
                           onPressed: () {
                             context.read<SearchCubit>().search(
@@ -176,36 +188,50 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                   );
                 }
 
-                final properties = (state['data'] as List?)?.isEmpty ?? true
+                final rawProperties =
+                    (searchState['data'] as List?)?.isEmpty ?? true
                     ? _properties
-                    : (state['data'] as List?);
+                    : (searchState['data'] as List?);
 
-                return properties!.isEmpty
-                    ? _buildEmptyState()
-                    : ListView.builder(
-                        padding: EdgeInsets.only(
-                          top: screenHeight * 0.01,
-                          bottom: screenHeight * 0.02,
-                        ),
-                        itemCount: properties.length,
-                        itemBuilder: (context, index) {
-                          final property = properties[index];
-                          return PropertyListingCard(
-                            title: property['title'],
-                            imageUrl: property['imageUrl'],
-                            price: property['price'],
-                            location: property['location'],
-                            beds: property['beds'],
-                            baths: property['baths'],
-                            sqft: property['sqft'],
-                            isSaved: property['isSaved'],
-                            onSaveToggle: () => _toggleSave(index),
-                            onTap: () {
-                              Navigator.pushNamed(context, '/property-details');
+                // Apply sorting using SortCubit
+                return BlocBuilder<SortCubit, BaseState>(
+                  builder: (context, sortState) {
+                    final sortCubit = context.read<SortCubit>();
+                    final sortedProperties = sortCubit.sortProperties(
+                      List<Map<String, dynamic>>.from(rawProperties!),
+                    );
+
+                    return sortedProperties.isEmpty
+                        ? _buildEmptyState()
+                        : ListView.builder(
+                            padding: EdgeInsets.only(
+                              top: screenHeight * 0.01,
+                              bottom: screenHeight * 0.02,
+                            ),
+                            itemCount: sortedProperties.length,
+                            itemBuilder: (context, index) {
+                              final property = sortedProperties[index];
+                              return PropertyListingCard(
+                                title: property['title'],
+                                imageUrl: property['imageUrl'],
+                                price: property['price'],
+                                location: property['location'],
+                                beds: property['beds'],
+                                baths: property['baths'],
+                                sqft: property['sqft'],
+                                isSaved: property['isSaved'],
+                                onSaveToggle: () => _toggleSave(property['id']),
+                                onTap: () {
+                                  Navigator.pushNamed(
+                                    context,
+                                    '/property-details',
+                                  );
+                                },
+                              );
                             },
                           );
-                        },
-                      );
+                  },
+                );
               },
             ),
           ),
@@ -252,6 +278,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
   void _showSortBottomSheet(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+    final sortCubit = context.read<SortCubit>();
 
     showModalBottomSheet(
       context: context,
@@ -261,38 +288,73 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
         ),
       ),
       builder: (context) {
-        return Container(
-          padding: EdgeInsets.all(screenWidth * 0.05),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Sort by',
-                style: TextStyle(
-                  fontSize: screenWidth * 0.05,
-                  fontWeight: FontWeight.bold,
-                ),
+        return BlocBuilder<SortCubit, BaseState>(
+          builder: (context, state) {
+            final currentSort = sortCubit.currentSort;
+
+            return Container(
+              padding: EdgeInsets.all(screenWidth * 0.05),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Sort by',
+                    style: TextStyle(
+                      fontSize: screenWidth * 0.05,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: screenHeight * 0.02),
+                  Flexible(
+                    child: ListView(
+                      shrinkWrap: true,
+                      children: SortOption.values.map((option) {
+                        return _buildSortOption(
+                          option.displayName,
+                          screenWidth,
+                          isSelected: currentSort == option,
+                          onTap: () {
+                            sortCubit.updateSort(option);
+                            Navigator.pop(context);
+                          },
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ],
               ),
-              SizedBox(height: screenHeight * 0.02),
-              _buildSortOption('Price: Low to High', screenWidth),
-              _buildSortOption('Price: High to Low', screenWidth),
-              _buildSortOption('Newest', screenWidth),
-              _buildSortOption('Most Popular', screenWidth),
-            ],
-          ),
+            );
+          },
         );
       },
     );
   }
 
-  Widget _buildSortOption(String title, double screenWidth) {
+  Widget _buildSortOption(
+    String title,
+    double screenWidth, {
+    bool isSelected = false,
+    VoidCallback? onTap,
+  }) {
     return ListTile(
-      title: Text(title, style: TextStyle(fontSize: screenWidth * 0.04)),
-      onTap: () {
-        Navigator.pop(context);
-        // Apply sort
-      },
+      title: Text(
+        title,
+        style: TextStyle(
+          fontSize: screenWidth * 0.04,
+          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          color: isSelected ? Theme.of(context).colorScheme.primary : null,
+        ),
+      ),
+      trailing: isSelected
+          ? Icon(Icons.check, color: Theme.of(context).colorScheme.primary)
+          : null,
+      onTap:
+          onTap ??
+          () {
+            Navigator.pop(context);
+            // Apply sort
+          },
     );
   }
 

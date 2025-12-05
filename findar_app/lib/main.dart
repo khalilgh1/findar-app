@@ -16,6 +16,7 @@ import './features/demoscreen.dart';
 import './features/settings/settings_screen.dart';
 import 'core/theme/theme_provider.dart';
 import './features/profile/screens/profile_screen/profile_screen.dart';
+import './features/profile/screens/user_profile_screen/user_profile_screen.dart';
 import './features/profile/screens/edit_profile/edit_profile_screen.dart';
 import './features/property_details/screens/property_details_screen.dart';
 import './features/demo/demo_test_screen.dart';
@@ -30,7 +31,10 @@ import 'logic/cubits/property_details_cubit.dart';
 import 'logic/cubits/my_listings_cubit.dart';
 import 'logic/cubits/profile_cubit.dart';
 import 'logic/cubits/settings_cubit.dart';
+import 'logic/cubits/sort_cubit.dart';
+import 'logic/cubits/profile_picture_setup_cubit.dart';
 import 'core/models/property_listing_model.dart';
+import './features/auth/screens/profile_picture_setup_screen.dart';
 
 void main() {
   runApp(const MainApp());
@@ -53,6 +57,8 @@ class MainApp extends StatelessWidget {
         BlocProvider(create: (_) => MyListingsCubit()),
         BlocProvider(create: (_) => ProfileCubit()),
         BlocProvider(create: (_) => SettingsCubit()),
+        BlocProvider(create: (_) => SortCubit()),
+        BlocProvider(create: (_) => ProfilePictureSetupCubit()),
       ],
       child: ChangeNotifierProvider(
         create: (context) => ThemeProvider(),
@@ -70,14 +76,27 @@ class MainApp extends StatelessWidget {
                 if (settings.name == '/edit-listing') {
                   final listing = settings.arguments;
                   return MaterialPageRoute(
-                    builder: (context) => EditListingScreen(listing: listing as PropertyListing),
+                    builder: (context) =>
+                        EditListingScreen(listing: listing as PropertyListing),
                   );
                 }
+
+                // Handle user profile route with arguments
+                if (settings.name == '/user-profile') {
+                  final userId = settings.arguments as String?;
+                  return MaterialPageRoute(
+                    builder: (context) =>
+                        UserProfileScreen(userId: userId ?? ''),
+                  );
+                }
+
                 // Default routes
                 final routes = {
                   '/landing': (context) => const SplashScreen(),
                   '/login': (context) => const LoginScreen(),
                   '/register': (context) => RegisterScreen(),
+                  '/profile-picture-setup': (context) =>
+                      const ProfilePictureSetupScreen(),
                   '/home': (context) => const HomeScreen(),
                   '/filtering': (context) => const FilteringScreen(),
                   '/my-listings': (context) => const MyListingsScreen(),
@@ -86,17 +105,18 @@ class MainApp extends StatelessWidget {
                   '/demoscreen': (context) => const Demoscreen(),
                   '/demo-test': (context) => const DemoTestScreen(),
                   '/settings': (context) => const SettingsScreen(),
-                  '/property-details': (context) => const PropertyDetailsScreen(),
+                  '/property-details': (context) =>
+                      const PropertyDetailsScreen(),
                   '/create-listing': (context) => const CreateListingScreen(),
                   '/profile': (context) => const ProfileScreen(),
                   '/edit-profile': (context) => const EditProfileScreen(),
                 };
-                
+
                 final builder = routes[settings.name];
                 if (builder != null) {
                   return MaterialPageRoute(builder: builder);
                 }
-                
+
                 return MaterialPageRoute(
                   builder: (context) => const SplashScreen(),
                 );

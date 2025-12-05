@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:findar/logic/cubits/saved_listings_cubit.dart';
+import 'package:findar/logic/cubits/sort_cubit.dart';
 import '../../../core/widgets/appbar_title.dart';
 import '../../../core/widgets/property_card.dart';
 import '../../../core/widgets/progress_button.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/widgets/build_bottom_bar.dart';
+import '../../../core/cubits/base_state.dart';
 import 'package:provider/provider.dart';
 
 class SavedListingsScreen extends StatefulWidget {
@@ -44,7 +46,8 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
     {
       'title': 'Modern Apartment',
       'id': '3',
-      'imageUrl': 'https://images.pexels.com/photos/4700551/pexels-photo-4700551.jpeg',
+      'imageUrl':
+          'https://images.pexels.com/photos/4700551/pexels-photo-4700551.jpeg',
       'price': '\$780,000',
       'location': '789 City Center, Apt 12B',
       'beds': 2,
@@ -55,7 +58,8 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
     {
       'title': 'Cozy Cottage',
       'id': '4',
-      'imageUrl': 'https://images.pexels.com/photos/18610869/pexels-photo-18610869.jpeg',
+      'imageUrl':
+          'https://images.pexels.com/photos/18610869/pexels-photo-18610869.jpeg',
       'price': '\$250,000',
       'location': '101 Forest Ln, Greenwood',
       'beds': 2,
@@ -72,12 +76,18 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
     context.read<SavedListingsCubit>().fetchSavedListings();
   }
 
-  void _toggleSave(int index) {
+  void _toggleSave(String propertyId) {
     final colorScheme = Theme.of(context).colorScheme;
+    final propertyIndex = _savedProperties.indexWhere(
+      (p) => p['id'] == propertyId,
+    );
+
+    if (propertyIndex == -1) return; // Property not found
 
     setState(() {
-      _savedProperties[index]['isSaved'] = !_savedProperties[index]['isSaved'];
-      if (!_savedProperties[index]['isSaved']) {
+      _savedProperties[propertyIndex]['isSaved'] =
+          !_savedProperties[propertyIndex]['isSaved'];
+      if (!_savedProperties[propertyIndex]['isSaved']) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text('Removed from saved'),
@@ -88,16 +98,16 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
               textColor: colorScheme.primary,
               onPressed: () {
                 setState(() {
-                  _savedProperties[index]['isSaved'] = true;
+                  _savedProperties[propertyIndex]['isSaved'] = true;
                 });
               },
             ),
           ),
         );
         Future.delayed(const Duration(seconds: 2), () {
-          if (mounted && !_savedProperties[index]['isSaved']) {
+          if (mounted && !_savedProperties[propertyIndex]['isSaved']) {
             setState(() {
-              _savedProperties.removeAt(index);
+              _savedProperties.removeAt(propertyIndex);
             });
           }
         });
@@ -108,7 +118,7 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final themeProvider = Provider.of<ThemeProvider>(context); 
+    final themeProvider = Provider.of<ThemeProvider>(context);
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
@@ -126,6 +136,14 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
         ),
         title: const AppbarTitle(title: 'Saved Listings'),
         actions: [
+          IconButton(
+            icon: Icon(
+              Icons.sort,
+              color: Theme.of(context).colorScheme.onSurface,
+              size: 30,
+            ),
+            onPressed: () => _showSortBottomSheet(context),
+          ),
           IconButton(
             icon: Icon(
               themeProvider.isDarkMode
@@ -166,15 +184,26 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
             );
           }
 
-          final savedListings =
-              (state['data'] as List?)?.isEmpty ?? true ? _savedProperties : (state['data'] as List?);
+          final savedListings = (state['data'] as List?)?.isEmpty ?? true
+              ? _savedProperties
+              : (state['data'] as List?);
 
-          return savedListings!.isEmpty
-              ? _buildEmptyState()
-              : _buildSavedPropertiesView(
-                  MediaQuery.of(context).orientation,
-                  savedListings,
-                );
+          // Apply sorting using SortCubit
+          return BlocBuilder<SortCubit, BaseState>(
+            builder: (context, sortState) {
+              final sortCubit = context.read<SortCubit>();
+              final sortedProperties = sortCubit.sortProperties(
+                List<Map<String, dynamic>>.from(savedListings!),
+              );
+
+              return sortedProperties.isEmpty
+                  ? _buildEmptyState()
+                  : _buildSavedPropertiesView(
+                      MediaQuery.of(context).orientation,
+                      sortedProperties,
+                    );
+            },
+          );
         },
       ),
       bottomNavigationBar: BuildBottomNavBar(index: 1),
@@ -182,7 +211,10 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
   }
 
   // ADDED: GridView in landscape, ListView in portrait
-  Widget _buildSavedPropertiesView(Orientation orientation, List<dynamic> properties) {
+  Widget _buildSavedPropertiesView(
+    Orientation orientation,
+    List<dynamic> properties,
+  ) {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return ListView.builder(
@@ -202,10 +234,88 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
           baths: property['baths'],
           sqft: property['sqft'],
           isSaved: property['isSaved'],
-          onSaveToggle: () => _toggleSave(index),
+          onSaveToggle: () => _toggleSave(property['id']),
           onTap: () {},
         );
       },
+    );
+  }
+
+  void _showSortBottomSheet(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final sortCubit = context.read<SortCubit>();
+
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(screenWidth * 0.05),
+        ),
+      ),
+      builder: (context) {
+        return BlocBuilder<SortCubit, BaseState>(
+          builder: (context, state) {
+            final currentSort = sortCubit.currentSort;
+
+            return Container(
+              padding: EdgeInsets.all(screenWidth * 0.05),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Sort by',
+                    style: TextStyle(
+                      fontSize: screenWidth * 0.05,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: screenHeight * 0.02),
+                  Flexible(
+                    child: ListView(
+                      shrinkWrap: true,
+                      children: SortOption.values.map((option) {
+                        return _buildSortOption(
+                          option.displayName,
+                          screenWidth,
+                          isSelected: currentSort == option,
+                          onTap: () {
+                            sortCubit.updateSort(option);
+                            Navigator.pop(context);
+                          },
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildSortOption(
+    String title,
+    double screenWidth, {
+    bool isSelected = false,
+    VoidCallback? onTap,
+  }) {
+    return ListTile(
+      title: Text(
+        title,
+        style: TextStyle(
+          fontSize: screenWidth * 0.04,
+          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          color: isSelected ? Theme.of(context).colorScheme.primary : null,
+        ),
+      ),
+      trailing: isSelected
+          ? Icon(Icons.check, color: Theme.of(context).colorScheme.primary)
+          : null,
+      onTap: onTap,
     );
   }
 

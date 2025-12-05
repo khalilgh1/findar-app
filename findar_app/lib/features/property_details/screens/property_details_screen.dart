@@ -35,12 +35,16 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
         centerTitle: false,
         title: Text(
           'Property Details',
-          style: TextStyle(fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface),
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
         ),
         actions: [
           BlocBuilder<PropertyDetailsCubit, Map<String, dynamic>>(
             builder: (context, state) {
-              final isSaved = (state['data'] as Map?)?.containsKey('isSaved') ?? false;
+              final isSaved =
+                  (state['data'] as Map?)?.containsKey('isSaved') ?? false;
               return IconButton(
                 icon: Icon(isSaved ? Icons.bookmark : Icons.bookmark_border),
                 onPressed: () {
@@ -49,10 +53,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
               );
             },
           ),
-          IconButton(
-            icon: const Icon(Icons.share),
-            onPressed: () {},
-          ),
+          IconButton(icon: const Icon(Icons.share), onPressed: () {}),
         ],
       ),
       body: BlocBuilder<PropertyDetailsCubit, Map<String, dynamic>>(
@@ -73,7 +74,9 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                     backgroundColor: Theme.of(context).colorScheme.primary,
                     textColor: Theme.of(context).colorScheme.onPrimary,
                     onPressed: () {
-                      context.read<PropertyDetailsCubit>().fetchPropertyDetails(1);
+                      context.read<PropertyDetailsCubit>().fetchPropertyDetails(
+                        1,
+                      );
                     },
                   ),
                 ],
@@ -93,7 +96,8 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       PropertyImageCarousel(
-                        images: (property['images'] as List?)?.cast<String>() ??
+                        images:
+                            (property['images'] as List?)?.cast<String>() ??
                             [
                               'assets/find-dar-test1.jpg',
                               'assets/find-dar-test2.jpg',
@@ -103,7 +107,9 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                       const SizedBox(height: 16),
                       PropertyHeader(
                         title: property['title'] ?? 'Modern Family Home',
-                        address: property['address'] ?? '123 Sunshine Avenue, Meadowville',
+                        address:
+                            property['address'] ??
+                            '123 Sunshine Avenue, Meadowville',
                         price: property['price'] ?? '\$550,000',
                       ),
                       const SizedBox(height: 16),
@@ -114,14 +120,19 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                       ),
                       const SizedBox(height: 24),
                       PropertyDescription(
-                        description: property['description'] ??
+                        description:
+                            property['description'] ??
                             'This beautiful and spacious modern family home is located in a quiet, friendly neighborhood.',
                       ),
                       const SizedBox(height: 24),
                       AgentCard(
                         agentName: property['agentName'] ?? 'Ishak Dib',
-                        agentCompany: property['agentCompany'] ?? 'Prestige Realty',
-                        agentImage: property['agentImage'] ?? 'assets/profile.jpg',
+                        agentCompany:
+                            property['agentCompany'] ?? 'Prestige Realty',
+                        agentImage:
+                            property['agentImage'] ?? 'assets/profile.jpg',
+                        agentId:
+                            property['agentId'] as String? ?? 'test-user-123',
                       ),
                       const SizedBox(height: 24),
                       if (similarProperties.isNotEmpty)
@@ -129,9 +140,15 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                           properties: List.generate(
                             similarProperties.length,
                             (index) => SimilarProperty(
-                              image: similarProperties[index]['image'] ?? 'assets/find-dar-test1.jpg',
-                              price: similarProperties[index]['price'] ?? '\$525,000',
-                              address: similarProperties[index]['address'] ?? '456 Oak St',
+                              image:
+                                  similarProperties[index]['image'] ??
+                                  'assets/find-dar-test1.jpg',
+                              price:
+                                  similarProperties[index]['price'] ??
+                                  '\$525,000',
+                              address:
+                                  similarProperties[index]['address'] ??
+                                  '456 Oak St',
                             ),
                           ),
                         ),
