@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:findar/core/models/property_listing_model.dart';
-import 'package:findar/logic/cubits/listing_cubit.dart';
+import 'package:findar/logic/cubits/my_listings_cubit.dart';
 import '../../../create_listing/widgets/property_title.dart';
 import '../../../create_listing/widgets/description.dart';
 import '../../../create_listing/widgets/custom_selector.dart';
@@ -97,7 +97,7 @@ class _EditListingScreenState extends State<EditListingScreen> {
       return;
     }
 
-    context.read<ListingCubit>().updateListing(
+    context.read<MyListingsCubit>().editListing(
       id: widget.listing.id,
       title: _titleController.text,
       description: _descriptionController.text,
@@ -282,7 +282,7 @@ class _EditListingScreenState extends State<EditListingScreen> {
                 const SizedBox(height: 40),
 
                 // Update Button
-                BlocBuilder<ListingCubit, Map<String, dynamic>>(
+                BlocBuilder<MyListingsCubit, Map<String, dynamic>>(
                   builder: (context, state) {
                     final isLoading = state['state'] == 'loading';
                     return ProgressButton(
