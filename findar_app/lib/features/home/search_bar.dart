@@ -1,10 +1,7 @@
 import 'package:findar/logic/cubits/search_cubit.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
-<<<<<<< HEAD
-import 'package:provider/provider.dart';
-=======
 import 'package:findar/l10n/app_localizations.dart';
->>>>>>> origin/localizations
 
 const hpaddingSearchBar = 12.0;
 const vpaddingSearchBar = 3.0;
@@ -44,15 +41,14 @@ class SearchBarWidget extends StatelessWidget {
                   fontSize: 14,
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
-          
+
                 hintText: l10n.searchHint,
                 border: InputBorder.none,
               ),
-                onSubmitted: (value) {
-                  context.read<SearchCubit>().getrecentListings(value);
-                  Navigator.pushNamed(context, '/search-results');
-                },
-
+              onSubmitted: (value) {
+                context.read<SearchCubit>().getrecentListings(value);
+                Navigator.pushNamed(context, '/search-results');
+              },
             ),
           ),
         ],
