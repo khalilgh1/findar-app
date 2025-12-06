@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class ListingCard extends StatelessWidget {
   final String imagePath;
   final String title;
-  final String price;
+  final double price;
 
   const ListingCard({
     super.key,
@@ -52,7 +52,7 @@ class ListingCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  price,
+                  price.toString(),
                   style: TextStyle(
                     color: theme.colorScheme.primary,
                     fontSize: 16,

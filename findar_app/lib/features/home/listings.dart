@@ -75,7 +75,7 @@ class _ListingTileState extends State<ListingTile> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    widget.property.price,
+                    widget.property.price.toString(),
                     style: theme.textTheme.headlineSmall?.copyWith(
                       color: theme.colorScheme.onSurface,
                     ),

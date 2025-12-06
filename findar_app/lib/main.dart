@@ -67,7 +67,7 @@ class MainApp extends StatelessWidget {
         BlocProvider(create: (_) => ListingCubit()),
         BlocProvider(create: (_) => SearchCubit(repo)),
         BlocProvider(create: (_) => SavedListingsCubit(repo)),
-        BlocProvider(create: (_) => PropertyDetailsCubit()),
+        BlocProvider(create: (_) => PropertyDetailsCubit(repo)),
         BlocProvider(create: (_) => MyListingsCubit(repo)),
         BlocProvider(create: (_) => ProfileCubit()),
         BlocProvider(create: (_) => SettingsCubit()),

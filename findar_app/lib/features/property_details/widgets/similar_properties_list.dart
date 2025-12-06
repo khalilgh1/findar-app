@@ -83,7 +83,7 @@ class SimilarPropertyCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  property.price,
+                  property.price.toString(),
                   style: textTheme.bodyLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -109,7 +109,7 @@ class SimilarPropertyCard extends StatelessWidget {
 
 class SimilarProperty {
   final String image;
-  final String price;
+  final double price;
   final String address;
 
   const SimilarProperty({

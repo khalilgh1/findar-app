@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:findar/core/models/property_listing_model.dart';
 import 'package:findar/logic/cubits/saved_listings_cubit.dart';
 import 'package:findar/logic/cubits/sort_cubit.dart';
+import 'package:findar/logic/cubits/property_details_cubit.dart';
 import '../../../core/widgets/appbar_title.dart';
 import '../../../core/widgets/property_card.dart';
 import '../../../core/widgets/progress_button.dart';
@@ -31,12 +32,12 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
 
   void _toggleSave(int listingId) async {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     // Mark as removing to change icon color
     setState(() {
       _removingListingIds.add(listingId);
     });
-    
+
     // Show snackbar immediately
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -57,15 +58,15 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
         ),
       ),
     );
-    
+
     // Wait for 2 seconds before actually removing
     await Future.delayed(const Duration(seconds: 2));
-    
+
     // Check if still in removing state (not undone)
     if (mounted && _removingListingIds.contains(listingId)) {
       // Call cubit to unsave the listing
       context.read<SavedListingsCubit>().unsaveListing(listingId);
-      
+
       setState(() {
         _removingListingIds.remove(listingId);
       });
@@ -173,7 +174,7 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
         final listing = property is PropertyListing
             ? property
             : _mapToListing(property as Map<String, dynamic>);
-        
+
         // Check if this listing is being removed
         final isBeingRemoved = _removingListingIds.contains(listing.id);
 
@@ -182,11 +183,10 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
           isSaved: !isBeingRemoved, // Unselect if being removed
           onSaveToggle: () => _toggleSave(listing.id),
           onTap: () {
-            Navigator.pushNamed(
-              context,
-              '/property-details',
-              arguments: listing.id,
+            context.read<PropertyDetailsCubit>().fetchPropertyDetails(
+              listing.id,
             );
+            Navigator.pushNamed(context, '/property-details');
           },
         );
       },

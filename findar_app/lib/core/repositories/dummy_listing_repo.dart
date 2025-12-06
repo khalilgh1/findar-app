@@ -388,7 +388,11 @@ class DummyListingRepository implements ListingRepository {
   // Additional utility methods for testing
 
   /// Get a single listing by ID
-  PropertyListing? getListingById(int id) {
+  @override
+  Future<PropertyListing?> getListingById(int id) async {
+    // Simulate network delay
+    await Future.delayed(const Duration(milliseconds: 300));
+
     try {
       return _listings.firstWhere((listing) => listing.id == id);
     } catch (e) {

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../models/property_listing_model.dart';
+import 'package:findar/logic/cubits/property_details_cubit.dart';
 import 'primary_button.dart';
 
 class PropertyListingCard extends StatelessWidget {
@@ -53,6 +55,7 @@ class PropertyListingCard extends StatelessWidget {
         if (onTap != null) {
           onTap!();
         } else {
+          context.read<PropertyDetailsCubit>().fetchPropertyDetails(listing.id);
           Navigator.pushNamed(context, '/property-details', arguments: listing);
         }
       },

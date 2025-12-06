@@ -20,7 +20,6 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
   @override
   void initState() {
     super.initState();
-    // Perform search when screen loads
   }
 
   // Keep track of locally saved listing ids for optimistic UI updates
