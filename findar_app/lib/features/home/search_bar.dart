@@ -1,4 +1,5 @@
 import 'package:findar/logic/cubits/search_cubit.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:findar/l10n/app_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
