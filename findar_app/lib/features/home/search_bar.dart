@@ -1,4 +1,6 @@
+import 'package:findar/logic/cubits/search_cubit.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 const hpaddingSearchBar = 12.0;
 const vpaddingSearchBar = 3.0;
@@ -42,7 +44,8 @@ class SearchBarWidget extends StatelessWidget {
                 border: InputBorder.none,
               ),
                 onSubmitted: (value) {
-                  Navigator.pushNamed(context, '/search-results', arguments: value);
+                  context.read<SearchCubit>().getrecentListings(value);
+                  Navigator.pushNamed(context, '/search-results');
                 },
 
             ),

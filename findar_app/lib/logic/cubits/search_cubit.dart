@@ -57,6 +57,27 @@ class SearchCubit extends Cubit<Map<String, dynamic>> {
     }
   }
 
+  //search by query
+  Future<void> getrecentListings(String query) async {
+    emit({...state, 'state': 'loading', 'message': ''});
+
+    try {
+      final recentListings = await repository.getRecentListings(query: query);
+      emit({
+        ...state,
+        'data': recentListings,
+        'state': 'done',
+        'message': 'Listings loaded',
+      });
+    } catch (e) {
+      emit({
+        ...state,
+        'state': 'error',
+        'message': 'Failed to load listings: ${e.toString()}',
+      });
+    }
+  }
+
   /// Save a listing (add to favorites) using the abstract repository
   Future<ReturnResult> saveListing(int listingId) async {
     try {
