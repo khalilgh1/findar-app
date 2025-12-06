@@ -50,12 +50,13 @@ import 'features/listings/screens/payment_confirmation/payment_confirmation_scre
 //import repository
 import 'core/repositories/dummy_listing_repo.dart';
 import 'core/repositories/abstract_listing_repo.dart';
+import 'core/repositories/database_listing_repo.dart';
 
 late ListingRepository repo;
 void main() {
   //later: repo = (online)? RemoteListingRepository(): LocalListingRepository();
   repo =
-      DummyListingRepository(); //we will replace this with real repository later
+      LocalListingRepository(); //we will replace this with real repository later
 
   runApp(const MainApp());
 }

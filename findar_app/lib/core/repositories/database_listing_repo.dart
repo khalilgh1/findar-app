@@ -222,4 +222,12 @@ class LocalListingRepository implements ListingRepository {
     _savedIds.remove(listingId);
     return ReturnResult(state: true, message: "Listing unsaved.");
   }
+  @override
+  Future<PropertyListing?> getListingById(int id) async {
+    final rows = await db.query(table, where: "id = ?", whereArgs: [id]);
+    if (rows.isNotEmpty) {
+      return PropertyListing.fromMap(rows.first);
+    }
+    return null;
+  }
 }
