@@ -16,54 +16,10 @@ class SearchResultsScreen extends StatefulWidget {
 }
 
 class _SearchResultsScreenState extends State<SearchResultsScreen> {
-  // Sample data - in a real app, this would come from a service/provider
-  final List<Map<String, dynamic>> _properties = [
-    {
-      'id': '1',
-      'imageUrl':
-          'https://images.pexels.com/photos/206172/pexels-photo-206172.jpeg',
-      'title': 'Luxury Villa with Ocean View',
-      'price': '\$500,000',
-      'location': 'New York, NY',
-      'beds': 3,
-      'baths': 2,
-      'sqft': 1500,
-      'isSaved': false,
-    },
-    {
-      'id': '2',
-      'imageUrl':
-          'https://images.pexels.com/photos/20708166/pexels-photo-20708166.jpeg',
-      'title': 'Modern Apartment in the City',
-      'price': '\$750,000',
-      'location': 'San Francisco, CA',
-      'beds': 2,
-      'baths': 2,
-      'sqft': 1200,
-      'isSaved': true,
-    },
-    {
-      'id': '3',
-      'imageUrl':
-          'https://images.pexels.com/photos/1396132/pexels-photo-1396132.jpeg',
-      'title': 'Cozy Cottage in the Suburbs',
-      'price': '\$320,000',
-      'location': 'Austin, TX',
-      'beds': 4,
-      'baths': 3,
-      'sqft': 2000,
-      'isSaved': false,
-    },
-  ];
-
   @override
   void initState() {
     super.initState();
     // Perform search when screen loads
-    context.read<SearchCubit>().getFilteredListings(
-      minPrice: 0,
-      maxPrice: double.infinity,
-    );
   }
 
   // Keep track of locally saved listing ids for optimistic UI updates
@@ -187,96 +143,28 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                   );
                 }
 
-                final dynamic listData = state['data'];
-                final bool useFallback =
-                    listData == null || (listData is List && listData.isEmpty);
-
-                if (useFallback) {
-                  return _properties.isEmpty
-                      ? _buildEmptyState()
-                      : ListView.builder(
-                          padding: EdgeInsets.only(
-                            top: screenHeight * 0.01,
-                            bottom: screenHeight * 0.02,
-                          ),
-                          itemCount: _properties.length,
-                          itemBuilder: (context, index) {
-                            final property = _properties[index];
-                            return PropertyListingCard(
-                              title: property['title'],
-                              imageUrl: property['imageUrl'],
-                              price: property['price'],
-                              location: property['location'],
-                              beds: property['beds'],
-                              baths: property['baths'],
-                              sqft: property['sqft'],
-                              isSaved: property['isSaved'],
-                              onSaveToggle: () => _toggleSave(
-                                int.tryParse(property['id'].toString()) ?? 0,
-                              ),
-                              onTap: () {
-                                Navigator.pushNamed(
-                                  context,
-                                  '/property-details',
-                                );
-                              },
-                            );
-                          },
-                        );
+                //use cubit getters for listings
+                final listings =
+                    (state['data'] as List<PropertyListing>?) ?? const [];
+                if (listings.isEmpty) {
+                  return _buildEmptyState();
                 }
-
-                final listings = (listData as List).cast();
-                if (listings.isEmpty) return _buildEmptyState();
-
-                return ListView.builder(
-                  padding: EdgeInsets.only(
-                    top: screenHeight * 0.01,
-                    bottom: screenHeight * 0.02,
+                return ListView.separated(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: screenWidth * 0.04,
+                    vertical: screenHeight * 0.02,
                   ),
                   itemCount: listings.length,
+                  separatorBuilder: (context, index) =>
+                      SizedBox(height: screenHeight * 0.02),
                   itemBuilder: (context, index) {
-                    final item = listings[index];
-
-                    // item may be PropertyListing
-                    String imageUrl = '';
-                    if (item is PropertyListing) {
-                      imageUrl =
-                          (item.image.isNotEmpty &&
-                              item.image.startsWith('http'))
-                          ? item.image
-                          : 'https://via.placeholder.com/600x400';
-                    }
-
-                    final title = item is PropertyListing ? item.title : '';
-                    final price = item is PropertyListing
-                        ? '\$${item.price.toStringAsFixed(0)}'
-                        : '';
-                    final location = item is PropertyListing
-                        ? item.location
-                        : '';
-                    final beds = item is PropertyListing ? item.bedrooms : 0;
-                    final baths = item is PropertyListing ? item.bathrooms : 0;
-                    final sqft = 0;
-                    final id = item is PropertyListing ? item.id : 0;
-                    final isSaved = _savedIds.contains(id);
+                    final listing = listings[index];
+                    final isSaved = _savedIds.contains(listing.id);
 
                     return PropertyListingCard(
-                      title: title,
-                      imageUrl: imageUrl,
-                      price: price,
-                      location: location,
-                      beds: beds,
-                      baths: baths,
-                      sqft: sqft,
+                      listing: listing,
                       isSaved: isSaved,
-                      onSaveToggle: () => _toggleSave(id),
-                      onTap: () {
-                        Navigator.pushNamed(
-                          context,
-                          '/property-details',
-                          arguments: item,
-                        );
-                      },
+                      onSaveToggle: () => _toggleSave(listing.id),
                     );
                   },
                 );

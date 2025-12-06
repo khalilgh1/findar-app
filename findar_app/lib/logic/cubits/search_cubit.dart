@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:findar/core/models/property_listing_model.dart';
 import 'package:findar/core/models/return_result.dart';
 import 'package:findar/core/repositories/abstract_listing_repo.dart';
 
@@ -8,7 +9,7 @@ class SearchCubit extends Cubit<Map<String, dynamic>> {
   final ListingRepository repository;
 
   SearchCubit(this.repository)
-    : super({'data': [], 'state': 'initial', 'message': ''});
+    : super({'data': <PropertyListing>[], 'state': 'initial', 'message': ''});
 
   /// Fetch filtered listings using the abstract repository
   Future<void> getFilteredListings({
