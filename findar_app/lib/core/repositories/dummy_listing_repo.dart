@@ -7,6 +7,7 @@ class DummyListingRepository implements ListingRepository {
   // In-memory storage for listings
   final List<PropertyListing> _listings = [];
   final Set<int> _savedListingIds = {}; // Track saved listing IDs
+  List<int> _myListingIds = []; // Track user's own listing IDs
   int _nextId = 1;
 
   DummyListingRepository() {
@@ -176,6 +177,7 @@ class DummyListingRepository implements ListingRepository {
       );
 
       _listings.add(newListing);
+      _myListingIds.add(newListing.id);
 
       return ReturnResult(state: true, message: 'Listing created successfully');
     } catch (e) {
@@ -205,7 +207,6 @@ class DummyListingRepository implements ListingRepository {
 
     try {
       final index = _listings.indexWhere((listing) => listing.id == id);
-
       if (index == -1) {
         return ReturnResult(state: false, message: 'Listing not found');
       }
@@ -316,8 +317,13 @@ class DummyListingRepository implements ListingRepository {
     // Simulate network delay
     await Future.delayed(const Duration(milliseconds: 600));
 
-    final active = _listings.where((l) => l.isOnline).toList();
-    final inactive = _listings.where((l) => !l.isOnline).toList();
+    //get current user's listings
+    final active = _listings
+        .where((l) => _myListingIds.contains(l.id) && l.isOnline)
+        .toList();
+    final inactive = _listings
+        .where((l) => _myListingIds.contains(l.id) && !l.isOnline)
+        .toList();
 
     return {'active': active, 'inactive': inactive};
   }
