@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:main_button/main_button.dart';
+
+import '../../../logic/cubits/search_cubit.dart';
 
 class FilteringScreen extends StatefulWidget {
   const FilteringScreen({super.key});
@@ -10,29 +13,37 @@ class FilteringScreen extends StatefulWidget {
 
 class _FilteringScreenState extends State<FilteringScreen> {
   final TextEditingController locationController = TextEditingController();
+  final TextEditingController minSqftController = TextEditingController();
+  final TextEditingController maxSqftController = TextEditingController();
 
   RangeValues priceRange = const RangeValues(20000, 250000000);
   String propertyType = 'Any';
-  String buildingType = 'House'; // Only one can be selected now
+  String buildingType = 'Any'; // Only one can be selected now
 
   int bedrooms = 2;
   int bathrooms = 1;
   String? listedBy = 'Any';
-  String? minSqFt;
-  String? maxSqFt;
 
   void resetFilters() {
     setState(() {
       locationController.clear();
       priceRange = const RangeValues(100000, 5000000);
       propertyType = 'Any';
-      buildingType = 'House';
+      buildingType = 'Any';
       bedrooms = 2;
       bathrooms = 1;
       listedBy = 'Any';
-      minSqFt = null;
-      maxSqFt = null;
+      minSqftController.clear();
+      maxSqftController.clear();
     });
+  }
+
+  @override
+  void dispose() {
+    locationController.dispose();
+    minSqftController.dispose();
+    maxSqftController.dispose();
+    super.dispose();
   }
 
   String _formatPrice(double value) {
@@ -59,7 +70,7 @@ class _FilteringScreenState extends State<FilteringScreen> {
         ),
         title: const Text('Advanced Search'),
         centerTitle: true,
-    
+
         elevation: 0,
       ),
       body: Container(
@@ -152,16 +163,13 @@ class _FilteringScreenState extends State<FilteringScreen> {
             const SizedBox(height: 8),
             Column(
               children: [
-                Row(
+                Wrap(
                   children: [
-                    Expanded(child: _buildBuildingRadio('House')),
-                    Expanded(child: _buildBuildingRadio('Apartment')),
-                  ],
-                ),
-                Row(
-                  children: [
-                    Expanded(child: _buildBuildingRadio('Condo')),
-                    Expanded(child: _buildBuildingRadio('Townhouse')),
+                    _buildBuildingRadio('Any'),
+                    _buildBuildingRadio('House'),
+                    _buildBuildingRadio('Apartment'),
+                    _buildBuildingRadio('Condo'),
+                    _buildBuildingRadio('Townhouse'),
                   ],
                 ),
               ],
@@ -193,6 +201,7 @@ class _FilteringScreenState extends State<FilteringScreen> {
               children: [
                 Expanded(
                   child: TextField(
+                    controller: minSqftController,
                     decoration: InputDecoration(
                       labelText: 'Min',
                       labelStyle: const TextStyle(
@@ -222,6 +231,7 @@ class _FilteringScreenState extends State<FilteringScreen> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: TextField(
+                    controller: maxSqftController,
                     decoration: InputDecoration(
                       labelText: 'Max',
                       labelStyle: TextStyle(color: theme.colorScheme.secondary),
@@ -299,12 +309,8 @@ class _FilteringScreenState extends State<FilteringScreen> {
               child: MainButton(
                 label: 'Show results',
                 backgroundColor: theme.colorScheme.primary,
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Showing 42 results')),
-                    
-                  );
-                  Navigator.pushNamed(context,'/search-results');
+                onPressed: () async {
+                  await _applyFilters(context);
                 },
               ),
             ),
@@ -315,18 +321,27 @@ class _FilteringScreenState extends State<FilteringScreen> {
   }
 
   Widget _buildBuildingRadio(String type) {
-    return RadioListTile<String>(
-      title: Text(type),
-      value: type,
-      groupValue: buildingType,
-      activeColor: Theme.of(context).colorScheme.primary,
-      onChanged: (value) {
-        setState(() {
-          buildingType = value!;
-        });
-      },
-      contentPadding: EdgeInsets.zero,
-      dense: true,
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    // Constrain the width so the Wrap can position multiple radios horizontally.
+    // Adjust `0.45` if you want more/less items per row.
+    return SizedBox(
+      width: screenWidth * 0.45,
+      child: RadioListTile<String>(
+        title: Text(type),
+        value: type,
+        groupValue: buildingType,
+        activeColor: Theme.of(context).colorScheme.primary,
+        onChanged: (value) {
+          setState(() {
+            buildingType = value!;
+          });
+        },
+        // Use a small horizontal padding and compact density so tiles are not full-width
+        contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+        dense: true,
+        visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+      ),
     );
   }
 
@@ -360,5 +375,35 @@ class _FilteringScreenState extends State<FilteringScreen> {
         ),
       ],
     );
+  }
+
+  Future<void> _applyFilters(BuildContext context) async {
+    final searchCubit = context.read<SearchCubit>();
+
+    final double? minSqft = double.tryParse(minSqftController.text.trim());
+    final double? maxSqft = double.tryParse(maxSqftController.text.trim());
+    final String? listingTypeValue = propertyType == 'Any'
+        ? null
+        : propertyType;
+    final String? buildingTypeValue = (buildingType == 'Any')
+        ? null
+        : buildingType;
+    final String? listedByValue = (listedBy == null || listedBy == 'Any')
+        ? null
+        : listedBy;
+
+    await searchCubit.getFilteredListings(
+      minPrice: priceRange.start,
+      maxPrice: priceRange.end,
+      listingType: listingTypeValue,
+      buildingType: buildingTypeValue,
+      numBedrooms: bedrooms,
+      numBathrooms: bathrooms,
+      minSqft: minSqft,
+      maxSqft: maxSqft,
+      listedBy: listedByValue,
+    );
+
+    Navigator.pop(context);
   }
 }

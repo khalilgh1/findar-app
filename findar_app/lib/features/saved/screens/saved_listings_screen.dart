@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:findar/core/models/property_listing_model.dart';
 import 'package:findar/logic/cubits/saved_listings_cubit.dart';
+import 'package:findar/logic/cubits/sort_cubit.dart';
 import '../../../core/widgets/appbar_title.dart';
 import '../../../core/widgets/property_card.dart';
 import '../../../core/widgets/progress_button.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/widgets/build_bottom_bar.dart';
+import '../../../core/cubits/base_state.dart';
 import 'package:provider/provider.dart';
 
 class SavedListingsScreen extends StatefulWidget {
@@ -16,54 +19,8 @@ class SavedListingsScreen extends StatefulWidget {
 }
 
 class _SavedListingsScreenState extends State<SavedListingsScreen> {
-  final List<Map<String, dynamic>> _savedProperties = [
-    {
-      'title': 'Luxury Villa',
-      'id': '1',
-      'imageUrl':
-          'https://images.pexels.com/photos/206172/pexels-photo-206172.jpeg',
-      'price': '\$550,000',
-      'location': '123 Ocean View Dr, Malibu',
-      'beds': 3,
-      'baths': 2,
-      'sqft': 1800,
-      'isSaved': true,
-    },
-    {
-      'title': 'Charming Bungalow',
-      'id': '2',
-      'imageUrl':
-          'https://images.pexels.com/photos/20708166/pexels-photo-20708166.jpeg',
-      'price': '\$320,000',
-      'location': '456 Maple St, Springfield',
-      'beds': 4,
-      'baths': 3,
-      'sqft': 2200,
-      'isSaved': true,
-    },
-    {
-      'title': 'Modern Apartment',
-      'id': '3',
-      'imageUrl': 'https://images.pexels.com/photos/4700551/pexels-photo-4700551.jpeg',
-      'price': '\$780,000',
-      'location': '789 City Center, Apt 12B',
-      'beds': 2,
-      'baths': 2,
-      'sqft': 1100,
-      'isSaved': true,
-    },
-    {
-      'title': 'Cozy Cottage',
-      'id': '4',
-      'imageUrl': 'https://images.pexels.com/photos/18610869/pexels-photo-18610869.jpeg',
-      'price': '\$250,000',
-      'location': '101 Forest Ln, Greenwood',
-      'beds': 2,
-      'baths': 1,
-      'sqft': 950,
-      'isSaved': true,
-    },
-  ];
+  // Track listings that are being removed
+  final Set<int> _removingListingIds = {};
 
   @override
   void initState() {
@@ -72,43 +29,53 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
     context.read<SavedListingsCubit>().fetchSavedListings();
   }
 
-  void _toggleSave(int index) {
+  void _toggleSave(int listingId) async {
     final colorScheme = Theme.of(context).colorScheme;
-
+    
+    // Mark as removing to change icon color
     setState(() {
-      _savedProperties[index]['isSaved'] = !_savedProperties[index]['isSaved'];
-      if (!_savedProperties[index]['isSaved']) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Removed from saved'),
-            backgroundColor: colorScheme.secondary,
-            duration: const Duration(seconds: 2),
-            action: SnackBarAction(
-              label: 'Undo',
-              textColor: colorScheme.primary,
-              onPressed: () {
-                setState(() {
-                  _savedProperties[index]['isSaved'] = true;
-                });
-              },
-            ),
-          ),
-        );
-        Future.delayed(const Duration(seconds: 2), () {
-          if (mounted && !_savedProperties[index]['isSaved']) {
-            setState(() {
-              _savedProperties.removeAt(index);
-            });
-          }
-        });
-      }
+      _removingListingIds.add(listingId);
     });
+    
+    // Show snackbar immediately
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Removed from saved'),
+        backgroundColor: colorScheme.secondary,
+        duration: const Duration(seconds: 3),
+        action: SnackBarAction(
+          label: 'Undo',
+          textColor: colorScheme.primary,
+          onPressed: () {
+            // Cancel removal
+            setState(() {
+              _removingListingIds.remove(listingId);
+            });
+            // Re-save the listing
+            context.read<SavedListingsCubit>().saveListing(listingId);
+          },
+        ),
+      ),
+    );
+    
+    // Wait for 2 seconds before actually removing
+    await Future.delayed(const Duration(seconds: 2));
+    
+    // Check if still in removing state (not undone)
+    if (mounted && _removingListingIds.contains(listingId)) {
+      // Call cubit to unsave the listing
+      context.read<SavedListingsCubit>().unsaveListing(listingId);
+      
+      setState(() {
+        _removingListingIds.remove(listingId);
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final themeProvider = Provider.of<ThemeProvider>(context); 
+    final themeProvider = Provider.of<ThemeProvider>(context);
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
@@ -126,6 +93,14 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
         ),
         title: const AppbarTitle(title: 'Saved Listings'),
         actions: [
+          IconButton(
+            icon: Icon(
+              Icons.sort,
+              color: Theme.of(context).colorScheme.onSurface,
+              size: 30,
+            ),
+            onPressed: () => _showSortBottomSheet(context),
+          ),
           IconButton(
             icon: Icon(
               themeProvider.isDarkMode
@@ -166,14 +141,13 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
             );
           }
 
-          final savedListings =
-              (state['data'] as List?)?.isEmpty ?? true ? _savedProperties : (state['data'] as List?);
+          final listings = state['data'] as List<dynamic>? ?? [];
 
-          return savedListings!.isEmpty
+          return listings.isEmpty
               ? _buildEmptyState()
               : _buildSavedPropertiesView(
                   MediaQuery.of(context).orientation,
-                  savedListings,
+                  listings,
                 );
         },
       ),
@@ -182,7 +156,10 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
   }
 
   // ADDED: GridView in landscape, ListView in portrait
-  Widget _buildSavedPropertiesView(Orientation orientation, List<dynamic> properties) {
+  Widget _buildSavedPropertiesView(
+    Orientation orientation,
+    List<dynamic> properties,
+  ) {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return ListView.builder(
@@ -193,19 +170,104 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
       itemCount: properties.length,
       itemBuilder: (context, index) {
         final property = properties[index];
+        final listing = property is PropertyListing
+            ? property
+            : _mapToListing(property as Map<String, dynamic>);
+        
+        // Check if this listing is being removed
+        final isBeingRemoved = _removingListingIds.contains(listing.id);
+
         return PropertyListingCard(
-          title: property['title'],
-          imageUrl: property['imageUrl'],
-          price: property['price'],
-          location: property['location'],
-          beds: property['beds'],
-          baths: property['baths'],
-          sqft: property['sqft'],
-          isSaved: property['isSaved'],
-          onSaveToggle: () => _toggleSave(index),
-          onTap: () {},
+          listing: listing,
+          isSaved: !isBeingRemoved, // Unselect if being removed
+          onSaveToggle: () => _toggleSave(listing.id),
+          onTap: () {
+            Navigator.pushNamed(
+              context,
+              '/property-details',
+              arguments: listing.id,
+            );
+          },
         );
       },
+    );
+  }
+
+  void _showSortBottomSheet(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final sortCubit = context.read<SortCubit>();
+
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(screenWidth * 0.05),
+        ),
+      ),
+      builder: (context) {
+        return BlocBuilder<SortCubit, BaseState>(
+          builder: (context, state) {
+            final currentSort = sortCubit.currentSort;
+
+            return Container(
+              padding: EdgeInsets.all(screenWidth * 0.05),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Sort by',
+                    style: TextStyle(
+                      fontSize: screenWidth * 0.05,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: screenHeight * 0.02),
+                  Flexible(
+                    child: ListView(
+                      shrinkWrap: true,
+                      children: SortOption.values.map((option) {
+                        return _buildSortOption(
+                          option.displayName,
+                          screenWidth,
+                          isSelected: currentSort == option,
+                          onTap: () {
+                            sortCubit.updateSort(option);
+                            Navigator.pop(context);
+                          },
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildSortOption(
+    String title,
+    double screenWidth, {
+    bool isSelected = false,
+    VoidCallback? onTap,
+  }) {
+    return ListTile(
+      title: Text(
+        title,
+        style: TextStyle(
+          fontSize: screenWidth * 0.04,
+          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          color: isSelected ? Theme.of(context).colorScheme.primary : null,
+        ),
+      ),
+      trailing: isSelected
+          ? Icon(Icons.check, color: Theme.of(context).colorScheme.primary)
+          : null,
+      onTap: onTap,
     );
   }
 
@@ -240,5 +302,47 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
         ],
       ),
     );
+  }
+
+  PropertyListing _mapToListing(Map<String, dynamic> data) {
+    return PropertyListing(
+      id: _toInt(data['id']),
+      title: data['title'] as String? ?? '',
+      description: data['description'] as String? ?? '',
+      price: _parsePrice(data['price']),
+      location: data['location'] as String? ?? '',
+      bedrooms: _toInt(data['beds'] ?? data['bedrooms']),
+      bathrooms: _toInt(data['baths'] ?? data['bathrooms']),
+      classification: data['classification'] as String? ?? 'For Sale',
+      propertyType: data['propertyType'] as String? ?? 'Apartment',
+      image: (data['image'] ?? data['imageUrl']) as String? ?? '',
+      isBoosted: data['isBoosted'] as bool? ?? false,
+    );
+  }
+
+  double _parsePrice(dynamic price) {
+    if (price is num) {
+      return price.toDouble();
+    }
+
+    if (price is String) {
+      final cleaned = price.replaceAll(RegExp(r'[^0-9.]'), '');
+      return double.tryParse(cleaned) ?? 0;
+    }
+
+    return 0;
+  }
+
+  int _toInt(dynamic value) {
+    if (value is int) {
+      return value;
+    }
+    if (value is double) {
+      return value.toInt();
+    }
+    if (value is String) {
+      return int.tryParse(value) ?? 0;
+    }
+    return 0;
   }
 }

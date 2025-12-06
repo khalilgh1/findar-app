@@ -161,15 +161,8 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
                   itemBuilder: (context, index) {
                     final listing = listings[index];
                     return PropertyListingCard(
-                      imageUrl: listing.image ?? '',
-                      title: listing.title,
-                      price: listing.price.toString(),
-                      location: listing.location,
-                      beds: listing.bedrooms ?? 0,
-                      baths: listing.bathrooms ?? 0,
-                      sqft: 0, // Not in model, using default
-                      isSaved: false, // Not in model, using default
-                      isBoosted: listing.isBoosted,
+                      listing: listing,
+                      isSaved: false,
                       showMenu: true,
                       onEdit: () => _handleEdit(listing),
                       onRemove: () => _handleRemove(listing),
@@ -230,22 +223,16 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
   void _handleToggleStatus(PropertyListing listing) {
     final newStatus = listing.isOnline ? 'Offline' : 'Online';
     context.read<MyListingsCubit>().editListing(
-          id: listing.id,
-          isOnline: !listing.isOnline,
-        );
+      id: listing.id,
+      isOnline: !listing.isOnline,
+    );
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(
-      SnackBar(content: Text('Setting listing to $newStatus...')),
-    );
+    ).showSnackBar(SnackBar(content: Text('Setting listing to $newStatus...')));
   }
 
   // UPDATED: Boost handler
   void _handleBoost(PropertyListing listing) {
-    Navigator.pushNamed(
-      context,
-      '/sponsorship-plans',
-      arguments: listing,
-    );
+    Navigator.pushNamed(context, '/sponsorship-plans', arguments: listing);
   }
 }

@@ -9,11 +9,7 @@ class ApiException implements Exception {
   final int? statusCode;
   final String? response;
 
-  ApiException({
-    required this.message,
-    this.statusCode,
-    this.response,
-  });
+  ApiException({required this.message, this.statusCode, this.response});
 
   @override
   String toString() => 'ApiException: $message (Status: $statusCode)';
@@ -62,9 +58,7 @@ class ApiService {
       // For now, return mock data based on endpoint
       return _getMockData(endpoint);
     } catch (e) {
-      throw ApiException(
-        message: 'Failed to fetch data: ${e.toString()}',
-      );
+      throw ApiException(message: 'Failed to fetch data: ${e.toString()}');
     }
   }
 
@@ -81,9 +75,7 @@ class ApiService {
       // For now, return mock response based on endpoint
       return _postMockData(endpoint, body);
     } catch (e) {
-      throw ApiException(
-        message: 'Failed to post data: ${e.toString()}',
-      );
+      throw ApiException(message: 'Failed to post data: ${e.toString()}');
     }
   }
 
@@ -97,9 +89,7 @@ class ApiService {
       await Future.delayed(const Duration(milliseconds: 800));
       return _putMockData(endpoint, body);
     } catch (e) {
-      throw ApiException(
-        message: 'Failed to update data: ${e.toString()}',
-      );
+      throw ApiException(message: 'Failed to update data: ${e.toString()}');
     }
   }
 
@@ -110,9 +100,7 @@ class ApiService {
       await Future.delayed(const Duration(milliseconds: 600));
       // Mock delete always succeeds
     } catch (e) {
-      throw ApiException(
-        message: 'Failed to delete data: ${e.toString()}',
-      );
+      throw ApiException(message: 'Failed to delete data: ${e.toString()}');
     }
   }
 
@@ -169,10 +157,7 @@ class ApiService {
       };
     }
 
-    return {
-      'success': true,
-      'data': {},
-    };
+    return {'success': true, 'data': {}};
   }
 
   /// Handle POST requests with mock data
@@ -189,6 +174,8 @@ class ApiService {
           'id': 1,
           'email': body['email'],
           'name': body['name'],
+          'phone': body['phone'] ?? '',
+          'account_type': body['account_type'] ?? 'buyer',
           'token': 'mock_token_${DateTime.now().millisecondsSinceEpoch}',
         },
       };
@@ -228,11 +215,7 @@ class ApiService {
       };
     }
 
-    return {
-      'success': true,
-      'message': 'Operation successful',
-      'data': body,
-    };
+    return {'success': true, 'message': 'Operation successful', 'data': body};
   }
 
   /// Handle PUT requests with mock data
@@ -240,11 +223,7 @@ class ApiService {
     String endpoint,
     Map<String, dynamic> body,
   ) {
-    return {
-      'success': true,
-      'message': 'Update successful',
-      'data': body,
-    };
+    return {'success': true, 'message': 'Update successful', 'data': body};
   }
 
   /// Parse error response
