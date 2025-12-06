@@ -13,17 +13,18 @@ class ListingTile extends StatefulWidget {
 
 class _ListingTileState extends State<ListingTile> {
   late bool _bookmarked;
-
   @override
   void initState() {
     super.initState();
     _bookmarked = widget.property.bookmarked; // initial value
+    print("property: ");
+    print(widget.property.image);
   }
 
   void _toggleSave() {
     final cubit = context.read<RecentCubit>();
     print('Before toggle: _bookmarked=$_bookmarked, id=${widget.property.id}');
-    
+
     if (_bookmarked) {
       // Currently saved, so unsave it
       print('Unsaving listing ${widget.property.id}');
