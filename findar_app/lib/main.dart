@@ -18,7 +18,6 @@ import './features/demoscreen.dart';
 import './features/settings/settings_screen.dart';
 import 'core/theme/theme_provider.dart';
 import './features/profile/screens/profile_screen/profile_screen.dart';
-import './features/profile/screens/user_profile_screen/user_profile_screen.dart';
 import './features/profile/screens/edit_profile/edit_profile_screen.dart';
 import './features/property_details/screens/property_details_screen.dart';
 // import './features/demo/demo_test_screen.dart';
@@ -64,7 +63,7 @@ class MainApp extends StatelessWidget {
         BlocProvider(create: (_) => ListingsCubit()),
         BlocProvider(create: (_) => ListingCubit()),
         BlocProvider(create: (_) => SearchCubit(repo)),
-        BlocProvider(create: (_) => SavedListingsCubit()),
+        BlocProvider(create: (_) => SavedListingsCubit(repo)),
         BlocProvider(create: (_) => PropertyDetailsCubit()),
         BlocProvider(create: (_) => MyListingsCubit(repo)),
         BlocProvider(create: (_) => ProfileCubit()),

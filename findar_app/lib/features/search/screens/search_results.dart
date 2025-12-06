@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:findar/logic/cubits/search_cubit.dart';
+import 'package:findar/logic/cubits/sort_cubit.dart';
 import 'package:findar/core/models/property_listing_model.dart';
 import '../../../../core/widgets/appbar_title.dart';
 import '../../../../core/widgets/property_card.dart';
@@ -145,7 +146,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
 
                 //use cubit getters for listings
                 final listings =
-                    (state['data'] as List<PropertyListing>?) ?? const [];
+                    (searchState['data'] as List<PropertyListing>?) ?? const [];
                 if (listings.isEmpty) {
                   return _buildEmptyState();
                 }

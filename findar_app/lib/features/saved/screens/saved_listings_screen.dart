@@ -19,64 +19,8 @@ class SavedListingsScreen extends StatefulWidget {
 }
 
 class _SavedListingsScreenState extends State<SavedListingsScreen> {
-  final List<Map<String, dynamic>> _savedProperties = [
-    {
-      'title': 'Luxury Villa',
-      'id': 1,
-      'description': 'Ocean-view villa with private pool',
-      'imageUrl':
-          'https://images.pexels.com/photos/206172/pexels-photo-206172.jpeg',
-      'price': 550000.0,
-      'location': '123 Ocean View Dr, Malibu',
-      'beds': 3,
-      'baths': 2,
-      'propertyType': 'Villa',
-      'classification': 'For Sale',
-      'isSaved': true,
-    },
-    {
-      'title': 'Charming Bungalow',
-      'id': 2,
-      'description': 'Family-friendly bungalow with garden',
-      'imageUrl':
-          'https://images.pexels.com/photos/20708166/pexels-photo-20708166.jpeg',
-      'price': 320000.0,
-      'location': '456 Maple St, Springfield',
-      'beds': 4,
-      'baths': 3,
-      'propertyType': 'Bungalow',
-      'classification': 'For Sale',
-      'isSaved': true,
-    },
-    {
-      'title': 'Modern Apartment',
-      'id': 3,
-      'description': 'City-center apartment with skyline views',
-      'imageUrl':
-          'https://images.pexels.com/photos/4700551/pexels-photo-4700551.jpeg',
-      'price': 780000.0,
-      'location': '789 City Center, Apt 12B',
-      'beds': 2,
-      'baths': 2,
-      'propertyType': 'Apartment',
-      'classification': 'For Sale',
-      'isSaved': true,
-    },
-    {
-      'title': 'Cozy Cottage',
-      'id': 4,
-      'description': 'Woodland cottage perfect for getaways',
-      'imageUrl':
-          'https://images.pexels.com/photos/18610869/pexels-photo-18610869.jpeg',
-      'price': 250000.0,
-      'location': '101 Forest Ln, Greenwood',
-      'beds': 2,
-      'baths': 1,
-      'propertyType': 'Cottage',
-      'classification': 'For Sale',
-      'isSaved': true,
-    },
-  ];
+  // Track listings that are being removed
+  final Set<int> _removingListingIds = {};
 
   @override
   void initState() {
@@ -85,43 +29,47 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
     context.read<SavedListingsCubit>().fetchSavedListings();
   }
 
-  void _toggleSave(String propertyId) {
+  void _toggleSave(int listingId) async {
     final colorScheme = Theme.of(context).colorScheme;
-    final propertyIndex = _savedProperties.indexWhere(
-      (p) => p['id'] == propertyId,
-    );
-
-    if (propertyIndex == -1) return; // Property not found
-
+    
+    // Mark as removing to change icon color
     setState(() {
-      _savedProperties[propertyIndex]['isSaved'] =
-          !_savedProperties[propertyIndex]['isSaved'];
-      if (!_savedProperties[propertyIndex]['isSaved']) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Removed from saved'),
-            backgroundColor: colorScheme.secondary,
-            duration: const Duration(seconds: 2),
-            action: SnackBarAction(
-              label: 'Undo',
-              textColor: colorScheme.primary,
-              onPressed: () {
-                setState(() {
-                  _savedProperties[propertyIndex]['isSaved'] = true;
-                });
-              },
-            ),
-          ),
-        );
-        Future.delayed(const Duration(seconds: 2), () {
-          if (mounted && !_savedProperties[propertyIndex]['isSaved']) {
-            setState(() {
-              _savedProperties.removeAt(propertyIndex);
-            });
-          }
-        });
-      }
+      _removingListingIds.add(listingId);
     });
+    
+    // Show snackbar immediately
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Removed from saved'),
+        backgroundColor: colorScheme.secondary,
+        duration: const Duration(seconds: 3),
+        action: SnackBarAction(
+          label: 'Undo',
+          textColor: colorScheme.primary,
+          onPressed: () {
+            // Cancel removal
+            setState(() {
+              _removingListingIds.remove(listingId);
+            });
+            // Re-save the listing
+            context.read<SavedListingsCubit>().saveListing(listingId);
+          },
+        ),
+      ),
+    );
+    
+    // Wait for 2 seconds before actually removing
+    await Future.delayed(const Duration(seconds: 2));
+    
+    // Check if still in removing state (not undone)
+    if (mounted && _removingListingIds.contains(listingId)) {
+      // Call cubit to unsave the listing
+      context.read<SavedListingsCubit>().unsaveListing(listingId);
+      
+      setState(() {
+        _removingListingIds.remove(listingId);
+      });
+    }
   }
 
   @override
@@ -193,16 +141,13 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
             );
           }
 
-          final remoteData = state['data'] as List<dynamic>?;
-          final useFallback = remoteData == null || remoteData.isEmpty;
-          final listingsToDisplay = useFallback ? _savedProperties : remoteData;
+          final listings = state['data'] as List<dynamic>? ?? [];
 
-          return listingsToDisplay.isEmpty
+          return listings.isEmpty
               ? _buildEmptyState()
               : _buildSavedPropertiesView(
                   MediaQuery.of(context).orientation,
-                  listingsToDisplay,
-                  useFallback,
+                  listings,
                 );
         },
       ),
@@ -214,7 +159,6 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
   Widget _buildSavedPropertiesView(
     Orientation orientation,
     List<dynamic> properties,
-    bool isFallbackData,
   ) {
     final screenHeight = MediaQuery.of(context).size.height;
 
@@ -229,18 +173,21 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
         final listing = property is PropertyListing
             ? property
             : _mapToListing(property as Map<String, dynamic>);
-        final bool isSaved = isFallbackData
-            ? (property as Map<String, dynamic>)['isSaved'] as bool? ?? true
-            : true;
-        final VoidCallback? onSaveToggle = isFallbackData
-            ? () => _toggleSave(index)
-            : null;
+        
+        // Check if this listing is being removed
+        final isBeingRemoved = _removingListingIds.contains(listing.id);
 
         return PropertyListingCard(
           listing: listing,
-          isSaved: isSaved,
-          onSaveToggle: onSaveToggle,
-          onTap: () {},
+          isSaved: !isBeingRemoved, // Unselect if being removed
+          onSaveToggle: () => _toggleSave(listing.id),
+          onTap: () {
+            Navigator.pushNamed(
+              context,
+              '/property-details',
+              arguments: listing.id,
+            );
+          },
         );
       },
     );
