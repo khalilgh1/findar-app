@@ -11,7 +11,7 @@ import './widgets/price_field.dart';
 import './widgets/numeric_field.dart';
 import './widgets/location_field.dart';
 //package imports
-import 'package:findar/logic/cubits/create_listing_cubit.dart';
+import 'package:findar/logic/cubits/my_listings_cubit.dart';
 
 //widgets
 import '../../core/widgets/progress_button.dart';
@@ -100,7 +100,12 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text('Create New Listing', style: theme.textTheme.headlineLarge?.copyWith(color: theme.colorScheme.onSurface),),
+        title: Text(
+          'Create New Listing',
+          style: theme.textTheme.headlineLarge?.copyWith(
+            color: theme.colorScheme.onSurface,
+          ),
+        ),
         centerTitle: true,
         elevation: 0,
       ),
@@ -175,7 +180,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
                           child: DropdownButtonHideUnderline(
                             child: DropdownButton(
                               dropdownColor:
-                              theme.colorScheme.secondaryContainer,
+                                  theme.colorScheme.secondaryContainer,
                               value: _propertyType,
                               isExpanded: true,
                               icon: Icon(
@@ -286,7 +291,9 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
                                 width: 28,
                                 height: 28,
                                 decoration: BoxDecoration(
-                                  color: theme.colorScheme.onSurface.withAlpha(150),
+                                  color: theme.colorScheme.onSurface.withAlpha(
+                                    150,
+                                  ),
                                   shape: BoxShape.circle,
                                 ),
                                 child: Icon(
@@ -327,7 +334,9 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
                                 width: 28,
                                 height: 28,
                                 decoration: BoxDecoration(
-                                  color: theme.colorScheme.onSurface.withAlpha(150),
+                                  color: theme.colorScheme.onSurface.withAlpha(
+                                    150,
+                                  ),
                                   shape: BoxShape.circle,
                                 ),
                                 child: Icon(
@@ -352,7 +361,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
                 child: Container(
                   height: 100,
                   decoration: BoxDecoration(
-                    color: Theme.of(  context).colorScheme.secondary ,
+                    color: Theme.of(context).colorScheme.secondary,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: Colors.grey.shade300,
@@ -406,7 +415,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
       // Create Listing Button
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: BlocListener<CreateListingCubit, Map<String, dynamic>>(
+        child: BlocListener<MyListingsCubit, Map<String, dynamic>>(
           listener: (context, state) {
             if (state['state'] == 'done') {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -415,7 +424,8 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
                   backgroundColor: Colors.green,
                 ),
               );
-              Navigator.pushNamed(context, '/my-listings');
+              // Return to previous screen and signal that a listing was created
+              Navigator.pop(context, true);
             } else if (state['state'] == 'error') {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
@@ -425,11 +435,13 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
               );
             }
           },
-          child: BlocBuilder<CreateListingCubit, Map<String, dynamic>>(
+          child: BlocBuilder<MyListingsCubit, Map<String, dynamic>>(
             builder: (context, state) {
               final isLoading = state['state'] == 'loading';
               final isError = state['state'] == 'error';
-              final errorMessage = isError ? (state['message'] as String?) : null;
+              final errorMessage = isError
+                  ? (state['message'] as String?)
+                  : null;
 
               return ProgressButton(
                 label: 'Create Listing',
@@ -441,44 +453,65 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
                 onPressed: () {
                   // Validate all fields
                   final titleError = _validateTitle(_titleController.text);
-                  final descError = _validateDescription(_descriptionController.text);
+                  final descError = _validateDescription(
+                    _descriptionController.text,
+                  );
                   final priceError = _validatePrice(_priceController.text);
-                  final locationError = _validateLocation(_locationController.text);
-                  final bedroomsError = _validateBedrooms(_bedroomsController.text);
+                  final locationError = _validateLocation(
+                    _locationController.text,
+                  );
+                  final bedroomsError = _validateBedrooms(
+                    _bedroomsController.text,
+                  );
 
                   if (titleError != null) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(titleError), backgroundColor: Colors.red),
+                      SnackBar(
+                        content: Text(titleError),
+                        backgroundColor: Colors.red,
+                      ),
                     );
                     return;
                   }
                   if (descError != null) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(descError), backgroundColor: Colors.red),
+                      SnackBar(
+                        content: Text(descError),
+                        backgroundColor: Colors.red,
+                      ),
                     );
                     return;
                   }
                   if (priceError != null) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(priceError), backgroundColor: Colors.red),
+                      SnackBar(
+                        content: Text(priceError),
+                        backgroundColor: Colors.red,
+                      ),
                     );
                     return;
                   }
                   if (locationError != null) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(locationError), backgroundColor: Colors.red),
+                      SnackBar(
+                        content: Text(locationError),
+                        backgroundColor: Colors.red,
+                      ),
                     );
                     return;
                   }
                   if (bedroomsError != null) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(bedroomsError), backgroundColor: Colors.red),
+                      SnackBar(
+                        content: Text(bedroomsError),
+                        backgroundColor: Colors.red,
+                      ),
                     );
                     return;
                   }
 
                   // Call cubit to create listing
-                  context.read<CreateListingCubit>().createListing(
+                  context.read<MyListingsCubit>().createListing(
                     title: _titleController.text,
                     description: _descriptionController.text,
                     price: double.parse(_priceController.text),

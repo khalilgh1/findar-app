@@ -19,7 +19,7 @@ import './features/profile/screens/profile_screen/profile_screen.dart';
 import './features/profile/screens/user_profile_screen/user_profile_screen.dart';
 import './features/profile/screens/edit_profile/edit_profile_screen.dart';
 import './features/property_details/screens/property_details_screen.dart';
-import './features/demo/demo_test_screen.dart';
+// import './features/demo/demo_test_screen.dart';
 // Import all cubits
 import 'logic/cubits/auth_cubit.dart';
 import 'logic/cubits/create_listing_cubit.dart';
@@ -36,7 +36,15 @@ import 'logic/cubits/profile_picture_setup_cubit.dart';
 import 'core/models/property_listing_model.dart';
 import './features/auth/screens/profile_picture_setup_screen.dart';
 
+//import repository
+import 'core/repositories/dummy_listing_repo.dart';
+import 'core/repositories/abstract_listing_repo.dart';
+
+late ListingRepository repo;
 void main() {
+  //later: repo = (online)? RemoteListingRepository(): LocalListingRepository();
+  repo = DummyListingRepository(); //we will replace this with real repository later
+      
   runApp(const MainApp());
 }
 
@@ -54,7 +62,7 @@ class MainApp extends StatelessWidget {
         BlocProvider(create: (_) => SearchCubit()),
         BlocProvider(create: (_) => SavedListingsCubit()),
         BlocProvider(create: (_) => PropertyDetailsCubit()),
-        BlocProvider(create: (_) => MyListingsCubit()),
+        BlocProvider(create: (_) => MyListingsCubit(repo)),
         BlocProvider(create: (_) => ProfileCubit()),
         BlocProvider(create: (_) => SettingsCubit()),
         BlocProvider(create: (_) => SortCubit()),
@@ -103,7 +111,7 @@ class MainApp extends StatelessWidget {
                   '/saved-listings': (context) => const SavedListingsScreen(),
                   '/search-results': (context) => const SearchResultsScreen(),
                   '/demoscreen': (context) => const Demoscreen(),
-                  '/demo-test': (context) => const DemoTestScreen(),
+                  // '/demo-test': (context) => const DemoTestScreen(),
                   '/settings': (context) => const SettingsScreen(),
                   '/property-details': (context) =>
                       const PropertyDetailsScreen(),
