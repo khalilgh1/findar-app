@@ -18,6 +18,7 @@ class PropertyListingCard extends StatelessWidget {
   final String? menuToggleText;
   final bool showBoostButton;
   final VoidCallback? onBoost;
+  final bool isBoosted;
 
   const PropertyListingCard({
     super.key,
@@ -38,6 +39,7 @@ class PropertyListingCard extends StatelessWidget {
     this.menuToggleText,
     this.showBoostButton = false,
     this.onBoost,
+    this.isBoosted = false,
   });
 
   @override
@@ -96,6 +98,45 @@ class PropertyListingCard extends StatelessWidget {
                     },
                   ),
                 ),
+                // Boosted badge
+                if (isBoosted)
+                  Positioned(
+                    top: screenHeight * 0.015,
+                    left: screenWidth * 0.03,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: colorScheme.primary,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: colorScheme.onSurface.withOpacity(0.2),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.rocket_launch,
+                            color: Colors.white,
+                            size: 16,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Boosted',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 // 3-dot menu button (replaces save icon when showMenu is true)
                 if (showMenu)
                   Positioned(

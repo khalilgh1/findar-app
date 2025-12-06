@@ -24,6 +24,7 @@ class CreateListingScreen extends StatefulWidget {
 }
 
 class _CreateListingScreenState extends State<CreateListingScreen> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _priceController = TextEditingController();
@@ -112,21 +113,28 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Property Title Section
-              Text('Property Title', style: theme.textTheme.headlineSmall),
-              const SizedBox(height: 12),
-              PropertyTitle(titleController: _titleController, theme: theme),
-              const SizedBox(height: 24),
-              // Description Section
-              Text('Description', style: theme.textTheme.headlineSmall),
-              const SizedBox(height: 12),
-              Description(
-                descriptionController: _descriptionController,
-                theme: theme,
-              ),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Property Title Section
+                Text('Property Title', style: theme.textTheme.headlineSmall),
+                const SizedBox(height: 12),
+                PropertyTitle(
+                  titleController: _titleController,
+                  theme: theme,
+                  validator: _validateTitle,
+                ),
+                const SizedBox(height: 24),
+                // Description Section
+                Text('Description', style: theme.textTheme.headlineSmall),
+                const SizedBox(height: 12),
+                Description(
+                  descriptionController: _descriptionController,
+                  theme: theme,
+                  validator: _validateDescription,
+                ),
               const SizedBox(height: 24),
               // Classification Section
               Text('Classification', style: theme.textTheme.headlineSmall),
@@ -155,6 +163,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
                         priceField(
                           priceController: _priceController,
                           theme: theme,
+                          validator: _validatePrice,
                         ),
                       ],
                     ),
@@ -245,6 +254,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
                       controller: _bedroomsController,
                       keyboardType: TextInputType.number,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      validator: _validateBedrooms,
                     ),
                   ),
                 ],
@@ -258,6 +268,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
               LocationField(
                 locationController: _locationController,
                 theme: theme,
+                validator: _validateLocation,
               ),
               const SizedBox(height: 24),
 
@@ -409,6 +420,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
               ),
             ],
           ),
+          ),
         ),
       ),
 
@@ -451,62 +463,8 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
                 isError: isError,
                 errorMessage: errorMessage,
                 onPressed: () {
-                  // Validate all fields
-                  final titleError = _validateTitle(_titleController.text);
-                  final descError = _validateDescription(
-                    _descriptionController.text,
-                  );
-                  final priceError = _validatePrice(_priceController.text);
-                  final locationError = _validateLocation(
-                    _locationController.text,
-                  );
-                  final bedroomsError = _validateBedrooms(
-                    _bedroomsController.text,
-                  );
-
-                  if (titleError != null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(titleError),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                    return;
-                  }
-                  if (descError != null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(descError),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                    return;
-                  }
-                  if (priceError != null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(priceError),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                    return;
-                  }
-                  if (locationError != null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(locationError),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                    return;
-                  }
-                  if (bedroomsError != null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(bedroomsError),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
+                  // Validate form
+                  if (!_formKey.currentState!.validate()) {
                     return;
                   }
 

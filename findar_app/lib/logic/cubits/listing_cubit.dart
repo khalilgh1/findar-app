@@ -177,4 +177,30 @@ class ListingCubit extends Cubit<Map<String, dynamic>> {
     final listings = state['data'] as List;
     return listings.where((listing) => listing.isOnline == false).toList();
   }
+
+  /// Update listing boost status locally (for simulated boost without backend)
+  void updateBoostStatus({
+    required int listingId,
+    required String sponsorshipPlanId,
+    required DateTime boostExpiryDate,
+  }) {
+    final listings = List<dynamic>.from(state['data'] as List);
+    
+    final index = listings.indexWhere((listing) => listing.id == listingId);
+    
+    if (index != -1) {
+      final updatedListing = listings[index].copyWith(
+        isBoosted: true,
+        sponsorshipPlanId: sponsorshipPlanId,
+        boostExpiryDate: boostExpiryDate,
+      );
+      
+      listings[index] = updatedListing;
+      
+      emit({
+        ...state,
+        'data': listings,
+      });
+    }
+  }
 }

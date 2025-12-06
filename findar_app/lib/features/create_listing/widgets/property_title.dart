@@ -4,15 +4,18 @@ class PropertyTitle extends StatelessWidget {
     super.key,
     required TextEditingController titleController,
     required this.theme,
+    this.validator,
   }) : _titleController = titleController;
 
   final TextEditingController _titleController;
   final ThemeData theme;
+  final String? Function(String?)? validator;
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
+    return TextFormField(
       controller: _titleController,
+      validator: validator,
       decoration: InputDecoration(
         fillColor: theme.colorScheme.secondaryContainer,
         filled: true,
@@ -25,6 +28,14 @@ class PropertyTitle extends StatelessWidget {
             color: theme.colorScheme.primary,
             width: 2,
           ),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderSide: const BorderSide(color: Colors.red),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderSide: const BorderSide(color: Colors.red, width: 2),
           borderRadius: BorderRadius.circular(12),
         ),
         hintText: 'e.g. Spacious 3 Bedroom Apartment',

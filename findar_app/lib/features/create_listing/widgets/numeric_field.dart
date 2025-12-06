@@ -36,8 +36,9 @@ class NumericField extends StatelessWidget {
           style: theme.textTheme.headlineSmall?.copyWith(color: theme.colorScheme.onSurface)
         ),
         const SizedBox(height: 10),
-        TextField(
+        TextFormField(
           controller: controller,
+          validator: validator,
           enabled: enabled,
           keyboardType: keyboardType,
           inputFormatters: inputFormatters,
@@ -60,7 +61,14 @@ class NumericField extends StatelessWidget {
               ),
               borderRadius: BorderRadius.circular(12),
             ),
-
+            errorBorder: OutlineInputBorder(
+              borderSide: const BorderSide(color: Colors.red),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderSide: const BorderSide(color: Colors.red, width: 2),
+              borderRadius: BorderRadius.circular(12),
+            ),
             hintText: hint,
             hintStyle: TextStyle(
               color: theme.colorScheme.onSurface,

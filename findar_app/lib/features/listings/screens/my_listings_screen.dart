@@ -169,6 +169,7 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
                       baths: listing.bathrooms ?? 0,
                       sqft: 0, // Not in model, using default
                       isSaved: false, // Not in model, using default
+                      isBoosted: listing.isBoosted,
                       showMenu: true,
                       onEdit: () => _handleEdit(listing),
                       onRemove: () => _handleRemove(listing),
@@ -198,7 +199,7 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
           }
         },
         backgroundColor: theme.colorScheme.primary,
-        child: Icon(Icons.add, size: 40),
+        child: Icon(Icons.add, size: 40, color: Colors.white),
       ),
       bottomNavigationBar: BuildBottomNavBar(index: 2),
     );
@@ -241,30 +242,10 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
 
   // UPDATED: Boost handler
   void _handleBoost(PropertyListing listing) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Boost Listing'),
-        content: Text('Boost "${listing.title}" to get more visibility?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('${listing.title} has been boosted!'),
-                  duration: const Duration(seconds: 2),
-                ),
-              );
-            },
-            child: const Text('Boost'),
-          ),
-        ],
-      ),
+    Navigator.pushNamed(
+      context,
+      '/sponsorship-plans',
+      arguments: listing,
     );
   }
 }

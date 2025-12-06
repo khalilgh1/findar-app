@@ -5,15 +5,18 @@ class LocationField extends StatelessWidget {
     super.key,
     required TextEditingController locationController,
     required this.theme,
+    this.validator,
   }) : _locationController = locationController;
 
   final TextEditingController _locationController;
   final ThemeData theme;
+  final String? Function(String?)? validator;
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
+    return TextFormField(
       controller: _locationController,
+      validator: validator,
       style: const TextStyle(fontSize: 15, color: Colors.black87),
       decoration: InputDecoration(
         fillColor: theme.colorScheme.secondaryContainer,
@@ -26,7 +29,14 @@ class LocationField extends StatelessWidget {
           borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
           borderRadius: BorderRadius.circular(12),
         ),
-
+        errorBorder: OutlineInputBorder(
+          borderSide: const BorderSide(color: Colors.red),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderSide: const BorderSide(color: Colors.red, width: 2),
+          borderRadius: BorderRadius.circular(12),
+        ),
         hintText: 'e.g. 15 Rue Didouche Mourad, Algiers',
         hintStyle: TextStyle(
           color: theme.colorScheme.onSurfaceVariant,

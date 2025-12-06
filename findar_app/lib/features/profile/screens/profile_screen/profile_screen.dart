@@ -113,11 +113,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
           return SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const SizedBox(height: 10),
-                ProfileAvatar(),
+            child: SafeArea(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 10),
+                  ProfileAvatar(),
                 const SizedBox(height: 10),
                 Text(
                   username,
@@ -184,7 +185,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         .toList(),
                   ),
                 ),
-                const SizedBox(height: 30),
+                const SizedBox(height: 6),
                 ProgressButton(
                   label: 'Logout',
                   backgroundColor: const Color(0xFFFFEDED),
@@ -195,6 +196,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 const SizedBox(height: 20),
               ],
+            ),
             ),
           );
           },

@@ -6,8 +6,10 @@ import './features/home/home.dart';
 import './features/search/screens/filtering.dart';
 import 'core/theme/app_theme.dart';
 import './features/landing/screens/splash_screen.dart';
-import './features/auth/screens/login_screen.dart';
-import './features/auth/screens/register_screen.dart';
+import 'features/auth/screens/login_screen.dart';
+import 'features/auth/screens/register_screen.dart';
+import 'features/auth/screens/forgot_password_screen.dart';
+import 'features/auth/screens/reset_password_screen.dart';
 import './features/listings/screens/my_listings_screen.dart';
 import './features/listings/screens/edit_listing/edit_listing_screen.dart';
 import './features/saved/screens/saved_listings_screen.dart';
@@ -30,7 +32,11 @@ import 'logic/cubits/property_details_cubit.dart';
 import 'logic/cubits/my_listings_cubit.dart';
 import 'logic/cubits/profile_cubit.dart';
 import 'logic/cubits/settings_cubit.dart';
+import 'logic/cubits/boost_cubit.dart';
 import 'core/models/property_listing_model.dart';
+import 'core/models/sponsorship_plan.dart';
+import 'features/listings/screens/sponsorship_plans/sponsorship_plans_screen.dart';
+import 'features/listings/screens/payment_confirmation/payment_confirmation_screen.dart';
 
 //import repository
 import 'core/repositories/dummy_listing_repo.dart';
@@ -61,6 +67,7 @@ class MainApp extends StatelessWidget {
         BlocProvider(create: (_) => MyListingsCubit(repo)),
         BlocProvider(create: (_) => ProfileCubit()),
         BlocProvider(create: (_) => SettingsCubit()),
+        BlocProvider(create: (_) => BoostCubit()),
       ],
       child: ChangeNotifierProvider(
         create: (context) => ThemeProvider(),
@@ -82,11 +89,31 @@ class MainApp extends StatelessWidget {
                         EditListingScreen(listing: listing as PropertyListing),
                   );
                 }
+                // Handle sponsorship plans route with arguments
+                if (settings.name == '/sponsorship-plans') {
+                  final listing = settings.arguments as PropertyListing;
+                  return MaterialPageRoute(
+                    builder: (context) =>
+                        SponsorshipPlansScreen(listing: listing),
+                  );
+                }
+                // Handle payment confirmation route with arguments
+                if (settings.name == '/payment-confirmation') {
+                  final args = settings.arguments as Map<String, dynamic>;
+                  return MaterialPageRoute(
+                    builder: (context) => PaymentConfirmationScreen(
+                      listing: args['listing'] as PropertyListing,
+                      plan: args['plan'] as SponsorshipPlan,
+                    ),
+                  );
+                }
                 // Default routes
                 final routes = {
                   '/landing': (context) => const SplashScreen(),
                   '/login': (context) => const LoginScreen(),
                   '/register': (context) => RegisterScreen(),
+                  '/forgot-password': (context) => const ForgotPasswordScreen(),
+                  '/reset-password': (context) => const ResetPasswordScreen(),
                   '/home': (context) => const HomeScreen(),
                   '/filtering': (context) => const FilteringScreen(),
                   '/my-listings': (context) => const MyListingsScreen(),

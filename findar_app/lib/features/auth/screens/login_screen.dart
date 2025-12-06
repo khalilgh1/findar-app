@@ -12,18 +12,26 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _obscurePassword = true;
 
   /// Validate email format
-  String? _validateEmail(String email) {
-    if (email.isEmpty) {
+  String? _validateEmail(String? email) {
+    if (email == null || email.isEmpty) {
       return 'Email is required';
     }
     final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
     if (!emailRegex.hasMatch(email)) {
       return 'Please enter a valid email address';
+    }
+    return null;
+  }
+
+  String? _validatePassword(String? password) {
+    if (password == null || password.isEmpty) {
+      return 'Password is required';
     }
     return null;
   }
@@ -37,14 +45,16 @@ class _LoginScreenState extends State<LoginScreen> {
         child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
                 const SizedBox(height: 120),
-                const Text(
+                Text(
                   'FinDAR',
                   style: TextStyle(
-                    color: Colors.blue,
+                    color: theme.colorScheme.primary,
                     fontSize: 60,
                     fontWeight: FontWeight.bold,
                   ),
@@ -63,18 +73,29 @@ class _LoginScreenState extends State<LoginScreen> {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     'Email Address',
-                    style: theme.textTheme.headlineSmall?.copyWith(
-                        color: theme.colorScheme.onSurface,
-                      )
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 6),
-                TextField(
+                TextFormField(
                   controller: _emailController,
+                  validator: _validateEmail,
                   decoration: InputDecoration(
                     hintText: 'Enter your email',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
+                    ),
+                    errorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: Colors.red),
+                    ),
+                    focusedErrorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: Colors.red, width: 2),
                     ),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
                   ),
@@ -84,15 +105,18 @@ class _LoginScreenState extends State<LoginScreen> {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     'Password',
-                    style: theme.textTheme.headlineSmall?.copyWith(
-                        color: theme.colorScheme.onSurface,
-                      )
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 6),
-                TextField(
+                TextFormField(
                   controller: _passwordController,
                   obscureText: _obscurePassword,
+                  validator: _validatePassword,
                   decoration: InputDecoration(
                     hintText: 'Enter your password',
                     suffixIcon: IconButton(
@@ -109,6 +133,14 @@ class _LoginScreenState extends State<LoginScreen> {
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
+                    errorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: Colors.red),
+                    ),
+                    focusedErrorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: Colors.red, width: 2),
+                    ),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
                   ),
                 ),
@@ -116,11 +148,13 @@ class _LoginScreenState extends State<LoginScreen> {
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
-                    onPressed: () {},
-                    child: const Text(
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/forgot-password');
+                    },
+                    child: Text(
                       'Forgot Password?',
                       style: TextStyle(
-                        color: Colors.blue,
+                        color: theme.colorScheme.primary,
                         fontSize: 14,
                       ),
                     ),
@@ -146,31 +180,18 @@ class _LoginScreenState extends State<LoginScreen> {
 
                     return ProgressButton(
                       onPressed: () {
-                        final emailError = _validateEmail(_emailController.text);
-                        if (emailError != null) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(emailError), backgroundColor:Theme.of(context).colorScheme.error),
+                        if (_formKey.currentState!.validate()) {
+                          context.read<AuthCubit>().login(
+                            email: _emailController.text,
+                            password: _passwordController.text,
                           );
-                          return;
                         }
-
-                        if (_passwordController.text.isEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Password is required'),backgroundColor: Colors.red,),
-                          );
-                          return;
-                        }
-
-                        context.read<AuthCubit>().login(
-                          email: _emailController.text,
-                          password: _passwordController.text,
-                        );
                       },
                       label: 'Login',
                       isLoading: isLoading,
                       isError: isError,
                       errorMessage: errorMessage,
-                      backgroundColor: Colors.blue,
+                      backgroundColor: theme.colorScheme.primary,
                       textColor: Colors.white,
                     );
                   },
@@ -187,10 +208,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       onPressed: () {
                         Navigator.pushNamed(context, '/register');
                       },
-                      child: const Text(
+                      child: Text(
                         'Register',
                         style: TextStyle(
-                          color: Colors.blue,
+                          color: theme.colorScheme.primary,
                           fontWeight: FontWeight.bold,
                           fontSize: 14,
                         ),
@@ -199,6 +220,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ],
                 ),
               ],
+              ),
             ),
           ),
         ),
