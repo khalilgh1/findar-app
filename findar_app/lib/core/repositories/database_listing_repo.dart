@@ -176,6 +176,8 @@ class LocalListingRepository implements ListingRepository {
       args.add(listingType);
     }
 
+    where += " AND is_online = 1";
+
     final rows = await db.rawQuery("""
       SELECT * FROM $table 
       WHERE $where
@@ -222,6 +224,7 @@ class LocalListingRepository implements ListingRepository {
     _savedIds.remove(listingId);
     return ReturnResult(state: true, message: "Listing unsaved.");
   }
+
   @override
   Future<PropertyListing?> getListingById(int id) async {
     final rows = await db.query(table, where: "id = ?", whereArgs: [id]);

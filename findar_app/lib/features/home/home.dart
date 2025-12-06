@@ -31,7 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
+    var l10n = AppLocalizations.of(context)!;
     return MultiBlocListener(
       listeners: [
         BlocListener<SponsoredCubit, Map<String, dynamic>>(
@@ -171,7 +171,11 @@ class _HomeScreenState extends State<HomeScreen> {
                           itemCount: displayListings.length,
                           itemBuilder: (context, index) => GestureDetector(
                             onTap: () => {
-                              context.read<PropertyDetailsCubit>().fetchPropertyDetails(displayListings[index].id),
+                              context
+                                  .read<PropertyDetailsCubit>()
+                                  .fetchPropertyDetails(
+                                    displayListings[index].id,
+                                  ),
                               Navigator.pushNamed(context, '/property-details'),
                             },
                             child: PropertyCard(
@@ -240,9 +244,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         children: displayRecentListings
                             .map(
                               (p) => GestureDetector(
-                                
                                 onTap: () => {
-                                  context.read<PropertyDetailsCubit>().fetchPropertyDetails(p.id),
+                                  context
+                                      .read<PropertyDetailsCubit>()
+                                      .fetchPropertyDetails(p.id),
                                   Navigator.pushNamed(
                                     context,
                                     '/property-details',
