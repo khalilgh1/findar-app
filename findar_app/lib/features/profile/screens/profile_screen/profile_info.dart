@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 
 class ProfileInfoCard extends StatelessWidget {
-  ProfileInfoCard({super.key});
+  final String phone;
+  final String email;
 
-  var phone = "0000000000";
-  var email = "null";
+  const ProfileInfoCard({
+    super.key,
+    this.phone = "0000000000",
+    this.email = "null",
+  });
 
   @override
   Widget build(BuildContext context) {

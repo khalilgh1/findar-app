@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:findar/logic/cubits/settings_cubit.dart';
 import 'package:provider/provider.dart';
 import '../../../core/theme/theme_provider.dart';
 
@@ -10,7 +12,11 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  String _selectedLanguage = 'English';
+  @override
+  void initState() {
+    super.initState();
+    // Settings are initialized in SettingsCubit constructor
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -123,87 +129,95 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _buildDarkModeToggle(ThemeProvider themeProvider, ColorScheme colorScheme, TextTheme textTheme) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        border: Border(
-          bottom: BorderSide(
-            color: colorScheme.onSurface.withOpacity(0.1),
-            width: 1,
-          ),
-        ),
-      ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 0),
-        leading: Container(
-          width: 56,
-          height: 56,
+    return BlocBuilder<SettingsCubit, Map<String, dynamic>>(
+      builder: (context, state) {
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: 16),
           decoration: BoxDecoration(
-            color: colorScheme.secondary.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(12),
+            color: colorScheme.surface,
+            border: Border(
+              bottom: BorderSide(
+                color: colorScheme.onSurface.withOpacity(0.1),
+                width: 1,
+              ),
+            ),
           ),
-          child: Icon(
-            themeProvider.isDarkMode ? Icons.dark_mode : Icons.dark_mode_outlined,
-            color: colorScheme.onSurface,
-            size: 30,
+          child: ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 0),
+            leading: Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: colorScheme.secondary.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                themeProvider.isDarkMode ? Icons.dark_mode : Icons.dark_mode_outlined,
+                color: colorScheme.onSurface,
+                size: 30,
+              ),
+            ),
+            title: Text(
+              'Dark Mode',
+              style: textTheme.bodyMedium?.copyWith(
+                fontSize: 18,
+                color: colorScheme.onSurface,
+              ),
+            ),
+            trailing: Switch(
+              value: state['darkMode'] as bool? ?? false,
+              onChanged: (value) {
+                context.read<SettingsCubit>().toggleDarkMode();
+                themeProvider.toggleTheme(value);
+              },
+              activeColor: colorScheme.primary,
+            ),
           ),
-        ),
-        title: Text(
-          'Dark Mode',
-          style: textTheme.bodyMedium?.copyWith(
-            fontSize: 18,
-            color: colorScheme.onSurface,
-          ),
-        ),
-        trailing: Switch(
-          value: themeProvider.isDarkMode,
-          onChanged: (value) {
-            themeProvider.toggleTheme(value);
-          },
-          activeColor: colorScheme.primary,
-        ),
-      ),
+        );
+      },
     );
   }
 
   Widget _buildLanguageOption(String language, ColorScheme colorScheme, TextTheme textTheme) {
-    final isSelected = _selectedLanguage == language;
+    return BlocBuilder<SettingsCubit, Map<String, dynamic>>(
+      builder: (context, state) {
+        final currentLanguage = state['language'] as String? ?? 'en';
+        final languageMap = {'English': 'en', 'Arabic': 'ar', 'French': 'fr'};
+        final isSelected = languageMap[language] == currentLanguage;
 
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        border: Border(
-          bottom: BorderSide(
-            color: colorScheme.onSurface.withOpacity(0.1),
-            width: 1,
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            border: Border(
+              bottom: BorderSide(
+                color: colorScheme.onSurface.withOpacity(0.1),
+                width: 1,
+              ),
+            ),
           ),
-        ),
-      ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
-        title: Text(
-          language,
-          style: textTheme.bodyMedium?.copyWith(
-            fontSize: 18,
-            color: isSelected ? colorScheme.primary : colorScheme.onSurface.withOpacity(0.5),
+          child: ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
+            title: Text(
+              language,
+              style: textTheme.bodyMedium?.copyWith(
+                fontSize: 18,
+                color: isSelected ? colorScheme.primary : colorScheme.onSurface.withOpacity(0.5),
+              ),
+            ),
+            trailing: isSelected
+                ? Icon(
+                    Icons.check,
+                    color: colorScheme.primary,
+                    size: 28,
+                  )
+                : null,
+            onTap: () {
+              context.read<SettingsCubit>().changeLanguage(languageMap[language]!);
+            },
           ),
-        ),
-        trailing: isSelected
-            ? Icon(
-                Icons.check,
-                color: colorScheme.primary,
-                size: 28,
-              )
-            : null,
-        onTap: () {
-          setState(() {
-            _selectedLanguage = language;
-          });
-          // TODO: Implement language change logic
-        },
-      ),
+        );
+      },
     );
   }
 

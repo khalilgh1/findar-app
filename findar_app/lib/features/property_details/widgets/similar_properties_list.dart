@@ -10,7 +10,6 @@ class SimilarPropertiesList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
     return Column(
@@ -84,7 +83,7 @@ class SimilarPropertyCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  property.price,
+                  property.price.toString(),
                   style: textTheme.bodyLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -110,7 +109,7 @@ class SimilarPropertyCard extends StatelessWidget {
 
 class SimilarProperty {
   final String image;
-  final String price;
+  final double price;
   final String address;
 
   const SimilarProperty({

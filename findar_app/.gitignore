@@ -41,3 +41,10 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Documentation and development files
+/medbox_lang/
+*.md
+/lib/l10n/
+# Error logs
+hs_err_*.log

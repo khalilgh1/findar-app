@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../models/property_listing_model.dart';
+import 'package:findar/logic/cubits/property_details_cubit.dart';
 import 'primary_button.dart';
-import '../theme/color_schemes.dart';
+
 class PropertyListingCard extends StatelessWidget {
-  final String imageUrl;
-  final String price;
-  final String location;
-  final int beds;
-  final int baths;
-  final int sqft;
-  final String? title;
+  final PropertyListing listing;
   final bool isSaved;
   final VoidCallback? onTap;
   final VoidCallback? onSaveToggle;
@@ -22,13 +20,7 @@ class PropertyListingCard extends StatelessWidget {
 
   const PropertyListingCard({
     super.key,
-    required this.imageUrl,
-    required this.price,
-    required this.location,
-    required this.beds,
-    required this.baths,
-    required this.sqft,
-    this.title,
+    required this.listing,
     this.isSaved = false,
     this.onTap,
     this.onSaveToggle,
@@ -43,7 +35,9 @@ class PropertyListingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme; // UPDATED: Get color scheme from theme
+    final colorScheme = Theme.of(
+      context,
+    ).colorScheme; // UPDATED: Get color scheme from theme
     final textTheme = Theme.of(context).textTheme; // UPDATED: Get text theme
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
@@ -57,8 +51,13 @@ class PropertyListingCard extends StatelessWidget {
     final priceFontSize = 25.0;
 
     return GestureDetector(
-      onTap : (){
-        Navigator.pushNamed(context, '/property-details');
+      onTap: () {
+        if (onTap != null) {
+          onTap!();
+        } else {
+          context.read<PropertyDetailsCubit>().fetchPropertyDetails(listing.id);
+          Navigator.pushNamed(context, '/property-details', arguments: listing);
+        }
       },
       child: Card(
         margin: EdgeInsets.symmetric(
@@ -70,76 +69,100 @@ class PropertyListingCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(screenWidth * 0.04),
         ),
         elevation: 2,
-        color: Theme.of(context).colorScheme.onPrimary, // UPDATED: Use theme surface color
+        color: Theme.of(
+          context,
+        ).colorScheme.onPrimary, // UPDATED: Use theme surface color
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Property Image
             Stack(
               children: [
-                SizedBox(
+                _buildListingImage(
                   height: imageHeight,
                   width: double.infinity,
-                  child: Image.network(
-                    imageUrl,
-                    fit: BoxFit.fill,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        color: colorScheme.secondary.withOpacity(0.3), // UPDATED: Use theme secondary color
-                        child: Center(
-                          child: Icon(
-                            Icons.home,
-                            size: screenWidth * 0.12,
-                            color: colorScheme.onSecondary, // UPDATED: Use theme onSecondary color
-                          ),
-                        ),
-                      );
-                    },
-                  ),
+                  colorScheme: colorScheme,
+                  screenWidth: screenWidth,
                 ),
-                // Save/Bookmark Button
-                Positioned(
-                  top: screenHeight * 0.015,
-                  right: screenWidth * 0.03,
-
-                  child: Stack(
-                    children: [
-                      GestureDetector(
-                        onTap: onSaveToggle,
-                        child: Container(
-                          padding: EdgeInsets.all(4),
-
-                          decoration: BoxDecoration(
-                            color: colorScheme.surface,
-                             // reduce the size of the button
-
-                        shape: BoxShape.circle,
+                // Boosted badge
+                if (listing.isBoosted)
+                  Positioned(
+                    top: screenHeight * 0.015,
+                    left: screenWidth * 0.03,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: colorScheme.primary,
+                        borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color: colorScheme.onSurface.withOpacity(0.1), // UPDATED: Use theme onSurface color
-                            blurRadius: 8,
+                            color: colorScheme.onSurface.withOpacity(0.2),
+                            blurRadius: 4,
                             offset: const Offset(0, 2),
                           ),
                         ],
                       ),
-                      child: Icon(
-                        isSaved ? Icons.bookmark : Icons.bookmark_border,
-                        color: colorScheme.primary, // UPDATED: Use theme primary color
-                        size: iconSize,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.rocket_launch,
+                            color: Colors.white,
+                            size: 16,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Boosted',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                  if (showMenu)
+                // 3-dot menu button (replaces save icon when showMenu is true)
+                if (showMenu)
                   Positioned(
                     top: screenHeight * 0.015,
-                    right: screenWidth * 0.15,
-                    child: _buildMenuButton(context, screenWidth, colorScheme), // UPDATED: Pass colorScheme
+                    right: screenWidth * 0.03,
+                    child: _buildMenuButton(context, screenWidth, colorScheme),
+                  )
+                else
+                  // Save/Bookmark Button (only show when menu is not shown)
+                  Positioned(
+                    top: screenHeight * 0.015,
+                    right: screenWidth * 0.03,
+                    child: GestureDetector(
+                      onTap: onSaveToggle,
+                      child: Container(
+                        padding: EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: colorScheme.surface,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: colorScheme.onSurface.withOpacity(0.1),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Icon(
+                          isSaved ? Icons.bookmark : Icons.bookmark_border,
+                          color: colorScheme.primary,
+                          size: iconSize,
+                        ),
+                      ),
+                    ),
                   ),
-              ]),
-                // 3-dot menu button
-                
-                ),
-          ]),
+              ],
+            ),
             // Property Details
             Padding(
               padding: EdgeInsets.all(20),
@@ -147,27 +170,29 @@ class PropertyListingCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Title
-                  if (title != null) ...[
-                    Text(
-                      title!,
-                      style: textTheme.headlineMedium?.copyWith( // UPDATED: Use theme headlineMedium
-                        fontWeight: FontWeight.bold,
-                        fontSize: titleFontSize,
-                        color: colorScheme.onSurface, // UPDATED: Use theme onSurface color
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                  Text(
+                    listing.title,
+                    style: textTheme.headlineMedium?.copyWith(
+                      // UPDATED: Use theme headlineMedium
+                      fontWeight: FontWeight.bold,
+                      fontSize: titleFontSize,
+                      color: colorScheme
+                          .onSurface, // UPDATED: Use theme onSurface color
                     ),
-                    SizedBox(height: 15),
-                  ],
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  SizedBox(height: 15),
                   // Price
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        price,
-                        style: textTheme.headlineMedium?.copyWith( // UPDATED: Use theme headlineMedium
-                          color: colorScheme.primary, // UPDATED: Use theme primary color
+                        _formatPrice(listing.price),
+                        style: textTheme.headlineMedium?.copyWith(
+                          // UPDATED: Use theme headlineMedium
+                          color: colorScheme
+                              .primary, // UPDATED: Use theme primary color
                           fontWeight: FontWeight.bold,
                           fontSize: priceFontSize,
                         ),
@@ -177,9 +202,11 @@ class PropertyListingCard extends StatelessWidget {
                   SizedBox(height: 15),
                   // Location
                   Text(
-                    location,
-                    style: textTheme.bodyMedium?.copyWith( // UPDATED: Use theme bodyMedium
-                      color: colorScheme.onSecondaryContainer, // UPDATED: Use theme onSecondary color
+                    listing.location,
+                    style: textTheme.bodyMedium?.copyWith(
+                      // UPDATED: Use theme bodyMedium
+                      color: colorScheme
+                          .onSecondaryContainer, // UPDATED: Use theme onSecondary color
                       fontSize: fontSize * 0.95,
                     ),
                     maxLines: 1,
@@ -189,15 +216,45 @@ class PropertyListingCard extends StatelessWidget {
                   // Property Features
                   Row(
                     children: [
-                      _buildFeature(context, '$beds Beds', fontSize, colorScheme, textTheme), // UPDATED: Pass theme
+                      _buildFeature(
+                        context,
+                        '${listing.bedrooms} Beds',
+                        fontSize,
+                        colorScheme,
+                        textTheme,
+                      ), // UPDATED: Pass theme
                       SizedBox(width: 10),
-                      Text('•', style: TextStyle(color: colorScheme.onSecondary, fontSize: fontSize)), // UPDATED: Use theme color
+                      Text(
+                        '•',
+                        style: TextStyle(
+                          color: colorScheme.onSecondary,
+                          fontSize: fontSize,
+                        ),
+                      ), // UPDATED: Use theme color
                       SizedBox(width: 10),
-                      _buildFeature(context, '$baths Baths', fontSize, colorScheme, textTheme), // UPDATED: Pass theme
+                      _buildFeature(
+                        context,
+                        '${listing.bathrooms} Baths',
+                        fontSize,
+                        colorScheme,
+                        textTheme,
+                      ), // UPDATED: Pass theme
                       SizedBox(width: 10),
-                      Text('•', style: TextStyle(color: colorScheme.onSecondary, fontSize: fontSize)), // UPDATED: Use theme color
+                      Text(
+                        '•',
+                        style: TextStyle(
+                          color: colorScheme.onSecondary,
+                          fontSize: fontSize,
+                        ),
+                      ), // UPDATED: Use theme color
                       SizedBox(width: 10),
-                      _buildFeature(context, '$sqft sqft', fontSize, colorScheme, textTheme), // UPDATED: Pass theme
+                      _buildFeature(
+                        context,
+                        listing.propertyType,
+                        fontSize,
+                        colorScheme,
+                        textTheme,
+                      ), // UPDATED: Pass theme
                     ],
                   ),
                   // Boost Button
@@ -219,7 +276,11 @@ class PropertyListingCard extends StatelessWidget {
   }
 
   // UPDATED: Method signature with colorScheme parameter
-  Widget _buildMenuButton(BuildContext context, double screenWidth, ColorScheme colorScheme) {
+  Widget _buildMenuButton(
+    BuildContext context,
+    double screenWidth,
+    ColorScheme colorScheme,
+  ) {
     return PopupMenuButton<String>(
       icon: Container(
         padding: EdgeInsets.all(6),
@@ -228,7 +289,9 @@ class PropertyListingCard extends StatelessWidget {
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: colorScheme.onSurface.withOpacity(0.1), // UPDATED: Use theme onSurface color
+              color: colorScheme.onSurface.withOpacity(
+                0.1,
+              ), // UPDATED: Use theme onSurface color
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -258,11 +321,12 @@ class PropertyListingCard extends StatelessWidget {
           value: 'edit',
           child: Row(
             children: [
-              Icon(Icons.edit_outlined, size: 20, color: colorScheme.onSurface), 
-              SizedBox(width: 15),
-
-              Text('Edit', style: TextStyle(fontSize: 10, color: colorScheme.onSurface)), // UPDATED: Use theme color
-
+              Icon(Icons.edit_outlined, size: 20, color: colorScheme.onSurface),
+              SizedBox(width: 12),
+              Text(
+                'Edit',
+                style: TextStyle(fontSize: 14, color: colorScheme.onSurface),
+              ),
             ],
           ),
         ),
@@ -270,9 +334,12 @@ class PropertyListingCard extends StatelessWidget {
           value: 'remove',
           child: Row(
             children: [
-              Icon(Icons.delete_outline, size: 20, color: colorScheme.error), // UPDATED: Use theme error color
-              SizedBox(width: 15),
-              Text('Remove', style: TextStyle(fontSize: 10, color: colorScheme.onSurface)), // UPDATED: Use theme color
+              Icon(Icons.delete_outline, size: 20, color: colorScheme.error),
+              SizedBox(width: 12),
+              Text(
+                'Remove',
+                style: TextStyle(fontSize: 14, color: colorScheme.onSurface),
+              ),
             ],
           ),
         ),
@@ -280,11 +347,15 @@ class PropertyListingCard extends StatelessWidget {
           value: 'toggle',
           child: Row(
             children: [
-              Icon(Icons.cloud_off_outlined, size: 20, color: colorScheme.onSurface), // UPDATED: Use theme color
-              SizedBox(width: 15),
+              Icon(
+                Icons.cloud_off_outlined,
+                size: 20,
+                color: colorScheme.onSurface,
+              ),
+              SizedBox(width: 12),
               Text(
                 menuToggleText ?? 'Toggle Status',
-                style: TextStyle(fontSize: 10, color: colorScheme.onSurface), // UPDATED: Use theme color
+                style: TextStyle(fontSize: 14, color: colorScheme.onSurface),
               ),
             ],
           ),
@@ -294,13 +365,83 @@ class PropertyListingCard extends StatelessWidget {
   }
 
   // UPDATED: Method signature with colorScheme and textTheme parameters
-  Widget _buildFeature(BuildContext context, String text, double fontSize, ColorScheme colorScheme, TextTheme textTheme) {
+  Widget _buildFeature(
+    BuildContext context,
+    String text,
+    double fontSize,
+    ColorScheme colorScheme,
+    TextTheme textTheme,
+  ) {
     return Text(
       text,
-      style: textTheme.bodyMedium?.copyWith( // UPDATED: Use theme bodyMedium
-            color: colorScheme.onSecondaryContainer, // UPDATED: Use theme onSecondary color
-            fontSize: fontSize * 0.9,
-          ),
+      style: textTheme.bodyMedium?.copyWith(
+        // UPDATED: Use theme bodyMedium
+        color: colorScheme
+            .onSecondaryContainer, // UPDATED: Use theme onSecondary color
+        fontSize: fontSize * 0.9,
+      ),
     );
+  }
+
+  Widget _buildListingImage({
+    required double height,
+    required double width,
+    required ColorScheme colorScheme,
+    required double screenWidth,
+  }) {
+    if (listing.image.isEmpty) {
+      return Container(
+        height: height,
+        width: width,
+        color: colorScheme.secondary.withOpacity(0.3),
+        child: Center(
+          child: Icon(
+            Icons.home,
+            size: screenWidth * 0.12,
+            color: colorScheme.onSecondary,
+          ),
+        ),
+      );
+    }
+
+    return SizedBox(
+      height: height,
+      width: width,
+      child: Image.network(
+        listing.image,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            color: colorScheme.secondary.withOpacity(0.3),
+            child: Center(
+              child: Icon(
+                Icons.home,
+                size: screenWidth * 0.12,
+                color: colorScheme.onSecondary,
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  String _formatPrice(double price) {
+    if (price <= 0) {
+      return 'Price on request';
+    }
+
+    final hasDecimals = price % 1 != 0;
+    final value = hasDecimals
+        ? price.toStringAsFixed(2)
+        : price.toStringAsFixed(0);
+    final parts = value.split('.');
+    final whole = parts.first.replaceAll(RegExp(r'\B(?=(\d{3})+(?!\d))'), ',');
+
+    if (parts.length > 1 && parts[1].isNotEmpty) {
+      return '\$$whole.${parts[1]}';
+    }
+
+    return '\$$whole';
   }
 }

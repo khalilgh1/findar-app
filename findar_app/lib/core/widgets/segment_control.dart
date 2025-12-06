@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../theme/color_schemes.dart';
 class SegmentedControl extends StatefulWidget {
   final List<String> options;
   final String? initialValue;

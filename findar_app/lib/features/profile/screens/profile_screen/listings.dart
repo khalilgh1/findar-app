@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class ListingCard extends StatelessWidget {
   final String imagePath;
   final String title;
-  final String price;
+  final double price;
 
   const ListingCard({
     super.key,
@@ -26,6 +26,7 @@ class ListingCard extends StatelessWidget {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           ClipRRect(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
@@ -37,9 +38,10 @@ class ListingCard extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(12.0),
+            padding: const EdgeInsets.all(10.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   title,
@@ -50,7 +52,7 @@ class ListingCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  price,
+                  price.toString(),
                   style: TextStyle(
                     color: theme.colorScheme.primary,
                     fontSize: 16,
@@ -61,7 +63,7 @@ class ListingCard extends StatelessWidget {
                   child: Container(
                     width: double.infinity,
                     margin: const EdgeInsets.fromLTRB(4, 4, 4, 0),
-                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    padding: const EdgeInsets.symmetric(vertical: 6),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
                       color: theme.colorScheme.surface,

@@ -1,6 +1,7 @@
 //flutter imports
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 //widgets
 import './widgets/property_title.dart';
@@ -10,7 +11,10 @@ import './widgets/price_field.dart';
 import './widgets/numeric_field.dart';
 import './widgets/location_field.dart';
 //package imports
-import 'package:main_button/main_button.dart';
+import 'package:findar/logic/cubits/my_listings_cubit.dart';
+
+//widgets
+import '../../core/widgets/progress_button.dart';
 
 class CreateListingScreen extends StatefulWidget {
   const CreateListingScreen({super.key});
@@ -20,6 +24,7 @@ class CreateListingScreen extends StatefulWidget {
 }
 
 class _CreateListingScreenState extends State<CreateListingScreen> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _priceController = TextEditingController();
@@ -32,6 +37,56 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
   String _propertyType = 'Apartment';
   String _status = 'Online';
   final List<String> _photos = ['find-dar-test1.jpg', 'find-dar-test2.jpg'];
+
+  String? _validateTitle(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please enter a property title';
+    }
+    if (value.length < 5) {
+      return 'Title must be at least 5 characters';
+    }
+    return null;
+  }
+
+  String? _validateDescription(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please enter a description';
+    }
+    if (value.length < 20) {
+      return 'Description must be at least 20 characters';
+    }
+    return null;
+  }
+
+  String? _validatePrice(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please enter a price';
+    }
+    if (double.tryParse(value) == null) {
+      return 'Please enter a valid price';
+    }
+    if (double.parse(value) <= 0) {
+      return 'Price must be greater than 0';
+    }
+    return null;
+  }
+
+  String? _validateLocation(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please enter a location';
+    }
+    return null;
+  }
+
+  String? _validateBedrooms(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please enter number of bedrooms';
+    }
+    if (int.tryParse(value) == null || int.parse(value) < 0) {
+      return 'Please enter a valid number';
+    }
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,28 +101,40 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text('Create New Listing', style: theme.textTheme.headlineLarge?.copyWith(color: theme.colorScheme.onSurface),),
+        title: Text(
+          'Create New Listing',
+          style: theme.textTheme.headlineLarge?.copyWith(
+            color: theme.colorScheme.onSurface,
+          ),
+        ),
         centerTitle: true,
         elevation: 0,
       ),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Property Title Section
-              Text('Property Title', style: theme.textTheme.headlineSmall),
-              const SizedBox(height: 12),
-              PropertyTitle(titleController: _titleController, theme: theme),
-              const SizedBox(height: 24),
-              // Description Section
-              Text('Description', style: theme.textTheme.headlineSmall),
-              const SizedBox(height: 12),
-              Description(
-                descriptionController: _descriptionController,
-                theme: theme,
-              ),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Property Title Section
+                Text('Property Title', style: theme.textTheme.headlineSmall),
+                const SizedBox(height: 12),
+                PropertyTitle(
+                  titleController: _titleController,
+                  theme: theme,
+                  validator: _validateTitle,
+                ),
+                const SizedBox(height: 24),
+                // Description Section
+                Text('Description', style: theme.textTheme.headlineSmall),
+                const SizedBox(height: 12),
+                Description(
+                  descriptionController: _descriptionController,
+                  theme: theme,
+                  validator: _validateDescription,
+                ),
               const SizedBox(height: 24),
               // Classification Section
               Text('Classification', style: theme.textTheme.headlineSmall),
@@ -96,6 +163,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
                         priceField(
                           priceController: _priceController,
                           theme: theme,
+                          validator: _validatePrice,
                         ),
                       ],
                     ),
@@ -121,7 +189,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
                           child: DropdownButtonHideUnderline(
                             child: DropdownButton(
                               dropdownColor:
-                              theme.colorScheme.secondaryContainer,
+                                  theme.colorScheme.secondaryContainer,
                               value: _propertyType,
                               isExpanded: true,
                               icon: Icon(
@@ -186,6 +254,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
                       controller: _bedroomsController,
                       keyboardType: TextInputType.number,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      validator: _validateBedrooms,
                     ),
                   ),
                 ],
@@ -199,6 +268,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
               LocationField(
                 locationController: _locationController,
                 theme: theme,
+                validator: _validateLocation,
               ),
               const SizedBox(height: 24),
 
@@ -232,7 +302,9 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
                                 width: 28,
                                 height: 28,
                                 decoration: BoxDecoration(
-                                  color: theme.colorScheme.onSurface.withAlpha(150),
+                                  color: theme.colorScheme.onSurface.withAlpha(
+                                    150,
+                                  ),
                                   shape: BoxShape.circle,
                                 ),
                                 child: Icon(
@@ -273,7 +345,9 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
                                 width: 28,
                                 height: 28,
                                 decoration: BoxDecoration(
-                                  color: theme.colorScheme.onSurface.withAlpha(150),
+                                  color: theme.colorScheme.onSurface.withAlpha(
+                                    150,
+                                  ),
                                   shape: BoxShape.circle,
                                 ),
                                 child: Icon(
@@ -298,7 +372,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
                 child: Container(
                   height: 100,
                   decoration: BoxDecoration(
-                    color: Theme.of(  context).colorScheme.secondary ,
+                    color: Theme.of(context).colorScheme.secondary,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: Colors.grey.shade300,
@@ -346,22 +420,70 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
               ),
             ],
           ),
+          ),
         ),
       ),
 
       // Create Listing Button
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: MainButton(
-          label: 'Create Listing',
-          backgroundColor: theme.colorScheme.primary,
-          onPressed: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Listing Created Successfully!')),
-            );
-              Navigator.pushNamed(context, '/my-listings');
-
+        child: BlocListener<MyListingsCubit, Map<String, dynamic>>(
+          listener: (context, state) {
+            if (state['state'] == 'done') {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Listing Created Successfully!'),
+                  backgroundColor: Colors.green,
+                ),
+              );
+              // Return to previous screen and signal that a listing was created
+              Navigator.pop(context, true);
+            } else if (state['state'] == 'error') {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state['message'] ?? 'Failed to create listing'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
           },
+          child: BlocBuilder<MyListingsCubit, Map<String, dynamic>>(
+            builder: (context, state) {
+              final isLoading = state['state'] == 'loading';
+              final isError = state['state'] == 'error';
+              final errorMessage = isError
+                  ? (state['message'] as String?)
+                  : null;
+
+              return ProgressButton(
+                label: 'Create Listing',
+                backgroundColor: theme.colorScheme.primary,
+                textColor: theme.colorScheme.onPrimary,
+                isLoading: isLoading,
+                isError: isError,
+                errorMessage: errorMessage,
+                onPressed: () {
+                  // Validate form
+                  if (!_formKey.currentState!.validate()) {
+                    return;
+                  }
+
+                  // Call cubit to create listing
+                  context.read<MyListingsCubit>().createListing(
+                    title: _titleController.text,
+                    description: _descriptionController.text,
+                    price: double.parse(_priceController.text),
+                    location: _locationController.text,
+                    bedrooms: int.parse(_bedroomsController.text),
+                    bathrooms: 1,
+                    classification: _classification,
+                    propertyType: _propertyType,
+                    image: _photos.first,
+                  );
+                },
+              );
+            },
+          ),
         ),
       ),
     );
