@@ -8,6 +8,7 @@ import '../widgets/property_features.dart';
 import '../widgets/property_description.dart';
 import '../widgets/agent_card.dart';
 import '../widgets/similar_properties_list.dart';
+import 'package:findar/l10n/app_localizations.dart';
 
 class PropertyDetailsScreen extends StatefulWidget {
   const PropertyDetailsScreen({super.key});
@@ -26,6 +27,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
@@ -34,7 +36,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
         foregroundColor: Theme.of(context).colorScheme.onSurface,
         centerTitle: false,
         title: Text(
-          'Property Details',
+          l10n.propertyDetails,
           style: TextStyle(
             fontWeight: FontWeight.w600,
             color: Theme.of(context).colorScheme.onSurface,
@@ -70,7 +72,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                   Text('Error: ${state['message'] ?? 'Unknown error'}'),
                   SizedBox(height: 16),
                   ProgressButton(
-                    label: 'Retry',
+                    label: l10n.retry,
                     backgroundColor: Theme.of(context).colorScheme.primary,
                     textColor: Theme.of(context).colorScheme.onPrimary,
                     onPressed: () {
@@ -110,7 +112,11 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                         address:
                             property['address'] ??
                             '123 Sunshine Avenue, Meadowville',
-                        price: property['price'] ?? '\$550,000',
+                        price: (property['price'] is double)
+                            ? property['price']
+                            : (property['price'] is int)
+                                ? (property['price'] as int).toDouble()
+                                : 550000.0,
                       ),
                       const SizedBox(height: 16),
                       PropertyFeatures(
@@ -143,9 +149,11 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                               image:
                                   similarProperties[index]['image'] ??
                                   'assets/find-dar-test1.jpg',
-                              price:
-                                  similarProperties[index]['price'] ??
-                                  '\$525,000',
+                              price: (similarProperties[index]['price'] is double)
+                                  ? similarProperties[index]['price']
+                                  : (similarProperties[index]['price'] is int)
+                                      ? (similarProperties[index]['price'] as int).toDouble()
+                                      : 525000.0,
                               address:
                                   similarProperties[index]['address'] ??
                                   '456 Oak St',

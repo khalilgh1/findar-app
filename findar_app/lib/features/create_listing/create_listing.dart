@@ -12,6 +12,7 @@ import './widgets/numeric_field.dart';
 import './widgets/location_field.dart';
 //package imports
 import 'package:findar/logic/cubits/my_listings_cubit.dart';
+import 'package:findar/l10n/app_localizations.dart';
 
 //widgets
 import '../../core/widgets/progress_button.dart';
@@ -91,6 +92,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
       appBar: AppBar(
@@ -102,7 +104,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Create New Listing',
+          l10n.createNewListing,
           style: theme.textTheme.headlineLarge?.copyWith(
             color: theme.colorScheme.onSurface,
           ),
@@ -119,7 +121,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Property Title Section
-                Text('Property Title', style: theme.textTheme.headlineSmall),
+                Text(l10n.propertyTitle, style: theme.textTheme.headlineSmall),
                 const SizedBox(height: 12),
                 PropertyTitle(
                   titleController: _titleController,
@@ -128,7 +130,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
                 ),
                 const SizedBox(height: 24),
                 // Description Section
-                Text('Description', style: theme.textTheme.headlineSmall),
+                Text(l10n.description, style: theme.textTheme.headlineSmall),
                 const SizedBox(height: 12),
                 Description(
                   descriptionController: _descriptionController,
@@ -137,7 +139,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
                 ),
               const SizedBox(height: 24),
               // Classification Section
-              Text('Classification', style: theme.textTheme.headlineSmall),
+              Text(l10n.classification, style: theme.textTheme.headlineSmall),
               const SizedBox(height: 12),
               CustomSelector(
                 selectedOption: _classification,
@@ -158,7 +160,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Price', style: theme.textTheme.headlineSmall),
+                        Text(l10n.price, style: theme.textTheme.headlineSmall),
                         const SizedBox(height: 12),
                         priceField(
                           priceController: _priceController,
@@ -174,7 +176,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Property Type',
+                          l10n.propertyType,
                           style: theme.textTheme.headlineSmall,
                         ),
                         const SizedBox(height: 12),
@@ -229,7 +231,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
                 children: [
                   Expanded(
                     child: NumericField(
-                      label: 'Floors',
+                      label: l10n.floors,
                       hint: 'e.g. 2',
                       controller: _floorsController,
                       keyboardType: TextInputType.number,
@@ -239,7 +241,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
                   const SizedBox(width: 16),
                   Expanded(
                     child: NumericField(
-                      label: 'Rooms',
+                      label: l10n.rooms,
                       hint: 'e.g. 5',
                       controller: _roomsController,
                       keyboardType: TextInputType.number,
@@ -249,7 +251,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
                   const SizedBox(width: 16),
                   Expanded(
                     child: NumericField(
-                      label: 'Bedrooms',
+                      label: l10n.bedrooms,
                       hint: 'e.g. 3',
                       controller: _bedroomsController,
                       keyboardType: TextInputType.number,
@@ -263,7 +265,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
               const SizedBox(height: 24),
 
               // Location Section
-              Text('Location', style: theme.textTheme.headlineSmall),
+              Text(l10n.location, style: theme.textTheme.headlineSmall),
               const SizedBox(height: 12),
               LocationField(
                 locationController: _locationController,
@@ -273,7 +275,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
               const SizedBox(height: 24),
 
               // Photos Section
-              Text('Photos', style: theme.textTheme.headlineSmall),
+              Text(l10n.photos, style: theme.textTheme.headlineSmall),
               const SizedBox(height: 12),
               Row(
                 children: [
@@ -391,7 +393,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Add Photos',
+                          l10n.addPhotos,
                           style: TextStyle(
                             color: Colors.grey[400],
                             fontSize: 14,
@@ -406,7 +408,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
               const SizedBox(height: 24),
 
               // Status Section
-              Text('Status', style: theme.textTheme.headlineSmall),
+              Text(l10n.status, style: theme.textTheme.headlineSmall),
               const SizedBox(height: 12),
               CustomSelector(
                 selectedOption: _status,
@@ -456,7 +458,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
                   : null;
 
               return ProgressButton(
-                label: 'Create Listing',
+                label: l10n.createListing,
                 backgroundColor: theme.colorScheme.primary,
                 textColor: theme.colorScheme.onPrimary,
                 isLoading: isLoading,

@@ -7,6 +7,7 @@ import '../../../../core/widgets/appbar_title.dart';
 import '../../../../core/widgets/property_card.dart';
 import '../../../../core/widgets/sort_and_filter.dart';
 import '../../../../core/widgets/progress_button.dart';
+import 'package:findar/l10n/app_localizations.dart';
 
 class SearchResultsScreen extends StatefulWidget {
   const SearchResultsScreen({super.key});
@@ -48,6 +49,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
@@ -63,7 +65,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
           ),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const AppbarTitle(title: 'Search Results'),
+        title: AppbarTitle(title: l10n.searchResults),
         actions: [
           IconButton(
             icon: Icon(
@@ -89,7 +91,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
             child: Row(
               children: [
                 FilterButton(
-                  text: 'Sort',
+                  text: l10n.sort,
                   icon: Icons.swap_vert,
                   onPressed: () {
                     _showSortBottomSheet(context);
@@ -97,7 +99,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                 ),
                 SizedBox(width: screenWidth * 0.03),
                 FilterButton(
-                  text: 'Filter',
+                  text: l10n.filter,
                   icon: Icons.tune,
                   onPressed: () {
                     _showFilterBottomSheet(context);
@@ -125,7 +127,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                         ),
                         SizedBox(height: 16),
                         ProgressButton(
-                          label: 'Retry',
+                          label: l10n.retry,
                           backgroundColor: Theme.of(
                             context,
                           ).colorScheme.primary,
@@ -178,6 +180,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
   Widget _buildEmptyState() {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+    final l10n = AppLocalizations.of(context)!;
 
     return Center(
       child: Column(
@@ -190,7 +193,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
           ),
           SizedBox(height: screenHeight * 0.02),
           Text(
-            'No properties found',
+            l10n.noPropertiesFound,
             style: TextStyle(
               fontSize: screenWidth * 0.05,
               fontWeight: FontWeight.w600,
@@ -199,7 +202,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
           ),
           SizedBox(height: screenHeight * 0.01),
           Text(
-            'Please try adjusting your search filters.',
+            l10n.pleaseTryAdjustingFilters,
             style: TextStyle(
               fontSize: screenWidth * 0.035,
               color: Colors.grey[600],

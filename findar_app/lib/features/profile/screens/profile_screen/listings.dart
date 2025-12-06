@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:findar/l10n/app_localizations.dart';
 
 class ListingCard extends StatelessWidget {
   final String imagePath;
@@ -15,6 +16,7 @@ class ListingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Container(
       width: 235,
@@ -73,7 +75,7 @@ class ListingCard extends StatelessWidget {
                         Navigator.pushNamed(context, '/property-details'),
                       },
                       child: Text(
-                        'View Listing',
+                        l10n.viewListing,
 
                         style: TextStyle(
                           fontWeight: FontWeight.bold,

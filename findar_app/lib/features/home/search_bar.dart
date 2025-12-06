@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:findar/l10n/app_localizations.dart';
 
 const hpaddingSearchBar = 12.0;
 const vpaddingSearchBar = 3.0;
@@ -9,6 +10,7 @@ class SearchBarWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: hpaddingSearchBar,
@@ -38,7 +40,7 @@ class SearchBarWidget extends StatelessWidget {
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
           
-                hintText: "Search for properties, agents, or locations",
+                hintText: l10n.searchHint,
                 border: InputBorder.none,
               ),
                 onSubmitted: (value) {

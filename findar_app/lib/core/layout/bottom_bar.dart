@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:findar/l10n/app_localizations.dart';
 
 class BottomBar extends StatelessWidget {
   const BottomBar({
@@ -16,6 +17,7 @@ class BottomBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return BottomNavigationBar(
       type: BottomNavigationBarType.fixed,
       backgroundColor: theme.colorScheme.surface,
@@ -24,19 +26,19 @@ class BottomBar extends StatelessWidget {
       currentIndex: index,
       elevation: 0,
       iconSize: screenWidth.clamp(10, 25),
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: 'Home'),
+      items: [
+        BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: l10n.home),
         BottomNavigationBarItem(
           icon: Icon(Icons.bookmark_outline),
-          label: 'Saved',
+          label: l10n.saved,
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.article_outlined),
-          label: 'My Posts',
+          label: l10n.listings,
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.person_outline),
-          label: 'Profile',
+          label: l10n.profile,
         ),
       ],
       onTap: (index) {

@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:findar/logic/cubits/settings_cubit.dart';
 import 'package:provider/provider.dart';
 import '../../../core/theme/theme_provider.dart';
+import 'package:findar/l10n/app_localizations.dart';
+import 'package:findar/logic/cubits/language_cubit.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -40,7 +42,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         centerTitle: true,
         title: Text(
-          'Settings',
+          AppLocalizations.of(context)!.settings,
           style: textTheme.headlineMedium?.copyWith(
             color: colorScheme.onSurface,
           ),
@@ -52,7 +54,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
             child: Text(
-              'Appearance',
+              AppLocalizations.of(context)!.appearance,
               style: textTheme.headlineMedium?.copyWith(
                 color: colorScheme.onSurface,
               ),
@@ -66,7 +68,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
             child: Text(
-              'Language',
+              AppLocalizations.of(context)!.language,
               style: textTheme.headlineMedium?.copyWith(
                 color: colorScheme.onSurface,
               ),
@@ -74,6 +76,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           _buildLanguageOption('English', colorScheme, textTheme),
           _buildLanguageOption('Arabic', colorScheme, textTheme),
+          _buildLanguageOption('French', colorScheme, textTheme),
 
           const SizedBox(height: 24),
 
@@ -81,7 +84,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
             child: Text(
-              'Contact Us',
+              AppLocalizations.of(context)!.contactUs,
               style: textTheme.headlineMedium?.copyWith(
                 color: colorScheme.onSurface,
               ),
@@ -158,7 +161,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
             title: Text(
-              'Dark Mode',
+              AppLocalizations.of(context)!.darkMode,
               style: textTheme.bodyMedium?.copyWith(
                 fontSize: 18,
                 color: colorScheme.onSurface,
@@ -179,9 +182,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _buildLanguageOption(String language, ColorScheme colorScheme, TextTheme textTheme) {
-    return BlocBuilder<SettingsCubit, Map<String, dynamic>>(
-      builder: (context, state) {
-        final currentLanguage = state['language'] as String? ?? 'en';
+    return BlocBuilder<LanguageCubit, String>(
+      builder: (context, currentLanguage) {
         final languageMap = {'English': 'en', 'Arabic': 'ar', 'French': 'fr'};
         final isSelected = languageMap[language] == currentLanguage;
 
@@ -213,7 +215,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   )
                 : null,
             onTap: () {
-              context.read<SettingsCubit>().changeLanguage(languageMap[language]!);
+              context.read<LanguageCubit>().changeLanguage(languageMap[language]!);
             },
           ),
         );
