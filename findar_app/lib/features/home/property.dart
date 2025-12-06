@@ -18,7 +18,7 @@ class Property {
     required this.details,
     required this.bookmarked,
   });
-  static Property convertListing(PropertyListing p) {
+  static Property convertListing(PropertyListing p, {bool bookmarked = false}) {
     return Property(
       id: p.id,
       title: p.title,
@@ -26,7 +26,7 @@ class Property {
       price: "${p.price.toString()}\$",
       address: p.location,
       details: "${p.bedrooms} beds • ${p.bathrooms} baths •",
-      bookmarked: false,
+      bookmarked: bookmarked,
     );
   }
 }

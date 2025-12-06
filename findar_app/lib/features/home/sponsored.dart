@@ -22,10 +22,24 @@ class _PropertyCardState extends State<PropertyCard> {
   }
 
   void _toggleSave() {
-    setState(() {
-      _bookmarked = !_bookmarked;
-    });
-    context.read<SponsoredCubit>().saveListing(widget.property.id);
+    final cubit = context.read<SponsoredCubit>();
+    print('Before toggle: _bookmarked=$_bookmarked, id=${widget.property.id}');
+    
+    if (_bookmarked) {
+      // Currently saved, so unsave it
+      print('Unsaving listing ${widget.property.id}');
+      setState(() {
+        _bookmarked = false;
+      });
+      cubit.unsaveListing(widget.property.id);
+    } else {
+      // Currently not saved, so save it
+      print('Saving listing ${widget.property.id}');
+      setState(() {
+        _bookmarked = true;
+      });
+      cubit.saveListing(widget.property.id);
+    }
   }
 
   @override

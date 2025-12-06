@@ -3,12 +3,12 @@ import 'package:findar/core/models/return_result.dart';
 import 'package:findar/core/repositories/abstract_listing_repo.dart';
 
 /// SponsoredCubit handles searching/ (filtering based on type) listings and saving a listing
-/// State shape: { data: List<PropertyListing>, state: 'initial|loading|done|error', message: '' }
+/// State shape: { data: List<PropertyListing>, state: 'initial|loading|done|error', message: '', savedIds: Set<int> }
 class SponsoredCubit extends Cubit<Map<String, dynamic>> {
   final ListingRepository repository;
 
   SponsoredCubit(this.repository)
-    : super({'data': [], 'state': 'initial', 'message': ''});
+    : super({'data': [], 'state': 'initial', 'message': '', 'savedIds': <int>{}});
 
   /// Fetch filtered listings using the abstract repository
   Future<void> getSponsoredListings({String? listingType}) async {
@@ -16,10 +16,12 @@ class SponsoredCubit extends Cubit<Map<String, dynamic>> {
 
     try {
       final sponsoredListings = await repository.getSponsoredListings();
+      final savedIds = await repository.getSavedListingIds();
 
       emit({
         ...state,
         'data': sponsoredListings,
+        'savedIds': savedIds,
         'state': 'done',
         'message': 'Listings loaded',
       });
@@ -38,7 +40,10 @@ class SponsoredCubit extends Cubit<Map<String, dynamic>> {
       final result = await repository.saveListing(listingId);
 
       if (result.state) {
-        emit({...state, 'message': result.message});
+        // Update savedIds in state
+        final currentSavedIds = Set<int>.from(state['savedIds'] as Set<int>);
+        currentSavedIds.add(listingId);
+        emit({...state, 'message': result.message, 'savedIds': currentSavedIds});
       } else {
         emit({...state, 'message': result.message});
       }
@@ -48,6 +53,31 @@ class SponsoredCubit extends Cubit<Map<String, dynamic>> {
       final err = ReturnResult(
         state: false,
         message: 'Failed to save listing: ${e.toString()}',
+      );
+      emit({...state, 'message': err.message});
+      return err;
+    }
+  }
+
+  /// Unsave a listing (remove from favorites) using the abstract repository
+  Future<ReturnResult> unsaveListing(int listingId) async {
+    try {
+      final result = await repository.unsaveListing(listingId);
+
+      if (result.state) {
+        // Update savedIds in state
+        final currentSavedIds = Set<int>.from(state['savedIds'] as Set<int>);
+        currentSavedIds.remove(listingId);
+        emit({...state, 'message': result.message, 'savedIds': currentSavedIds});
+      } else {
+        emit({...state, 'message': result.message});
+      }
+
+      return result;
+    } catch (e) {
+      final err = ReturnResult(
+        state: false,
+        message: 'Failed to unsave listing: ${e.toString()}',
       );
       emit({...state, 'message': err.message});
       return err;

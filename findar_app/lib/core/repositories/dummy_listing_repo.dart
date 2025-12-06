@@ -11,8 +11,7 @@ class DummyListingRepository implements ListingRepository {
 
   DummyListingRepository() {
     _initializeDummyData();
-    // Initialize saved listings after dummy data is created
-    _initializeSavedListings();
+    // Don't auto-initialize saved listings - let users save them manually
   }
 
   /// Initialize with dummy data
@@ -139,12 +138,6 @@ class DummyListingRepository implements ListingRepository {
         createdAt: '2024-11-30T15:00:00Z',
       ),
     ]);
-  }
-
-  /// Initialize some listings as saved for demo purposes
-  void _initializeSavedListings() {
-    // Mark the first 4 listings as saved
-    _savedListingIds.addAll([1, 2, 3, 4]);
   }
 
   @override
@@ -457,11 +450,6 @@ class DummyListingRepository implements ListingRepository {
     await Future.delayed(const Duration(milliseconds: 500));
 
     try {
-      // Ensure we have some saved listings for demo
-      if (_savedListingIds.isEmpty && _listings.isNotEmpty) {
-        _savedListingIds.addAll([1, 2, 3, 4]);
-      }
-      
       // Return all listings that are in the saved set
       final savedListings = _listings
           .where((listing) => _savedListingIds.contains(listing.id))
@@ -471,6 +459,15 @@ class DummyListingRepository implements ListingRepository {
     } catch (e) {
       return [];
     }
+  }
+
+  @override
+  Future<Set<int>> getSavedListingIds() async {
+    // Simulate network delay
+    await Future.delayed(const Duration(milliseconds: 100));
+    
+    // Return the saved listing IDs without auto-initialization
+    return Set.from(_savedListingIds);
   }
 
   /// Reset to initial dummy data

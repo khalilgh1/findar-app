@@ -29,7 +29,44 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Scaffold(
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<SponsoredCubit, Map<String, dynamic>>(
+          listenWhen: (previous, current) {
+            return previous['message'] != current['message'];
+          },
+          listener: (context, state) {
+            final message = state['message'] as String? ?? '';
+            if (message.isNotEmpty && (message.toLowerCase().contains('saved') || 
+                message.toLowerCase().contains('removed'))) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(message),
+                  duration: const Duration(seconds: 2),
+                ),
+              );
+            }
+          },
+        ),
+        BlocListener<RecentCubit, Map<String, dynamic>>(
+          listenWhen: (previous, current) {
+            return previous['message'] != current['message'];
+          },
+          listener: (context, state) {
+            final message = state['message'] as String? ?? '';
+            if (message.isNotEmpty && (message.toLowerCase().contains('saved') || 
+                message.toLowerCase().contains('removed'))) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(message),
+                  duration: const Duration(seconds: 2),
+                ),
+              );
+            }
+          },
+        ),
+      ],
+      child: Scaffold(
       backgroundColor: theme.colorScheme.surface,
       appBar: AppBar(
         scrolledUnderElevation: 0,
@@ -107,9 +144,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     }
 
                     final raw = state['data'];
+                    final savedIds = state['savedIds'] as Set<int>? ?? <int>{};
 
                     final listings = raw is List
-                        ? raw.map((e) => Property.convertListing(e)).toList()
+                        ? raw.map((e) => Property.convertListing(e, bookmarked: savedIds.contains(e.id))).toList()
                         : [];
 
                     final displayListings = listings;
@@ -164,10 +202,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     }
 
                     final recentraw = state['data'];
+                    final savedIds = state['savedIds'] as Set<int>? ?? <int>{};
 
                     final recentlistings = recentraw is List
                         ? recentraw
-                              .map((e) => Property.convertListing(e))
+                              .map((e) => Property.convertListing(e, bookmarked: savedIds.contains(e.id)))
                               .toList()
                         : [];
 
@@ -196,6 +235,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       bottomNavigationBar: BuildBottomNavBar(index: 0),
+    ),
     );
   }
 }
