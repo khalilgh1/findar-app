@@ -83,7 +83,16 @@ abstract class ListingRepository {
   /// Returns listings that are marked as boosted/sponsored
   Future<List<PropertyListing>> getSponsoredListings();
 
+  /// Get saved/favorite listings for the current user
+  ///
+  /// Returns all listings that the user has saved/favorited
+  Future<List<PropertyListing>> getSavedListings();
+
   /// Save a listing (add to user's favorites)
   /// Returns a [ReturnResult] indicating success or failure
   Future<ReturnResult> saveListing(int listingId);
+
+  /// Unsave a listing (remove from user's favorites)
+  /// Returns a [ReturnResult] indicating success or failure
+  Future<ReturnResult> unsaveListing(int listingId);
 }
