@@ -1,7 +1,9 @@
 import 'package:findar/features/create_listing/create_listing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
+import 'l10n/app_localizations.dart';
 import './features/home/home.dart';
 import './features/search/screens/filtering.dart';
 import 'core/theme/app_theme.dart';
@@ -40,6 +42,7 @@ import 'logic/cubits/settings_cubit.dart';
 import 'logic/cubits/boost_cubit.dart';
 import 'logic/cubits/sort_cubit.dart';
 import 'core/models/property_listing_model.dart';
+import 'logic/cubits/language_cubit.dart';
 import 'core/models/sponsorship_plan.dart';
 import 'features/listings/screens/sponsorship_plans/sponsorship_plans_screen.dart';
 import 'features/listings/screens/payment_confirmation/payment_confirmation_screen.dart';
@@ -64,6 +67,7 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
+        BlocProvider(create: (_) => LanguageCubit()),
         BlocProvider(create: (_) => AuthCubit()),
         BlocProvider(create: (_) => CreateListingCubit(repo)),
         BlocProvider(create: (_) => ListingsCubit(repo)),
@@ -84,12 +88,26 @@ class MainApp extends StatelessWidget {
         create: (context) => ThemeProvider(),
         child: Consumer<ThemeProvider>(
           builder: (context, themeProvider, child) {
-            return MaterialApp(
-              theme: lightTheme,
-              // theme: darkTheme,
-              darkTheme: darkTheme,
-              themeMode: themeProvider.themeMode,
-              debugShowCheckedModeBanner: false,
+            return BlocBuilder<LanguageCubit, String>(
+              builder: (context, language) {
+                return MaterialApp(
+                  theme: lightTheme,
+                  // theme: darkTheme,
+                  darkTheme: darkTheme,
+                  themeMode: themeProvider.themeMode,
+                  debugShowCheckedModeBanner: false,
+                  locale: Locale(language),
+                  localizationsDelegates: [
+                AppLocalizations.delegate,
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+              ],
+              supportedLocales: [
+                Locale('en'),
+                Locale('ar'),
+                Locale('fr'),
+              ],
               initialRoute: '/demoscreen',
               onGenerateRoute: (settings) {
                 // Handle edit listing route with arguments
@@ -156,6 +174,8 @@ class MainApp extends StatelessWidget {
                 return MaterialPageRoute(
                   builder: (context) => const SplashScreen(),
                 );
+              },
+            );
               },
             );
           },

@@ -10,6 +10,7 @@ import 'property.dart';
 import 'listings.dart';
 import 'sponsored.dart';
 import '../../../core/widgets/build_bottom_bar.dart';
+import 'package:findar/l10n/app_localizations.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -30,6 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     return MultiBlocListener(
       listeners: [
         BlocListener<SponsoredCubit, Map<String, dynamic>>(
@@ -112,7 +114,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   CategoryBar(),
                   SizedBox(height: 20),
                   Text(
-                    "Sponsored Properties",
+                    l10n.sponsoredProperties,
                     style: theme.textTheme.headlineLarge?.copyWith(
                       color: theme.colorScheme.onSurface,
                     ),
@@ -132,7 +134,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                               SizedBox(height: 16),
                               ProgressButton(
-                                label: 'Retry',
+                                label: l10n.retry,
                                 backgroundColor: theme.colorScheme.primary,
                                 textColor: theme.colorScheme.onPrimary,
                                 onPressed: () {
@@ -183,7 +185,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   SizedBox(height: 25),
                   Text(
-                    "Recent Listings",
+                    l10n.recentListings,
                     style: theme.textTheme.headlineLarge?.copyWith(
                       color: theme.colorScheme.onSurface,
                     ),

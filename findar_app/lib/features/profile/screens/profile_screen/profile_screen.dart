@@ -6,6 +6,7 @@ import 'listings.dart';
 import 'profile_info.dart';
 import '../../../../core/widgets/progress_button.dart';
 import '../../../../core/widgets/build_bottom_bar.dart';
+import 'package:findar/l10n/app_localizations.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -25,6 +26,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
@@ -41,7 +43,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Profile',
+          l10n.profile,
           style: TextStyle(
             color: Theme.of(context).colorScheme.onSurface,
             fontWeight: FontWeight.w600,
@@ -53,9 +55,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             onPressed: () {
               Navigator.pushNamed(context, '/edit-profile');
             },
-            child: const Text(
-              'Edit',
-              style: TextStyle(color: Colors.blue, fontSize: 16),
+            child: Text(
+              l10n.edit,
+              style: const TextStyle(color: Colors.blue, fontSize: 16),
             ),
           ),
         ],
@@ -81,7 +83,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Text('Error: ${state['message'] ?? 'Unknown error'}'),
                   SizedBox(height: 16),
                   ProgressButton(
-                    label: 'Retry',
+                    label: l10n.retry,
                     backgroundColor: Theme.of(context).colorScheme.primary,
                     textColor: Theme.of(context).colorScheme.onPrimary,
                     onPressed: () {
@@ -136,7 +138,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         Navigator.pushNamed(context, '/my-listings'),
                       },
                       child: Text(
-                        'Listings',
+                        l10n.listings,
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
@@ -160,7 +162,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         color: theme.colorScheme.onPrimary,
                       ),
                       label: Text(
-                        'Add New',
+                        l10n.addNew,
                         style: TextStyle(
                           color: theme.colorScheme.onPrimary,
                           fontWeight: FontWeight.bold,
@@ -191,7 +193,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 const SizedBox(height: 6),
                 ProgressButton(
-                  label: 'Logout',
+                  label: l10n.logout,
                   backgroundColor: const Color(0xFFFFEDED),
                   textColor: Colors.red,
                   onPressed: () {

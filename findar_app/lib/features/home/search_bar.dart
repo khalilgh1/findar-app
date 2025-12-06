@@ -1,6 +1,10 @@
 import 'package:findar/logic/cubits/search_cubit.dart';
 import 'package:flutter/material.dart';
+<<<<<<< HEAD
 import 'package:provider/provider.dart';
+=======
+import 'package:findar/l10n/app_localizations.dart';
+>>>>>>> origin/localizations
 
 const hpaddingSearchBar = 12.0;
 const vpaddingSearchBar = 3.0;
@@ -11,6 +15,7 @@ class SearchBarWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: hpaddingSearchBar,
@@ -40,7 +45,7 @@ class SearchBarWidget extends StatelessWidget {
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
           
-                hintText: "Search for properties, agents, or locations",
+                hintText: l10n.searchHint,
                 border: InputBorder.none,
               ),
                 onSubmitted: (value) {

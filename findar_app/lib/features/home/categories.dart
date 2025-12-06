@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:findar/logic/cubits/home/recent_listings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:findar/l10n/app_localizations.dart';
 
 const categroiesHeight = 34.0;
 
@@ -12,18 +13,26 @@ class CategoryBar extends StatefulWidget {
 }
 
 class _CategoryBarState extends State<CategoryBar> {
-  final List<String> categories = [
-    "Any",
-    "For Sale",
-    "For Rent",
-    "Commercial",
-    "New Constructions",
-  ];
+  late final List<String> categories;
+  late final AppLocalizations l10n;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    l10n = AppLocalizations.of(context)!;
+    categories = [
+      l10n.any,
+      l10n.forSale,
+      l10n.forRent,
+      l10n.commercial,
+      l10n.newConstructions,
+    ];
+  }
 
   void newfilter() {
     String? listingtype = categories[selectedIndex];
 
-    if (listingtype == 'Any') {
+    if (listingtype == l10n.any) {
       listingtype = null;
     }
     context.read<RecentCubit>().getRecentListings(listingType: listingtype);

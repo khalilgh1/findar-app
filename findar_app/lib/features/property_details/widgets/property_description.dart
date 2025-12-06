@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:findar/l10n/app_localizations.dart';
 
 class PropertyDescription extends StatelessWidget {
   final String description;
@@ -12,12 +13,13 @@ class PropertyDescription extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Description',
+          l10n.description,
           style: textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.bold,
           ),

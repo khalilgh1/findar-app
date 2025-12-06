@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:findar/l10n/app_localizations.dart';
 
 class SimilarPropertiesList extends StatelessWidget {
   final List<SimilarProperty> properties;
@@ -11,12 +12,13 @@ class SimilarPropertiesList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Similar Properties',
+          l10n.similarProperties,
           style: textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.bold,
           ),

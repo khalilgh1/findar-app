@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:findar/logic/cubits/auth_cubit.dart';
 import '../../../core/widgets/progress_button.dart';
+import 'package:findar/l10n/app_localizations.dart';
 
 
 class LoginScreen extends StatefulWidget {
@@ -17,28 +18,29 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _passwordController = TextEditingController();
   bool _obscurePassword = true;
 
-  /// Validate email format
-  String? _validateEmail(String? email) {
-    if (email == null || email.isEmpty) {
-      return 'Email is required';
-    }
-    final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
-    if (!emailRegex.hasMatch(email)) {
-      return 'Please enter a valid email address';
-    }
-    return null;
-  }
-
-  String? _validatePassword(String? password) {
-    if (password == null || password.isEmpty) {
-      return 'Password is required';
-    }
-    return null;
-  }
-
   @override
   Widget build(BuildContext context) {
   final theme = Theme.of(context);
+  final l10n = AppLocalizations.of(context)!;
+  
+  /// Validate email format - defined here to access l10n
+  String? validateEmail(String? email) {
+    if (email == null || email.isEmpty) {
+      return l10n.emailRequired;
+    }
+    final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+    if (!emailRegex.hasMatch(email)) {
+      return l10n.invalidEmail;
+    }
+    return null;
+  }
+
+  String? validatePassword(String? password) {
+    if (password == null || password.isEmpty) {
+      return l10n.passwordRequired;
+    }
+    return null;
+  }
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
@@ -61,7 +63,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 10),
                  Text(
-                  'Welcome Back!',
+                  l10n.welcomeBack,
                   style: TextStyle(
                     color: Theme.of( context).colorScheme.onSurface,
                     fontSize: 25,
@@ -72,7 +74,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    'Email Address',
+                    l10n.emailAddress,
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.onSurface,
                       fontSize: 14,
@@ -83,9 +85,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 6),
                 TextFormField(
                   controller: _emailController,
-                  validator: _validateEmail,
+                  validator: validateEmail,
                   decoration: InputDecoration(
-                    hintText: 'Enter your email',
+                    hintText: l10n.enterEmail,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -104,7 +106,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    'Password',
+                    l10n.password,
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.onSurface,
                       fontSize: 14,
@@ -116,9 +118,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 TextFormField(
                   controller: _passwordController,
                   obscureText: _obscurePassword,
-                  validator: _validatePassword,
+                  validator: validatePassword,
                   decoration: InputDecoration(
-                    hintText: 'Enter your password',
+                    hintText: l10n.enterPassword,
                     suffixIcon: IconButton(
                       icon: Icon(
                         _obscurePassword ? Icons.visibility_off : Icons.visibility,
@@ -152,7 +154,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       Navigator.pushNamed(context, '/forgot-password');
                     },
                     child: Text(
-                      'Forgot Password?',
+                      l10n.forgotPassword,
                       style: TextStyle(
                         color: theme.colorScheme.primary,
                         fontSize: 14,
@@ -165,8 +167,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   listener: (context, state) {
                     if (state['state'] == 'done') {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Login successful'),
+                        SnackBar(
+                          content: Text(l10n.success),
                           backgroundColor: Colors.green,
                         ),
                       );
@@ -187,7 +189,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           );
                         }
                       },
-                      label: 'Login',
+                      label: l10n.login,
                       isLoading: isLoading,
                       isError: isError,
                       errorMessage: errorMessage,
@@ -201,7 +203,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      "Don't have an account?",
+                      l10n.dontHaveAccount,
                       style: TextStyle(color:theme.colorScheme.onSurface, fontSize: 14),
                     ),
                     TextButton(
@@ -209,7 +211,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         Navigator.pushNamed(context, '/register');
                       },
                       child: Text(
-                        'Register',
+                        l10n.register,
                         style: TextStyle(
                           color: theme.colorScheme.primary,
                           fontWeight: FontWeight.bold,

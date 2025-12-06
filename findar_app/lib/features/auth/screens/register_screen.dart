@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:findar/logic/cubits/auth_cubit.dart';
 import '../../../core/widgets/progress_button.dart';
+import 'package:findar/l10n/app_localizations.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -20,71 +21,72 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _passwordController = TextEditingController();
   bool _obscurePassword = true;
 
-  /// Validate name
-  String? _validateName(String? name) {
-    if (name == null || name.isEmpty) {
-      return 'Name is required';
-    }
-    if (name.length < 3) {
-      return 'Name must be at least 3 characters';
-    }
-    return null;
-  }
-
-  /// Validate password strength
-  /// Requirements:
-  /// - Minimum 6 characters
-  /// - At least one uppercase letter
-  /// - At least one number
-  String? _validatePassword(String? password) {
-    if (password == null || password.isEmpty) {
-      return 'Password is required';
-    }
-    if (password.length < 6) {
-      return 'Password must be at least 6 characters';
-    }
-    if (!password.contains(RegExp(r'[A-Z]'))) {
-      return 'Password must contain at least one uppercase letter';
-    }
-    if (!password.contains(RegExp(r'[0-9]'))) {
-      return 'Password must contain at least one number';
-    }
-    return null;
-  }
-
-  /// Validate email format
-  String? _validateEmail(String? email) {
-    if (email == null || email.isEmpty) {
-      return 'Email is required';
-    }
-    final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
-    if (!emailRegex.hasMatch(email)) {
-      return 'Please enter a valid email address';
-    }
-    return null;
-  }
-
-  /// Validate phone number (basic check)
-  String? _validatePhone(String? phone) {
-    if (phone == null || phone.isEmpty) {
-      return 'Phone number is required';
-    }
-    if (phone.length < 10) {
-      return 'Phone number must be at least 10 digits';
-    }
-    return null;
-  }
-
-  String? _validateAccountType(String? type) {
-    if (type == null || type.isEmpty) {
-      return 'Please select account type';
-    }
-    return null;
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+
+    /// Validate name - defined here to access l10n
+    String? validateName(String? name) {
+      if (name == null || name.isEmpty) {
+        return l10n.nameRequired;
+      }
+      if (name.length < 3) {
+        return l10n.nameTooShort;
+      }
+      return null;
+    }
+
+    /// Validate password strength
+    /// Requirements:
+    /// - Minimum 6 characters
+    /// - At least one uppercase letter
+    /// - At least one number
+    String? validatePassword(String? password) {
+      if (password == null || password.isEmpty) {
+        return l10n.passwordRequired;
+      }
+      if (password.length < 6) {
+        return l10n.passwordTooShort;
+      }
+      if (!password.contains(RegExp(r'[A-Z]'))) {
+        return l10n.passwordMissingUppercase;
+      }
+      if (!password.contains(RegExp(r'[0-9]'))) {
+        return l10n.passwordMissingNumber;
+      }
+      return null;
+    }
+
+    /// Validate email format
+    String? validateEmail(String? email) {
+      if (email == null || email.isEmpty) {
+        return l10n.emailRequired;
+      }
+      final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+      if (!emailRegex.hasMatch(email)) {
+        return l10n.invalidEmail;
+      }
+      return null;
+    }
+
+    /// Validate phone number (basic check)
+    String? validatePhone(String? phone) {
+      if (phone == null || phone.isEmpty) {
+        return l10n.phoneRequired;
+      }
+      if (phone.length < 10) {
+        return l10n.phoneTooShort;
+      }
+      return null;
+    }
+
+    String? validateAccountType(String? type) {
+      if (type == null || type.isEmpty) {
+        return l10n.accountTypeRequired;
+      }
+      return null;
+    };
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
@@ -107,7 +109,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
                 const SizedBox(height: 10),
                  Text(
-                  'Complete Your Registration',
+                  l10n.completeRegistration,
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.onSurface,
                     fontSize: 25,
@@ -118,7 +120,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 DropdownButtonFormField<String>(
                   dropdownColor: Theme.of(context).colorScheme.surface,
                   decoration: InputDecoration(
-                    hintText: 'Select Account Type',
+                    hintText: l10n.selectAccountType,
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                       ),
@@ -135,14 +137,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
                   ),
-                  hint: Text('Select Account Type', style: TextStyle(color: Theme.of(context).colorScheme.onSecondaryContainer),),
-                  items: <String>['Individual', 'Agency'].map((String value) {
+                  hint: Text(l10n.selectAccountType, style: TextStyle(color: Theme.of(context).colorScheme.onSecondaryContainer),),
+                  items: <String>[l10n.accountIndividual, l10n.accountAgency].map((String value) {
                     return DropdownMenuItem<String>(
                       value: value,
                       child: Text(value),
                     );
                   }).toList(),
-                  validator: _validateAccountType,
+                  validator: validateAccountType,
                   onChanged: (String? newValue) {
                     setState(() => _selectedAccountType = newValue);
                   },
@@ -152,7 +154,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    'Full Name',
+                    l10n.fullName,
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.onSurface,
                       fontSize: 14,
@@ -163,9 +165,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 const SizedBox(height: 6),
                 TextFormField(
                   controller: _nameController,
-                  validator: _validateName,
+                  validator: validateName,
                   decoration: InputDecoration(
-                    hintText: 'Enter your full name',
+                    hintText: l10n.enterFullName,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -184,7 +186,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    'Email Address',
+                    l10n.emailAddress,
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.onSurface,
                       fontSize: 14,
@@ -195,9 +197,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 const SizedBox(height: 6),
                 TextFormField(
                   controller: _emailController,
-                  validator: _validateEmail,
+                  validator: validateEmail,
                   decoration: InputDecoration(
-                    hintText: 'Enter your Email Address',
+                    hintText: l10n.enterEmail,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -216,7 +218,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    'Phone Number',
+                    l10n.phoneNumber,
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.onSurface,
                       fontSize: 14,
@@ -227,9 +229,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 const SizedBox(height: 6),
                 TextFormField(
                   controller: _phonenumberController,
-                  validator: _validatePhone,
+                  validator: validatePhone,
                   decoration: InputDecoration(
-                    hintText: 'Enter your phone number',
+                    hintText: l10n.enterPhone,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -248,7 +250,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    'Password',
+                    l10n.password,
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.onSurface,
                       fontSize: 14,
@@ -260,9 +262,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 TextFormField(
                   controller: _passwordController,
                   obscureText: _obscurePassword,
-                  validator: _validatePassword,
+                  validator: validatePassword,
                   decoration: InputDecoration(
-                    hintText: 'Enter your password',
+                    hintText: l10n.enterPassword,
                     suffixIcon: IconButton(
                       icon: Icon(
                         _obscurePassword ? Icons.visibility_off : Icons.visibility,
@@ -319,7 +321,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           );
                         }
                       },
-                      label: 'Register Now',
+                      label: l10n.registerNow,
                       isLoading: isLoading,
                       isError: isError,
                       errorMessage: errorMessage,
@@ -333,7 +335,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      "Already have an account?",
+                      l10n.alreadyHaveAccount,
                       style: TextStyle(color: theme.colorScheme.onSurface, fontSize: 14),
                     ),
                     TextButton(
@@ -341,7 +343,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         Navigator.pushNamed(context, '/login');
                       },
                       child: Text(
-                        'Login',
+                        l10n.login,
                         style: TextStyle(
                           color: theme.colorScheme.primary,
                           fontWeight: FontWeight.bold,

@@ -9,6 +9,7 @@ import '../../../core/widgets/property_card.dart';
 import '../../../core/widgets/progress_button.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/widgets/build_bottom_bar.dart';
+import 'package:findar/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 
 class SavedListingsScreen extends StatefulWidget {
@@ -31,6 +32,7 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
 
   void _toggleSave(int listingId) async {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     // Mark as removing to change icon color
     setState(() {
@@ -40,11 +42,11 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
     // Show snackbar immediately
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Text('Removed from saved'),
+        content: Text(l10n.removedFromSaved),
         backgroundColor: colorScheme.secondary,
         duration: const Duration(seconds: 3),
         action: SnackBarAction(
-          label: 'Undo',
+          label: l10n.undo,
           textColor: colorScheme.primary,
           onPressed: () {
             // Cancel removal
