@@ -15,6 +15,9 @@ class PropertyListing {
   final bool isBoosted;
   final DateTime? boostExpiryDate;
   final String? sponsorshipPlanId;
+  final String? owner_name;
+  final String? owner_image;
+  final String? owner_phone;
 
   const PropertyListing({
     required this.id,
@@ -33,7 +36,60 @@ class PropertyListing {
     this.isBoosted = false,
     this.boostExpiryDate,
     this.sponsorshipPlanId,
+    this.owner_name = null,
+    this.owner_image = null,
+    this.owner_phone = null,
   });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'title': title,
+      'description': description,
+      'price': price,
+      'location': location,
+      'bedrooms': bedrooms,
+      'bathrooms': bathrooms,
+      'classification': classification,
+      'property_type': propertyType,
+      'image': image,
+      'is_online': isOnline ? 1 : 0,
+      'created_at': createdAt,
+      'updated_at': updatedAt,
+      'is_boosted': isBoosted ? 1 : 0,
+      'boost_expiry_date': boostExpiryDate?.millisecondsSinceEpoch,
+      'sponsorship_plan_id': sponsorshipPlanId,
+      'owner_name': owner_name,
+      'owner_image': owner_image,
+      'owner_phone': owner_phone,
+    };
+  }
+
+  factory PropertyListing.fromMap(Map<String, dynamic> map) {
+    return PropertyListing(
+      id: map['id'] as int,
+      title: map['title'] as String,
+      description: map['description'] as String,
+      price: (map['price'] as num).toDouble(),
+      location: map['location'] as String,
+      bedrooms: map['bedrooms'] as int,
+      bathrooms: map['bathrooms'] as int,
+      classification: map['classification'] as String,
+      propertyType: map['property_type'] as String,
+      image: map['image'] as String,
+      isOnline: map['is_online'] == 1,
+      createdAt: map['created_at'] as String?,
+      updatedAt: map['updated_at'] as String?,
+      isBoosted: map['is_boosted'] == 1,
+      boostExpiryDate: map['boost_expiry_date'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(map['boost_expiry_date'])
+          : null,
+      sponsorshipPlanId: map['sponsorship_plan_id'] as String?,
+      owner_name: map['owner_name'] as String?,
+      owner_image: map['owner_image'] as String?,
+      owner_phone: map['owner_phone'] as String?,
+    );
+  }
 
   /// Create PropertyListing from JSON
   factory PropertyListing.fromJson(Map<String, dynamic> json) {
@@ -63,7 +119,7 @@ class PropertyListing {
       createdAt: json['created_at'] as String?,
       updatedAt: json['updated_at'] as String?,
       isBoosted: json['is_boosted'] as bool? ?? false,
-      boostExpiryDate: json['boost_expiry_date'] != null 
+      boostExpiryDate: json['boost_expiry_date'] != null
           ? DateTime.tryParse(json['boost_expiry_date'] as String)
           : null,
       sponsorshipPlanId: json['sponsorship_plan_id'] as String?,
@@ -87,7 +143,8 @@ class PropertyListing {
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       'is_boosted': isBoosted,
-      if (boostExpiryDate != null) 'boost_expiry_date': boostExpiryDate!.toIso8601String(),
+      if (boostExpiryDate != null)
+        'boost_expiry_date': boostExpiryDate!.toIso8601String(),
       if (sponsorshipPlanId != null) 'sponsorship_plan_id': sponsorshipPlanId,
     };
   }
@@ -109,6 +166,9 @@ class PropertyListing {
     bool? isBoosted,
     DateTime? boostExpiryDate,
     String? sponsorshipPlanId,
+    String? owner_name,
+    String? owner_image,
+    String? owner_phone,
   }) {
     return PropertyListing(
       id: id ?? this.id,
@@ -127,6 +187,9 @@ class PropertyListing {
       isBoosted: isBoosted ?? this.isBoosted,
       boostExpiryDate: boostExpiryDate ?? this.boostExpiryDate,
       sponsorshipPlanId: sponsorshipPlanId ?? this.sponsorshipPlanId,
+      owner_name: owner_name ?? this.owner_name,
+      owner_image: owner_image ?? this.owner_image,
+      owner_phone: owner_phone ?? this.owner_phone,
     );
   }
 }

@@ -36,6 +36,7 @@ import 'logic/cubits/my_listings_cubit.dart';
 import 'logic/cubits/profile_cubit.dart';
 import 'logic/cubits/settings_cubit.dart';
 import 'logic/cubits/boost_cubit.dart';
+import 'logic/cubits/sort_cubit.dart';
 import 'core/models/property_listing_model.dart';
 import 'core/models/sponsorship_plan.dart';
 import 'features/listings/screens/sponsorship_plans/sponsorship_plans_screen.dart';
@@ -71,6 +72,7 @@ class MainApp extends StatelessWidget {
         BlocProvider(create: (_) => MyListingsCubit(repo)),
         BlocProvider(create: (_) => ProfileCubit()),
         BlocProvider(create: (_) => SettingsCubit()),
+        BlocProvider(create: (_) => SortCubit()),
         BlocProvider(create: (_) => BoostCubit()),
         BlocProvider(create: (_) => RecentCubit(repo)),
         BlocProvider(create: (_) => SponsoredCubit(repo)),
