@@ -6,7 +6,7 @@ class Property {
   final int id;
   final String title;
   final String description;
-  final String price;
+  final double price;
   final String address;
   final int bedrooms;
   final int bathrooms;
@@ -53,7 +53,7 @@ class Property {
       id: json['id'] as int? ?? 0,
       title: json['title'] as String? ?? '',
       description: json['description'] as String? ?? '',
-      price: json['price'] as String? ?? '\$0',
+      price: (json['price'] as num?)?.toDouble() ?? 0.0,
       address: json['address'] as String? ?? '',
       bedrooms: json['bedrooms'] as int? ?? 0,
       bathrooms: json['bathrooms'] as int? ?? 0,
@@ -102,7 +102,7 @@ class Property {
     int? id,
     String? title,
     String? description,
-    String? price,
+    double? price,
     String? address,
     int? bedrooms,
     int? bathrooms,

@@ -1,51 +1,28 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:findar/core/repositories/abstract_listing_repo.dart';
+import 'package:findar/core/services/api_service.dart';
 
 /// PropertyDetailsCubit handles displaying detailed information about a property
 /// State: {data: {}, state: 'loading|done|error', message: ''}
 class PropertyDetailsCubit extends Cubit<Map<String, dynamic>> {
-  final ListingRepository? listingsRepository;
+  final ListingRepository listingsRepository;
 
-  PropertyDetailsCubit({this.listingsRepository})
-      : super({
-          'data': {},
-          'state': 'initial',
-          'message': '',
-        });
+  PropertyDetailsCubit(this.listingsRepository)
+    : super({'data': {}, 'state': 'initial', 'message': ''});
 
   /// Fetch property details by ID
   Future<void> fetchPropertyDetails(int propertyId) async {
     emit({...state, 'state': 'loading', 'message': ''});
 
     try {
-      // Mock property details
-      final mockProperty = {
-        'id': propertyId,
-        'title': 'Beautiful Apartment in Downtown',
-        'description':
-            'Spacious apartment with modern amenities, fully furnished',
-        'price': '\$50,000',
-        'address': 'Downtown',
-        'bedrooms': 3,
-        'bathrooms': 2,
-        'sqft': '1,500 sqft',
-        'images': [
-          'assets/find-dar-test1.jpg',
-          'assets/find-dar-test2.jpg',
-          'assets/find-dar-test3.jpg',
-        ],
-        'agentName': 'John Doe',
-        'agentCompany': 'Prestige Realty',
-        'agentImage': 'assets/profile.jpg',
-        'isSaved': false,
-        'similarProperties': [],
-      };
+      // get property details from repository
+      final property = await listingsRepository.getListingById(propertyId);
 
       await Future.delayed(const Duration(milliseconds: 800));
 
       emit({
         ...state,
-        'data': mockProperty,
+        'data': property != null ? property.toJson() : {},
         'state': 'done',
         'message': 'Property details loaded successfully',
       });
@@ -68,32 +45,33 @@ class PropertyDetailsCubit extends Cubit<Map<String, dynamic>> {
 
       if (isSaved) {
         // Remove from saved
-        await listingsRepository!.unsaveListing(propertyId);
-        emit({
-          ...state,
-          'data': {
-            ...currentData,
-            'isFavorite': false,
-          },
-          'message': 'Removed from favorites',
-        });
+        final result = await listingsRepository.unsaveListing(propertyId);
+
+        if (result.state) {
+          emit({
+            ...state,
+            'data': {...currentData, 'isFavorite': false},
+            'message': result.message,
+          });
+        } else {
+          emit({...state, 'message': result.message});
+        }
       } else {
         // Add to saved
-        await listingsRepository!.saveListing(propertyId);
-        emit({
-          ...state,
-          'data': {
-            ...currentData,
-            'isFavorite': true,
-          },
-          'message': 'Added to favorites',
-        });
+        final result = await listingsRepository.saveListing(propertyId);
+
+        if (result.state) {
+          emit({
+            ...state,
+            'data': {...currentData, 'isFavorite': true},
+            'message': result.message,
+          });
+        } else {
+          emit({...state, 'message': result.message});
+        }
       }
     } catch (e) {
-      emit({
-        ...state,
-        'message': 'Error toggling favorite: ${e.toString()}',
-      });
+      emit({...state, 'message': 'Error toggling favorite: ${e.toString()}'});
     }
   }
 
@@ -144,10 +122,7 @@ class PropertyDetailsCubit extends Cubit<Map<String, dynamic>> {
         },
       ];
 
-      emit({
-        ...state,
-        'similar': similarProperties,
-      });
+      emit({...state, 'similar': similarProperties});
     } catch (e) {
       emit({
         ...state,

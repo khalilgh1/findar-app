@@ -100,4 +100,7 @@ abstract class ListingRepository {
   /// Unsave a listing (remove from user's favorites)
   /// Returns a [ReturnResult] indicating success or failure
   Future<ReturnResult> unsaveListing(int listingId);
+
+  //get listing by id
+  Future<PropertyListing?> getListingById(int id);
 }

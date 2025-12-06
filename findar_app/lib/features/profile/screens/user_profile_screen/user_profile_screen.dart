@@ -90,12 +90,12 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 {
                   "imagePath": 'assets/find-dar-test1.jpg',
                   "title": 'house 1',
-                  "price": '\$127,000',
+                  "price": 127000.0,
                 },
                 {
                   "imagePath": 'assets/find-dar-test1.jpg',
                   "title": 'house 2',
-                  "price": '\$150,000',
+                  "price": 150000.0,
                 },
               ];
 
@@ -158,7 +158,11 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                                       listing['imagePath'] ??
                                       'assets/find-dar-test1.jpg',
                                   title: listing['title'] ?? 'house',
-                                  price: listing['price'] ?? '\$0',
+                                  price: (listing['price'] is double) 
+                                      ? listing['price'] 
+                                      : (listing['price'] is int) 
+                                          ? (listing['price'] as int).toDouble()
+                                          : 0.0,
                                 ),
                               )
                               .toList(),

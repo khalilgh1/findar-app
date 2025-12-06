@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class PropertyHeader extends StatelessWidget {
   final String title;
   final String address;
-  final String price;
+  final double price;
 
   const PropertyHeader({
     super.key,
@@ -36,7 +36,7 @@ class PropertyHeader extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         Text(
-          price,
+          price.toString(),
           style: textTheme.headlineMedium?.copyWith(
             fontWeight: FontWeight.bold,
             color: colorScheme.primary,

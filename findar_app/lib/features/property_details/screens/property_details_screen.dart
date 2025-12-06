@@ -21,7 +21,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
   void initState() {
     super.initState();
     // Fetch property details when screen loads
-    context.read<PropertyDetailsCubit>().fetchPropertyDetails(1);
+    
   }
 
   @override
@@ -84,7 +84,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
             );
           }
 
-          final property = state['data'] as Map<String, dynamic>? ?? {};
+          final property = state['data'] as Map<dynamic, dynamic>? ?? {};
           final similarProperties = (state['similarProperties'] as List?) ?? [];
 
           return CustomScrollView(

@@ -69,7 +69,7 @@ class MainApp extends StatelessWidget {
         // BlocProvider(create: (_) => ListingCubit(repo)), // Disabled - has incompatible methods
         BlocProvider(create: (_) => SearchCubit(repo)),
         BlocProvider(create: (_) => SavedListingsCubit(repo)),
-        BlocProvider(create: (_) => PropertyDetailsCubit(listingsRepository: repo)),
+        BlocProvider(create: (_) => PropertyDetailsCubit(repo)),
         BlocProvider(create: (_) => MyListingsCubit(repo)),
         BlocProvider(create: (_) => ProfileCubit()),
         BlocProvider(create: (_) => ProfilePictureSetupCubit()),

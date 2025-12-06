@@ -1,3 +1,4 @@
+import 'package:findar/logic/cubits/property_details_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:findar/logic/cubits/my_listings_cubit.dart';
@@ -172,7 +173,12 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
                           : 'Make Online',
                       showBoostButton: true,
                       onBoost: () => _handleBoost(listing),
-                      onTap: () {},
+                      onTap: () {
+                        context.read<PropertyDetailsCubit>().fetchPropertyDetails(
+                          listing.id,
+                        );
+                        Navigator.pushNamed(context, '/property-details');
+                      },
                     );
                   },
                 );

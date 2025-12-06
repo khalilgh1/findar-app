@@ -4,7 +4,7 @@ class Property {
   final int id;
   final String title;
   final String image;
-  final String price;
+  final double price;
   final String address;
   final String details;
   bool bookmarked;
@@ -23,7 +23,7 @@ class Property {
       id: p.id,
       title: p.title,
       image: p.image,
-      price: "${p.price.toString()}\$",
+      price: p.price,
       address: p.location,
       details: "${p.bedrooms} beds • ${p.bathrooms} baths •",
       bookmarked: bookmarked,
