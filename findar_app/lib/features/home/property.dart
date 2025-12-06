@@ -11,7 +11,7 @@ class Property {
 
   Property({
     required this.id,
-    required String title,
+    required this.title,
     required this.image,
     required this.price,
     required this.address,
@@ -25,7 +25,7 @@ class Property {
       image: p.image,
       price: "${p.price.toString()}\$",
       address: p.location,
-      details: "${p.bedrooms} beds • ${p.bathrooms} baths • ${p.area} ",
+      details: "${p.bedrooms} beds • ${p.bathrooms} baths •",
       bookmarked: false,
     );
   }

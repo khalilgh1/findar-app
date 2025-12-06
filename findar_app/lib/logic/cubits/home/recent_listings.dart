@@ -16,7 +16,7 @@ class RecentCubit extends Cubit<Map<String, dynamic>> {
 
     try {
       final recentListings = await repository.getRecentListings(
-        listingType: listingType,
+        listingType: listingType, 
       );
 
       emit({
