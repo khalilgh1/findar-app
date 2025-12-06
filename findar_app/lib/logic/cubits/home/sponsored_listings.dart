@@ -2,27 +2,25 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:findar/core/models/return_result.dart';
 import 'package:findar/core/repositories/abstract_listing_repo.dart';
 
-/// RecentCubit handles searching/ (filtering based on type) listings and saving a listing
+/// SponsoredCubit handles searching/ (filtering based on type) listings and saving a listing
 /// State shape: { data: List<PropertyListing>, state: 'initial|loading|done|error', message: '', savedIds: Set<int> }
-class RecentCubit extends Cubit<Map<String, dynamic>> {
+class SponsoredCubit extends Cubit<Map<String, dynamic>> {
   final ListingRepository repository;
 
-  RecentCubit(this.repository)
+  SponsoredCubit(this.repository)
     : super({'data': [], 'state': 'initial', 'message': '', 'savedIds': <int>{}});
 
   /// Fetch filtered listings using the abstract repository
-  Future<void> getRecentListings({String? listingType}) async {
+  Future<void> getSponsoredListings({String? listingType}) async {
     emit({...state, 'state': 'loading', 'message': ''});
 
     try {
-      final recentListings = await repository.getRecentListings(
-        listingType: listingType, 
-      );
+      final sponsoredListings = await repository.getSponsoredListings();
       final savedIds = await repository.getSavedListingIds();
 
       emit({
         ...state,
-        'data': recentListings,
+        'data': sponsoredListings,
         'savedIds': savedIds,
         'state': 'done',
         'message': 'Listings loaded',

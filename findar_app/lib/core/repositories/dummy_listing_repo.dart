@@ -6,10 +6,12 @@ import 'abstract_listing_repo.dart';
 class DummyListingRepository implements ListingRepository {
   // In-memory storage for listings
   final List<PropertyListing> _listings = [];
+  final Set<int> _savedListingIds = {}; // Track saved listing IDs
   int _nextId = 1;
 
   DummyListingRepository() {
     _initializeDummyData();
+    // Don't auto-initialize saved listings - let users save them manually
   }
 
   /// Initialize with dummy data
@@ -410,8 +412,8 @@ class DummyListingRepository implements ListingRepository {
         return ReturnResult(state: false, message: 'Listing not found');
       }
 
-      // In a real app we'd mark the listing as saved for the current user.
-      // For dummy repo, just return success.
+      // Add to saved listings
+      _savedListingIds.add(listingId);
       return ReturnResult(state: true, message: 'Listing saved successfully');
     } catch (e) {
       return ReturnResult(
@@ -419,6 +421,53 @@ class DummyListingRepository implements ListingRepository {
         message: 'Failed to save listing: ${e.toString()}',
       );
     }
+  }
+
+  @override
+  Future<ReturnResult> unsaveListing(int listingId) async {
+    // Simulate network delay
+    await Future.delayed(const Duration(milliseconds: 300));
+
+    try {
+      if (!_savedListingIds.contains(listingId)) {
+        return ReturnResult(state: false, message: 'Listing not in saved');
+      }
+
+      // Remove from saved listings
+      _savedListingIds.remove(listingId);
+      return ReturnResult(state: true, message: 'Listing removed from saved');
+    } catch (e) {
+      return ReturnResult(
+        state: false,
+        message: 'Failed to unsave listing: ${e.toString()}',
+      );
+    }
+  }
+
+  @override
+  Future<List<PropertyListing>> getSavedListings() async {
+    // Simulate network delay
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    try {
+      // Return all listings that are in the saved set
+      final savedListings = _listings
+          .where((listing) => _savedListingIds.contains(listing.id))
+          .toList();
+      
+      return savedListings;
+    } catch (e) {
+      return [];
+    }
+  }
+
+  @override
+  Future<Set<int>> getSavedListingIds() async {
+    // Simulate network delay
+    await Future.delayed(const Duration(milliseconds: 100));
+    
+    // Return the saved listing IDs without auto-initialization
+    return Set.from(_savedListingIds);
   }
 
   /// Reset to initial dummy data

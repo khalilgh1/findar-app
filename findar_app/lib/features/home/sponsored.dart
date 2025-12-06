@@ -1,10 +1,46 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
+import 'package:findar/logic/cubits/home/sponsored_listings.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'property.dart';
 
-class PropertyCard extends StatelessWidget {
+class PropertyCard extends StatefulWidget {
   final Property property;
   const PropertyCard({super.key, required this.property});
+
+  @override
+  State<PropertyCard> createState() => _PropertyCardState();
+}
+
+class _PropertyCardState extends State<PropertyCard> {
+  late bool _bookmarked;
+
+  @override
+  void initState() {
+    super.initState();
+    _bookmarked = widget.property.bookmarked; // initial value
+  }
+
+  void _toggleSave() {
+    final cubit = context.read<SponsoredCubit>();
+    print('Before toggle: _bookmarked=$_bookmarked, id=${widget.property.id}');
+    
+    if (_bookmarked) {
+      // Currently saved, so unsave it
+      print('Unsaving listing ${widget.property.id}');
+      setState(() {
+        _bookmarked = false;
+      });
+      cubit.unsaveListing(widget.property.id);
+    } else {
+      // Currently not saved, so save it
+      print('Saving listing ${widget.property.id}');
+      setState(() {
+        _bookmarked = true;
+      });
+      cubit.saveListing(widget.property.id);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +53,6 @@ class PropertyCard extends StatelessWidget {
         border: Border.all(color: theme.colorScheme.shadow, width: 0.2),
         borderRadius: BorderRadius.circular(10),
       ),
-
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -29,7 +64,7 @@ class PropertyCard extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
               image: DecorationImage(
-                image: AssetImage(property.image),
+                image: AssetImage(widget.property.image),
                 fit: BoxFit.fill,
               ),
             ),
@@ -37,25 +72,32 @@ class PropertyCard extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Spacer(),
-                ClipRect(
-                  child: Container(
-                    clipBehavior: Clip.hardEdge,
-                    margin: EdgeInsets.fromLTRB(0, 0, 8, 8),
-                    padding: EdgeInsets.fromLTRB(2, 6, 2, 20),
-                    width: 35,
-                    height: 42,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(30),
-                    ),
+                const Spacer(),
+                GestureDetector(
+                  onTap: _toggleSave,
+                  child: ClipRect(
+                    child: Container(
+                      clipBehavior: Clip.hardEdge,
+                      margin: const EdgeInsets.fromLTRB(0, 0, 8, 8),
+                      padding: _bookmarked
+                          ? EdgeInsets.fromLTRB(2, 10, 2, 6)
+                          : EdgeInsets.fromLTRB(2, 6, 2, 20),
+                      width: 35,
+                      height: 42,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(30),
+                      ),
 
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 8.0, sigmaY: 8.0),
-                      child: Icon(
-                        Icons.bookmark_border_outlined,
-                        size: 22,
-                        color: theme.colorScheme.onPrimary,
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(sigmaX: 8.0, sigmaY: 8.0),
+                        child: Icon(
+                          _bookmarked
+                              ? Icons.bookmark
+                              : Icons.bookmark_border_outlined,
+                          size: 22,
+                          color: theme.colorScheme.onPrimary,
+                        ),
                       ),
                     ),
                   ),
@@ -69,14 +111,14 @@ class PropertyCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  property.price,
+                  widget.property.price,
                   style: theme.textTheme.headlineSmall?.copyWith(
                     color: theme.colorScheme.onSecondaryContainer,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  property.address,
+                  widget.property.address,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.primary,
                   ),
@@ -84,7 +126,7 @@ class PropertyCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  property.details,
+                  widget.property.details,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.onSecondaryContainer,
                   ),

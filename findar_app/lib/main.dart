@@ -19,10 +19,13 @@ import './features/settings/settings_screen.dart';
 import 'core/theme/theme_provider.dart';
 import './features/profile/screens/profile_screen/profile_screen.dart';
 import './features/profile/screens/edit_profile/edit_profile_screen.dart';
+import './features/profile/screens/user_profile_screen/user_profile_screen.dart';
 import './features/property_details/screens/property_details_screen.dart';
 // import './features/demo/demo_test_screen.dart';
 // Import all cubits
-import 'logic/cubits/auth_cubit.dart';
+import 'logic/cubits//auth_cubit.dart';
+import 'package:findar/logic/cubits/home/recent_listings.dart';
+import 'package:findar/logic/cubits/home/sponsored_listings.dart';
 import 'logic/cubits/create_listing_cubit.dart';
 import 'logic/cubits/listings_cubit.dart';
 import 'logic/cubits/listing_cubit.dart';
@@ -69,6 +72,8 @@ class MainApp extends StatelessWidget {
         BlocProvider(create: (_) => ProfileCubit()),
         BlocProvider(create: (_) => SettingsCubit()),
         BlocProvider(create: (_) => BoostCubit()),
+        BlocProvider(create: (_) => RecentCubit(repo)),
+        BlocProvider(create: (_) => SponsoredCubit(repo)),
       ],
       child: ChangeNotifierProvider(
         create: (context) => ThemeProvider(),
@@ -106,6 +111,13 @@ class MainApp extends StatelessWidget {
                       listing: args['listing'] as PropertyListing,
                       plan: args['plan'] as SponsorshipPlan,
                     ),
+                  );
+                }
+                // Handle user profile route with userId argument
+                if (settings.name == '/user-profile') {
+                  final userId = settings.arguments as String;
+                  return MaterialPageRoute(
+                    builder: (context) => UserProfileScreen(userId: userId),
                   );
                 }
                 // Default routes

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:findar/logic/cubits/home/recent_listings.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'property.dart';
 
 const categroiesHeight = 34.0;
 
@@ -11,11 +14,21 @@ class CategoryBar extends StatefulWidget {
 
 class _CategoryBarState extends State<CategoryBar> {
   final List<String> categories = [
+    "Any",
     "For Sale",
     "For Rent",
     "Commercial",
     "New Constructions",
   ];
+
+  void newfilter() {
+    String? listingtype = categories[selectedIndex];
+
+    if (listingtype == 'Any') {
+      listingtype = null;
+    }
+    context.read<RecentCubit>().getRecentListings(listingType: listingtype);
+  }
 
   int selectedIndex = 0;
 
@@ -31,7 +44,10 @@ class _CategoryBarState extends State<CategoryBar> {
         itemBuilder: (context, index) {
           final isSelected = selectedIndex == index;
           return GestureDetector(
-            onTap: () => setState(() => selectedIndex = index),
+            onTap: () => setState(() {
+              selectedIndex = index;
+              newfilter();
+            }),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 3),
               decoration: BoxDecoration(

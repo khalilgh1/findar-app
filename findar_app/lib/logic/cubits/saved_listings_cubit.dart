@@ -19,8 +19,8 @@ class SavedListingsCubit extends Cubit<Map<String, dynamic>> {
     emit({...state, 'state': 'loading', 'message': ''});
 
     try {
-      // Use getRecentListings to get listings (in a real app, would filter by saved)
-      final listings = await listingRepository.getRecentListings();
+      // Get saved listings from repository
+      final listings = await listingRepository.getSavedListings();
 
       emit({
         ...state,
@@ -68,17 +68,26 @@ class SavedListingsCubit extends Cubit<Map<String, dynamic>> {
   /// Remove listing from saved/favorites
   Future<void> unsaveListing(int listingId) async {
     try {
-      // In a real implementation, would call an unsave endpoint
-      // For now, just remove from local state
-      final currentData = state['data'] as List;
-      final updatedData = currentData.where((listing) => listing.id != listingId).toList();
+      // Call repository to unsave the listing
+      final result = await listingRepository.unsaveListing(listingId);
       
-      emit({
-        ...state,
-        'data': updatedData,
-        'count': updatedData.length,
-        'message': 'Listing removed from saved',
-      });
+      if (result.state) {
+        // Remove from local state
+        final currentData = state['data'] as List;
+        final updatedData = currentData.where((listing) => listing.id != listingId).toList();
+        
+        emit({
+          ...state,
+          'data': updatedData,
+          'count': updatedData.length,
+          'message': result.message,
+        });
+      } else {
+        emit({
+          ...state,
+          'message': result.message,
+        });
+      }
     } catch (e) {
       emit({
         ...state,
