@@ -227,5 +227,79 @@
   "phoneNumber": "رقم الهاتف",
   "removedFromSaved": "تم الحذف من المفضلة",
   "undo": "تراجع",
-  "savedListings": "الإعلانات المحفوظة"
+  "savedListings": "الإعلانات المحفوظة",
+  "noSavedProperties": "لا توجد عقارات محفوظة",
+  "savePropertiesToViewHere": "احفظ العقارات لعرضها هنا",
+  "myListings": "إعلاناتي",
+  "noListingsMessage": "لا توجد إعلانات {tab}",
+  "@noListingsMessage": {
+    "placeholders": {
+      "tab": {
+        "type": "String"
+      }
+    }
+  },
+  "addFirstPropertyListing": "أضف قائمة العقارات الأولى الخاصة بك",
+  "editProfile": "تحرير الملف الشخصي",
+  "chooseSponsorshipPlan": "اختر خطة رعاية",
+  "selectPlanToBoostProperty": "حدد خطة لتعزيز العقار الخاص بك",
+  "continueToPayment": "متابعة إلى الدفع",
+  "paymentConfirmation": "تأكيد الدفع",
+  "propertyBoostedSuccessfully": "تم تعزيز العقار بنجاح!",
+  "payNow": "ادفع الآن",
+  "reset": "إعادة تعيين",
+  "showResults": "عرض النتائج",
+  "bedrooms": "غرف النوم",
+  "bathrooms": "الحمامات",
+  "privateOwner": "صاحب خاص",
+  "realEstateAgent": "وكيل عقاري",
+  "locationHint": "أدخل مدينة أو رمز بريدي أو حي",
+  "propertyType": "نوع العقار",
+  "forSale": "للبيع",
+  "forRent": "للإيجار",
+  "floors": "الطوابق",
+  "bedroomsCount": "{count} غرف نوم",
+  "@bedroomsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bathroomsCount": "{count} حمامات",
+  "@bathroomsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "basicSponsor": "راعي أساسي",
+  "premiumSponsor": "راعي بريميوم",
+  "agencySponsorPlan": "خطة رعاية الوكالة",
+  "featuredPlacement": "موضع مميز",
+  "priorityInSearch": "الأولوية في نتائج البحث",
+  "basicAnalytics": "تحليلات أساسية",
+  "topPriority": "أولوية عليا في نتائج البحث",
+  "advancedAnalytics": "تحليلات متقدمة",
+  "premiumAnalyticsDashboard": "لوحة تحليلات premium",
+  "dedicatedSupport": "دعم مخصص",
+  "featuredBadge": "شارة مميزة",
+  "cardNumber": "رقم البطاقة",
+  "cardNumberHint": "1234 5678 9012 3456",
+  "cardholderName": "اسم حامل البطاقة",
+  "cardholderNameHint": "أحمد محمد",
+  "expiryDate": "تاريخ الانتهاء",
+  "expiryDateHint": "MM/YY",
+  "cvv": "CVV",
+  "cvvHint": "123",
+  "validateTitleEmpty": "يرجى إدخال عنوان العقار",
+  "validateTitleMinLength": "يجب أن يكون العنوان بطول 5 أحرف على الأقل",
+  "validateDescriptionEmpty": "يرجى إدخال وصف",
+  "validateDescriptionMinLength": "يجب أن يكون الوصف بطول 20 حرفًا على الأقل",
+  "validatePriceEmpty": "يرجى إدخال السعر",
+  "validatePriceInvalid": "يرجى إدخال سعر صحيح",
+  "validatePricePositive": "يجب أن يكون السعر أكبر من 0",
+  "validateLocationEmpty": "يرجى إدخال الموقع",
+  "validateBedroomsEmpty": "يرجى إدخال عدد غرف النوم"
 }

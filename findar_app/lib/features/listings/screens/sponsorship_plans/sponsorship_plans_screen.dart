@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/models/sponsorship_plan.dart';
 import '../../../../core/models/property_listing_model.dart';
 import '../../widgets/plan_card.dart';
+import 'package:findar/l10n/app_localizations.dart';
 
 class SponsorshipPlansScreen extends StatefulWidget {
   final PropertyListing listing;
@@ -30,12 +31,17 @@ class _SponsorshipPlansScreenState extends State<SponsorshipPlansScreen> {
         backgroundColor: theme.colorScheme.surface,
         foregroundColor: theme.colorScheme.onSurface,
         centerTitle: false,
-        title: Text(
-          'Choose Sponsorship Plan',
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            color: theme.colorScheme.onSurface,
-          ),
+        title: Builder(
+          builder: (context) {
+            final l10n = AppLocalizations.of(context)!;
+            return Text(
+              l10n.chooseSponsorshipPlan,
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                color: theme.colorScheme.onSurface,
+              ),
+            );
+          },
         ),
       ),
       body: Column(
@@ -111,13 +117,18 @@ class _SponsorshipPlansScreenState extends State<SponsorshipPlansScreen> {
             child: ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                Text(
-                  'Select a plan to boost your property',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: theme.colorScheme.onSurface,
-                  ),
+                Builder(
+                  builder: (context) {
+                    final l10n = AppLocalizations.of(context)!;
+                    return Text(
+                      l10n.selectPlanToBoostProperty,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                    );
+                  },
                 ),
                 const SizedBox(height: 16),
                 ..._plans.map((plan) => PlanCard(
@@ -168,15 +179,20 @@ class _SponsorshipPlansScreenState extends State<SponsorshipPlansScreen> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                child: Text(
-                  'Continue to Payment',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: _selectedPlan == null
-                        ? theme.colorScheme.onSurface.withValues(alpha: 0.38)
-                        : Colors.white,
-                  ),
+                child: Builder(
+                  builder: (context) {
+                    final l10n = AppLocalizations.of(context)!;
+                    return Text(
+                      l10n.continueToPayment,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: _selectedPlan == null
+                            ? theme.colorScheme.onSurface.withValues(alpha: 0.38)
+                            : Colors.white,
+                      ),
+                    );
+                  },
                 ),
               ),
             ),

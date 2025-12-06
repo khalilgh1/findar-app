@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:findar/logic/cubits/my_listings_cubit.dart';
 import 'package:findar/core/models/property_listing_model.dart';
+import 'package:findar/l10n/app_localizations.dart';
 import '../../../core/widgets/property_card.dart';
 import '../../../core/widgets/segment_control.dart';
 import '../../../core/widgets/progress_button.dart';
@@ -43,13 +44,18 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
           ),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
-          'My Listings',
-          style: TextStyle(
-            color: Theme.of(context).colorScheme.onSurface,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
+        title: Builder(
+          builder: (context) {
+            var l10n = AppLocalizations.of(context)!;
+            return Text(
+              l10n.myListings,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            );
+          },
         ),
         actions: [
           IconButton(
@@ -97,24 +103,27 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
                 }
 
                 if (state['state'] == 'error') {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text('Error: ${state['message'] ?? 'Unknown error'}'),
-                        SizedBox(height: 16),
-                        ProgressButton(
-                          label: 'Retry',
-                          backgroundColor: Theme.of(
-                            context,
-                          ).colorScheme.primary,
-                          textColor: Theme.of(context).colorScheme.onPrimary,
-                          onPressed: () {
-                            context.read<MyListingsCubit>().fetchMyListings();
-                          },
+                  return Builder(
+                    builder: (context) {
+                      final l10n = AppLocalizations.of(context)!;
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text('Error: ${state['message'] ?? 'Unknown error'}'),
+                            SizedBox(height: 16),
+                            ProgressButton(
+                              label: l10n.retry,
+                              backgroundColor: Theme.of(context).colorScheme.primary,
+                              textColor: Theme.of(context).colorScheme.onPrimary,
+                              onPressed: () {
+                                context.read<MyListingsCubit>().fetchMyListings();
+                              },
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      );
+                    },
                   );
                 }
 
@@ -125,34 +134,39 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
                     : cubit.offlineListings;
 
                 if (listings.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.home_outlined,
-                          size: 60,
-                          color: Colors.grey[400],
+                  return Builder(
+                    builder: (context) {
+                      final l10n = AppLocalizations.of(context)!;
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.home_outlined,
+                              size: 60,
+                              color: Colors.grey[400],
+                            ),
+                            SizedBox(height: 30),
+                            Text(
+                              l10n.noListingsMessage(_selectedTab),
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.grey[700],
+                              ),
+                            ),
+                            SizedBox(height: 8),
+                            Text(
+                              l10n.addFirstPropertyListing,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ],
                         ),
-                        SizedBox(height: 30),
-                        Text(
-                          'No $_selectedTab listings',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.grey[700],
-                          ),
-                        ),
-                        SizedBox(height: 8),
-                        Text(
-                          'Add your first property listing',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ],
-                    ),
+                      );
+                    },
                   );
                 }
 

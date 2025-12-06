@@ -13,26 +13,26 @@ class CategoryBar extends StatefulWidget {
 }
 
 class _CategoryBarState extends State<CategoryBar> {
-  late final List<String> categories;
-  late final AppLocalizations l10n;
+  late  List<String> categories;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    l10n = AppLocalizations.of(context)!;
+    var l10n = AppLocalizations.of(context);
     categories = [
-      l10n.any,
-      l10n.forSale,
-      l10n.forRent,
-      l10n.commercial,
-      l10n.newConstructions,
+      l10n?.any ?? 'Any',
+      l10n?.forSale ?? 'For Sale',
+      l10n?.forRent ?? 'For Rent',
+      l10n?.commercial ?? 'Commercial',
+      l10n?.newConstructions ?? 'New Constructions',
     ];
   }
 
   void newfilter() {
+    var l10n = AppLocalizations.of(context);
     String? listingtype = categories[selectedIndex];
 
-    if (listingtype == l10n.any) {
+    if (listingtype == (l10n?.any ?? 'Any')) {
       listingtype = null;
     }
     context.read<RecentCubit>().getRecentListings(listingType: listingtype);

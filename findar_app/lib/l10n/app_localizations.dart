@@ -529,7 +529,7 @@ abstract class AppLocalizations {
   /// No description provided for @propertyType.
   ///
   /// In en, this message translates to:
-  /// **'Property Type'**
+  /// **'Property type'**
   String get propertyType;
 
   /// No description provided for @buildingType.
@@ -1173,6 +1173,252 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Undo'**
   String get undo;
+
+  /// No description provided for @noSavedProperties.
+  ///
+  /// In en, this message translates to:
+  /// **'No saved properties'**
+  String get noSavedProperties;
+
+  /// No description provided for @savePropertiesToViewHere.
+  ///
+  /// In en, this message translates to:
+  /// **'Save properties to view them here'**
+  String get savePropertiesToViewHere;
+
+  /// No description provided for @noListingsMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'No {tab} listings'**
+  String noListingsMessage(String tab);
+
+  /// No description provided for @addFirstPropertyListing.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your first property listing'**
+  String get addFirstPropertyListing;
+
+  /// No description provided for @chooseSponsorshipPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Sponsorship Plan'**
+  String get chooseSponsorshipPlan;
+
+  /// No description provided for @selectPlanToBoostProperty.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a plan to boost your property'**
+  String get selectPlanToBoostProperty;
+
+  /// No description provided for @continueToPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue to Payment'**
+  String get continueToPayment;
+
+  /// No description provided for @paymentConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Confirmation'**
+  String get paymentConfirmation;
+
+  /// No description provided for @propertyBoostedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Property boosted successfully!'**
+  String get propertyBoostedSuccessfully;
+
+  /// No description provided for @payNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay Now'**
+  String get payNow;
+
+  /// No description provided for @locationHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a city, zip code, or neighborhood'**
+  String get locationHint;
+
+  /// No description provided for @bedroomsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Bedrooms'**
+  String bedroomsCount(int count);
+
+  /// No description provided for @bathroomsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Bathrooms'**
+  String bathroomsCount(int count);
+
+  /// No description provided for @basicSponsor.
+  ///
+  /// In en, this message translates to:
+  /// **'Basic Sponsor'**
+  String get basicSponsor;
+
+  /// No description provided for @premiumSponsor.
+  ///
+  /// In en, this message translates to:
+  /// **'Premium Sponsor'**
+  String get premiumSponsor;
+
+  /// No description provided for @agencySponsorPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Agency Sponsor Plan'**
+  String get agencySponsorPlan;
+
+  /// No description provided for @featuredPlacement.
+  ///
+  /// In en, this message translates to:
+  /// **'Featured placement'**
+  String get featuredPlacement;
+
+  /// No description provided for @priorityInSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Priority in search results'**
+  String get priorityInSearch;
+
+  /// No description provided for @basicAnalytics.
+  ///
+  /// In en, this message translates to:
+  /// **'Basic analytics'**
+  String get basicAnalytics;
+
+  /// No description provided for @topPriority.
+  ///
+  /// In en, this message translates to:
+  /// **'Top priority in search results'**
+  String get topPriority;
+
+  /// No description provided for @advancedAnalytics.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced analytics'**
+  String get advancedAnalytics;
+
+  /// No description provided for @premiumAnalyticsDashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Premium analytics dashboard'**
+  String get premiumAnalyticsDashboard;
+
+  /// No description provided for @dedicatedSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Dedicated support'**
+  String get dedicatedSupport;
+
+  /// No description provided for @featuredBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Featured badge'**
+  String get featuredBadge;
+
+  /// No description provided for @cardNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Card Number'**
+  String get cardNumber;
+
+  /// No description provided for @cardNumberHint.
+  ///
+  /// In en, this message translates to:
+  /// **'1234 5678 9012 3456'**
+  String get cardNumberHint;
+
+  /// No description provided for @cardholderName.
+  ///
+  /// In en, this message translates to:
+  /// **'Cardholder Name'**
+  String get cardholderName;
+
+  /// No description provided for @cardholderNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'John Doe'**
+  String get cardholderNameHint;
+
+  /// No description provided for @expiryDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Expiry Date'**
+  String get expiryDate;
+
+  /// No description provided for @expiryDateHint.
+  ///
+  /// In en, this message translates to:
+  /// **'MM/YY'**
+  String get expiryDateHint;
+
+  /// No description provided for @cvv.
+  ///
+  /// In en, this message translates to:
+  /// **'CVV'**
+  String get cvv;
+
+  /// No description provided for @cvvHint.
+  ///
+  /// In en, this message translates to:
+  /// **'123'**
+  String get cvvHint;
+
+  /// No description provided for @validateTitleEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a property title'**
+  String get validateTitleEmpty;
+
+  /// No description provided for @validateTitleMinLength.
+  ///
+  /// In en, this message translates to:
+  /// **'Title must be at least 5 characters'**
+  String get validateTitleMinLength;
+
+  /// No description provided for @validateDescriptionEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a description'**
+  String get validateDescriptionEmpty;
+
+  /// No description provided for @validateDescriptionMinLength.
+  ///
+  /// In en, this message translates to:
+  /// **'Description must be at least 20 characters'**
+  String get validateDescriptionMinLength;
+
+  /// No description provided for @validatePriceEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a price'**
+  String get validatePriceEmpty;
+
+  /// No description provided for @validatePriceInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid price'**
+  String get validatePriceInvalid;
+
+  /// No description provided for @validatePricePositive.
+  ///
+  /// In en, this message translates to:
+  /// **'Price must be greater than 0'**
+  String get validatePricePositive;
+
+  /// No description provided for @validateLocationEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a location'**
+  String get validateLocationEmpty;
+
+  /// No description provided for @validateBedroomsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter number of bedrooms'**
+  String get validateBedroomsEmpty;
 }
 
 class _AppLocalizationsDelegate

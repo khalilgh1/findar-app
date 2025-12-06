@@ -240,7 +240,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get listedBy => 'مدرج بواسطة';
 
   @override
-  String get privateOwner => 'مالك خاص';
+  String get privateOwner => 'صاحب خاص';
 
   @override
   String get realEstateAgent => 'وكيل عقاري';
@@ -322,7 +322,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get startExploring => 'ابدأ في استكشاف العقارات لحفظ المفضلة لديك';
 
   @override
-  String get myListings => 'قوائمي';
+  String get myListings => 'إعلاناتي';
 
   @override
   String get removeListingTitle => 'حذف الإعلان';
@@ -354,7 +354,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get viewListing => 'عرض الإعلان';
 
   @override
-  String get editProfile => 'تعديل الملف الشخصي';
+  String get editProfile => 'تحرير الملف الشخصي';
 
   @override
   String get accountSettings => 'إعدادات الحساب';
@@ -552,4 +552,135 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get undo => 'تراجع';
+
+  @override
+  String get noSavedProperties => 'لا توجد عقارات محفوظة';
+
+  @override
+  String get savePropertiesToViewHere => 'احفظ العقارات لعرضها هنا';
+
+  @override
+  String noListingsMessage(String tab) {
+    return 'لا توجد إعلانات $tab';
+  }
+
+  @override
+  String get addFirstPropertyListing => 'أضف قائمة العقارات الأولى الخاصة بك';
+
+  @override
+  String get chooseSponsorshipPlan => 'اختر خطة رعاية';
+
+  @override
+  String get selectPlanToBoostProperty => 'حدد خطة لتعزيز العقار الخاص بك';
+
+  @override
+  String get continueToPayment => 'متابعة إلى الدفع';
+
+  @override
+  String get paymentConfirmation => 'تأكيد الدفع';
+
+  @override
+  String get propertyBoostedSuccessfully => 'تم تعزيز العقار بنجاح!';
+
+  @override
+  String get payNow => 'ادفع الآن';
+
+  @override
+  String get locationHint => 'أدخل مدينة أو رمز بريدي أو حي';
+
+  @override
+  String bedroomsCount(int count) {
+    return '$count غرف نوم';
+  }
+
+  @override
+  String bathroomsCount(int count) {
+    return '$count حمامات';
+  }
+
+  @override
+  String get basicSponsor => 'راعي أساسي';
+
+  @override
+  String get premiumSponsor => 'راعي بريميوم';
+
+  @override
+  String get agencySponsorPlan => 'خطة رعاية الوكالة';
+
+  @override
+  String get featuredPlacement => 'موضع مميز';
+
+  @override
+  String get priorityInSearch => 'الأولوية في نتائج البحث';
+
+  @override
+  String get basicAnalytics => 'تحليلات أساسية';
+
+  @override
+  String get topPriority => 'أولوية عليا في نتائج البحث';
+
+  @override
+  String get advancedAnalytics => 'تحليلات متقدمة';
+
+  @override
+  String get premiumAnalyticsDashboard => 'لوحة تحليلات premium';
+
+  @override
+  String get dedicatedSupport => 'دعم مخصص';
+
+  @override
+  String get featuredBadge => 'شارة مميزة';
+
+  @override
+  String get cardNumber => 'رقم البطاقة';
+
+  @override
+  String get cardNumberHint => '1234 5678 9012 3456';
+
+  @override
+  String get cardholderName => 'اسم حامل البطاقة';
+
+  @override
+  String get cardholderNameHint => 'أحمد محمد';
+
+  @override
+  String get expiryDate => 'تاريخ الانتهاء';
+
+  @override
+  String get expiryDateHint => 'MM/YY';
+
+  @override
+  String get cvv => 'CVV';
+
+  @override
+  String get cvvHint => '123';
+
+  @override
+  String get validateTitleEmpty => 'يرجى إدخال عنوان العقار';
+
+  @override
+  String get validateTitleMinLength =>
+      'يجب أن يكون العنوان بطول 5 أحرف على الأقل';
+
+  @override
+  String get validateDescriptionEmpty => 'يرجى إدخال وصف';
+
+  @override
+  String get validateDescriptionMinLength =>
+      'يجب أن يكون الوصف بطول 20 حرفًا على الأقل';
+
+  @override
+  String get validatePriceEmpty => 'يرجى إدخال السعر';
+
+  @override
+  String get validatePriceInvalid => 'يرجى إدخال سعر صحيح';
+
+  @override
+  String get validatePricePositive => 'يجب أن يكون السعر أكبر من 0';
+
+  @override
+  String get validateLocationEmpty => 'يرجى إدخال الموقع';
+
+  @override
+  String get validateBedroomsEmpty => 'يرجى إدخال عدد غرف النوم';
 }

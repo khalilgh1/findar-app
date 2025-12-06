@@ -227,5 +227,79 @@
   "phoneNumber": "Phone Number",
   "removedFromSaved": "Removed from saved",
   "undo": "Undo",
-  "savedListings": "Saved Listings"
+  "savedListings": "Saved Listings",
+  "noSavedProperties": "No saved properties",
+  "savePropertiesToViewHere": "Save properties to view them here",
+  "myListings": "My Listings",
+  "noListingsMessage": "No {tab} listings",
+  "@noListingsMessage": {
+    "placeholders": {
+      "tab": {
+        "type": "String"
+      }
+    }
+  },
+  "addFirstPropertyListing": "Add your first property listing",
+  "editProfile": "Edit Profile",
+  "chooseSponsorshipPlan": "Choose Sponsorship Plan",
+  "selectPlanToBoostProperty": "Select a plan to boost your property",
+  "continueToPayment": "Continue to Payment",
+  "paymentConfirmation": "Payment Confirmation",
+  "propertyBoostedSuccessfully": "Property boosted successfully!",
+  "payNow": "Pay Now",
+  "reset": "Reset",
+  "showResults": "Show results",
+  "bedrooms": "Bedrooms",
+  "bathrooms": "Bathrooms",
+  "privateOwner": "Private Owner",
+  "realEstateAgent": "Real Estate Agent",
+  "locationHint": "Enter a city, zip code, or neighborhood",
+  "propertyType": "Property type",
+  "forSale": "For Sale",
+  "forRent": "For Rent",
+  "floors": "Floors",
+  "bedroomsCount": "{count} Bedrooms",
+  "@bedroomsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bathroomsCount": "{count} Bathrooms",
+  "@bathroomsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "basicSponsor": "Basic Sponsor",
+  "premiumSponsor": "Premium Sponsor",
+  "agencySponsorPlan": "Agency Sponsor Plan",
+  "featuredPlacement": "Featured placement",
+  "priorityInSearch": "Priority in search results",
+  "basicAnalytics": "Basic analytics",
+  "topPriority": "Top priority in search results",
+  "advancedAnalytics": "Advanced analytics",
+  "premiumAnalyticsDashboard": "Premium analytics dashboard",
+  "dedicatedSupport": "Dedicated support",
+  "featuredBadge": "Featured badge",
+  "cardNumber": "Card Number",
+  "cardNumberHint": "1234 5678 9012 3456",
+  "cardholderName": "Cardholder Name",
+  "cardholderNameHint": "John Doe",
+  "expiryDate": "Expiry Date",
+  "expiryDateHint": "MM/YY",
+  "cvv": "CVV",
+  "cvvHint": "123",
+  "validateTitleEmpty": "Please enter a property title",
+  "validateTitleMinLength": "Title must be at least 5 characters",
+  "validateDescriptionEmpty": "Please enter a description",
+  "validateDescriptionMinLength": "Description must be at least 20 characters",
+  "validatePriceEmpty": "Please enter a price",
+  "validatePriceInvalid": "Please enter a valid price",
+  "validatePricePositive": "Price must be greater than 0",
+  "validateLocationEmpty": "Please enter a location",
+  "validateBedroomsEmpty": "Please enter number of bedrooms"
 }

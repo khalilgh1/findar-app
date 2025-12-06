@@ -32,21 +32,23 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
 
   void _toggleSave(int listingId) async {
     final colorScheme = Theme.of(context).colorScheme;
-    final l10n = AppLocalizations.of(context)!;
 
     // Mark as removing to change icon color
     setState(() {
       _removingListingIds.add(listingId);
     });
 
+    // Get localization
+    var l10n = AppLocalizations.of(context);
+
     // Show snackbar immediately
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(l10n.removedFromSaved),
+        content: Text(l10n?.removedFromSaved ?? 'Removed from Saved'),
         backgroundColor: colorScheme.secondary,
         duration: const Duration(seconds: 3),
         action: SnackBarAction(
-          label: l10n.undo,
+          label: l10n?.undo ?? 'Undo',
           textColor: colorScheme.primary,
           onPressed: () {
             // Cancel removal
@@ -93,7 +95,12 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
           ),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const AppbarTitle(title: 'Saved Listings'),
+        title: Builder(
+          builder: (context) {
+            var l10n = AppLocalizations.of(context)!;
+            return AppbarTitle(title: l10n.savedListings);
+          },
+        ),
         actions: [
           IconButton(
             icon: Icon(
@@ -124,26 +131,29 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
           }
 
           if (state['state'] == 'error') {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('Error: ${state['message'] ?? 'Unknown error'}'),
-                  SizedBox(height: 16),
-                  ProgressButton(
-                    label: 'Retry',
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                    textColor: Theme.of(context).colorScheme.onPrimary,
-                    onPressed: () {
-                      context.read<SavedListingsCubit>().fetchSavedListings();
-                    },
+            return Builder(
+              builder: (context) {
+                var l10n = AppLocalizations.of(context)!;
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('Error: ${state['message'] ?? 'Unknown error'}'),
+                      SizedBox(height: 16),
+                      ProgressButton(
+                        label: l10n.retry,
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        textColor: Theme.of(context).colorScheme.onPrimary,
+                        onPressed: () {
+                          context.read<SavedListingsCubit>().fetchSavedListings();
+                        },
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                );
+              },
             );
-          }
-
-          final listings = state['data'] as List<dynamic>? ?? [];
+          }          final listings = state['data'] as List<dynamic>? ?? [];
 
           return listings.isEmpty
               ? _buildEmptyState()
@@ -209,7 +219,8 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
       builder: (context) {
         return BlocBuilder<SortCubit, SortOption>(
           builder: (context, state) {
-            final currentSort = sortCubit.currentSort;
+            final currentSort = context.read<SortCubit>().currentSort;
+            var l10n = AppLocalizations.of(context)!;
 
             return Container(
               padding: EdgeInsets.all(screenWidth * 0.05),
@@ -218,7 +229,7 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Sort by',
+                    l10n.sortBy,
                     style: TextStyle(
                       fontSize: screenWidth * 0.05,
                       fontWeight: FontWeight.bold,
@@ -277,31 +288,36 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
     final textTheme = Theme.of(context).textTheme;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.bookmark_border,
-            size: 35,
-            color: Theme.of(context).colorScheme.onSecondary,
+    return Builder(
+      builder: (context) {
+        var l10n = AppLocalizations.of(context)!;
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.bookmark_border,
+                size: 35,
+                color: Theme.of(context).colorScheme.onSecondary,
+              ),
+              SizedBox(height: screenHeight * 0.02),
+              Text(
+                l10n.noSavedProperties,
+                style: textTheme.headlineMedium?.copyWith(
+                  color: colorScheme.onSurface,
+                ),
+              ),
+              SizedBox(height: screenHeight * 0.01),
+              Text(
+                l10n.savePropertiesToViewHere,
+                style: textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSecondary,
+                ),
+              ),
+            ],
           ),
-          SizedBox(height: screenHeight * 0.02),
-          Text(
-            'No saved properties',
-            style: textTheme.headlineMedium?.copyWith(
-              color: colorScheme.onSurface,
-            ),
-          ),
-          SizedBox(height: screenHeight * 0.01),
-          Text(
-            'Save properties to view them here',
-            style: textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onSecondary,
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 

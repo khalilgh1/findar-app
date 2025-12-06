@@ -5,6 +5,7 @@ import '../../../../core/widgets/progress_button.dart';
 import 'widgets/profile_text_field.dart';
 import 'utils/validators.dart';
 import 'utils/edit_profile_handler.dart';
+import 'package:findar/l10n/app_localizations.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -72,12 +73,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           ),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
-          'Edit Profile',
-          style: TextStyle(
-            color: theme.colorScheme.onSurface,
-            fontWeight: FontWeight.w600,
-          ),
+        title: Builder(
+          builder: (context) {
+            final l10n = AppLocalizations.of(context)!;
+            return Text(
+              l10n.editProfile,
+              style: TextStyle(
+                color: theme.colorScheme.onSurface,
+                fontWeight: FontWeight.w600,
+              ),
+            );
+          },
         ),
         centerTitle: true,
       ),

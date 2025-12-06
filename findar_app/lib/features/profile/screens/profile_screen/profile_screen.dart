@@ -26,7 +26,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
@@ -42,23 +41,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
-          l10n.profile,
-          style: TextStyle(
-            color: Theme.of(context).colorScheme.onSurface,
-            fontWeight: FontWeight.w600,
-          ),
+        title: Builder(
+          builder: (context) {
+            var l10n = AppLocalizations.of(context);
+            return Text(
+              l10n?.profile ?? 'Profile',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface,
+                fontWeight: FontWeight.w600,
+              ),
+            );
+          },
         ),
         centerTitle: true,
         actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pushNamed(context, '/edit-profile');
+          Builder(
+            builder: (context) {
+              var l10n = AppLocalizations.of(context);
+              return TextButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/edit-profile');
+                },
+                child: Text(
+                  l10n?.edit ?? 'Edit',
+                  style: const TextStyle(color: Colors.blue, fontSize: 16),
+                ),
+              );
             },
-            child: Text(
-              l10n.edit,
-              style: const TextStyle(color: Colors.blue, fontSize: 16),
-            ),
           ),
         ],
       ),
@@ -82,12 +91,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 children: [
                   Text('Error: ${state['message'] ?? 'Unknown error'}'),
                   SizedBox(height: 16),
-                  ProgressButton(
-                    label: l10n.retry,
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                    textColor: Theme.of(context).colorScheme.onPrimary,
-                    onPressed: () {
-                      context.read<ProfileCubit>().fetchProfile();
+                  Builder(
+                    builder: (context) {
+                      var l10n = AppLocalizations.of(context);
+                      return ProgressButton(
+                        label: l10n?.retry ?? 'Retry',
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        textColor: Theme.of(context).colorScheme.onPrimary,
+                        onPressed: () {
+                          context.read<ProfileCubit>().fetchProfile();
+                        },
+                      );
                     },
                   ),
                 ],
@@ -133,41 +147,51 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    TextButton(
-                      onPressed: () => {
-                        Navigator.pushNamed(context, '/my-listings'),
+                    Builder(
+                      builder: (context) {
+                        var l10n = AppLocalizations.of(context);
+                        return TextButton(
+                          onPressed: () => {
+                            Navigator.pushNamed(context, '/my-listings'),
+                          },
+                          child: Text(
+                            l10n?.listings ?? 'Listings',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              color: theme.colorScheme.onSurface,
+                            ),
+                          ),
+                        );
                       },
-                      child: Text(
-                        l10n.listings,
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: theme.colorScheme.onSurface,
-                        ),
-                      ),
                     ),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.pushNamed(context, '/create-listing');
+                    Builder(
+                      builder: (context) {
+                        var l10n = AppLocalizations.of(context);
+                        return ElevatedButton.icon(
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/create-listing');
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: theme.colorScheme.primary,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          icon: Icon(
+                            Icons.add,
+                            size: 18,
+                            color: theme.colorScheme.onPrimary,
+                          ),
+                          label: Text(
+                            l10n?.addNew ?? 'Add New',
+                            style: TextStyle(
+                              color: theme.colorScheme.onPrimary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        );
                       },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: theme.colorScheme.primary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      icon: Icon(
-                        Icons.add,
-                        size: 18,
-                        color: theme.colorScheme.onPrimary,
-                      ),
-                      label: Text(
-                        l10n.addNew,
-                        style: TextStyle(
-                          color: theme.colorScheme.onPrimary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
                     ),
                   ],
                 ),
@@ -192,12 +216,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
                 const SizedBox(height: 6),
-                ProgressButton(
-                  label: l10n.logout,
-                  backgroundColor: const Color(0xFFFFEDED),
-                  textColor: Colors.red,
-                  onPressed: () {
-                    context.read<ProfileCubit>().logout();
+                Builder(
+                  builder: (context) {
+                    var l10n = AppLocalizations.of(context);
+                    return ProgressButton(
+                      label: l10n?.logout ?? 'Logout',
+                      backgroundColor: const Color(0xFFFFEDED),
+                      textColor: Colors.red,
+                      onPressed: () {
+                        context.read<ProfileCubit>().logout();
+                      },
+                    );
                   },
                 ),
                 const SizedBox(height: 20),

@@ -13,16 +13,20 @@ class PropertyDescription extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
-    final l10n = AppLocalizations.of(context)!;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          l10n.description,
-          style: textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+        Builder(
+          builder: (context) {
+            var l10n = AppLocalizations.of(context);
+            return Text(
+              l10n?.description ?? 'Description',
+              style: textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            );
+          },
         ),
         const SizedBox(height: 12),
         Text(

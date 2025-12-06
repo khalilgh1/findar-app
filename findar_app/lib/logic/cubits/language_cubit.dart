@@ -21,6 +21,8 @@ class LanguageCubit extends Cubit<String> {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('app_language', languageCode);
       emit(languageCode);
+      // Add small delay to allow MaterialApp to rebuild before any navigation
+      await Future.delayed(const Duration(milliseconds: 100));
     } catch (e) {
       // Handle error
       print('Error changing language: $e');

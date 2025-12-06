@@ -10,7 +10,6 @@ class SearchBarWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: hpaddingSearchBar,
@@ -33,20 +32,23 @@ class SearchBarWidget extends StatelessWidget {
           Icon(Icons.search, color: theme.colorScheme.onSurfaceVariant),
           const SizedBox(width: 8),
           Expanded(
-            child: TextField(
-              decoration: InputDecoration(
-                hintStyle: theme.textTheme.bodySmall?.copyWith(
-                  fontSize: 14,
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-          
-                hintText: l10n.searchHint,
-                border: InputBorder.none,
-              ),
-                onSubmitted: (value) {
-                  Navigator.pushNamed(context, '/search-results', arguments: value);
-                },
-
+            child: Builder(
+              builder: (context) {
+                var l10n = AppLocalizations.of(context);
+                return TextField(
+                  decoration: InputDecoration(
+                    hintStyle: theme.textTheme.bodySmall?.copyWith(
+                      fontSize: 14,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                    hintText: l10n?.searchHint ?? 'Search...',
+                    border: InputBorder.none,
+                  ),
+                  onSubmitted: (value) {
+                    Navigator.pushNamed(context, '/search-results', arguments: value);
+                  },
+                );
+              },
             ),
           ),
         ],

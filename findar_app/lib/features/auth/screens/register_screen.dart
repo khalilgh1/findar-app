@@ -24,7 +24,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
+    var l10n = AppLocalizations.of(context)!;
 
     /// Validate name - defined here to access l10n
     String? validateName(String? name) {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:findar/l10n/app_localizations.dart';
 
 class PropertyFeatures extends StatelessWidget {
   final int bedrooms;
@@ -18,14 +19,28 @@ class PropertyFeatures extends StatelessWidget {
       children: [
         Row(
           children: [
-            _FeatureItem(
-              icon: Icons.bed_outlined,
-              text: '$bedrooms Bedrooms',
+            Expanded(
+              child: Builder(
+                builder: (context) {
+                  final l10n = AppLocalizations.of(context)!;
+                  return _FeatureItem(
+                    icon: Icons.bed_outlined,
+                    text: '$bedrooms ${l10n.bedrooms.toLowerCase()}',
+                  );
+                },
+              ),
             ),
             const SizedBox(width: 24),
-            _FeatureItem(
-              icon: Icons.bathtub_outlined,
-              text: '$bathrooms Bathrooms',
+            Expanded(
+              child: Builder(
+                builder: (context) {
+                  final l10n = AppLocalizations.of(context)!;
+                  return _FeatureItem(
+                    icon: Icons.bathtub_outlined,
+                    text: '$bathrooms ${l10n.bathrooms.toLowerCase()}',
+                  );
+                },
+              ),
             ),
           ],
         ),

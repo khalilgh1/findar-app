@@ -27,7 +27,6 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
@@ -35,12 +34,17 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
         backgroundColor: Theme.of(context).colorScheme.surface,
         foregroundColor: Theme.of(context).colorScheme.onSurface,
         centerTitle: false,
-        title: Text(
-          l10n.propertyDetails,
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
+        title: Builder(
+          builder: (context) {
+            var l10n = AppLocalizations.of(context);
+            return Text(
+              l10n?.propertyDetails ?? 'Property Details',
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            );
+          },
         ),
         actions: [
           BlocBuilder<PropertyDetailsCubit, Map<String, dynamic>>(
@@ -71,13 +75,18 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                 children: [
                   Text('Error: ${state['message'] ?? 'Unknown error'}'),
                   SizedBox(height: 16),
-                  ProgressButton(
-                    label: l10n.retry,
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                    textColor: Theme.of(context).colorScheme.onPrimary,
-                    onPressed: () {
-                      context.read<PropertyDetailsCubit>().fetchPropertyDetails(
-                        1,
+                  Builder(
+                    builder: (context) {
+                      var l10n = AppLocalizations.of(context);
+                      return ProgressButton(
+                        label: l10n?.retry ?? 'Retry',
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        textColor: Theme.of(context).colorScheme.onPrimary,
+                        onPressed: () {
+                          context.read<PropertyDetailsCubit>().fetchPropertyDetails(
+                            1,
+                          );
+                        },
                       );
                     },
                   ),

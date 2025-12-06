@@ -17,7 +17,7 @@ class BottomBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    var l10n = AppLocalizations.of(context)!;
     return BottomNavigationBar(
       type: BottomNavigationBarType.fixed,
       backgroundColor: theme.colorScheme.surface,

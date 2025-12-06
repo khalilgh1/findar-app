@@ -14,7 +14,6 @@ class ProfileInfoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
     return Container(
       decoration: BoxDecoration(
         color: theme.colorScheme.onPrimary,
@@ -22,19 +21,29 @@ class ProfileInfoCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          ListTile(
-            leading: _iconBox(Icons.phone_outlined, theme),
-            title: Text(l10n.phoneNumber, style: TextStyle(fontSize: 13)),
-            trailing: Text(phone, style: TextStyle(fontSize: 13)),
+          Builder(
+            builder: (context) {
+              var l10n = AppLocalizations.of(context);
+              return ListTile(
+                leading: _iconBox(Icons.phone_outlined, theme),
+                title: Text(l10n?.phoneNumber ?? 'Phone Number', style: TextStyle(fontSize: 13)),
+                trailing: Text(phone, style: TextStyle(fontSize: 13)),
+              );
+            },
           ),
           const Divider(height: 1),
-          ListTile(
-            leading: _iconBox(Icons.email_outlined, theme),
-            title: Text(l10n.email, style: TextStyle(fontSize: 14)),
-            trailing: Text(
-              email,
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w300),
-            ),
+          Builder(
+            builder: (context) {
+              var l10n = AppLocalizations.of(context);
+              return ListTile(
+                leading: _iconBox(Icons.email_outlined, theme),
+                title: Text(l10n?.email ?? 'Email', style: TextStyle(fontSize: 14)),
+                trailing: Text(
+                  email,
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w300),
+                ),
+              );
+            },
           ),
         ],
       ),

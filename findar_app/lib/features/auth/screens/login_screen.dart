@@ -21,7 +21,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
   final theme = Theme.of(context);
-  final l10n = AppLocalizations.of(context)!;
+  var l10n = AppLocalizations.of(context)!;
   
   /// Validate email format - defined here to access l10n
   String? validateEmail(String? email) {

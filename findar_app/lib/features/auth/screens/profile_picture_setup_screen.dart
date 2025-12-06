@@ -129,15 +129,17 @@ class _ProfilePictureSetupScreenState extends State<ProfilePictureSetupScreen>
     final theme = Theme.of(context);
 
     return BlocListener<ProfilePictureSetupCubit, ProfilePictureSetupState>(
+      listenWhen: (previous, current) {
+        // Only trigger when uploadComplete changes from false to true
+        return !previous.uploadComplete && current.uploadComplete;
+      },
       listener: (context, state) {
-        if (state.uploadComplete) {
-          // Save the profile picture URL to AuthCubit if available
-          if (state.uploadedImageUrl != null) {
-            context.read<AuthCubit>().updateProfilePicture(state.uploadedImageUrl!);
-          }
-          // Navigate to home after upload or skip
-          Navigator.pushReplacementNamed(context, '/home');
+        // Save the profile picture URL to AuthCubit if available
+        if (state.uploadedImageUrl != null) {
+          context.read<AuthCubit>().updateProfilePicture(state.uploadedImageUrl!);
         }
+        // Navigate to home after upload or skip
+        Navigator.pushReplacementNamed(context, '/home');
       },
       child: Scaffold(
         backgroundColor: theme.colorScheme.surface,

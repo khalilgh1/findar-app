@@ -7,6 +7,7 @@ import '../../../../logic/cubits/boost_cubit.dart';
 import '../../../../core/widgets/progress_button.dart';
 import 'widgets/order_summary.dart';
 import 'widgets/payment_form.dart';
+import 'package:findar/l10n/app_localizations.dart';
 
 class PaymentConfirmationScreen extends StatefulWidget {
   final PropertyListing listing;
@@ -57,8 +58,13 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
       // );
       
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Property boosted successfully!'),
+        SnackBar(
+          content: Builder(
+            builder: (context) {
+              final l10n = AppLocalizations.of(context)!;
+              return Text(l10n.propertyBoostedSuccessfully);
+            },
+          ),
           backgroundColor: Colors.green,
         ),
       );
@@ -93,12 +99,17 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
         backgroundColor: theme.colorScheme.surface,
         foregroundColor: theme.colorScheme.onSurface,
         centerTitle: false,
-        title: Text(
-          'Payment Confirmation',
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            color: theme.colorScheme.onSurface,
-          ),
+        title: Builder(
+          builder: (context) {
+            final l10n = AppLocalizations.of(context)!;
+            return Text(
+              l10n.paymentConfirmation,
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                color: theme.colorScheme.onSurface,
+              ),
+            );
+          },
         ),
       ),
       body: BlocConsumer<BoostCubit, Map<String, dynamic>>(
@@ -132,12 +143,17 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
                         cvvController: _cvvController,
                       ),
                       const SizedBox(height: 32),
-                      ProgressButton(
-                        label: 'Pay Now',
-                        isLoading: isLoading,
-                        backgroundColor: theme.colorScheme.primary,
-                        textColor: Colors.white,
-                        onPressed: _handlePayment,
+                      Builder(
+                        builder: (context) {
+                          final l10n = AppLocalizations.of(context)!;
+                          return ProgressButton(
+                            label: l10n.payNow,
+                            isLoading: isLoading,
+                            backgroundColor: theme.colorScheme.primary,
+                            textColor: Colors.white,
+                            onPressed: _handlePayment,
+                          );
+                        },
                       ),
                     ],
                   ),

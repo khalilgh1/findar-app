@@ -326,7 +326,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'Commencez à explorer les propriétés pour sauvegarder vos favoris';
 
   @override
-  String get myListings => 'Mes annonces';
+  String get myListings => 'Mes Annonces';
 
   @override
   String get removeListingTitle => 'Supprimer l\'annonce';
@@ -558,4 +558,140 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get undo => 'Annuler';
+
+  @override
+  String get noSavedProperties => 'Aucune propriété sauvegardée';
+
+  @override
+  String get savePropertiesToViewHere =>
+      'Enregistrez les propriétés pour les voir ici';
+
+  @override
+  String noListingsMessage(String tab) {
+    return 'Aucune annonce $tab';
+  }
+
+  @override
+  String get addFirstPropertyListing =>
+      'Ajoutez votre première annonce immobilière';
+
+  @override
+  String get chooseSponsorshipPlan => 'Choisir un plan de sponsorisation';
+
+  @override
+  String get selectPlanToBoostProperty =>
+      'Sélectionnez un plan pour promouvoir votre propriété';
+
+  @override
+  String get continueToPayment => 'Continuer vers le paiement';
+
+  @override
+  String get paymentConfirmation => 'Confirmation du paiement';
+
+  @override
+  String get propertyBoostedSuccessfully => 'Propriété promue avec succès!';
+
+  @override
+  String get payNow => 'Payer maintenant';
+
+  @override
+  String get locationHint => 'Entrez une ville, un code postal ou un quartier';
+
+  @override
+  String bedroomsCount(int count) {
+    return '$count Chambres';
+  }
+
+  @override
+  String bathroomsCount(int count) {
+    return '$count Salles de bain';
+  }
+
+  @override
+  String get basicSponsor => 'Parrain de base';
+
+  @override
+  String get premiumSponsor => 'Parrain Premium';
+
+  @override
+  String get agencySponsorPlan => 'Plan de parrainage d\'agence';
+
+  @override
+  String get featuredPlacement => 'Placement en vedette';
+
+  @override
+  String get priorityInSearch => 'Priorité dans les résultats de recherche';
+
+  @override
+  String get basicAnalytics => 'Analytiques de base';
+
+  @override
+  String get topPriority =>
+      'Priorité supérieure dans les résultats de recherche';
+
+  @override
+  String get advancedAnalytics => 'Analytiques avancées';
+
+  @override
+  String get premiumAnalyticsDashboard =>
+      'Tableau de bord d\'analytiques premium';
+
+  @override
+  String get dedicatedSupport => 'Support dédié';
+
+  @override
+  String get featuredBadge => 'Badge en vedette';
+
+  @override
+  String get cardNumber => 'Numéro de carte';
+
+  @override
+  String get cardNumberHint => '1234 5678 9012 3456';
+
+  @override
+  String get cardholderName => 'Nom du titulaire de la carte';
+
+  @override
+  String get cardholderNameHint => 'Jean Dupont';
+
+  @override
+  String get expiryDate => 'Date d\'expiration';
+
+  @override
+  String get expiryDateHint => 'MM/AA';
+
+  @override
+  String get cvv => 'CVV';
+
+  @override
+  String get cvvHint => '123';
+
+  @override
+  String get validateTitleEmpty => 'Veuillez entrer un titre de propriété';
+
+  @override
+  String get validateTitleMinLength =>
+      'Le titre doit comporter au moins 5 caractères';
+
+  @override
+  String get validateDescriptionEmpty => 'Veuillez entrer une description';
+
+  @override
+  String get validateDescriptionMinLength =>
+      'La description doit comporter au moins 20 caractères';
+
+  @override
+  String get validatePriceEmpty => 'Veuillez entrer un prix';
+
+  @override
+  String get validatePriceInvalid => 'Veuillez entrer un prix valide';
+
+  @override
+  String get validatePricePositive => 'Le prix doit être supérieur à 0';
+
+  @override
+  String get validateLocationEmpty => 'Veuillez entrer un lieu';
+
+  @override
+  String get validateBedroomsEmpty => 'Veuillez entrer le nombre de chambres';
 }

@@ -49,7 +49,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    final l10n = AppLocalizations.of(context)!;
+    var l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
@@ -180,7 +180,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
   Widget _buildEmptyState() {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    final l10n = AppLocalizations.of(context)!;
+    var l10n = AppLocalizations.of(context)!;
 
     return Center(
       child: Column(

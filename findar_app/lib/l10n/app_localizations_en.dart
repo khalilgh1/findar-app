@@ -223,7 +223,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get priceRange => 'Price range';
 
   @override
-  String get propertyType => 'Property Type';
+  String get propertyType => 'Property type';
 
   @override
   String get buildingType => 'Building Type';
@@ -554,4 +554,135 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get undo => 'Undo';
+
+  @override
+  String get noSavedProperties => 'No saved properties';
+
+  @override
+  String get savePropertiesToViewHere => 'Save properties to view them here';
+
+  @override
+  String noListingsMessage(String tab) {
+    return 'No $tab listings';
+  }
+
+  @override
+  String get addFirstPropertyListing => 'Add your first property listing';
+
+  @override
+  String get chooseSponsorshipPlan => 'Choose Sponsorship Plan';
+
+  @override
+  String get selectPlanToBoostProperty =>
+      'Select a plan to boost your property';
+
+  @override
+  String get continueToPayment => 'Continue to Payment';
+
+  @override
+  String get paymentConfirmation => 'Payment Confirmation';
+
+  @override
+  String get propertyBoostedSuccessfully => 'Property boosted successfully!';
+
+  @override
+  String get payNow => 'Pay Now';
+
+  @override
+  String get locationHint => 'Enter a city, zip code, or neighborhood';
+
+  @override
+  String bedroomsCount(int count) {
+    return '$count Bedrooms';
+  }
+
+  @override
+  String bathroomsCount(int count) {
+    return '$count Bathrooms';
+  }
+
+  @override
+  String get basicSponsor => 'Basic Sponsor';
+
+  @override
+  String get premiumSponsor => 'Premium Sponsor';
+
+  @override
+  String get agencySponsorPlan => 'Agency Sponsor Plan';
+
+  @override
+  String get featuredPlacement => 'Featured placement';
+
+  @override
+  String get priorityInSearch => 'Priority in search results';
+
+  @override
+  String get basicAnalytics => 'Basic analytics';
+
+  @override
+  String get topPriority => 'Top priority in search results';
+
+  @override
+  String get advancedAnalytics => 'Advanced analytics';
+
+  @override
+  String get premiumAnalyticsDashboard => 'Premium analytics dashboard';
+
+  @override
+  String get dedicatedSupport => 'Dedicated support';
+
+  @override
+  String get featuredBadge => 'Featured badge';
+
+  @override
+  String get cardNumber => 'Card Number';
+
+  @override
+  String get cardNumberHint => '1234 5678 9012 3456';
+
+  @override
+  String get cardholderName => 'Cardholder Name';
+
+  @override
+  String get cardholderNameHint => 'John Doe';
+
+  @override
+  String get expiryDate => 'Expiry Date';
+
+  @override
+  String get expiryDateHint => 'MM/YY';
+
+  @override
+  String get cvv => 'CVV';
+
+  @override
+  String get cvvHint => '123';
+
+  @override
+  String get validateTitleEmpty => 'Please enter a property title';
+
+  @override
+  String get validateTitleMinLength => 'Title must be at least 5 characters';
+
+  @override
+  String get validateDescriptionEmpty => 'Please enter a description';
+
+  @override
+  String get validateDescriptionMinLength =>
+      'Description must be at least 20 characters';
+
+  @override
+  String get validatePriceEmpty => 'Please enter a price';
+
+  @override
+  String get validatePriceInvalid => 'Please enter a valid price';
+
+  @override
+  String get validatePricePositive => 'Price must be greater than 0';
+
+  @override
+  String get validateLocationEmpty => 'Please enter a location';
+
+  @override
+  String get validateBedroomsEmpty => 'Please enter number of bedrooms';
 }

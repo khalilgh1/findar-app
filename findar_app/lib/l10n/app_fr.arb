@@ -227,5 +227,79 @@
   "phoneNumber": "Numéro de téléphone",
   "removedFromSaved": "Supprimé des favoris",
   "undo": "Annuler",
-  "savedListings": "Annonces sauvegardées"
+  "savedListings": "Annonces sauvegardées",
+  "noSavedProperties": "Aucune propriété sauvegardée",
+  "savePropertiesToViewHere": "Enregistrez les propriétés pour les voir ici",
+  "myListings": "Mes Annonces",
+  "noListingsMessage": "Aucune annonce {tab}",
+  "@noListingsMessage": {
+    "placeholders": {
+      "tab": {
+        "type": "String"
+      }
+    }
+  },
+  "addFirstPropertyListing": "Ajoutez votre première annonce immobilière",
+  "editProfile": "Modifier le profil",
+  "chooseSponsorshipPlan": "Choisir un plan de sponsorisation",
+  "selectPlanToBoostProperty": "Sélectionnez un plan pour promouvoir votre propriété",
+  "continueToPayment": "Continuer vers le paiement",
+  "paymentConfirmation": "Confirmation du paiement",
+  "propertyBoostedSuccessfully": "Propriété promue avec succès!",
+  "payNow": "Payer maintenant",
+  "reset": "Réinitialiser",
+  "showResults": "Afficher les résultats",
+  "bedrooms": "Chambres",
+  "bathrooms": "Salles de bain",
+  "privateOwner": "Propriétaire privé",
+  "realEstateAgent": "Agent immobilier",
+  "locationHint": "Entrez une ville, un code postal ou un quartier",
+  "propertyType": "Type de propriété",
+  "forSale": "À vendre",
+  "forRent": "À louer",
+  "floors": "Étages",
+  "bedroomsCount": "{count} Chambres",
+  "@bedroomsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bathroomsCount": "{count} Salles de bain",
+  "@bathroomsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "basicSponsor": "Parrain de base",
+  "premiumSponsor": "Parrain Premium",
+  "agencySponsorPlan": "Plan de parrainage d'agence",
+  "featuredPlacement": "Placement en vedette",
+  "priorityInSearch": "Priorité dans les résultats de recherche",
+  "basicAnalytics": "Analytiques de base",
+  "topPriority": "Priorité supérieure dans les résultats de recherche",
+  "advancedAnalytics": "Analytiques avancées",
+  "premiumAnalyticsDashboard": "Tableau de bord d'analytiques premium",
+  "dedicatedSupport": "Support dédié",
+  "featuredBadge": "Badge en vedette",
+  "cardNumber": "Numéro de carte",
+  "cardNumberHint": "1234 5678 9012 3456",
+  "cardholderName": "Nom du titulaire de la carte",
+  "cardholderNameHint": "Jean Dupont",
+  "expiryDate": "Date d'expiration",
+  "expiryDateHint": "MM/AA",
+  "cvv": "CVV",
+  "cvvHint": "123",
+  "validateTitleEmpty": "Veuillez entrer un titre de propriété",
+  "validateTitleMinLength": "Le titre doit comporter au moins 5 caractères",
+  "validateDescriptionEmpty": "Veuillez entrer une description",
+  "validateDescriptionMinLength": "La description doit comporter au moins 20 caractères",
+  "validatePriceEmpty": "Veuillez entrer un prix",
+  "validatePriceInvalid": "Veuillez entrer un prix valide",
+  "validatePricePositive": "Le prix doit être supérieur à 0",
+  "validateLocationEmpty": "Veuillez entrer un lieu",
+  "validateBedroomsEmpty": "Veuillez entrer le nombre de chambres"
 }

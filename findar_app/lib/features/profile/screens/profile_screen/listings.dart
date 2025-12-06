@@ -16,7 +16,6 @@ class ListingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
 
     return Container(
       width: 235,
@@ -74,14 +73,18 @@ class ListingCard extends StatelessWidget {
                       onPressed: () => {
                         Navigator.pushNamed(context, '/property-details'),
                       },
-                      child: Text(
-                        l10n.viewListing,
-
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: theme.colorScheme.onSecondaryContainer,
-                        ),
-                        textAlign: TextAlign.center,
+                      child: Builder(
+                        builder: (context) {
+                          var l10n = AppLocalizations.of(context);
+                          return Text(
+                            l10n?.viewListing ?? 'View Listing',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: theme.colorScheme.onSecondaryContainer,
+                            ),
+                            textAlign: TextAlign.center,
+                          );
+                        },
                       ),
                     ),
                   ),

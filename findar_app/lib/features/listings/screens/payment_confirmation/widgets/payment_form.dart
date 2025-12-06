@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../utils/expiry_date_formatter.dart';
 import '../utils/payment_validator.dart';
+import 'package:findar/l10n/app_localizations.dart';
 
 class PaymentForm extends StatelessWidget {
   final TextEditingController cardNumberController;
@@ -23,81 +24,85 @@ class PaymentForm extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Form(
-      key: formKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-        Row(
-          children: [
-            Image.asset(
-              'assets/edahabia_logo.png',
-              height: 30,
-              errorBuilder: (context, error, stackTrace) {
-                return Icon(
-                  Icons.credit_card,
-                  color: theme.colorScheme.primary,
-                  size: 30,
-                );
-              },
+    return Builder(
+      builder: (context) {
+        final l10n = AppLocalizations.of(context)!;
+        
+        return Form(
+          key: formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+            Row(
+              children: [
+                Image.asset(
+                  'assets/edahabia_logo.png',
+                  height: 30,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Icon(
+                      Icons.credit_card,
+                      color: theme.colorScheme.primary,
+                      size: 30,
+                    );
+                  },
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'Pay with your EDAHABIA Card',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: 12),
-            Text(
-              'Pay with your EDAHABIA Card',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: theme.colorScheme.onSurface,
-              ),
+            const SizedBox(height: 20),
+
+            // Card Number
+            _buildLabel(l10n.cardNumber, theme),
+            const SizedBox(height: 6),
+            _buildTextField(
+              controller: cardNumberController,
+              hintText: l10n.cardNumberHint,
+              keyboardType: TextInputType.number,
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+                LengthLimitingTextInputFormatter(16),
+              ],
+              validator: PaymentValidator.validateCardNumber,
             ),
-          ],
-        ),
-        const SizedBox(height: 20),
+            const SizedBox(height: 20),
 
-        // Card Number
-        _buildLabel('Card Number', theme),
-        const SizedBox(height: 6),
-        _buildTextField(
-          controller: cardNumberController,
-          hintText: '1234 5678 9012 3456',
-          keyboardType: TextInputType.number,
-          inputFormatters: [
-            FilteringTextInputFormatter.digitsOnly,
-            LengthLimitingTextInputFormatter(16),
-          ],
-          validator: PaymentValidator.validateCardNumber,
-        ),
-        const SizedBox(height: 20),
+            // Cardholder Name
+            _buildLabel(l10n.cardholderName, theme),
+            const SizedBox(height: 6),
+            _buildTextField(
+              controller: cardholderNameController,
+              hintText: l10n.cardholderNameHint,
+              keyboardType: TextInputType.name,
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\s]')),
+              ],
+              validator: PaymentValidator.validateCardholderName,
+            ),
+            const SizedBox(height: 20),
 
-        // Cardholder Name
-        _buildLabel('Cardholder Name', theme),
-        const SizedBox(height: 6),
-        _buildTextField(
-          controller: cardholderNameController,
-          hintText: 'John Doe',
-          keyboardType: TextInputType.name,
-          inputFormatters: [
-            FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\s]')),
-          ],
-          validator: PaymentValidator.validateCardholderName,
-        ),
-        const SizedBox(height: 20),
-
-        // Expiry Date and CVV
-        Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildLabel('Expiry Date', theme),
-                  const SizedBox(height: 6),
-                  _buildTextField(
-                    controller: expiryDateController,
-                    hintText: 'MM/YY',
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [
-                      ExpiryDateFormatter(),
+            // Expiry Date and CVV
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildLabel(l10n.expiryDate, theme),
+                      const SizedBox(height: 6),
+                      _buildTextField(
+                        controller: expiryDateController,
+                        hintText: l10n.expiryDateHint,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          ExpiryDateFormatter(),
                     ],
                     validator: PaymentValidator.validateExpiryDate,
                   ),
@@ -109,11 +114,11 @@ class PaymentForm extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildLabel('CVV', theme),
+                  _buildLabel(l10n.cvv, theme),
                   const SizedBox(height: 6),
                   _buildTextField(
                     controller: cvvController,
-                    hintText: '123',
+                    hintText: l10n.cvvHint,
                     keyboardType: TextInputType.number,
                     obscureText: true,
                     inputFormatters: [
@@ -127,8 +132,10 @@ class PaymentForm extends StatelessWidget {
             ),
           ],
         ),
-      ],
-      ),
+        ],
+        ),
+        );
+      },
     );
   }
 

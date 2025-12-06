@@ -8,7 +8,7 @@
 //    import 'package:findar/l10n/app_localizations.dart';
 //
 // 2. Get the localization object and use it:
-//    final l10n = AppLocalizations.of(context)!;
+//    var l10n = AppLocalizations.of(context)!;
 //    
 //    Text(l10n.welcomeBack)          // "Welcome Back!"
 //    Text(l10n.login)                // "Login"
@@ -34,7 +34,7 @@
 //
 //   @override
 //   Widget build(BuildContext context) {
-//     final l10n = AppLocalizations.of(context)!;
+//     var l10n = AppLocalizations.of(context)!;
 //     
 //     return Scaffold(
 //       backgroundColor: Colors.white,
@@ -195,7 +195,7 @@
 //
 //   @override
 //   Widget build(BuildContext context) {
-//     final l10n = AppLocalizations.of(context)!;
+//     var l10n = AppLocalizations.of(context)!;
 //     
 //     return ListTile(
 //       title: Text(l10n.language),
@@ -205,7 +205,7 @@
 //   }
 //
 //   void _showLanguageDialog(BuildContext context) {
-//     final l10n = AppLocalizations.of(context)!;
+//     var l10n = AppLocalizations.of(context)!;
 //     
 //     showDialog(
 //       context: context,

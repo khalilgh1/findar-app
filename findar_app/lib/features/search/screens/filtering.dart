@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:main_button/main_button.dart';
 
 import '../../../logic/cubits/search_cubit.dart';
+import 'package:findar/l10n/app_localizations.dart';
 
 class FilteringScreen extends StatefulWidget {
   const FilteringScreen({super.key});
@@ -68,7 +69,12 @@ class _FilteringScreenState extends State<FilteringScreen> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text('Advanced Search'),
+        title: Builder(
+          builder: (context) {
+            final l10n = AppLocalizations.of(context)!;
+            return Text(l10n.advancedSearch);
+          },
+        ),
         centerTitle: true,
 
         elevation: 0,
@@ -134,26 +140,38 @@ class _FilteringScreenState extends State<FilteringScreen> {
             Text('Propoerty type', style: theme.textTheme.headlineSmall),
 
             const SizedBox(height: 8),
-            Row(
-              children: ['Any', 'For Sale', 'For Rent'].map((type) {
-                final isSelected = propertyType == type;
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: ChoiceChip(
-                    label: Text(type),
-                    selected: isSelected,
-                    onSelected: (_) => setState(() => propertyType = type),
-                    selectedColor: theme.colorScheme.primary,
-                    labelStyle: TextStyle(
-                      color: isSelected
-                          ? theme.colorScheme.onPrimary
-                          : theme.colorScheme.onSurface,
-                    ),
-                    side: BorderSide.none,
-                    showCheckmark: false,
-                  ),
+            Builder(
+              builder: (context) {
+                final l10n = AppLocalizations.of(context)!;
+                final types = [
+                  ('Any', 'Any'),
+                  ('For Sale', l10n.forSale),
+                  ('For Rent', l10n.forRent),
+                ];
+                return Row(
+                  children: types.map((typeData) {
+                    final value = typeData.$1;
+                    final label = typeData.$2;
+                    final isSelected = propertyType == value;
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: ChoiceChip(
+                        label: Text(label),
+                        selected: isSelected,
+                        onSelected: (_) => setState(() => propertyType = value),
+                        selectedColor: theme.colorScheme.primary,
+                        labelStyle: TextStyle(
+                          color: isSelected
+                              ? theme.colorScheme.onPrimary
+                              : theme.colorScheme.onSurface,
+                        ),
+                        side: BorderSide.none,
+                        showCheckmark: false,
+                      ),
+                    );
+                  }).toList(),
                 );
-              }).toList(),
+              },
             ),
 
             const SizedBox(height: 24),
@@ -273,14 +291,24 @@ class _FilteringScreenState extends State<FilteringScreen> {
                   onChanged: (v) => setState(() => listedBy = v),
                 ),
                 RadioListTile<String>(
-                  title: Text('Private Owner'),
+                  title: Builder(
+                    builder: (context) {
+                      final l10n = AppLocalizations.of(context)!;
+                      return Text(l10n.privateOwner);
+                    },
+                  ),
                   value: 'Private Owner',
                   activeColor: theme.colorScheme.primary,
                   groupValue: listedBy,
                   onChanged: (v) => setState(() => listedBy = v),
                 ),
                 RadioListTile<String>(
-                  title: const Text('Real Estate Agent'),
+                  title: Builder(
+                    builder: (context) {
+                      final l10n = AppLocalizations.of(context)!;
+                      return Text(l10n.realEstateAgent);
+                    },
+                  ),
                   value: 'Real Estate Agent',
                   activeColor: theme.colorScheme.primary,
                   groupValue: listedBy,
@@ -298,19 +326,29 @@ class _FilteringScreenState extends State<FilteringScreen> {
         child: Row(
           children: [
             Expanded(
-              child: MainButton(
-                label: 'Reset',
-                backgroundColor: theme.colorScheme.secondary,
-                onPressed: resetFilters,
+              child: Builder(
+                builder: (context) {
+                  final l10n = AppLocalizations.of(context)!;
+                  return MainButton(
+                    label: l10n.reset,
+                    backgroundColor: theme.colorScheme.secondary,
+                    onPressed: resetFilters,
+                  );
+                },
               ),
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: MainButton(
-                label: 'Show results',
-                backgroundColor: theme.colorScheme.primary,
-                onPressed: () async {
-                  await _applyFilters(context);
+              child: Builder(
+                builder: (context) {
+                  final l10n = AppLocalizations.of(context)!;
+                  return MainButton(
+                    label: l10n.showResults,
+                    backgroundColor: theme.colorScheme.primary,
+                    onPressed: () async {
+                      await _applyFilters(context);
+                    },
+                  );
                 },
               ),
             ),
@@ -353,7 +391,13 @@ class _FilteringScreenState extends State<FilteringScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label),
+        Builder(
+          builder: (context) {
+            final l10n = AppLocalizations.of(context)!;
+            final displayLabel = label == 'Bedrooms' ? l10n.bedrooms : (label == 'Bathrooms' ? l10n.bathrooms : label);
+            return Text(displayLabel);
+          },
+        ),
         Row(
           children: [
             IconButton(

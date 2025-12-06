@@ -31,7 +31,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
     return MultiBlocListener(
       listeners: [
         BlocListener<SponsoredCubit, Map<String, dynamic>>(
@@ -83,7 +82,9 @@ class _HomeScreenState extends State<HomeScreen> {
               Icons.settings,
               color: Theme.of(context).colorScheme.onSurface,
             ),
-            onPressed: () => Navigator.pushNamed(context, '/settings'),
+            onPressed: () {
+              Navigator.pushNamed(context, '/settings');
+            },
           ),
           actions: [
             IconButton(
@@ -113,11 +114,16 @@ class _HomeScreenState extends State<HomeScreen> {
                   SizedBox(height: 15),
                   CategoryBar(),
                   SizedBox(height: 20),
-                  Text(
-                    l10n.sponsoredProperties,
-                    style: theme.textTheme.headlineLarge?.copyWith(
-                      color: theme.colorScheme.onSurface,
-                    ),
+                  Builder(
+                    builder: (context) {
+                      var l10n = AppLocalizations.of(context);
+                      return Text(
+                        l10n?.sponsoredProperties ?? 'Sponsored Properties',
+                        style: theme.textTheme.headlineLarge?.copyWith(
+                          color: theme.colorScheme.onSurface,
+                        ),
+                      );
+                    },
                   ),
                   SizedBox(height: 12),
                   BlocBuilder<SponsoredCubit, Map<String, dynamic>>(
@@ -133,14 +139,19 @@ class _HomeScreenState extends State<HomeScreen> {
                                 'Error: ${state['message'] ?? 'Unknown error'}',
                               ),
                               SizedBox(height: 16),
-                              ProgressButton(
-                                label: l10n.retry,
-                                backgroundColor: theme.colorScheme.primary,
-                                textColor: theme.colorScheme.onPrimary,
-                                onPressed: () {
-                                  context
-                                      .read<SponsoredCubit>()
-                                      .getSponsoredListings();
+                              Builder(
+                                builder: (context) {
+                                  var l10n = AppLocalizations.of(context);
+                                  return ProgressButton(
+                                    label: l10n?.retry ?? 'Retry',
+                                    backgroundColor: theme.colorScheme.primary,
+                                    textColor: theme.colorScheme.onPrimary,
+                                    onPressed: () {
+                                      context
+                                          .read<SponsoredCubit>()
+                                          .getSponsoredListings();
+                                    },
+                                  );
                                 },
                               ),
                             ],
@@ -184,11 +195,16 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
 
                   SizedBox(height: 25),
-                  Text(
-                    l10n.recentListings,
-                    style: theme.textTheme.headlineLarge?.copyWith(
-                      color: theme.colorScheme.onSurface,
-                    ),
+                  Builder(
+                    builder: (context) {
+                      var l10n = AppLocalizations.of(context);
+                      return Text(
+                        l10n?.recentListings ?? 'Recent Listings',
+                        style: theme.textTheme.headlineLarge?.copyWith(
+                          color: theme.colorScheme.onSurface,
+                        ),
+                      );
+                    },
                   ),
                   SizedBox(height: 15),
                   BlocBuilder<RecentCubit, Map<String, dynamic>>(
