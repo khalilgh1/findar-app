@@ -66,18 +66,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: AppbarTitle(title: l10n.searchResults),
-        actions: [
-          IconButton(
-            icon: Icon(
-              Icons.filter_alt_rounded,
-              color: Theme.of(context).colorScheme.onSurface,
-              size: 30,
-            ),
-            onPressed: () {
-              Navigator.pushNamed(context, '/filtering');
-            },
-          ),
-        ],
+        actions: [],
       ),
       body: Column(
         children: [

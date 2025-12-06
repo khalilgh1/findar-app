@@ -97,14 +97,6 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
         actions: [
           IconButton(
             icon: Icon(
-              Icons.sort,
-              color: Theme.of(context).colorScheme.onSurface,
-              size: 30,
-            ),
-            onPressed: () => _showSortBottomSheet(context),
-          ),
-          IconButton(
-            icon: Icon(
               themeProvider.isDarkMode
                   ? Icons.dark_mode_outlined
                   : Icons.light_mode_outlined,
