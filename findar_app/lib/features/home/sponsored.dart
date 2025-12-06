@@ -20,9 +20,10 @@ class PropertyCard extends StatelessWidget {
 
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            margin: EdgeInsetsGeometry.only(left: 10, right: 10, top: 10),
+            margin: const EdgeInsets.only(left: 10, right: 10, top: 10),
             height: 125,
             width: double.infinity,
             decoration: BoxDecoration(
@@ -63,7 +64,7 @@ class PropertyCard extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
