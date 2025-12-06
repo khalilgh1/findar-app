@@ -23,7 +23,7 @@ class _ListingTileState extends State<ListingTile> {
   void _toggleSave() {
     final cubit = context.read<RecentCubit>();
     print('Before toggle: _bookmarked=$_bookmarked, id=${widget.property.id}');
-    
+
     if (_bookmarked) {
       // Currently saved, so unsave it
       print('Unsaving listing ${widget.property.id}');
