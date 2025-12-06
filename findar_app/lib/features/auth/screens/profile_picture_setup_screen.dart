@@ -120,7 +120,7 @@ class _ProfilePictureSetupScreenState extends State<ProfilePictureSetupScreen>
     } else if (state.imageFile != null) {
       return FileImage(state.imageFile!);
     } else {
-      return const AssetImage('assets/profile.jpg');
+      return const AssetImage('assets/profile.png');
     }
   }
 
@@ -133,7 +133,9 @@ class _ProfilePictureSetupScreenState extends State<ProfilePictureSetupScreen>
         if (state.uploadComplete) {
           // Save the profile picture URL to AuthCubit if available
           if (state.uploadedImageUrl != null) {
-            context.read<AuthCubit>().updateProfilePicture(state.uploadedImageUrl!);
+            context.read<AuthCubit>().updateProfilePicture(
+              state.uploadedImageUrl!,
+            );
           }
           // Navigate to home after upload or skip
           Navigator.pushReplacementNamed(context, '/home');

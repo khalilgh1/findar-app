@@ -43,7 +43,7 @@ class _ProfileAvatarState extends State<ProfileAvatar>
     } else if (_selectedImage != null) {
       return FileImage(_selectedImage!);
     }
-    
+
     // Then check if user has a saved profile picture in AuthCubit
     final userData = authState['data'];
     if (userData != null && userData.profilePic != null) {
@@ -63,9 +63,9 @@ class _ProfileAvatarState extends State<ProfileAvatar>
         return FileImage(File(profilePic));
       }
     }
-    
+
     // Finally, fall back to default avatar
-    return const AssetImage('assets/profile.jpg');
+    return const AssetImage('assets/profile.png');
   }
 
   void _showFullScreenImage(BuildContext context) {
@@ -189,7 +189,7 @@ class _ProfileAvatarState extends State<ProfileAvatar>
           // For mobile, use file path
           profilePicUrl = _selectedImage!.path;
         }
-        
+
         if (profilePicUrl != null && mounted) {
           context.read<AuthCubit>().updateProfilePicture(profilePicUrl);
         }
@@ -223,67 +223,67 @@ class _ProfileAvatarState extends State<ProfileAvatar>
       builder: (context, authState) {
         return Stack(
           alignment: Alignment.center,
-      children: [
-        // Main avatar with tap to view fullscreen
-        GestureDetector(
-          onTap: () => _showFullScreenImage(context),
-          child: Hero(
-            tag: 'profile_avatar',
-            child: CircleAvatar(
-              radius: 50,
-              backgroundImage: _getImageProvider(authState),
-              backgroundColor: Colors.transparent,
-            ),
-          ),
-        ),
-
-        // Circular progress indicator (Facebook-style)
-        if (_isUploading)
-          Positioned.fill(
-            child: AnimatedBuilder(
-              animation: _progressController,
-              builder: (context, child) {
-                return CustomPaint(
-                  painter: _CircularProgressPainter(
-                    progress: _progressController.value,
-                    color: theme.colorScheme.primary,
-                  ),
-                );
-              },
-            ),
-          ),
-
-        // Edit button
-        Positioned(
-          bottom: 0,
-          right: 0,
-          child: GestureDetector(
-            onTap: _isUploading ? null : _showImageSourceDialog,
-            child: Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: _isUploading
-                    ? theme.colorScheme.primary.withOpacity(0.5)
-                    : theme.colorScheme.primary,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Icon(
-                Icons.edit,
-                color: theme.colorScheme.onPrimary,
-                size: 18,
+          children: [
+            // Main avatar with tap to view fullscreen
+            GestureDetector(
+              onTap: () => _showFullScreenImage(context),
+              child: Hero(
+                tag: 'profile_avatar',
+                child: CircleAvatar(
+                  radius: 50,
+                  backgroundImage: _getImageProvider(authState),
+                  backgroundColor: Colors.transparent,
+                ),
               ),
             ),
-          ),
-        ),
-      ],
-    );
+
+            // Circular progress indicator (Facebook-style)
+            if (_isUploading)
+              Positioned.fill(
+                child: AnimatedBuilder(
+                  animation: _progressController,
+                  builder: (context, child) {
+                    return CustomPaint(
+                      painter: _CircularProgressPainter(
+                        progress: _progressController.value,
+                        color: theme.colorScheme.primary,
+                      ),
+                    );
+                  },
+                ),
+              ),
+
+            // Edit button
+            Positioned(
+              bottom: 0,
+              right: 0,
+              child: GestureDetector(
+                onTap: _isUploading ? null : _showImageSourceDialog,
+                child: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: _isUploading
+                        ? theme.colorScheme.primary.withOpacity(0.5)
+                        : theme.colorScheme.primary,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    Icons.edit,
+                    color: theme.colorScheme.onPrimary,
+                    size: 18,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
       },
     );
   }

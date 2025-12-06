@@ -9,7 +9,7 @@ class UserProfileAvatar extends StatelessWidget {
     if (imageUrl != null && imageUrl!.isNotEmpty) {
       return NetworkImage(imageUrl!);
     } else {
-      return const AssetImage('assets/profile.jpg');
+      return const AssetImage('assets/profile.png');
     }
   }
 

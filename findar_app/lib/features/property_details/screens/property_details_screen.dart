@@ -22,7 +22,6 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
   void initState() {
     super.initState();
     // Fetch property details when screen loads
-    
   }
 
   @override
@@ -100,9 +99,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                       PropertyImageCarousel(
                         images:
                             (property['images'] as List?)?.cast<String>() ??
-                            [
-                                  'assets/default.png'
-                            ],
+                            ['assets/default.png'],
                       ),
                       const SizedBox(height: 16),
                       PropertyHeader(
@@ -113,8 +110,8 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                         price: (property['price'] is double)
                             ? property['price']
                             : (property['price'] is int)
-                                ? (property['price'] as int).toDouble()
-                                : 550000.0,
+                            ? (property['price'] as int).toDouble()
+                            : 550000.0,
                       ),
                       const SizedBox(height: 16),
                       PropertyFeatures(
@@ -134,7 +131,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                         agentCompany:
                             property['agentCompany'] ?? 'Prestige Realty',
                         agentImage:
-                            property['agentImage'] ?? 'assets/profile.jpg',
+                            property['agentImage'] ?? 'assets/profile.png',
                         agentId:
                             property['agentId'] as String? ?? 'test-user-123',
                       ),
@@ -147,11 +144,13 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                               image:
                                   similarProperties[index]['image'] ??
                                   'assets/find-dar-test1.jpg',
-                              price: (similarProperties[index]['price'] is double)
+                              price:
+                                  (similarProperties[index]['price'] is double)
                                   ? similarProperties[index]['price']
                                   : (similarProperties[index]['price'] is int)
-                                      ? (similarProperties[index]['price'] as int).toDouble()
-                                      : 525000.0,
+                                  ? (similarProperties[index]['price'] as int)
+                                        .toDouble()
+                                  : 525000.0,
                               address:
                                   similarProperties[index]['address'] ??
                                   '456 Oak St',

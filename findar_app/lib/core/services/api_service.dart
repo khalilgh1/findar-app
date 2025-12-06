@@ -150,7 +150,7 @@ class ApiService {
           'name': 'John Doe',
           'email': 'john@example.com',
           'phone': '+1234567890',
-          'profile_pic': 'assets/profile.jpg',
+          'profile_pic': 'assets/profile.png',
           'account_type': 'buyer',
           'credits': 100,
         },
