@@ -13,11 +13,12 @@ class ListingTile extends StatefulWidget {
 
 class _ListingTileState extends State<ListingTile> {
   late bool _bookmarked;
-
   @override
   void initState() {
     super.initState();
     _bookmarked = widget.property.bookmarked; // initial value
+    print("property: ");
+    print(widget.property.image);
   }
 
   void _toggleSave() {

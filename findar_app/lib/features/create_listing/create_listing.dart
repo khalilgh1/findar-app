@@ -37,7 +37,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
   String _classification = 'For Sale';
   String _propertyType = 'Apartment';
   String _status = 'Online';
-  final List<String> _photos = ['find-dar-test1.jpg', 'find-dar-test2.jpg'];
+  final List<String> _photos = ["assets/default.png"];
 
   String? _validateTitle(String? value) {
     if (value == null || value.isEmpty) {
@@ -322,48 +322,6 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  Expanded(
-                    child: Container(
-                      height: 120,
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.secondaryContainer,
-                        borderRadius: BorderRadius.circular(12),
-                        image: DecorationImage(
-                          image: AssetImage(_photos[1]),
-                          fit: BoxFit.cover,
-                          onError: (exception, stackTrace) {},
-                        ),
-                      ),
-                      child: Stack(
-                        children: [
-                          Positioned(
-                            top: 8,
-                            right: 8,
-                            child: GestureDetector(
-                              onTap: () {
-                                // setState(() => _photos.removeAt(1));
-                              },
-                              child: Container(
-                                width: 28,
-                                height: 28,
-                                decoration: BoxDecoration(
-                                  color: theme.colorScheme.onSurface.withAlpha(
-                                    150,
-                                  ),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(
-                                  Icons.close,
-                                  color: theme.colorScheme.surface,
-                                  size: 18,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
                 ],
               ),
               const SizedBox(height: 12),

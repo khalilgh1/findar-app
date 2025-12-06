@@ -101,9 +101,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                         images:
                             (property['images'] as List?)?.cast<String>() ??
                             [
-                              'assets/find-dar-test1.jpg',
-                              'assets/find-dar-test2.jpg',
-                              'assets/find-dar-test3.jpg',
+                                  'assets/default.png'
                             ],
                       ),
                       const SizedBox(height: 16),

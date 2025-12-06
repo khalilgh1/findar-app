@@ -71,12 +71,8 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   assets:
-    - assets/find-dar-test1.jpg
-    - assets/find-dar-test2.jpg
-    - assets/find-dar-test3.jpg
-    - assets/profile.jpg
-    - assets/dust3.webp
-    - assets/nuke.webp
+    - assets/
+
 
   # To add assets to your application, add an assets section, like this:
   # assets:
