@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:findar/logic/cubits/home/recent_listings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'property.dart';
 
 const categroiesHeight = 34.0;
 
