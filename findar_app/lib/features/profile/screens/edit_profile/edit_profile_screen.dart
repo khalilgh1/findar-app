@@ -132,7 +132,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   child: ProgressButton(
                     label: 'Save Changes',
                     backgroundColor: theme.colorScheme.primary,
-                    textColor: theme.colorScheme.onPrimary,
+                    textColor: Colors.white,
                     isLoading: _isLoading,
                     onPressed: _isLoading
                         ? null

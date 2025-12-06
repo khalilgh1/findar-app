@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:findar/logic/cubits/search_cubit.dart';
-import 'package:findar/logic/cubits/sort_cubit.dart';
+import 'package:findar/core/models/property_listing_model.dart';
 import '../../../../core/widgets/appbar_title.dart';
 import '../../../../core/widgets/property_card.dart';
 import '../../../../core/widgets/sort_and_filter.dart';
@@ -60,28 +60,33 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
   void initState() {
     super.initState();
     // Perform search when screen loads
-    context.read<SearchCubit>().search(
-      query: '',
+    context.read<SearchCubit>().getFilteredListings(
       minPrice: 0,
       maxPrice: double.infinity,
-      location: '',
-      minBedrooms: 0,
-      maxBedrooms: 10,
-      propertyType: '',
-      classification: '',
     );
   }
 
-  void _toggleSave(String propertyId) {
-    setState(() {
-      final propertyIndex = _properties.indexWhere(
-        (p) => p['id'] == propertyId,
-      );
-      if (propertyIndex != -1) {
-        _properties[propertyIndex]['isSaved'] =
-            !_properties[propertyIndex]['isSaved'];
-      }
-    });
+  // Keep track of locally saved listing ids for optimistic UI updates
+  final Set<int> _savedIds = {};
+
+  void _toggleSave(int listingId) async {
+    final result = await context.read<SearchCubit>().saveListing(listingId);
+    if (result.state) {
+      setState(() {
+        if (_savedIds.contains(listingId)) {
+          _savedIds.remove(listingId);
+        } else {
+          _savedIds.add(listingId);
+        }
+      });
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(result.message)));
+    } else {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(result.message)));
+    }
   }
 
   @override
@@ -171,15 +176,9 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                           ).colorScheme.primary,
                           textColor: Theme.of(context).colorScheme.onPrimary,
                           onPressed: () {
-                            context.read<SearchCubit>().search(
-                              query: '',
+                            context.read<SearchCubit>().getFilteredListings(
                               minPrice: 0,
                               maxPrice: double.infinity,
-                              location: '',
-                              minBedrooms: 0,
-                              maxBedrooms: 10,
-                              propertyType: '',
-                              classification: '',
                             );
                           },
                         ),
@@ -188,48 +187,97 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                   );
                 }
 
-                final rawProperties =
-                    (searchState['data'] as List?)?.isEmpty ?? true
-                    ? _properties
-                    : (searchState['data'] as List?);
+                final dynamic listData = state['data'];
+                final bool useFallback =
+                    listData == null || (listData is List && listData.isEmpty);
 
-                // Apply sorting using SortCubit
-                return BlocBuilder<SortCubit, BaseState>(
-                  builder: (context, sortState) {
-                    final sortCubit = context.read<SortCubit>();
-                    final sortedProperties = sortCubit.sortProperties(
-                      List<Map<String, dynamic>>.from(rawProperties!),
+                if (useFallback) {
+                  return _properties.isEmpty
+                      ? _buildEmptyState()
+                      : ListView.builder(
+                          padding: EdgeInsets.only(
+                            top: screenHeight * 0.01,
+                            bottom: screenHeight * 0.02,
+                          ),
+                          itemCount: _properties.length,
+                          itemBuilder: (context, index) {
+                            final property = _properties[index];
+                            return PropertyListingCard(
+                              title: property['title'],
+                              imageUrl: property['imageUrl'],
+                              price: property['price'],
+                              location: property['location'],
+                              beds: property['beds'],
+                              baths: property['baths'],
+                              sqft: property['sqft'],
+                              isSaved: property['isSaved'],
+                              onSaveToggle: () => _toggleSave(
+                                int.tryParse(property['id'].toString()) ?? 0,
+                              ),
+                              onTap: () {
+                                Navigator.pushNamed(
+                                  context,
+                                  '/property-details',
+                                );
+                              },
+                            );
+                          },
+                        );
+                }
+
+                final listings = (listData as List).cast();
+                if (listings.isEmpty) return _buildEmptyState();
+
+                return ListView.builder(
+                  padding: EdgeInsets.only(
+                    top: screenHeight * 0.01,
+                    bottom: screenHeight * 0.02,
+                  ),
+                  itemCount: listings.length,
+                  itemBuilder: (context, index) {
+                    final item = listings[index];
+
+                    // item may be PropertyListing
+                    String imageUrl = '';
+                    if (item is PropertyListing) {
+                      imageUrl =
+                          (item.image.isNotEmpty &&
+                              item.image.startsWith('http'))
+                          ? item.image
+                          : 'https://via.placeholder.com/600x400';
+                    }
+
+                    final title = item is PropertyListing ? item.title : '';
+                    final price = item is PropertyListing
+                        ? '\$${item.price.toStringAsFixed(0)}'
+                        : '';
+                    final location = item is PropertyListing
+                        ? item.location
+                        : '';
+                    final beds = item is PropertyListing ? item.bedrooms : 0;
+                    final baths = item is PropertyListing ? item.bathrooms : 0;
+                    final sqft = 0;
+                    final id = item is PropertyListing ? item.id : 0;
+                    final isSaved = _savedIds.contains(id);
+
+                    return PropertyListingCard(
+                      title: title,
+                      imageUrl: imageUrl,
+                      price: price,
+                      location: location,
+                      beds: beds,
+                      baths: baths,
+                      sqft: sqft,
+                      isSaved: isSaved,
+                      onSaveToggle: () => _toggleSave(id),
+                      onTap: () {
+                        Navigator.pushNamed(
+                          context,
+                          '/property-details',
+                          arguments: item,
+                        );
+                      },
                     );
-
-                    return sortedProperties.isEmpty
-                        ? _buildEmptyState()
-                        : ListView.builder(
-                            padding: EdgeInsets.only(
-                              top: screenHeight * 0.01,
-                              bottom: screenHeight * 0.02,
-                            ),
-                            itemCount: sortedProperties.length,
-                            itemBuilder: (context, index) {
-                              final property = sortedProperties[index];
-                              return PropertyListingCard(
-                                title: property['title'],
-                                imageUrl: property['imageUrl'],
-                                price: property['price'],
-                                location: property['location'],
-                                beds: property['beds'],
-                                baths: property['baths'],
-                                sqft: property['sqft'],
-                                isSaved: property['isSaved'],
-                                onSaveToggle: () => _toggleSave(property['id']),
-                                onTap: () {
-                                  Navigator.pushNamed(
-                                    context,
-                                    '/property-details',
-                                  );
-                                },
-                              );
-                            },
-                          );
                   },
                 );
               },
@@ -251,7 +299,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
           Icon(
             Icons.search_off,
             size: screenWidth * 0.2,
-            color: Theme.of(context).colorScheme.onBackground,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
           SizedBox(height: screenHeight * 0.02),
           Text(
@@ -259,7 +307,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
             style: TextStyle(
               fontSize: screenWidth * 0.05,
               fontWeight: FontWeight.w600,
-              color: Theme.of(context).colorScheme.onBackground,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           SizedBox(height: screenHeight * 0.01),

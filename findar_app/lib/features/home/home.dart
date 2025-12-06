@@ -98,10 +98,12 @@ class _HomeScreenState extends State<HomeScreen> {
         title: Text('FinDar'),
         elevation: 0,
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(14.0),
-          child: Column(
+      body: SafeArea(
+        bottom: false,
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(14.0),
+            child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -182,6 +184,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
+        ),
         ),
       ),
       bottomNavigationBar: BuildBottomNavBar(index: 0),

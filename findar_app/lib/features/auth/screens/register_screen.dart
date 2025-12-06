@@ -11,6 +11,7 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool isChecked = false;
   String? _selectedAccountType;
   final TextEditingController _nameController = TextEditingController();
@@ -19,13 +20,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _passwordController = TextEditingController();
   bool _obscurePassword = true;
 
+  /// Validate name
+  String? _validateName(String? name) {
+    if (name == null || name.isEmpty) {
+      return 'Name is required';
+    }
+    if (name.length < 3) {
+      return 'Name must be at least 3 characters';
+    }
+    return null;
+  }
+
   /// Validate password strength
   /// Requirements:
   /// - Minimum 6 characters
   /// - At least one uppercase letter
   /// - At least one number
-  String? _validatePassword(String password) {
-    if (password.isEmpty) {
+  String? _validatePassword(String? password) {
+    if (password == null || password.isEmpty) {
       return 'Password is required';
     }
     if (password.length < 6) {
@@ -41,8 +53,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   /// Validate email format
-  String? _validateEmail(String email) {
-    if (email.isEmpty) {
+  String? _validateEmail(String? email) {
+    if (email == null || email.isEmpty) {
       return 'Email is required';
     }
     final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
@@ -53,12 +65,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   /// Validate phone number (basic check)
-  String? _validatePhone(String phone) {
-    if (phone.isEmpty) {
+  String? _validatePhone(String? phone) {
+    if (phone == null || phone.isEmpty) {
       return 'Phone number is required';
     }
     if (phone.length < 10) {
       return 'Phone number must be at least 10 digits';
+    }
+    return null;
+  }
+
+  String? _validateAccountType(String? type) {
+    if (type == null || type.isEmpty) {
+      return 'Please select account type';
     }
     return null;
   }
@@ -72,14 +91,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
         child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
                 const SizedBox(height: 20),
-                const Text(
+                Text(
                   'FinDAR',
                   style: TextStyle(
-                    color: Colors.blue,
+                    color: Theme.of(context).colorScheme.primary,
                     fontSize: 60,
                     fontWeight: FontWeight.bold,
                   ),
@@ -104,6 +125,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
+                    errorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: Colors.red),
+                    ),
+                    focusedErrorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: Colors.red, width: 2),
+                    ),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
                   ),
                   hint: Text('Select Account Type', style: TextStyle(color: Theme.of(context).colorScheme.onSecondaryContainer),),
@@ -113,6 +142,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       child: Text(value),
                     );
                   }).toList(),
+                  validator: _validateAccountType,
                   onChanged: (String? newValue) {
                     setState(() => _selectedAccountType = newValue);
                   },
@@ -124,20 +154,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   child: Text(
                     'Full Name',
                     style: TextStyle(
-                      color: Theme.of(context).colorScheme.onPrimary,
+                      color: Theme.of(context).colorScheme.onSurface,
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                 ),
                 const SizedBox(height: 6),
-                TextField(
+                TextFormField(
                   controller: _nameController,
+                  validator: _validateName,
                   decoration: InputDecoration(
                     hintText: 'Enter your full name',
-          
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
+                    ),
+                    errorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: Colors.red),
+                    ),
+                    focusedErrorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: Colors.red, width: 2),
                     ),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
                   ),
@@ -148,19 +186,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   child: Text(
                     'Email Address',
                     style: TextStyle(
-                      color: Theme.of(context).colorScheme.onPrimary,
+                      color: Theme.of(context).colorScheme.onSurface,
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                 ),
                 const SizedBox(height: 6),
-                TextField(
+                TextFormField(
                   controller: _emailController,
+                  validator: _validateEmail,
                   decoration: InputDecoration(
                     hintText: 'Enter your Email Address',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
+                    ),
+                    errorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: Colors.red),
+                    ),
+                    focusedErrorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: Colors.red, width: 2),
                     ),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
                   ),
@@ -178,12 +225,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                 ),
                 const SizedBox(height: 6),
-                TextField(
+                TextFormField(
                   controller: _phonenumberController,
+                  validator: _validatePhone,
                   decoration: InputDecoration(
                     hintText: 'Enter your phone number',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
+                    ),
+                    errorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: Colors.red),
+                    ),
+                    focusedErrorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: Colors.red, width: 2),
                     ),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
                   ),
@@ -194,22 +250,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   child: Text(
                     'Password',
                     style: TextStyle(
-                      color: Theme.of(context).colorScheme.onPrimary,
+                      color: Theme.of(context).colorScheme.onSurface,
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                 ),
                 const SizedBox(height: 6),
-                TextField(
+                TextFormField(
                   controller: _passwordController,
                   obscureText: _obscurePassword,
+                  validator: _validatePassword,
                   decoration: InputDecoration(
                     hintText: 'Enter your password',
                     suffixIcon: IconButton(
                       icon: Icon(
                         _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                        color: Theme.of(context).colorScheme.onPrimary,
+                        color: Colors.grey,
                       ),
                       onPressed: () {
                         setState(() {
@@ -220,10 +277,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
+                    errorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: Colors.red),
+                    ),
+                    focusedErrorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: Colors.red, width: 2),
+                    ),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 40),
                 BlocConsumer<AuthCubit, Map<String, dynamic>>(
                   listener: (context, state) {
                     if (state['state'] == 'done') {
@@ -244,88 +309,50 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                     return ProgressButton(
                       onPressed: () {
-                        // Validate all fields
-                        if (_nameController.text.isEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Name is required'), backgroundColor: Colors.red,),
+                        if (_formKey.currentState!.validate()) {
+                          context.read<AuthCubit>().register(
+                            name: _nameController.text,
+                            email: _emailController.text,
+                            phone: _phonenumberController.text,
+                            password: _passwordController.text,
+                            accountType: _selectedAccountType!,
                           );
-                          return;
                         }
-
-                        final emailError = _validateEmail(_emailController.text);
-                        if (emailError != null) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(emailError), backgroundColor: Colors.red,),
-                          );
-                          return;
-                        }
-
-                        final phoneError = _validatePhone(_phonenumberController.text);
-                        if (phoneError != null) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(phoneError), backgroundColor: Colors.red,),
-                          );
-                          return;
-                        }
-
-                        final passwordError = _validatePassword(_passwordController.text);
-                        if (passwordError != null) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(passwordError), backgroundColor: Colors.red,),
-                          );
-                          return;
-                        }
-
-                        if (_selectedAccountType == null) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Please select an account type'), backgroundColor: Colors.red,),
-                          );
-                          return;
-                        }
-
-                        // All validation passed, call cubit
-                        context.read<AuthCubit>().register(
-                          name: _nameController.text,
-                          email: _emailController.text,
-                          phone: _phonenumberController.text,
-                          password: _passwordController.text,
-                          accountType: _selectedAccountType!,
-                        );
                       },
                       label: 'Register Now',
                       isLoading: isLoading,
                       isError: isError,
                       errorMessage: errorMessage,
                       backgroundColor: Theme.of(context).colorScheme.primary,
-                      textColor: Theme.of(context).colorScheme.onPrimary,
+                      textColor: Colors.white,
                     );
                   },
                 ),
                 const SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                     Text(
+                    Text(
                       "Already have an account?",
-                      style: theme.textTheme.headlineSmall?.copyWith(
-                        color: theme.colorScheme.onSurface,
-                      )
+                      style: TextStyle(color: theme.colorScheme.onSurface, fontSize: 14),
                     ),
                     TextButton(
                       onPressed: () {
                         Navigator.pushNamed(context, '/login');
                       },
-                      child:  Text(
+                      child: Text(
                         'Login',
-                        style: theme.textTheme.headlineSmall?.copyWith(
-                        color: theme.colorScheme.primary,
-                      )
+                        style: TextStyle(
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
                       ),
                     ),
                   ],
                 ),
               ],
+              ),
             ),
           ),
         ),

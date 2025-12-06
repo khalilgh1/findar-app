@@ -1,173 +1,80 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:findar/core/repositories/search_repository.dart';
-import 'package:findar/core/services/api_service.dart';
+import 'package:findar/core/models/return_result.dart';
+import 'package:findar/core/repositories/abstract_listing_repo.dart';
 
-/// SearchCubit handles property search with filters
-/// 
-/// State structure:
-/// {
-///   'data': List<SearchResult>,   // Search results
-///   'state': 'initial|loading|done|error',
-///   'message': 'success or error message'
-/// }
+/// SearchCubit handles searching/filtering listings and saving a listing
+/// State shape: { data: List<PropertyListing>, state: 'initial|loading|done|error', message: '' }
 class SearchCubit extends Cubit<Map<String, dynamic>> {
-  late final SearchRepository searchRepository;
+  final ListingRepository repository;
 
-  SearchCubit() : super({
-    'data': [],
-    'state': 'initial',
-    'message': ''
-  }) {
-    searchRepository = SearchRepository(apiService: ApiService());
-  }
+  SearchCubit(this.repository)
+    : super({'data': [], 'state': 'initial', 'message': ''});
 
-  /// Search listings with filters
-  Future<void> search({
-    String? query,
-    String? location,
+  /// Fetch filtered listings using the abstract repository
+  Future<void> getFilteredListings({
+    double? latitude,
+    double? longitude,
     double? minPrice,
     double? maxPrice,
-    int? minBedrooms,
-    int? maxBedrooms,
-    String? propertyType,
-    String? classification,
+    String? listingType,
+    String? buildingType,
+    int? numBedrooms,
+    int? numBathrooms,
+    double? minSqft,
+    double? maxSqft,
+    String? listedBy,
   }) async {
-    emit({
-      ...state,
-      'state': 'loading',
-      'message': ''
-    });
+    emit({...state, 'state': 'loading', 'message': ''});
 
     try {
-      final result = await searchRepository.search(
-        query: query,
-        location: location,
+      final listings = await repository.getFilteredListings(
+        latitude: latitude,
+        longitude: longitude,
         minPrice: minPrice,
         maxPrice: maxPrice,
-        minBedrooms: minBedrooms,
-        maxBedrooms: maxBedrooms,
-        propertyType: propertyType,
-        classification: classification,
+        listingType: listingType,
+        buildingType: buildingType,
+        numBedrooms: numBedrooms,
+        numBathrooms: numBathrooms,
+        minSqft: minSqft,
+        maxSqft: maxSqft,
+        listedBy: listedBy,
       );
 
-      if (result.state) {
-        emit({
-          ...state,
-          'state': 'done',
-          'message': result.message,
-        });
-      } else {
-        emit({
-          ...state,
-          'state': 'error',
-          'message': result.message,
-        });
-      }
+      emit({
+        ...state,
+        'data': listings,
+        'state': 'done',
+        'message': 'Listings loaded',
+      });
     } catch (e) {
       emit({
         ...state,
         'state': 'error',
-        'message': 'Search error: ${e.toString()}',
+        'message': 'Failed to load listings: ${e.toString()}',
       });
     }
   }
 
-  /// Get search suggestions
-  Future<void> getSearchSuggestions() async {
+  /// Save a listing (add to favorites) using the abstract repository
+  Future<ReturnResult> saveListing(int listingId) async {
     try {
-      final result = await searchRepository.getSearchSuggestions();
+      final result = await repository.saveListing(listingId);
 
       if (result.state) {
-        emit({
-          ...state,
-          'message': result.message,
-        });
-      }
-    } catch (e) {
-      emit({
-        ...state,
-        'message': 'Error fetching suggestions: ${e.toString()}',
-      });
-    }
-  }
-
-  /// Get available filter options
-  Future<void> getFilterOptions() async {
-    try {
-      final result = await searchRepository.getFilterOptions();
-
-      if (result.state) {
-        emit({
-          ...state,
-          'message': result.message,
-        });
-      }
-    } catch (e) {
-      emit({
-        ...state,
-        'message': 'Error fetching filter options: ${e.toString()}',
-      });
-    }
-  }
-
-  /// Save search filter
-  Future<void> saveFilter({
-    required String name,
-    required Map<String, dynamic> filters,
-  }) async {
-    emit({
-      ...state,
-      'state': 'loading',
-    });
-
-    try {
-      final result = await searchRepository.saveFilter(
-        name: name,
-        filters: filters,
-      );
-
-      if (result.state) {
-        emit({
-          ...state,
-          'state': 'done',
-          'message': result.message,
-        });
+        emit({...state, 'message': result.message});
       } else {
-        emit({
-          ...state,
-          'state': 'error',
-          'message': result.message,
-        });
+        emit({...state, 'message': result.message});
       }
+
+      return result;
     } catch (e) {
-      emit({
-        ...state,
-        'state': 'error',
-        'message': 'Error saving filter: ${e.toString()}',
-      });
+      final err = ReturnResult(
+        state: false,
+        message: 'Failed to save listing: ${e.toString()}',
+      );
+      emit({...state, 'message': err.message});
+      return err;
     }
   }
-
-  /// Get saved filters
-  Future<void> getSavedFilters() async {
-    try {
-      final result = await searchRepository.getSavedFilters();
-
-      if (result.state) {
-        emit({
-          ...state,
-          'message': result.message,
-        });
-      }
-    } catch (e) {
-      emit({
-        ...state,
-        'message': 'Error fetching saved filters: ${e.toString()}',
-      });
-    }
-  }
-
-  String get stateType => state['state'] as String;
-  String get message => state['message'] as String;
-  List get results => state['data'] as List;
 }

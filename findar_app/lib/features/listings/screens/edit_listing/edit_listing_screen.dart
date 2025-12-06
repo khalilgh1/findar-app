@@ -287,6 +287,8 @@ class _EditListingScreenState extends State<EditListingScreen> {
                     final isLoading = state['state'] == 'loading';
                     return ProgressButton(
                       label: 'Update Listing',
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      textColor: Colors.white,
                       onPressed: isLoading ? null : _handleUpdate,
                       isLoading: isLoading,
                     );

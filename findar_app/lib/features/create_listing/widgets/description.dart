@@ -5,15 +5,18 @@ class Description extends StatelessWidget {
     super.key,
     required TextEditingController descriptionController,
     required this.theme,
+    this.validator,
   }) : _descriptionController = descriptionController;
 
   final TextEditingController _descriptionController;
   final ThemeData theme;
+  final String? Function(String?)? validator;
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
+    return TextFormField(
       controller: _descriptionController,
+      validator: validator,
       maxLines: 5,
       style: const TextStyle(fontSize: 15, color: Colors.black87),
       decoration: InputDecoration(
@@ -28,6 +31,14 @@ class Description extends StatelessWidget {
             color: theme.colorScheme.primary,
             width: 2,
           ),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderSide: const BorderSide(color: Colors.red),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderSide: const BorderSide(color: Colors.red, width: 2),
           borderRadius: BorderRadius.circular(12),
         ),
         hintText: 'Describe the property details here...',

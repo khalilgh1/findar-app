@@ -12,6 +12,9 @@ class PropertyListing {
   final bool isOnline;
   final String? createdAt;
   final String? updatedAt;
+  final bool isBoosted;
+  final DateTime? boostExpiryDate;
+  final String? sponsorshipPlanId;
 
   const PropertyListing({
     required this.id,
@@ -27,6 +30,9 @@ class PropertyListing {
     this.isOnline = true,
     this.createdAt,
     this.updatedAt,
+    this.isBoosted = false,
+    this.boostExpiryDate,
+    this.sponsorshipPlanId,
   });
 
   /// Create PropertyListing from JSON
@@ -56,6 +62,11 @@ class PropertyListing {
       isOnline: isOnline,
       createdAt: json['created_at'] as String?,
       updatedAt: json['updated_at'] as String?,
+      isBoosted: json['is_boosted'] as bool? ?? false,
+      boostExpiryDate: json['boost_expiry_date'] != null 
+          ? DateTime.tryParse(json['boost_expiry_date'] as String)
+          : null,
+      sponsorshipPlanId: json['sponsorship_plan_id'] as String?,
     );
   }
 
@@ -75,6 +86,9 @@ class PropertyListing {
       'is_online': isOnline,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
+      'is_boosted': isBoosted,
+      if (boostExpiryDate != null) 'boost_expiry_date': boostExpiryDate!.toIso8601String(),
+      if (sponsorshipPlanId != null) 'sponsorship_plan_id': sponsorshipPlanId,
     };
   }
 
@@ -92,6 +106,9 @@ class PropertyListing {
     bool? isOnline,
     String? createdAt,
     String? updatedAt,
+    bool? isBoosted,
+    DateTime? boostExpiryDate,
+    String? sponsorshipPlanId,
   }) {
     return PropertyListing(
       id: id ?? this.id,
@@ -107,6 +124,9 @@ class PropertyListing {
       isOnline: isOnline ?? this.isOnline,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      isBoosted: isBoosted ?? this.isBoosted,
+      boostExpiryDate: boostExpiryDate ?? this.boostExpiryDate,
+      sponsorshipPlanId: sponsorshipPlanId ?? this.sponsorshipPlanId,
     );
   }
 }

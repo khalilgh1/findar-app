@@ -82,4 +82,8 @@ abstract class ListingRepository {
   ///
   /// Returns listings that are marked as boosted/sponsored
   Future<List<PropertyListing>> getSponsoredListings();
+
+  /// Save a listing (add to user's favorites)
+  /// Returns a [ReturnResult] indicating success or failure
+  Future<ReturnResult> saveListing(int listingId);
 }
