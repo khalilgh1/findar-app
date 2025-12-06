@@ -111,7 +111,7 @@ class _PropertyCardState extends State<PropertyCard> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  widget.property.price,
+                  widget.property.price.toString(),
                   style: theme.textTheme.headlineSmall?.copyWith(
                     color: theme.colorScheme.onSecondaryContainer,
                   ),

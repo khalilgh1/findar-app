@@ -1,6 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:findar/core/repositories/listings_repository.dart';
-import 'package:findar/core/services/api_service.dart';
+import 'package:findar/core/repositories/abstract_listing_repo.dart';
 
 /// CreateListingCubit handles property listing creation
 /// 
@@ -11,16 +10,13 @@ import 'package:findar/core/services/api_service.dart';
 ///   'message': 'success or error message'
 /// }
 class CreateListingCubit extends Cubit<Map<String, dynamic>> {
-  late final ListingsRepository listingsRepository;
+  final ListingRepository listingsRepository;
 
-  CreateListingCubit() : super({
+  CreateListingCubit(this.listingsRepository) : super({
     'data': null,
     'state': 'initial',
     'message': ''
-  }) {
-    // Initialize repository with ApiService
-    listingsRepository = ListingsRepository(apiService: ApiService());
-  }
+  });
 
   /// Create a new property listing
   /// 
@@ -56,7 +52,7 @@ class CreateListingCubit extends Cubit<Map<String, dynamic>> {
         bathrooms: bathrooms,
         classification: classification,
         propertyType: propertyType,
-        image: image,
+        image: image ?? '',
       );
 
       // 3. Check result.state
@@ -115,15 +111,17 @@ class CreateListingCubit extends Cubit<Map<String, dynamic>> {
     });
 
     try {
-      final result = await listingsRepository.updateListing(
-        listingId,
+      final result = await listingsRepository.editListing(
+        id: listingId,
         title: title,
         description: description,
         price: price,
         location: location,
         bedrooms: bedrooms,
         bathrooms: bathrooms,
-        image: image,
+        classification: null,
+        propertyType: null,
+        image: image ?? '',
       );
 
       if (result.state) {

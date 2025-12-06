@@ -102,12 +102,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 {
                   "imagePath": 'assets/find-dar-test1.jpg',
                   "title": 'house 1',
-                  "price": '\$127,000',
+                  "price": 127000.0,
                 },
                 {
                   "imagePath": 'assets/find-dar-test1.jpg',
                   "title": 'house 1',
-                  "price": '\$127,000',
+                  "price": 127000.0,
                 },
               ];
 
@@ -179,7 +179,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           (listing) => ListingCard(
                             imagePath: listing['imagePath'] ?? 'assets/find-dar-test1.jpg',
                             title: listing['title'] ?? 'house',
-                            price: listing['price'] ?? '\$0',
+                            price: (listing['price'] is double) 
+                                ? listing['price'] 
+                                : (listing['price'] is int) 
+                                    ? (listing['price'] as int).toDouble()
+                                    : 0.0,
                           ),
                         )
                         .toList(),

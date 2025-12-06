@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/models/sponsorship_plan.dart';
 import '../../../../core/models/property_listing_model.dart';
 import '../../../../logic/cubits/boost_cubit.dart';
-import '../../../../logic/cubits/listing_cubit.dart';
+// import '../../../../logic/cubits/listing_cubit.dart'; // Disabled - has incompatible methods
 import '../../../../core/widgets/progress_button.dart';
 import 'widgets/order_summary.dart';
 import 'widgets/payment_form.dart';
@@ -49,11 +49,12 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
 
   void _handleBoostSuccess(Map<String, dynamic> boostedData) {
     try {
-      context.read<ListingCubit>().updateBoostStatus(
-        listingId: boostedData['listingId'],
-        sponsorshipPlanId: boostedData['sponsorshipPlanId'],
-        boostExpiryDate: DateTime.parse(boostedData['boostExpiryDate']),
-      );
+      // TODO: Update boost status when ListingCubit is re-enabled
+      // context.read<ListingCubit>().updateBoostStatus(
+      //   listingId: boostedData['listingId'],
+      //   sponsorshipPlanId: boostedData['sponsorshipPlanId'],
+      //   boostExpiryDate: DateTime.parse(boostedData['boostExpiryDate']),
+      // );
       
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(

@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:io';
 import 'dart:typed_data';
+import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../logic/cubits/auth_cubit.dart';
 
 class ProfileAvatar extends StatefulWidget {
   const ProfileAvatar({super.key});
@@ -33,21 +36,44 @@ class _ProfileAvatarState extends State<ProfileAvatar>
     super.dispose();
   }
 
-  ImageProvider _getImageProvider() {
+  ImageProvider _getImageProvider(dynamic authState) {
+    // First check if user just uploaded/selected an image in this session
     if (kIsWeb && _webImageBytes != null) {
       return MemoryImage(_webImageBytes!);
     } else if (_selectedImage != null) {
       return FileImage(_selectedImage!);
-    } else {
-      return const AssetImage('assets/profile.jpg');
     }
+    
+    // Then check if user has a saved profile picture in AuthCubit
+    final userData = authState['data'];
+    if (userData != null && userData.profilePic != null) {
+      final profilePic = userData.profilePic as String;
+      // If it's a data URL (base64), parse it
+      if (profilePic.startsWith('data:image')) {
+        // Extract base64 data using Uri.parse
+        final bytes = Uri.parse(profilePic).data?.contentAsBytes();
+        if (bytes != null) {
+          return MemoryImage(bytes);
+        }
+      } else if (profilePic.startsWith('http')) {
+        // If it's a URL, use NetworkImage
+        return NetworkImage(profilePic);
+      } else {
+        // If it's a file path (mobile)
+        return FileImage(File(profilePic));
+      }
+    }
+    
+    // Finally, fall back to default avatar
+    return const AssetImage('assets/profile.jpg');
   }
 
-  void _showFullScreenImage() {
+  void _showFullScreenImage(BuildContext context) {
+    final authState = context.read<AuthCubit>().state;
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) =>
-            _FullScreenImageViewer(imageProvider: _getImageProvider()),
+            _FullScreenImageViewer(imageProvider: _getImageProvider(authState)),
       ),
     );
   }
@@ -153,6 +179,21 @@ class _ProfileAvatarState extends State<ProfileAvatar>
           _isUploading = false;
         });
 
+        // Save profile picture to AuthCubit for persistence
+        String? profilePicUrl;
+        if (_webImageBytes != null) {
+          // For web, create a data URL with base64 encoding
+          final base64String = base64Encode(_webImageBytes!);
+          profilePicUrl = 'data:image/png;base64,$base64String';
+        } else if (_selectedImage != null) {
+          // For mobile, use file path
+          profilePicUrl = _selectedImage!.path;
+        }
+        
+        if (profilePicUrl != null && mounted) {
+          context.read<AuthCubit>().updateProfilePicture(profilePicUrl);
+        }
+
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -160,9 +201,6 @@ class _ProfileAvatarState extends State<ProfileAvatar>
             duration: Duration(seconds: 2),
           ),
         );
-
-        // TODO: Upload to backend when API is ready
-        // context.read<ProfileCubit>().updateProfilePicture(_selectedImage!);
       }
     } catch (e) {
       setState(() {
@@ -181,17 +219,19 @@ class _ProfileAvatarState extends State<ProfileAvatar>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Stack(
-      alignment: Alignment.center,
+    return BlocBuilder<AuthCubit, Map<String, dynamic>>(
+      builder: (context, authState) {
+        return Stack(
+          alignment: Alignment.center,
       children: [
         // Main avatar with tap to view fullscreen
         GestureDetector(
-          onTap: _showFullScreenImage,
+          onTap: () => _showFullScreenImage(context),
           child: Hero(
             tag: 'profile_avatar',
             child: CircleAvatar(
               radius: 50,
-              backgroundImage: _getImageProvider(),
+              backgroundImage: _getImageProvider(authState),
               backgroundColor: Colors.transparent,
             ),
           ),
@@ -243,6 +283,8 @@ class _ProfileAvatarState extends State<ProfileAvatar>
           ),
         ),
       ],
+    );
+      },
     );
   }
 }
