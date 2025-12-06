@@ -1,20 +1,17 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:findar/core/repositories/listings_repository.dart';
-import 'package:findar/core/services/api_service.dart';
+import 'package:findar/core/repositories/abstract_listing_repo.dart';
 
 /// PropertyDetailsCubit handles displaying detailed information about a property
 /// State: {data: {}, state: 'loading|done|error', message: ''}
 class PropertyDetailsCubit extends Cubit<Map<String, dynamic>> {
-  late final ListingsRepository listingsRepository;
+  final ListingRepository? listingsRepository;
 
-  PropertyDetailsCubit()
+  PropertyDetailsCubit({this.listingsRepository})
       : super({
           'data': {},
           'state': 'initial',
           'message': '',
-        }) {
-    listingsRepository = ListingsRepository(apiService: ApiService());
-  }
+        });
 
   /// Fetch property details by ID
   Future<void> fetchPropertyDetails(int propertyId) async {
@@ -63,49 +60,34 @@ class PropertyDetailsCubit extends Cubit<Map<String, dynamic>> {
 
   /// Save/unsave property to favorites
   Future<void> toggleSaveListing(int propertyId) async {
+    if (listingsRepository == null) return;
+    
     try {
       final currentData = state['data'] as Map<String, dynamic>;
       final isSaved = currentData['isFavorite'] as bool? ?? false;
 
       if (isSaved) {
         // Remove from saved
-        final result =
-            await listingsRepository.unsaveListing(propertyId);
-
-        if (result.state) {
-          emit({
-            ...state,
-            'data': {
-              ...currentData,
-              'isFavorite': false,
-            },
-            'message': result.message,
-          });
-        } else {
-          emit({
-            ...state,
-            'message': result.message,
-          });
-        }
+        await listingsRepository!.unsaveListing(propertyId);
+        emit({
+          ...state,
+          'data': {
+            ...currentData,
+            'isFavorite': false,
+          },
+          'message': 'Removed from favorites',
+        });
       } else {
         // Add to saved
-        final result = await listingsRepository.saveListing(propertyId);
-
-        if (result.state) {
-          emit({
-            ...state,
-            'data': {
-              ...currentData,
-              'isFavorite': true,
-            },
-            'message': result.message,
-          });
-        } else {
-          emit({
-            ...state,
-            'message': result.message,
-          });
-        }
+        await listingsRepository!.saveListing(propertyId);
+        emit({
+          ...state,
+          'data': {
+            ...currentData,
+            'isFavorite': true,
+          },
+          'message': 'Added to favorites',
+        });
       }
     } catch (e) {
       emit({

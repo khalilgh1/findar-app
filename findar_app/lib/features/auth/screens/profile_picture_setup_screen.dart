@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import '../../../logic/cubits/profile_picture_setup_cubit.dart';
+import '../../../logic/cubits/auth_cubit.dart';
 
 class ProfilePictureSetupScreen extends StatefulWidget {
   const ProfilePictureSetupScreen({super.key});
@@ -130,6 +131,10 @@ class _ProfilePictureSetupScreenState extends State<ProfilePictureSetupScreen>
     return BlocListener<ProfilePictureSetupCubit, ProfilePictureSetupState>(
       listener: (context, state) {
         if (state.uploadComplete) {
+          // Save the profile picture URL to AuthCubit if available
+          if (state.uploadedImageUrl != null) {
+            context.read<AuthCubit>().updateProfilePicture(state.uploadedImageUrl!);
+          }
           // Navigate to home after upload or skip
           Navigator.pushReplacementNamed(context, '/home');
         }

@@ -253,4 +253,9 @@ class AuthCubit extends Cubit<Map<String, dynamic>> {
 
   /// Get current message
   String get message => state['message'] as String;
+
+  /// Update just the profile picture
+  Future<void> updateProfilePicture(String profilePicUrl) async {
+    await updateProfile(profilePic: profilePicUrl);
+  }
 }

@@ -8,6 +8,7 @@ import 'core/theme/app_theme.dart';
 import './features/landing/screens/splash_screen.dart';
 import 'features/auth/screens/login_screen.dart';
 import 'features/auth/screens/register_screen.dart';
+import 'features/auth/screens/profile_picture_setup_screen.dart';
 import 'features/auth/screens/forgot_password_screen.dart';
 import 'features/auth/screens/reset_password_screen.dart';
 import './features/listings/screens/my_listings_screen.dart';
@@ -23,17 +24,18 @@ import './features/profile/screens/user_profile_screen/user_profile_screen.dart'
 import './features/property_details/screens/property_details_screen.dart';
 // import './features/demo/demo_test_screen.dart';
 // Import all cubits
-import 'logic/cubits//auth_cubit.dart';
+import 'logic/cubits/auth_cubit.dart';
 import 'package:findar/logic/cubits/home/recent_listings.dart';
 import 'package:findar/logic/cubits/home/sponsored_listings.dart';
 import 'logic/cubits/create_listing_cubit.dart';
 import 'logic/cubits/listings_cubit.dart';
-import 'logic/cubits/listing_cubit.dart';
+// import 'logic/cubits/listing_cubit.dart'; // Disabled - has incompatible methods
 import 'logic/cubits/search_cubit.dart';
 import 'logic/cubits/saved_listings_cubit.dart';
 import 'logic/cubits/property_details_cubit.dart';
 import 'logic/cubits/my_listings_cubit.dart';
 import 'logic/cubits/profile_cubit.dart';
+import 'logic/cubits/profile_picture_setup_cubit.dart';
 import 'logic/cubits/settings_cubit.dart';
 import 'logic/cubits/boost_cubit.dart';
 import 'core/models/property_listing_model.dart';
@@ -62,14 +64,15 @@ class MainApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => AuthCubit()),
-        BlocProvider(create: (_) => CreateListingCubit()),
-        BlocProvider(create: (_) => ListingsCubit()),
-        BlocProvider(create: (_) => ListingCubit()),
+        BlocProvider(create: (_) => CreateListingCubit(repo)),
+        BlocProvider(create: (_) => ListingsCubit(repo)),
+        // BlocProvider(create: (_) => ListingCubit(repo)), // Disabled - has incompatible methods
         BlocProvider(create: (_) => SearchCubit(repo)),
         BlocProvider(create: (_) => SavedListingsCubit(repo)),
-        BlocProvider(create: (_) => PropertyDetailsCubit()),
+        BlocProvider(create: (_) => PropertyDetailsCubit(listingsRepository: repo)),
         BlocProvider(create: (_) => MyListingsCubit(repo)),
         BlocProvider(create: (_) => ProfileCubit()),
+        BlocProvider(create: (_) => ProfilePictureSetupCubit()),
         BlocProvider(create: (_) => SettingsCubit()),
         BlocProvider(create: (_) => BoostCubit()),
         BlocProvider(create: (_) => RecentCubit(repo)),
@@ -125,6 +128,7 @@ class MainApp extends StatelessWidget {
                   '/landing': (context) => const SplashScreen(),
                   '/login': (context) => const LoginScreen(),
                   '/register': (context) => RegisterScreen(),
+                  '/profile-picture-setup': (context) => const ProfilePictureSetupScreen(),
                   '/forgot-password': (context) => const ForgotPasswordScreen(),
                   '/reset-password': (context) => const ResetPasswordScreen(),
                   '/home': (context) => const HomeScreen(),

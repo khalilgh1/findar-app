@@ -198,15 +198,7 @@ class SearchRepository {
   /// Returns: ReturnResult with saved filters if successful
   Future<ReturnResult> getSavedFilters() async {
     try {
-      final response = await apiService.get('/users/saved-filters');
-
-      if (response['success'] != true) {
-        return ReturnResult(
-          state: false,
-          message: response['message'] ?? 'Failed to fetch saved filters',
-        );
-      }
-
+      // TODO: Connect to real API when backend is ready
       return ReturnResult(
         state: true,
         message: 'Saved filters loaded successfully',

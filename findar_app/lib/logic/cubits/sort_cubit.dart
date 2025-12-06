@@ -1,5 +1,4 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../core/cubits/base_state.dart';
 
 /// Sort options for property listings
 enum SortOption {
@@ -18,27 +17,20 @@ enum SortOption {
 }
 
 /// SortCubit manages the current sort option for property listings
-/// Uses BaseState for consistent state management
-class SortCubit extends Cubit<BaseState> {
-  SortCubit() : super(const BaseSuccess(SortOption.newest));
+class SortCubit extends Cubit<SortOption> {
+  SortCubit() : super(SortOption.newest);
 
   /// Get current sort option
-  SortOption get currentSort {
-    final currentState = state;
-    if (currentState is BaseSuccess<SortOption>) {
-      return currentState.data;
-    }
-    return SortOption.newest; // Default fallback
-  }
+  SortOption get currentSort => state;
 
   /// Update sort option
   void updateSort(SortOption sortOption) {
-    emit(BaseSuccess(sortOption));
+    emit(sortOption);
   }
 
   /// Reset to default sort (newest)
   void resetSort() {
-    emit(const BaseSuccess(SortOption.newest));
+    emit(SortOption.newest);
   }
 
   /// Sort a list of properties based on current sort option

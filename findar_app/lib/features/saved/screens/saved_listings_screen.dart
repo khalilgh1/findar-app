@@ -8,7 +8,6 @@ import '../../../core/widgets/property_card.dart';
 import '../../../core/widgets/progress_button.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/widgets/build_bottom_bar.dart';
-import '../../../core/cubits/base_state.dart';
 import 'package:provider/provider.dart';
 
 class SavedListingsScreen extends StatefulWidget {
@@ -206,7 +205,7 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
         ),
       ),
       builder: (context) {
-        return BlocBuilder<SortCubit, BaseState>(
+        return BlocBuilder<SortCubit, SortOption>(
           builder: (context, state) {
             final currentSort = sortCubit.currentSort;
 

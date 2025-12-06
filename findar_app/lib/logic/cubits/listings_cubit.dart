@@ -1,6 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:findar/core/repositories/listings_repository.dart';
-import 'package:findar/core/services/api_service.dart';
+import 'package:findar/core/repositories/abstract_listing_repo.dart';
 
 /// ListingsCubit handles fetching and managing property listings
 /// 
@@ -11,14 +10,13 @@ import 'package:findar/core/services/api_service.dart';
 ///   'message': 'success or error message'
 /// }
 class ListingsCubit extends Cubit<Map<String, dynamic>> {
-  late final ListingsRepository listingsRepository;
+  final ListingRepository listingsRepository;
 
-  ListingsCubit() : super({
+  ListingsCubit(this.listingsRepository) : super({
     'data': [],
     'state': 'loading',
     'message': ''
   }) {
-    listingsRepository = ListingsRepository(apiService: ApiService());
     // Auto-load listings when cubit is created
     fetchListings();
   }
@@ -37,28 +35,19 @@ class ListingsCubit extends Cubit<Map<String, dynamic>> {
     });
 
     try {
-      final result = await listingsRepository.fetchListings(
-        location: location,
+      final listings = await listingsRepository.getFilteredListings(
         minPrice: minPrice,
         maxPrice: maxPrice,
-        propertyType: propertyType,
+        buildingType: propertyType,
       );
 
-      if (result.state) {
-        // Note: In real implementation, we'd parse the API response
-        // For now, mock data is returned by apiService
-        emit({
-          ...state,
-          'state': 'done',
-          'message': result.message,
-        });
-      } else {
-        emit({
-          ...state,
-          'state': 'error',
-          'message': result.message,
-        });
-      }
+      // Success: listings fetched
+      emit({
+        ...state,
+        'data': listings,
+        'state': 'done',
+        'message': 'Listings fetched successfully',
+      });
     } catch (e) {
       emit({
         ...state,
@@ -76,14 +65,8 @@ class ListingsCubit extends Cubit<Map<String, dynamic>> {
   /// Save a listing to favorites
   Future<void> saveListing(int listingId) async {
     try {
-      final result = await listingsRepository.saveListing(listingId);
-
-      if (!result.state) {
-        emit({
-          ...state,
-          'message': result.message,
-        });
-      }
+      await listingsRepository.saveListing(listingId);
+      // Optionally refresh listings after saving
     } catch (e) {
       emit({
         ...state,
@@ -95,14 +78,8 @@ class ListingsCubit extends Cubit<Map<String, dynamic>> {
   /// Remove a listing from favorites
   Future<void> unsaveListing(int listingId) async {
     try {
-      final result = await listingsRepository.unsaveListing(listingId);
-
-      if (!result.state) {
-        emit({
-          ...state,
-          'message': result.message,
-        });
-      }
+      await listingsRepository.unsaveListing(listingId);
+      // Optionally refresh listings after unsaving
     } catch (e) {
       emit({
         ...state,

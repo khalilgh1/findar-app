@@ -7,7 +7,6 @@ import '../../../../core/widgets/appbar_title.dart';
 import '../../../../core/widgets/property_card.dart';
 import '../../../../core/widgets/sort_and_filter.dart';
 import '../../../../core/widgets/progress_button.dart';
-import '../../../core/cubits/base_state.dart';
 
 class SearchResultsScreen extends StatefulWidget {
   const SearchResultsScreen({super.key});
@@ -225,7 +224,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
         ),
       ),
       builder: (context) {
-        return BlocBuilder<SortCubit, BaseState>(
+        return BlocBuilder<SortCubit, SortOption>(
           builder: (context, state) {
             final currentSort = sortCubit.currentSort;
 
