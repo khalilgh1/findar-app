@@ -45,6 +45,5 @@ app.*.map.json
 # Documentation and development files
 /medbox_lang/
 *.md
-/lib/l10n/
 # Error logs
 hs_err_*.log

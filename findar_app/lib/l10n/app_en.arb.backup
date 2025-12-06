@@ -1,0 +1,245 @@
+{
+  "@@locale": "en",
+  "appTitle": "FinDar",
+  "welcomeBack": "Welcome Back!",
+  "completeRegistration": "Complete Your Registration",
+  "selectAccountType": "Select Account Type",
+  "accountIndividual": "Individual",
+  "accountAgency": "Agency",
+  "fullName": "Full Name",
+  "enterFullName": "Enter your full name",
+  "emailAddress": "Email Address",
+  "enterEmail": "Enter your Email Address",
+  "phoneNumber": "Phone Number",
+  "enterPhone": "Enter your phone number",
+  "password": "Password",
+  "enterPassword": "Enter your password",
+  "ninLabel": "National Identification Number (NIN)",
+  "enterNin": "Enter your NIN",
+  "registerNow": "Register Now",
+  "alreadyHaveAccount": "Already have an account?",
+  "login": "Login",
+  "dontHaveAccount": "Don't have an account?",
+  "register": "Register",
+  "welcome": "Welcome",
+  "yourPropertyMarketplace": "Your property marketplace",
+
+  "buy": "Buy",
+  "sell": "Sell",
+  "rent": "Rent",
+  "getStarted": "Get Started",
+  "sponsoredProperties": "Sponsored Properties",
+  "recentListings": "Recent Listings",
+  "viewAll": "View All",
+  "exploreProperties": "Explore Properties",
+  "forSale": "For Sale",
+  "forRent": "For Rent",
+  "commercial": "Commercial",
+  "newConstructions": "New Constructions",
+  "house": "House",
+  "apartment": "Apartment",
+  "condo": "Condo",
+  "townhouse": "Townhouse",
+  "villa": "Villa",
+  "studio": "Studio",
+  "any": "Any",
+  "propertyDetails": "Property Details",
+  "bedrooms": "Bedrooms",
+  "bathrooms": "Bathrooms",
+  "squareFootage": "Square Footage",
+  "sqft": "sqft",
+  "description": "Description",
+  "features": "Features",
+  "location": "Location",
+  "agentInfo": "Agent Information",
+  "similarProperties": "Similar Properties",
+  "contactAgent": "Contact Agent",
+  "scheduleTour": "Schedule Tour",
+  "share": "Share",
+  "save": "Save",
+  "searchResults": "Search Results",
+  "sort": "Sort",
+  "filter": "Filter",
+  "filters": "Filters",
+
+  "noPropertiesFound": "No properties found",
+
+  "pleaseTryAdjustingFilters": "Please try adjusting your search filters.",  "advanced_search": "Advanced Search",
+
+  "sortBy": "Sort by",  "location": "Location",
+
+  "priceLowToHigh": "Price: Low to High",  "enter_location_hint": "Enter a city, zip code, or neighborhood",
+
+  "priceHighToLow": "Price: High to Low",  "price_range": "Price range",
+
+  "newest": "Newest",  "property_type": "Property type",
+
+  "mostPopular": "Most Popular",
+
+  "advancedSearch": "Advanced Search",  "building_type": "Building Type",
+
+  "enterLocationHint": "Enter a city, zip code, or neighborhood",  "house": "House",
+
+  "priceRange": "Price range",  "apartment": "Apartment",
+
+  "propertyType": "Property type",  "condo": "Condo",
+
+  "buildingType": "Building Type",  "townhouse": "Townhouse",
+
+  "bedsAndBaths": "Beds & Baths",
+
+  "minLabel": "Min",  "beds_and_baths": "Beds & Baths",
+
+  "maxLabel": "Max",  "bedrooms": "Bedrooms",
+
+  "listedBy": "Listed by",  "bathrooms": "Bathrooms",
+
+  "privateOwner": "Private Owner",
+
+  "realEstateAgent": "Real Estate Agent",  "square_footage": "Square Footage",
+
+  "reset": "Reset",  "min_label": "Min",
+
+  "showResults": "Show results",  "max_label": "Max",
+
+  "showingResults": "Showing {count} results",
+
+  "@showingResults": {  "listed_by": "Listed by",
+
+    "placeholders": {  "any": "Any",
+
+      "count": {  "private_owner": "Private Owner",
+
+        "type": "int"  "real_estate_agent": "Real Estate Agent",
+
+      }
+
+    }  "reset": "Reset",
+
+  },  "show_results": "Show results",
+
+  "createListing": "Create Listing",
+
+  "editListing": "Edit \"{title}\"",  "removed_from_saved": "Removed from saved",
+
+  "@editListing": {  "saved_listings": "Saved Listings",
+
+    "placeholders": {
+
+      "title": {  "email": "Email",
+
+        "type": "String"
+
+      }  "edit_listing": "Edit \"{title}\"",
+
+    }  "@edit_listing": {
+
+  },    "description": "Edit dialog title including the listing title",
+
+  "propertyTitle": "Property Title",    "placeholders": { "title": {} }
+
+  "examplePropertyTitleHint": "e.g. Spacious 3 Bedroom Apartment",  },
+
+  "price": "Price",
+
+  "examplePriceHint": "250 000",  "remove_listing_title": "Remove Listing",
+
+  "exampleLocationHint": "e.g. 15 Rue Didouche Mourad, Algiers",  "remove_listing_confirm": "Are you sure you want to remove \"{title}\"?",
+
+  "propertyDescriptionHint": "Describe the property details here...",  "@remove_listing_confirm": {
+
+  "classification": "Classification",    "description": "Confirmation message when deleting a listing",
+
+  "propertyStatus": "Property Status",    "placeholders": { "title": {} }
+
+  "online": "Online",  },
+
+  "offline": "Offline",  "cancel": "Cancel",
+
+  "floors": "Floors",  "listing_removed": "Listing removed",
+
+  "rooms": "Rooms",  "listing_created_successfully": "Listing Created Successfully!",
+
+  "addImages": "Add Images",
+
+  "publishListing": "Publish Listing",  "example_property_title_hint": "e.g. Spacious 3 Bedroom Apartment",
+
+  "listingCreatedSuccessfully": "Listing Created Successfully!",  "example_price_hint": "250 000",
+
+  "removedFromSaved": "Removed from saved",  "example_location_hint": "e.g. 15 Rue Didouche Mourad, Algiers",
+
+  "savedListings": "Saved Listings",  "property_description_hint": "Describe the property details here...",
+
+  "noSavedListings": "No saved listings yet",
+
+  "startExploring": "Start exploring properties to save your favorites",  "showing_results": "Showing {count} results",
+
+  "myListings": "My Listings",  "@showing_results": {
+
+  "removeListingTitle": "Remove Listing",    "description": "Shows how many results are being displayed",
+
+  "removeListingConfirm": "Are you sure you want to remove \"{title}\"?",    "placeholders": { "count": {} }
+
+  "@removeListingConfirm": {  }
+
+    "placeholders": {}
+
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "listingRemoved": "Listing removed",
+  "edit": "Edit",
+  "delete": "Delete",
+  "profile": "Profile",
+  "listings": "Listings",
+  "addNew": "Add New",
+  "viewListing": "View Listing",
+  "editProfile": "Edit Profile",
+  "accountSettings": "Account Settings",
+  "logout": "Logout",
+  "profilePictureUpdated": "Profile picture updated successfully",
+  "upload": "Upload",
+  "skip": "Skip",
+  "settings": "Settings",
+  "appearance": "Appearance",
+  "language": "Language",
+  "english": "English",
+  "arabic": "Arabic",
+  "french": "French",
+  "contactUs": "Contact Us",
+  "contactPhone": "+1 (234) 567-890",
+  "twitter": "Twitter",
+  "facebook": "Facebook",
+  "instagram": "Instagram",
+  "darkMode": "Dark Mode",
+  "notifications": "Notifications",
+  "privacy": "Privacy",
+  "termsOfService": "Terms of Service",
+  "about": "About",
+  "version": "Version",
+  "email": "Email",
+  "cancel": "Cancel",
+  "confirm": "Confirm",
+  "saveChanges": "Save Changes",
+  "apply": "Apply",
+  "close": "Close",
+  "next": "Next",
+  "previous": "Previous",
+  "done": "Done",
+  "yes": "Yes",
+  "no": "No",
+  "ok": "OK",
+  "error": "Error",
+  "success": "Success",
+  "loading": "Loading...",
+  "retry": "Retry",
+  "seeMore": "See More",
+  "seeLess": "See Less",
+  "errorOccurred": "An error occurred",
+  "networkError": "Network error. Please check your connection",
+  "invalidEmail": "Please enter a valid email",
+  "invalidPassword": "Password is required",
+  "fieldRequired": "This field is required"
+}
