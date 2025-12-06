@@ -45,8 +45,9 @@ import 'core/repositories/abstract_listing_repo.dart';
 late ListingRepository repo;
 void main() {
   //later: repo = (online)? RemoteListingRepository(): LocalListingRepository();
-  repo = DummyListingRepository(); //we will replace this with real repository later
-      
+  repo =
+      DummyListingRepository(); //we will replace this with real repository later
+
   runApp(const MainApp());
 }
 
@@ -61,7 +62,7 @@ class MainApp extends StatelessWidget {
         BlocProvider(create: (_) => CreateListingCubit()),
         BlocProvider(create: (_) => ListingsCubit()),
         BlocProvider(create: (_) => ListingCubit()),
-        BlocProvider(create: (_) => SearchCubit()),
+        BlocProvider(create: (_) => SearchCubit(repo)),
         BlocProvider(create: (_) => SavedListingsCubit()),
         BlocProvider(create: (_) => PropertyDetailsCubit()),
         BlocProvider(create: (_) => MyListingsCubit(repo)),

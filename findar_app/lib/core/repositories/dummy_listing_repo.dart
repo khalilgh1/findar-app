@@ -399,6 +399,28 @@ class DummyListingRepository implements ListingRepository {
     _nextId = 1;
   }
 
+  @override
+  Future<ReturnResult> saveListing(int listingId) async {
+    // Simulate network delay
+    await Future.delayed(const Duration(milliseconds: 300));
+
+    try {
+      final index = _listings.indexWhere((l) => l.id == listingId);
+      if (index == -1) {
+        return ReturnResult(state: false, message: 'Listing not found');
+      }
+
+      // In a real app we'd mark the listing as saved for the current user.
+      // For dummy repo, just return success.
+      return ReturnResult(state: true, message: 'Listing saved successfully');
+    } catch (e) {
+      return ReturnResult(
+        state: false,
+        message: 'Failed to save listing: ${e.toString()}',
+      );
+    }
+  }
+
   /// Reset to initial dummy data
   void resetToInitialData() {
     _listings.clear();
