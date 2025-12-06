@@ -11,6 +11,7 @@ class CategoryBar extends StatefulWidget {
 
 class _CategoryBarState extends State<CategoryBar> {
   final List<String> categories = [
+    "Any",
     "For Sale",
     "For Rent",
     "Commercial",

@@ -22,7 +22,9 @@ import './features/profile/screens/edit_profile/edit_profile_screen.dart';
 import './features/property_details/screens/property_details_screen.dart';
 // import './features/demo/demo_test_screen.dart';
 // Import all cubits
-import 'logic/cubits/auth_cubit.dart';
+import 'logic/cubits//auth_cubit.dart';
+import 'package:findar/logic/cubits/home/recent_listings.dart';
+import 'package:findar/logic/cubits/home/sponsored_listings.dart';
 import 'logic/cubits/create_listing_cubit.dart';
 import 'logic/cubits/listings_cubit.dart';
 import 'logic/cubits/listing_cubit.dart';
@@ -69,6 +71,8 @@ class MainApp extends StatelessWidget {
         BlocProvider(create: (_) => ProfileCubit()),
         BlocProvider(create: (_) => SettingsCubit()),
         BlocProvider(create: (_) => BoostCubit()),
+        BlocProvider(create: (_) => RecentCubit(repo)),
+        BlocProvider(create: (_) => SponsoredCubit(repo)),
       ],
       child: ChangeNotifierProvider(
         create: (context) => ThemeProvider(),
