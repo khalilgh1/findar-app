@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:findar/l10n/app_localizations.dart';
 
 const hpaddingSearchBar = 12.0;
 const vpaddingSearchBar = 3.0;
@@ -22,23 +23,32 @@ class SearchBarWidget extends StatelessWidget {
             offset: Offset(0, 0),
           ),
         ],
-        color: theme.colorScheme.surface,
+        // color: theme.colorScheme.onSecondaryContainer,
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: theme.colorScheme.secondaryContainer),
       ),
       child: Row(
         children: [
-          Icon(Icons.search, color: theme.colorScheme.onSecondary),
+          Icon(Icons.search, color: theme.colorScheme.onSurfaceVariant),
           const SizedBox(width: 8),
           Expanded(
-            child: TextField(
-              decoration: InputDecoration(
-                hintStyle: theme.textTheme.bodySmall?.copyWith(
-                  fontSize: 14,
-                  color: theme.colorScheme.onSecondary,
-                ),
-                hintText: "Search for properties, agents, or locations",
-                border: InputBorder.none,
-              ),
+            child: Builder(
+              builder: (context) {
+                var l10n = AppLocalizations.of(context);
+                return TextField(
+                  decoration: InputDecoration(
+                    hintStyle: theme.textTheme.bodySmall?.copyWith(
+                      fontSize: 14,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                    hintText: l10n?.searchHint ?? 'Search...',
+                    border: InputBorder.none,
+                  ),
+                  onSubmitted: (value) {
+                    Navigator.pushNamed(context, '/search-results', arguments: value);
+                  },
+                );
+              },
             ),
           ),
         ],

@@ -1,0 +1,44 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "findar_app",
+      "cwd": "findar_app",
+      "request": "launch",
+      "type": "dart"
+    },
+    {
+      "name": "findar_app (profile mode)",
+      "cwd": "findar_app",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "profile"
+    },
+    {
+      "name": "findar_app (release mode)",
+      "cwd": "findar_app",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "release"
+    },
+    {
+      "name": "C/C++ Runner: Debug Session",
+      "type": "cppdbg",
+      "request": "launch",
+      "args": [],
+      "stopAtEntry": false,
+      "externalConsole": true,
+      "cwd": "c:/Users/Hp/Desktop/s5/Modules/Mobile_Development/Project/findar-app/findar_app/linux/flutter",
+      "program": "c:/Users/Hp/Desktop/s5/Modules/Mobile_Development/Project/findar-app/findar_app/linux/flutter/build/Debug/outDebug",
+      "MIMode": "gdb",
+      "miDebuggerPath": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    }
+  ]
+}

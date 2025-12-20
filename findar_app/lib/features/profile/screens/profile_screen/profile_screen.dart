@@ -1,0 +1,218 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:findar/logic/cubits/profile_cubit.dart';
+import 'profile_avatar.dart';
+import 'profile_info.dart';
+import 'package:findar/logic/cubits/my_listings_cubit.dart';
+
+import '../../../../core/widgets/progress_button.dart';
+import '../../../../core/widgets/build_bottom_bar.dart';
+import 'package:findar/l10n/app_localizations.dart';
+
+class ProfileScreen extends StatefulWidget {
+  const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Fetch profile when screen loads
+    context.read<ProfileCubit>().fetchProfile();
+    context.read<MyListingsCubit>().fetchMyListings();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Scaffold(
+      backgroundColor: theme.colorScheme.surface,
+      appBar: AppBar(
+        scrolledUnderElevation: 0,
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back,
+            color: Theme.of(context).colorScheme.onSurface,
+            size: 30,
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Builder(
+          builder: (context) {
+            var l10n = AppLocalizations.of(context);
+            return Text(
+              l10n?.profile ?? 'Profile',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface,
+                fontWeight: FontWeight.w600,
+              ),
+            );
+          },
+        ),
+        centerTitle: true,
+        actions: [
+          Builder(
+            builder: (context) {
+              var l10n = AppLocalizations.of(context);
+              return TextButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/edit-profile');
+                },
+                child: Text(
+                  l10n?.edit ?? 'Edit',
+                  style: const TextStyle(color: Colors.blue, fontSize: 16),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+      body: BlocListener<ProfileCubit, Map<String, dynamic>>(
+        listener: (context, state) {
+          // Navigate to login when logout is successful (state becomes 'initial' with empty data)
+          if (state['state'] == 'initial' &&
+              (state['data'] as Map?)?.isEmpty == true &&
+              state['message'] != null) {
+            Navigator.pushNamedAndRemoveUntil(
+              context,
+              '/login',
+              (route) => false,
+            );
+          }
+        },
+        child: BlocBuilder<ProfileCubit, Map<String, dynamic>>(
+          builder: (context, state) {
+            if (state['state'] == 'loading') {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            if (state['state'] == 'error') {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text('Error: ${state['message'] ?? 'Unknown error'}'),
+                    SizedBox(height: 16),
+                    Builder(
+                      builder: (context) {
+                        var l10n = AppLocalizations.of(context);
+                        return ProgressButton(
+                          label: l10n?.retry ?? 'Retry',
+                          backgroundColor: Theme.of(context).colorScheme.primary,
+                          textColor: Theme.of(context).colorScheme.onPrimary,
+                          onPressed: () {
+                            context.read<ProfileCubit>().fetchProfile();
+                          },
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            final data = state['data'];
+            final user = data is Map ? Map<String, dynamic>.from(data) : <String, dynamic>{};
+            final username = user['name'] ?? 'null null';
+            final email = user['email'] ?? 'null@null.com';
+
+            return SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              child: SafeArea(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const SizedBox(height: 10),
+                    ProfileAvatar(),
+                    const SizedBox(height: 10),
+                    Text(
+                      username,
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                    ),
+                    Text(email, style: const TextStyle(color: Colors.grey)),
+                    const SizedBox(height: 25),
+                    ProfileInfoCard(),
+                    const SizedBox(height: 30),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Builder(
+                          builder: (context) {
+                            var l10n = AppLocalizations.of(context);
+                            return TextButton(
+                              onPressed: () => {
+                                Navigator.pushNamed(context, '/my-listings'),
+                              },
+                              child: Text(
+                                l10n?.listings ?? 'Listings',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w600,
+                                  color: theme.colorScheme.onSurface,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                        Builder(
+                          builder: (context) {
+                            var l10n = AppLocalizations.of(context);
+                            return ElevatedButton.icon(
+                              onPressed: () {
+                                Navigator.pushNamed(context, '/create-listing');
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: theme.colorScheme.primary,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              icon: Icon(
+                                Icons.add,
+                                size: 18,
+                                color: theme.colorScheme.onPrimary,
+                              ),
+                              label: Text(
+                                l10n?.addNew ?? 'Add New',
+                                style: TextStyle(
+                                  color: theme.colorScheme.onPrimary,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Builder(
+                      builder: (context) {
+                        var l10n = AppLocalizations.of(context);
+                        return ProgressButton(
+                          label: l10n?.logout ?? 'Logout',
+                          backgroundColor: const Color(0xFFFFEDED),
+                          textColor: Colors.red,
+                          onPressed: () {
+                            context.read<ProfileCubit>().logout();
+                          },
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+      bottomNavigationBar: BuildBottomNavBar(index: 3),
+    );
+  }
+}

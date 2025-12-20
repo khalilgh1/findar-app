@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:findar/l10n/app_localizations.dart';
 
 class PropertyFeatures extends StatelessWidget {
   final int bedrooms;
@@ -18,14 +19,28 @@ class PropertyFeatures extends StatelessWidget {
       children: [
         Row(
           children: [
-            _FeatureItem(
-              icon: Icons.bed_outlined,
-              text: '$bedrooms Bedrooms',
+            Expanded(
+              child: Builder(
+                builder: (context) {
+                  final l10n = AppLocalizations.of(context)!;
+                  return _FeatureItem(
+                    icon: Icons.bed_outlined,
+                    text: '$bedrooms ${l10n.bedrooms.toLowerCase()}',
+                  );
+                },
+              ),
             ),
             const SizedBox(width: 24),
-            _FeatureItem(
-              icon: Icons.bathtub_outlined,
-              text: '$bathrooms Bathrooms',
+            Expanded(
+              child: Builder(
+                builder: (context) {
+                  final l10n = AppLocalizations.of(context)!;
+                  return _FeatureItem(
+                    icon: Icons.bathtub_outlined,
+                    text: '$bathrooms ${l10n.bathrooms.toLowerCase()}',
+                  );
+                },
+              ),
             ),
           ],
         ),
@@ -50,15 +65,17 @@ class _FeatureItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Row(
       children: [
-        Icon(icon, size: 20, color: Colors.grey[800]),
+        Icon(icon, size: 20, color: colorScheme.onSurface.withOpacity(0.8)),
         const SizedBox(width: 8),
         Text(
           text,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 14,
-            color: Colors.black87,
+            color: colorScheme.onSurface,
           ),
         ),
       ],

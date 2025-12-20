@@ -1,6 +1,8 @@
 //flutter imports
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:findar/l10n/app_localizations.dart';
 
 //widgets
 import './widgets/property_title.dart';
@@ -10,7 +12,10 @@ import './widgets/price_field.dart';
 import './widgets/numeric_field.dart';
 import './widgets/location_field.dart';
 //package imports
-import 'package:main_button/main_button.dart';
+import 'package:findar/logic/cubits/my_listings_cubit.dart';
+
+//widgets
+import '../../core/widgets/progress_button.dart';
 
 class CreateListingScreen extends StatefulWidget {
   const CreateListingScreen({super.key});
@@ -20,6 +25,7 @@ class CreateListingScreen extends StatefulWidget {
 }
 
 class _CreateListingScreenState extends State<CreateListingScreen> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _priceController = TextEditingController();
@@ -31,7 +37,61 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
   String _classification = 'For Sale';
   String _propertyType = 'Apartment';
   String _status = 'Online';
-  final List<String> _photos = ['assets/house1.jpg', 'assets/house2.jpg'];
+  final List<String> _photos = ["assets/default.png"];
+
+  String? _validateTitle(String? value) {
+    final l10n = AppLocalizations.of(context)!;
+    if (value == null || value.isEmpty) {
+      return l10n.validateTitleEmpty;
+    }
+    if (value.length < 5) {
+      return l10n.validateTitleMinLength;
+    }
+    return null;
+  }
+
+  String? _validateDescription(String? value) {
+    final l10n = AppLocalizations.of(context)!;
+    if (value == null || value.isEmpty) {
+      return l10n.validateDescriptionEmpty;
+    }
+    if (value.length < 20) {
+      return l10n.validateDescriptionMinLength;
+    }
+    return null;
+  }
+
+  String? _validatePrice(String? value) {
+    final l10n = AppLocalizations.of(context)!;
+    if (value == null || value.isEmpty) {
+      return l10n.validatePriceEmpty;
+    }
+    if (double.tryParse(value) == null) {
+      return l10n.validatePriceInvalid;
+    }
+    if (double.parse(value) <= 0) {
+      return l10n.validatePricePositive;
+    }
+    return null;
+  }
+
+  String? _validateLocation(String? value) {
+    final l10n = AppLocalizations.of(context)!;
+    if (value == null || value.isEmpty) {
+      return l10n.validateLocationEmpty;
+    }
+    return null;
+  }
+
+  String? _validateBedrooms(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please enter number of bedrooms';
+    }
+    if (int.tryParse(value) == null || int.parse(value) < 0) {
+      return 'Please enter a valid number';
+    }
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,31 +106,63 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text('Create New Listing', style: theme.textTheme.headlineLarge),
+        title: Builder(
+          builder: (context) {
+            var l10n = AppLocalizations.of(context);
+            return Text(
+              l10n?.createNewListing ?? 'Create New Listing',
+              style: theme.textTheme.headlineLarge?.copyWith(
+                color: theme.colorScheme.onSurface,
+              ),
+            );
+          },
+        ),
         centerTitle: true,
         elevation: 0,
       ),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Property Title Section
-              Text('Property Title', style: theme.textTheme.headlineSmall),
-              const SizedBox(height: 12),
-              PropertyTitle(titleController: _titleController, theme: theme),
-              const SizedBox(height: 24),
-              // Description Section
-              Text('Description', style: theme.textTheme.headlineSmall),
-              const SizedBox(height: 12),
-              Description(
-                descriptionController: _descriptionController,
-                theme: theme,
-              ),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Property Title Section
+                Builder(
+                  builder: (context) {
+                    var l10n = AppLocalizations.of(context);
+                    return Text(l10n?.propertyTitle ?? 'Property Title', style: theme.textTheme.headlineSmall);
+                  },
+                ),
+                const SizedBox(height: 12),
+                PropertyTitle(
+                  titleController: _titleController,
+                  theme: theme,
+                  validator: _validateTitle,
+                ),
+                const SizedBox(height: 24),
+                // Description Section
+                Builder(
+                  builder: (context) {
+                    var l10n = AppLocalizations.of(context);
+                    return Text(l10n?.description ?? 'Description', style: theme.textTheme.headlineSmall);
+                  },
+                ),
+                const SizedBox(height: 12),
+                Description(
+                  descriptionController: _descriptionController,
+                  theme: theme,
+                  validator: _validateDescription,
+                ),
               const SizedBox(height: 24),
               // Classification Section
-              Text('Classification', style: theme.textTheme.headlineSmall),
+              Builder(
+                builder: (context) {
+                  var l10n = AppLocalizations.of(context);
+                  return Text(l10n?.classification ?? 'Classification', style: theme.textTheme.headlineSmall);
+                },
+              ),
               const SizedBox(height: 12),
               CustomSelector(
                 selectedOption: _classification,
@@ -85,125 +177,148 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
               const SizedBox(height: 24),
 
               // Price and Property Type Row
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Price', style: theme.textTheme.headlineSmall),
-                        const SizedBox(height: 12),
-                        priceField(
-                          priceController: _priceController,
-                          theme: theme,
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Property Type',
-                          style: theme.textTheme.headlineSmall,
-                        ),
-                        const SizedBox(height: 12),
-                        Container(
-                          height: 52,
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.secondaryContainer,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.grey.shade300),
-                          ),
-                          child: DropdownButtonHideUnderline(
-                            child: DropdownButton(
-                              dropdownColor:
-                              theme.colorScheme.secondaryContainer,
-                              value: _propertyType,
-                              isExpanded: true,
-                              icon: Icon(
-                                Icons.keyboard_arrow_down,
-                                color: theme.colorScheme.onSurface,
-                              ),
-                              style: TextStyle(
-                                fontSize: 15,
-                                color: theme.colorScheme.onSurface,
-                                fontWeight: FontWeight.w500,
-                              ),
-                              items: ['Apartment', 'House', 'Villa', 'Condo']
-                                  .map(
-                                    (String value) => DropdownMenuItem<String>(
-                                      value: value,
-                                      child: Text(value),
-                                    ),
-                                  )
-                                  .toList(),
-                              onChanged: (String? newValue) {
-                                if (newValue != null) {
-                                  setState(() => _propertyType = newValue);
-                                }
-                              },
+              Builder(
+                builder: (context) {
+                  var l10n = AppLocalizations.of(context);
+                  return Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(l10n?.price ?? 'Price', style: theme.textTheme.headlineSmall),
+                            const SizedBox(height: 12),
+                            priceField(
+                              priceController: _priceController,
+                              theme: theme,
+                              validator: _validatePrice,
                             ),
-                          ),
+                          ],
                         ),
-                      ],
-                    ),
-                  ),
-                ],
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              l10n?.propertyType ?? 'Property Type',
+                              style: theme.textTheme.headlineSmall,
+                            ),
+                            const SizedBox(height: 12),
+                            Container(
+                              height: 52,
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.secondaryContainer,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: Colors.grey.shade300),
+                              ),
+                              child: DropdownButtonHideUnderline(
+                                child: DropdownButton(
+                                  dropdownColor:
+                                      theme.colorScheme.secondaryContainer,
+                                  value: _propertyType,
+                                  isExpanded: true,
+                                  icon: Icon(
+                                    Icons.keyboard_arrow_down,
+                                    color: theme.colorScheme.onSurface,
+                                  ),
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    color: theme.colorScheme.onSurface,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                  items: ['Apartment', 'House', 'Villa', 'Condo']
+                                      .map(
+                                        (String value) => DropdownMenuItem<String>(
+                                          value: value,
+                                          child: Text(value),
+                                        ),
+                                      )
+                                      .toList(),
+                                  onChanged: (String? newValue) {
+                                    if (newValue != null) {
+                                      setState(() => _propertyType = newValue);
+                                    }
+                                  },
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
               const SizedBox(height: 24),
 
               // Floors, Rooms, Bedrooms Row
-              Row(
-                children: [
-                  Expanded(
-                    child: NumericField(
-                      label: 'Floors',
-                      hint: 'e.g. 2',
-                      controller: _floorsController,
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: NumericField(
-                      label: 'Rooms',
-                      hint: 'e.g. 5',
-                      controller: _roomsController,
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: NumericField(
-                      label: 'Bedrooms',
-                      hint: 'e.g. 3',
-                      controller: _bedroomsController,
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    ),
-                  ),
-                ],
+              Builder(
+                builder: (context) {
+                  var l10n = AppLocalizations.of(context);
+                  return Row(
+                    children: [
+                      Expanded(
+                        child: NumericField(
+                          label: l10n?.floors ?? 'Floors',
+                          hint: 'e.g. 2',
+                          controller: _floorsController,
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: NumericField(
+                          label: l10n?.rooms ?? 'Rooms',
+                          hint: 'e.g. 5',
+                          controller: _roomsController,
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: NumericField(
+                          label: l10n?.bedrooms ?? 'Bedrooms',
+                          hint: 'e.g. 3',
+                          controller: _bedroomsController,
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                          validator: _validateBedrooms,
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
 
               const SizedBox(height: 24),
 
               // Location Section
-              Text('Location', style: theme.textTheme.headlineSmall),
+              Builder(
+                builder: (context) {
+                  var l10n = AppLocalizations.of(context);
+                  return Text(l10n?.location ?? 'Location', style: theme.textTheme.headlineSmall);
+                },
+              ),
               const SizedBox(height: 12),
               LocationField(
                 locationController: _locationController,
                 theme: theme,
+                validator: _validateLocation,
               ),
               const SizedBox(height: 24),
 
               // Photos Section
-              Text('Photos', style: theme.textTheme.headlineSmall),
+              Builder(
+                builder: (context) {
+                  var l10n = AppLocalizations.of(context);
+                  return Text(l10n?.photos ?? 'Photos', style: theme.textTheme.headlineSmall);
+                },
+              ),
               const SizedBox(height: 12),
               Row(
                 children: [
@@ -226,13 +341,15 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
                             right: 8,
                             child: GestureDetector(
                               onTap: () {
-                                setState(() => _photos.removeAt(0));
+                                // setState(() => _photos.removeAt(0));
                               },
                               child: Container(
                                 width: 28,
                                 height: 28,
                                 decoration: BoxDecoration(
-                                  color: theme.colorScheme.onSurface.withAlpha(150),
+                                  color: theme.colorScheme.onSurface.withAlpha(
+                                    150,
+                                  ),
                                   shape: BoxShape.circle,
                                 ),
                                 child: Icon(
@@ -248,46 +365,6 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  Expanded(
-                    child: Container(
-                      height: 120,
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.secondaryContainer,
-                        borderRadius: BorderRadius.circular(12),
-                        image: DecorationImage(
-                          image: AssetImage(_photos[1]),
-                          fit: BoxFit.cover,
-                          onError: (exception, stackTrace) {},
-                        ),
-                      ),
-                      child: Stack(
-                        children: [
-                          Positioned(
-                            top: 8,
-                            right: 8,
-                            child: GestureDetector(
-                              onTap: () {
-                                setState(() => _photos.removeAt(1));
-                              },
-                              child: Container(
-                                width: 28,
-                                height: 28,
-                                decoration: BoxDecoration(
-                                  color: theme.colorScheme.onSurface.withAlpha(150),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(
-                                  Icons.close,
-                                  color: theme.colorScheme.surface,
-                                  size: 18,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
                 ],
               ),
               const SizedBox(height: 12),
@@ -298,7 +375,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
                 child: Container(
                   height: 100,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.secondary,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: Colors.grey.shade300,
@@ -316,13 +393,18 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
                           size: 32,
                         ),
                         const SizedBox(height: 8),
-                        Text(
-                          'Add Photos',
-                          style: TextStyle(
-                            color: Colors.grey[400],
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
+                        Builder(
+                          builder: (context) {
+                            var l10n = AppLocalizations.of(context);
+                            return Text(
+                              l10n?.addPhotos ?? 'Add Photos',
+                              style: TextStyle(
+                                color: Colors.grey[400],
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            );
+                          },
                         ),
                       ],
                     ),
@@ -332,7 +414,12 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
               const SizedBox(height: 24),
 
               // Status Section
-              Text('Status', style: theme.textTheme.headlineSmall),
+              Builder(
+                builder: (context) {
+                  var l10n = AppLocalizations.of(context);
+                  return Text(l10n?.status ?? 'Status', style: theme.textTheme.headlineSmall);
+                },
+              ),
               const SizedBox(height: 12),
               CustomSelector(
                 selectedOption: _status,
@@ -346,20 +433,75 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
               ),
             ],
           ),
+          ),
         ),
       ),
 
       // Create Listing Button
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: MainButton(
-          label: 'Create Listing',
-          backgroundColor: theme.colorScheme.primary,
-          onPressed: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Listing Created Successfully!')),
-            );
+        child: BlocListener<MyListingsCubit, Map<String, dynamic>>(
+          listener: (context, state) {
+            if (state['state'] == 'done') {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Listing Created Successfully!'),
+                  backgroundColor: Colors.green,
+                ),
+              );
+              // Return to previous screen and signal that a listing was created
+              Navigator.pop(context, true);
+            } else if (state['state'] == 'error') {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state['message'] ?? 'Failed to create listing'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
           },
+          child: BlocBuilder<MyListingsCubit, Map<String, dynamic>>(
+            builder: (context, state) {
+              final isLoading = state['state'] == 'loading';
+              final isError = state['state'] == 'error';
+              final errorMessage = isError
+                  ? (state['message'] as String?)
+                  : null;
+
+              return Builder(
+                builder: (context) {
+                  var l10n = AppLocalizations.of(context);
+                  return ProgressButton(
+                    label: l10n?.createListing ?? 'Create Listing',
+                    backgroundColor: theme.colorScheme.primary,
+                    textColor: theme.colorScheme.onPrimary,
+                    isLoading: isLoading,
+                    isError: isError,
+                    errorMessage: errorMessage,
+                    onPressed: () {
+                      // Validate form
+                      if (!_formKey.currentState!.validate()) {
+                        return;
+                      }
+
+                      // Call cubit to create listing
+                      context.read<MyListingsCubit>().createListing(
+                        title: _titleController.text,
+                        description: _descriptionController.text,
+                        price: double.parse(_priceController.text),
+                        location: _locationController.text,
+                        bedrooms: int.parse(_bedroomsController.text),
+                        bathrooms: 1,
+                        classification: _classification,
+                        propertyType: _propertyType,
+                        image: _photos.first,
+                      );
+                    },
+                  );
+                },
+              );
+            },
+          ),
         ),
       ),
     );

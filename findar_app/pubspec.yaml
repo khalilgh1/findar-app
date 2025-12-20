@@ -32,10 +32,24 @@ dependencies:
     sdk: flutter
   group_button: ^5.3.4
   main_button: ^0.0.19
-
+  shared_preferences: ^2.2.2
+  provider: ^6.0.5
+  flutter_bloc: ^8.1.1
+  equatable: ^2.0.5
+  http: ^1.1.0
+  image_picker: ^1.0.7
+  sqflite: ^2.0.0
+  path: ^1.8.0
+  firebase_core: ^3.8.1
+  firebase_messaging: ^15.1.5
+  flutter_local_notifications: ^18.0.1
+  
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+  flutter_localizations:
+    sdk: flutter
+
 
 dev_dependencies:
   flutter_test:
@@ -53,17 +67,15 @@ dev_dependencies:
 # The following section is specific to Flutter packages.
 flutter:
 
+  generate: true
+
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
   assets:
-    - assets/find-dar-test1.jpg
-    - assets/find-dar-test2.jpg
-    - assets/find-dar-test3.jpg
-    - assets/profile.jpg
-    - assets/dust3.webp
-    - assets/nuke.webp
+    - assets/
+
 
   # To add assets to your application, add an assets section, like this:
   # assets:

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 class SegmentedControl extends StatefulWidget {
   final List<String> options;
   final String? initialValue;
@@ -10,7 +9,7 @@ class SegmentedControl extends StatefulWidget {
   final Color inactiveTextColor;
 
   const SegmentedControl({
-    super.key,
+    Key? key,
     required this.options,
     this.initialValue,
     this.onChanged,
@@ -18,7 +17,7 @@ class SegmentedControl extends StatefulWidget {
     this.inactiveColor = Colors.grey,
     this.activeTextColor = Colors.white,
     this.inactiveTextColor = Colors.black87,
-  });
+  }) : super(key: key);
 
   @override
   State<SegmentedControl> createState() => _SegmentedControlState();
@@ -37,7 +36,7 @@ class _SegmentedControlState extends State<SegmentedControl> {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey[200],
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(8),
       ),
       padding: const EdgeInsets.all(4),
@@ -65,8 +64,8 @@ class _SegmentedControlState extends State<SegmentedControl> {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: isSelected
-                        ? widget.activeTextColor
-                        : widget.inactiveTextColor,
+                        ? Theme.of(context).colorScheme.onPrimary
+                        : Theme.of(context).colorScheme.onSurface,
                     fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                   ),
                 ),
@@ -81,7 +80,7 @@ class _SegmentedControlState extends State<SegmentedControl> {
 
 // Example usage
 class SegmentedControlExample extends StatelessWidget {
-  const SegmentedControlExample({super.key});
+  const SegmentedControlExample({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

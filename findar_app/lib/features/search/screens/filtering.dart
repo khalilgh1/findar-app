@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:main_button/main_button.dart';
+
+import '../../../logic/cubits/search_cubit.dart';
+import 'package:findar/l10n/app_localizations.dart';
 
 class FilteringScreen extends StatefulWidget {
   const FilteringScreen({super.key});
@@ -10,29 +14,37 @@ class FilteringScreen extends StatefulWidget {
 
 class _FilteringScreenState extends State<FilteringScreen> {
   final TextEditingController locationController = TextEditingController();
+  final TextEditingController minSqftController = TextEditingController();
+  final TextEditingController maxSqftController = TextEditingController();
 
   RangeValues priceRange = const RangeValues(20000, 250000000);
   String propertyType = 'Any';
-  String buildingType = 'House'; // Only one can be selected now
+  String buildingType = 'Any'; // Only one can be selected now
 
   int bedrooms = 2;
   int bathrooms = 1;
   String? listedBy = 'Any';
-  String? minSqFt;
-  String? maxSqFt;
 
   void resetFilters() {
     setState(() {
       locationController.clear();
       priceRange = const RangeValues(100000, 5000000);
       propertyType = 'Any';
-      buildingType = 'House';
+      buildingType = 'Any';
       bedrooms = 2;
       bathrooms = 1;
       listedBy = 'Any';
-      minSqFt = null;
-      maxSqFt = null;
+      minSqftController.clear();
+      maxSqftController.clear();
     });
+  }
+
+  @override
+  void dispose() {
+    locationController.dispose();
+    minSqftController.dispose();
+    maxSqftController.dispose();
+    super.dispose();
   }
 
   String _formatPrice(double value) {
@@ -57,11 +69,14 @@ class _FilteringScreenState extends State<FilteringScreen> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text('Advanced Search'),
+        title: Builder(
+          builder: (context) {
+            final l10n = AppLocalizations.of(context)!;
+            return Text(l10n.advancedSearch);
+          },
+        ),
         centerTitle: true,
-        actions: [
-          IconButton(icon: const Icon(Icons.bookmark_outline), onPressed: null),
-        ],
+
         elevation: 0,
       ),
       body: Container(
@@ -87,7 +102,7 @@ class _FilteringScreenState extends State<FilteringScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 hintText: 'Enter a city, zip code, or neighborhood',
-                prefixIcon: const Icon(Icons.search),
+                prefixIcon: const Icon(Icons.location_on),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -125,26 +140,38 @@ class _FilteringScreenState extends State<FilteringScreen> {
             Text('Propoerty type', style: theme.textTheme.headlineSmall),
 
             const SizedBox(height: 8),
-            Row(
-              children: ['Any', 'For Sale', 'For Rent'].map((type) {
-                final isSelected = propertyType == type;
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: ChoiceChip(
-                    label: Text(type),
-                    selected: isSelected,
-                    onSelected: (_) => setState(() => propertyType = type),
-                    selectedColor: theme.colorScheme.primary,
-                    labelStyle: TextStyle(
-                      color: isSelected
-                          ? theme.colorScheme.onPrimary
-                          : theme.colorScheme.onSurface,
-                    ),
-                    side: BorderSide.none,
-                    showCheckmark: false,
-                  ),
+            Builder(
+              builder: (context) {
+                final l10n = AppLocalizations.of(context)!;
+                final types = [
+                  ('Any', 'Any'),
+                  ('For Sale', l10n.forSale),
+                  ('For Rent', l10n.forRent),
+                ];
+                return Row(
+                  children: types.map((typeData) {
+                    final value = typeData.$1;
+                    final label = typeData.$2;
+                    final isSelected = propertyType == value;
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: ChoiceChip(
+                        label: Text(label),
+                        selected: isSelected,
+                        onSelected: (_) => setState(() => propertyType = value),
+                        selectedColor: theme.colorScheme.primary,
+                        labelStyle: TextStyle(
+                          color: isSelected
+                              ? theme.colorScheme.onPrimary
+                              : theme.colorScheme.onSurface,
+                        ),
+                        side: BorderSide.none,
+                        showCheckmark: false,
+                      ),
+                    );
+                  }).toList(),
                 );
-              }).toList(),
+              },
             ),
 
             const SizedBox(height: 24),
@@ -154,16 +181,13 @@ class _FilteringScreenState extends State<FilteringScreen> {
             const SizedBox(height: 8),
             Column(
               children: [
-                Row(
+                Wrap(
                   children: [
-                    Expanded(child: _buildBuildingRadio('House')),
-                    Expanded(child: _buildBuildingRadio('Apartment')),
-                  ],
-                ),
-                Row(
-                  children: [
-                    Expanded(child: _buildBuildingRadio('Condo')),
-                    Expanded(child: _buildBuildingRadio('Townhouse')),
+                    _buildBuildingRadio('Any'),
+                    _buildBuildingRadio('House'),
+                    _buildBuildingRadio('Apartment'),
+                    _buildBuildingRadio('Condo'),
+                    _buildBuildingRadio('Townhouse'),
                   ],
                 ),
               ],
@@ -195,6 +219,7 @@ class _FilteringScreenState extends State<FilteringScreen> {
               children: [
                 Expanded(
                   child: TextField(
+                    controller: minSqftController,
                     decoration: InputDecoration(
                       labelText: 'Min',
                       labelStyle: const TextStyle(
@@ -224,6 +249,7 @@ class _FilteringScreenState extends State<FilteringScreen> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: TextField(
+                    controller: maxSqftController,
                     decoration: InputDecoration(
                       labelText: 'Max',
                       labelStyle: TextStyle(color: theme.colorScheme.secondary),
@@ -265,14 +291,24 @@ class _FilteringScreenState extends State<FilteringScreen> {
                   onChanged: (v) => setState(() => listedBy = v),
                 ),
                 RadioListTile<String>(
-                  title: Text('Private Owner'),
+                  title: Builder(
+                    builder: (context) {
+                      final l10n = AppLocalizations.of(context)!;
+                      return Text(l10n.privateOwner);
+                    },
+                  ),
                   value: 'Private Owner',
                   activeColor: theme.colorScheme.primary,
                   groupValue: listedBy,
                   onChanged: (v) => setState(() => listedBy = v),
                 ),
                 RadioListTile<String>(
-                  title: const Text('Real Estate Agent'),
+                  title: Builder(
+                    builder: (context) {
+                      final l10n = AppLocalizations.of(context)!;
+                      return Text(l10n.realEstateAgent);
+                    },
+                  ),
                   value: 'Real Estate Agent',
                   activeColor: theme.colorScheme.primary,
                   groupValue: listedBy,
@@ -290,20 +326,28 @@ class _FilteringScreenState extends State<FilteringScreen> {
         child: Row(
           children: [
             Expanded(
-              child: MainButton(
-                label: 'Reset',
-                backgroundColor: theme.colorScheme.secondary,
-                onPressed: resetFilters,
+              child: Builder(
+                builder: (context) {
+                  final l10n = AppLocalizations.of(context)!;
+                  return MainButton(
+                    label: l10n.reset,
+                    backgroundColor: theme.colorScheme.secondary,
+                    onPressed: resetFilters,
+                  );
+                },
               ),
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: MainButton(
-                label: 'Show results',
-                backgroundColor: theme.colorScheme.primary,
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Showing 42 results')),
+              child: Builder(
+                builder: (context) {
+                  final l10n = AppLocalizations.of(context)!;
+                  return MainButton(
+                    label: l10n.showResults,
+                    backgroundColor: theme.colorScheme.primary,
+                    onPressed: () async {
+                      await _applyFilters(context);
+                    },
                   );
                 },
               ),
@@ -315,18 +359,27 @@ class _FilteringScreenState extends State<FilteringScreen> {
   }
 
   Widget _buildBuildingRadio(String type) {
-    return RadioListTile<String>(
-      title: Text(type),
-      value: type,
-      groupValue: buildingType,
-      activeColor: Theme.of(context).colorScheme.primary,
-      onChanged: (value) {
-        setState(() {
-          buildingType = value!;
-        });
-      },
-      contentPadding: EdgeInsets.zero,
-      dense: true,
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    // Constrain the width so the Wrap can position multiple radios horizontally.
+    // Adjust `0.45` if you want more/less items per row.
+    return SizedBox(
+      width: screenWidth * 0.45,
+      child: RadioListTile<String>(
+        title: Text(type),
+        value: type,
+        groupValue: buildingType,
+        activeColor: Theme.of(context).colorScheme.primary,
+        onChanged: (value) {
+          setState(() {
+            buildingType = value!;
+          });
+        },
+        // Use a small horizontal padding and compact density so tiles are not full-width
+        contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+        dense: true,
+        visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+      ),
     );
   }
 
@@ -338,7 +391,13 @@ class _FilteringScreenState extends State<FilteringScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label),
+        Builder(
+          builder: (context) {
+            final l10n = AppLocalizations.of(context)!;
+            final displayLabel = label == 'Bedrooms' ? l10n.bedrooms : (label == 'Bathrooms' ? l10n.bathrooms : label);
+            return Text(displayLabel);
+          },
+        ),
         Row(
           children: [
             IconButton(
@@ -360,5 +419,35 @@ class _FilteringScreenState extends State<FilteringScreen> {
         ),
       ],
     );
+  }
+
+  Future<void> _applyFilters(BuildContext context) async {
+    final searchCubit = context.read<SearchCubit>();
+
+    final double? minSqft = double.tryParse(minSqftController.text.trim());
+    final double? maxSqft = double.tryParse(maxSqftController.text.trim());
+    final String? listingTypeValue = propertyType == 'Any'
+        ? null
+        : propertyType;
+    final String? buildingTypeValue = (buildingType == 'Any')
+        ? null
+        : buildingType;
+    final String? listedByValue = (listedBy == null || listedBy == 'Any')
+        ? null
+        : listedBy;
+
+    await searchCubit.getFilteredListings(
+      minPrice: priceRange.start,
+      maxPrice: priceRange.end,
+      listingType: listingTypeValue,
+      buildingType: buildingTypeValue,
+      numBedrooms: bedrooms,
+      numBathrooms: bathrooms,
+      minSqft: minSqft,
+      maxSqft: maxSqft,
+      listedBy: listedByValue,
+    );
+
+    Navigator.pop(context);
   }
 }

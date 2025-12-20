@@ -1,15 +1,32 @@
+import 'package:findar/core/models/property_listing_model.dart';
+
 class Property {
+  final int id;
+  final String title;
   final String image;
-  final String price;
+  final double price;
   final String address;
   final String details;
-  final bool bookmarked;
+  bool bookmarked;
 
   Property({
+    required this.id,
+    required this.title,
     required this.image,
     required this.price,
     required this.address,
     required this.details,
-    this.bookmarked = false,
+    required this.bookmarked,
   });
+  static Property convertListing(PropertyListing p, {bool bookmarked = false}) {
+    return Property(
+      id: p.id,
+      title: p.title,
+      image: p.image,
+      price: p.price,
+      address: p.location,
+      details: "${p.bedrooms} beds • ${p.bathrooms} baths •",
+      bookmarked: bookmarked,
+    );
+  }
 }

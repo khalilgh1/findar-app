@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "286561675288",
+    "project_id": "findar-4a43c",
+    "storage_bucket": "findar-4a43c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:286561675288:android:71c2f15bf519ddb2673b6d",
+        "android_client_info": {
+          "package_name": "com.example.findar"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAhXoz6xqM1hDvv5gywfK-_wgmykvgsZCA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

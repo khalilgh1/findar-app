@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
-// import '../../core/widgets/appbar.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:findar/logic/cubits/home/recent_listings.dart';
+import 'package:findar/logic/cubits/home/sponsored_listings.dart';
+import 'package:findar/logic/cubits/property_details_cubit.dart';
+import '../../core/widgets/progress_button.dart';
 import 'search_bar.dart';
 import 'categories.dart';
 import 'property.dart';
 import 'listings.dart';
 import 'sponsored.dart';
+import '../../../core/widgets/build_bottom_bar.dart';
+import 'package:findar/l10n/app_localizations.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -14,106 +20,268 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final sponsored = [
-    Property(
-      image: "assets/house1.jpg",
-      price: "\$1,200,000",
-      address: "123 Luxury Ave, Beverly Hills, CA",
-      details: "4 Bed | 3 Bath | 2,500 sqft",
-    ),
-    Property(
-      image: "assets/house2.jpg",
-      price: "\$850,000",
-      address: "456 Suburb Rd, Austin, TX",
-      details: "3 Bed | 2 Bath | 2,200 sqft",
-    ),
-    Property(
-      image: "assets/house3.jpg",
-      price: "\$980,000",
-      address: "101 Garden Ln, San Francisco, CA",
-      details: "3 Bed | 2 Bath | 2,100 sqft",
-    ),
-  ];
-
-  final recent = [
-    Property(
-      image: "assets/house1.jpg",
-      price: "\$1,200,000",
-      address: "123 Luxury Ave, Beverly Hills, CA",
-      details: "4 Bed | 3 Bath | 2,500 sqft",
-    ),
-    Property(
-      image: "assets/house2.jpg",
-      price: "\$850,000",
-      address: "456 Suburb Rd, Austin, TX",
-      details: "3 Bed | 2 Bath | 2,200 sqft",
-    ),
-    Property(
-      image: "assets/house3.jpg",
-      price: "\$980,000",
-      address: "101 Garden Ln, San Francisco, CA",
-      details: "3 Bed | 2 Bath | 2,100 sqft",
-    ),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    // Fetch listings when screen loads
+    context.read<SponsoredCubit>().getSponsoredListings();
+    context.read<RecentCubit>().getRecentListings();
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Scaffold(
-      backgroundColor: theme.colorScheme.surface,
-      appBar: AppBar(
-        forceMaterialTransparency: false,
-        primary: true,
-        toolbarOpacity: 1,
-        leading: Icon(Icons.settings),
-        actions: [Icon(Icons.notifications)],
-        actionsPadding: EdgeInsets.only(right: 14),
-        centerTitle: true,
-        title: Text('FinDar'),
-        elevation: 0,
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(14.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SizedBox(height: 15),
-              SearchBarWidget(),
-              SizedBox(height: 15),
-              CategoryBar(),
-              SizedBox(height: 20),
-              Text(
-                "Sponsored Properties",
-                style: theme.textTheme.headlineLarge?.copyWith(
-                  color: theme.colorScheme.onSurface,
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<SponsoredCubit, Map<String, dynamic>>(
+          listenWhen: (previous, current) {
+            return previous['message'] != current['message'];
+          },
+          listener: (context, state) {
+            final message = state['message'] as String? ?? '';
+            if (message.isNotEmpty &&
+                (message.toLowerCase().contains('saved') ||
+                    message.toLowerCase().contains('removed'))) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(message),
+                  duration: const Duration(seconds: 2),
                 ),
-              ),
-              SizedBox(height: 12),
-              SizedBox(
-                height: 230,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: sponsored.length,
-                  itemBuilder: (context, index) =>
-                      PropertyCard(property: sponsored[index]),
+              );
+            }
+          },
+        ),
+        BlocListener<RecentCubit, Map<String, dynamic>>(
+          listenWhen: (previous, current) {
+            return previous['message'] != current['message'];
+          },
+          listener: (context, state) {
+            final message = state['message'] as String? ?? '';
+            if (message.isNotEmpty &&
+                (message.toLowerCase().contains('saved') ||
+                    message.toLowerCase().contains('removed'))) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(message),
+                  duration: const Duration(seconds: 2),
                 ),
+              );
+            }
+          },
+        ),
+      ],
+      child: Scaffold(
+        backgroundColor: theme.colorScheme.surface,
+        appBar: AppBar(
+          scrolledUnderElevation: 0,
+          forceMaterialTransparency: false,
+          primary: true,
+          toolbarOpacity: 1,
+          leading: IconButton(
+            icon: Icon(
+              Icons.settings,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+            onPressed: () {
+              Navigator.pushNamed(context, '/settings');
+            },
+          ),
+          actions: [
+            IconButton(
+              icon: Icon(
+                Icons.person,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
-              SizedBox(height: 25),
-              Text(
-                "Recent Listings",
-                style: theme.textTheme.headlineLarge?.copyWith(
-                  color: theme.colorScheme.onSurface,
-                ),
+              onPressed: () => Navigator.pushNamed(context, '/profile'),
+            ),
+          ],
+          actionsPadding: EdgeInsets.only(right: 14),
+          centerTitle: true,
+          title: Text('FinDar'),
+          elevation: 0,
+        ),
+        body: SafeArea(
+          bottom: false,
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(14.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(height: 15),
+                  SearchBarWidget(),
+                  SizedBox(height: 15),
+                  CategoryBar(),
+                  SizedBox(height: 20),
+                  Builder(
+                    builder: (context) {
+                      var l10n = AppLocalizations.of(context);
+                      return Text(
+                        l10n?.sponsoredProperties ?? 'Sponsored Properties',
+                        style: theme.textTheme.headlineLarge?.copyWith(
+                          color: theme.colorScheme.onSurface,
+                        ),
+                      );
+                    },
+                  ),
+                  SizedBox(height: 12),
+                  BlocBuilder<SponsoredCubit, Map<String, dynamic>>(
+                    builder: (context, state) {
+                      if (state['state'] == 'loading') {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      if (state['state'] == 'error') {
+                        return Center(
+                          child: Column(
+                            children: [
+                              Text(
+                                'Error: ${state['message'] ?? 'Unknown error'}',
+                              ),
+                              SizedBox(height: 16),
+                              Builder(
+                                builder: (context) {
+                                  var l10n = AppLocalizations.of(context);
+                                  return ProgressButton(
+                                    label: l10n?.retry ?? 'Retry',
+                                    backgroundColor: theme.colorScheme.primary,
+                                    textColor: theme.colorScheme.onPrimary,
+                                    onPressed: () {
+                                      context
+                                          .read<SponsoredCubit>()
+                                          .getSponsoredListings();
+                                    },
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+
+                      final raw = state['data'];
+                      final savedIds =
+                          state['savedIds'] as Set<int>? ?? <int>{};
+
+                      final listings = raw is List
+                          ? raw
+                                .map(
+                                  (e) => Property.convertListing(
+                                    e,
+                                    bookmarked: savedIds.contains(e.id),
+                                  ),
+                                )
+                                .toList()
+                          : [];
+
+                      final displayListings = listings;
+                      return SizedBox(
+                        height: 230,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: displayListings.length,
+                          itemBuilder: (context, index) => GestureDetector(
+                            onTap: () => {
+                              context
+                                  .read<PropertyDetailsCubit>()
+                                  .fetchPropertyDetails(
+                                    displayListings[index].id,
+                                  ),
+                              Navigator.pushNamed(context, '/property-details'),
+                            },
+                            child: PropertyCard(
+                              property: displayListings[index],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+
+                  SizedBox(height: 25),
+                  Builder(
+                    builder: (context) {
+                      var l10n = AppLocalizations.of(context);
+                      return Text(
+                        l10n?.recentListings ?? 'Recent Listings',
+                        style: theme.textTheme.headlineLarge?.copyWith(
+                          color: theme.colorScheme.onSurface,
+                        ),
+                      );
+                    },
+                  ),
+                  SizedBox(height: 15),
+                  BlocBuilder<RecentCubit, Map<String, dynamic>>(
+                    builder: (context, state) {
+                      if (state['state'] == 'loading') {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      if (state['state'] == 'error') {
+                        return Center(
+                          child: Column(
+                            children: [
+                              Text(
+                                'Error: ${state['message'] ?? 'Unknown error'}',
+                              ),
+                              SizedBox(height: 16),
+                              ProgressButton(
+                                label: 'Retry',
+                                backgroundColor: theme.colorScheme.primary,
+                                textColor: theme.colorScheme.onPrimary,
+                                onPressed: () {
+                                  context
+                                      .read<RecentCubit>()
+                                      .getRecentListings();
+                                },
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+
+                      final recentraw = state['data'];
+                      final savedIds =
+                          state['savedIds'] as Set<int>? ?? <int>{};
+
+                      final recentlistings = recentraw is List
+                          ? recentraw
+                                .map(
+                                  (e) => Property.convertListing(
+                                    e,
+                                    bookmarked: savedIds.contains(e.id),
+                                  ),
+                                )
+                                .toList()
+                          : [];
+
+                      final displayRecentListings = recentlistings;
+
+                      return Column(
+                        children: displayRecentListings
+                            .map(
+                              (p) => GestureDetector(
+                                onTap: () => {
+                                  context
+                                      .read<PropertyDetailsCubit>()
+                                      .fetchPropertyDetails(p.id),
+                                  Navigator.pushNamed(
+                                    context,
+                                    '/property-details',
+                                  ),
+                                },
+                                child: ListingTile(property: p),
+                              ),
+                            )
+                            .toList(),
+                      );
+                    },
+                  ),
+                ],
               ),
-              SizedBox(height: 15),
-              Column(
-                children: recent.map((p) => ListingTile(property: p)).toList(),
-              ),
-            ],
+            ),
           ),
         ),
+        bottomNavigationBar: BuildBottomNavBar(index: 0),
       ),
     );
   }

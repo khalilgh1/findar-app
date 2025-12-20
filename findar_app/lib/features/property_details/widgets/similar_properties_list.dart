@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:findar/l10n/app_localizations.dart';
 
 class SimilarPropertiesList extends StatelessWidget {
   final List<SimilarProperty> properties;
@@ -10,15 +11,21 @@ class SimilarPropertiesList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Similar Properties',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
+        Builder(
+          builder: (context) {
+            var l10n = AppLocalizations.of(context);
+            return Text(
+              l10n?.similarProperties ?? 'Similar Properties',
+              style: textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            );
+          },
         ),
         const SizedBox(height: 12),
         SizedBox(
@@ -47,14 +54,17 @@ class SimilarPropertyCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return Container(
       width: 160,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        color: Colors.white,
+        color: colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
+            color: colorScheme.shadow.withOpacity(0.2),
             spreadRadius: 1,
             blurRadius: 4,
             offset: const Offset(0, 2),
@@ -66,12 +76,35 @@ class SimilarPropertyCard extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-            child: Image.asset(
-              property.image,
-              height: 100,
-              width: 160,
-              fit: BoxFit.cover,
-            ),
+            child: property.image.startsWith('http')
+                ? Image.network(
+                    property.image,
+                    height: 100,
+                    width: 160,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        height: 100,
+                        width: 160,
+                        color: Colors.grey[300],
+                        child: Icon(Icons.broken_image, color: Colors.grey[600]),
+                      );
+                    },
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return Container(
+                        height: 100,
+                        width: 160,
+                        child: Center(child: CircularProgressIndicator()),
+                      );
+                    },
+                  )
+                : Image.asset(
+                    property.image,
+                    height: 100,
+                    width: 160,
+                    fit: BoxFit.cover,
+                  ),
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -79,18 +112,17 @@ class SimilarPropertyCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  property.price,
-                  style: const TextStyle(
-                    fontSize: 16,
+                  _formatPrice(property.price),
+                  style: textTheme.bodyLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   property.address,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
-                    color: Colors.grey,
+                    color: colorScheme.onSurface.withOpacity(0.7),
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -102,11 +134,30 @@ class SimilarPropertyCard extends StatelessWidget {
       ),
     );
   }
+
+  String _formatPrice(double price) {
+    if (price <= 0) {
+      return 'Price on request';
+    }
+
+    final hasDecimals = price % 1 != 0;
+    final value = hasDecimals
+        ? price.toStringAsFixed(2)
+        : price.toStringAsFixed(0);
+    final parts = value.split('.');
+    final whole = parts.first.replaceAll(RegExp(r'\B(?=(\d{3})+(?!\d))'), ',');
+
+    if (parts.length > 1 && parts[1].isNotEmpty) {
+      return '$whole.${parts[1]} DZD';
+    }
+
+    return '$whole DZD';
+  }
 }
 
 class SimilarProperty {
   final String image;
-  final String price;
+  final double price;
   final String address;
 
   const SimilarProperty({

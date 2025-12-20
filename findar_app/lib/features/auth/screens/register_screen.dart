@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:findar/logic/cubits/auth_cubit.dart';
+import '../../../core/widgets/progress_button.dart';
+import 'package:findar/l10n/app_localizations.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -8,7 +12,9 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool isChecked = false;
+  String? _selectedAccountType;
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phonenumberController = TextEditingController();
@@ -17,205 +23,339 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    var l10n = AppLocalizations.of(context)!;
+
+    /// Validate name - defined here to access l10n
+    String? validateName(String? name) {
+      if (name == null || name.isEmpty) {
+        return l10n.nameRequired;
+      }
+      if (name.length < 3) {
+        return l10n.nameTooShort;
+      }
+      return null;
+    }
+
+    /// Validate password strength
+    /// Requirements:
+    /// - Minimum 6 characters
+    /// - At least one uppercase letter
+    /// - At least one number
+    String? validatePassword(String? password) {
+      if (password == null || password.isEmpty) {
+        return l10n.passwordRequired;
+      }
+      if (password.length < 6) {
+        return l10n.passwordTooShort;
+      }
+      if (!password.contains(RegExp(r'[A-Z]'))) {
+        return l10n.passwordMissingUppercase;
+      }
+      if (!password.contains(RegExp(r'[0-9]'))) {
+        return l10n.passwordMissingNumber;
+      }
+      return null;
+    }
+
+    /// Validate email format
+    String? validateEmail(String? email) {
+      if (email == null || email.isEmpty) {
+        return l10n.emailRequired;
+      }
+      final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+      if (!emailRegex.hasMatch(email)) {
+        return l10n.invalidEmail;
+      }
+      return null;
+    }
+
+    /// Validate phone number (basic check)
+    String? validatePhone(String? phone) {
+      if (phone == null || phone.isEmpty) {
+        return l10n.phoneRequired;
+      }
+      if (phone.length < 10) {
+        return l10n.phoneTooShort;
+      }
+      return null;
+    }
+
+    String? validateAccountType(String? type) {
+      if (type == null || type.isEmpty) {
+        return l10n.accountTypeRequired;
+      }
+      return null;
+    };
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(height: 20),
-              const Text(
-                'FinDAR',
-                style: TextStyle(
-                  color: Colors.blue,
-                  fontSize: 60,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 10),
-              const Text(
-                'Complete Your Registration',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 25,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 20),
-              DropdownButtonFormField<String>(
-                decoration: InputDecoration(
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                ),
-                hint: Text('Select Account Type', style: TextStyle(color: Colors.grey[800]),),
-                items: <String>['Individual', 'Agency'].map((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
-                onChanged: (String? newValue) {
-                },
-              ),
-              const SizedBox(height: 20),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Full Name',
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                const SizedBox(height: 20),
+                Text(
+                  'FinDAR',
                   style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
+                    color: Theme.of(context).colorScheme.primary,
+                    fontSize: 60,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-              ),
-              const SizedBox(height: 6),
-              TextField(
-                controller: _nameController,
-                decoration: InputDecoration(
-                  hintText: 'Enter your full name',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                ),
-              ),
-              const SizedBox(height: 20),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Email Address',
+                const SizedBox(height: 10),
+                 Text(
+                  l10n.completeRegistration,
                   style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
+                    color: Theme.of(context).colorScheme.onSurface,
+                    fontSize: 25,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
-              ),
-              const SizedBox(height: 6),
-              TextField(
-                controller: _emailController,
-                decoration: InputDecoration(
-                  hintText: 'Enter your Email Address',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                ),
-              ),
-              const SizedBox(height: 20),
-                Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Phone Number',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 6),
-              TextField(
-                controller: _phonenumberController,
-                decoration: InputDecoration(
-                  hintText: 'Enter your phone number',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                ),
-              ),
-              const SizedBox(height: 20),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Password',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 6),
-              TextField(
-                controller: _passwordController,
-                obscureText: _obscurePassword,
-                decoration: InputDecoration(
-                  hintText: 'Enter your password',
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                      color: Colors.grey,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _obscurePassword = !_obscurePassword;
-                      });
-                    },
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                ),
-              ),
-              const SizedBox(height: 30),
-              SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/home');
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    shape: RoundedRectangleBorder(
+                const SizedBox(height: 20),
+                DropdownButtonFormField<String>(
+                  dropdownColor: Theme.of(context).colorScheme.surface,
+                  decoration: InputDecoration(
+                    hintText: l10n.selectAccountType,
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      ),
+                    border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
+                    errorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: Colors.red),
+                    ),
+                    focusedErrorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: Colors.red, width: 2),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
                   ),
-                  child: const Text(
-                    'Register Now',
+                  hint: Text(l10n.selectAccountType, style: TextStyle(color: Theme.of(context).colorScheme.onSecondaryContainer),),
+                  items: <String>[l10n.accountIndividual, l10n.accountAgency].map((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                  validator: validateAccountType,
+                  onChanged: (String? newValue) {
+                    setState(() => _selectedAccountType = newValue);
+                  },
+                  value: _selectedAccountType,
+                ),
+                const SizedBox(height: 20),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    l10n.fullName,
                     style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onSurface,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    "Already have an account?",
-                    style: TextStyle(color: Colors.black87, fontSize: 14),
+                const SizedBox(height: 6),
+                TextFormField(
+                  controller: _nameController,
+                  validator: validateName,
+                  decoration: InputDecoration(
+                    hintText: l10n.enterFullName,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    errorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: Colors.red),
+                    ),
+                    focusedErrorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: Colors.red, width: 2),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
                   ),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/login');
-                    },
-                    child: const Text(
-                      'Login',
-                      style: TextStyle(
-                        color: Colors.blue,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                      ),
+                ),
+                const SizedBox(height: 20),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    l10n.emailAddress,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
-                ],
+                ),
+                const SizedBox(height: 6),
+                TextFormField(
+                  controller: _emailController,
+                  validator: validateEmail,
+                  decoration: InputDecoration(
+                    hintText: l10n.enterEmail,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    errorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: Colors.red),
+                    ),
+                    focusedErrorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: Colors.red, width: 2),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                  Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    l10n.phoneNumber,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                TextFormField(
+                  controller: _phonenumberController,
+                  validator: validatePhone,
+                  decoration: InputDecoration(
+                    hintText: l10n.enterPhone,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    errorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: Colors.red),
+                    ),
+                    focusedErrorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: Colors.red, width: 2),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    l10n.password,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                TextFormField(
+                  controller: _passwordController,
+                  obscureText: _obscurePassword,
+                  validator: validatePassword,
+                  decoration: InputDecoration(
+                    hintText: l10n.enterPassword,
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                        color: Colors.grey,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _obscurePassword = !_obscurePassword;
+                        });
+                      },
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    errorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: Colors.red),
+                    ),
+                    focusedErrorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: Colors.red, width: 2),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                  ),
+                ),
+                const SizedBox(height: 40),
+                BlocConsumer<AuthCubit, Map<String, dynamic>>(
+                  listener: (context, state) {
+                    if (state['state'] == 'done') {
+                      // Registration successful
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(state['message'] ?? 'Registration successful'),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                      Navigator.pushNamed(context, '/profile-picture-setup');
+                    }
+                  },
+                  builder: (context, state) {
+                    final isLoading = state['state'] == 'loading';
+                    final isError = state['state'] == 'error';
+                    final errorMessage = isError ? (state['message'] as String?) : null;
+
+                    return ProgressButton(
+                      onPressed: () {
+                        if (_formKey.currentState!.validate()) {
+                          context.read<AuthCubit>().register(
+                            name: _nameController.text,
+                            email: _emailController.text,
+                            phone: _phonenumberController.text,
+                            password: _passwordController.text,
+                            accountType: _selectedAccountType!,
+                          );
+                        }
+                      },
+                      label: l10n.registerNow,
+                      isLoading: isLoading,
+                      isError: isError,
+                      errorMessage: errorMessage,
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      textColor: Colors.white,
+                    );
+                  },
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      l10n.alreadyHaveAccount,
+                      style: TextStyle(color: theme.colorScheme.onSurface, fontSize: 14),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/login');
+                      },
+                      child: Text(
+                        l10n.login,
+                        style: TextStyle(
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
               ),
-            ],
+            ),
           ),
         ),
       ),
