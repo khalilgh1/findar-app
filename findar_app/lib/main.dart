@@ -41,21 +41,21 @@ import 'logic/cubits/profile_picture_setup_cubit.dart';
 import 'logic/cubits/settings_cubit.dart';
 import 'logic/cubits/boost_cubit.dart';
 import 'logic/cubits/sort_cubit.dart';
-import 'core/models/property_listing_model.dart';
+import 'package:findar/core/models/property_listing_model.dart';
+
 import 'logic/cubits/language_cubit.dart';
 import 'core/models/sponsorship_plan.dart';
 import 'features/listings/screens/sponsorship_plans/sponsorship_plans_screen.dart';
 import 'features/listings/screens/payment_confirmation/payment_confirmation_screen.dart';
 
 //import repository
-import 'core/repositories/abstract_listing_repo.dart';
-import 'core/repositories/database_listing_repo.dart';
+import 'package:findar/core/repositories/abstract_listing_repo.dart';
+import 'package:findar/core/repositories/database_listing_repo.dart';
 
 late ListingRepository repo;
 void main() {
   //later: repo = (online)? RemoteListingRepository(): LocalListingRepository();
-  repo =
-      LocalListingRepository(); //we will replace this with real repository later
+  repo = LocalListingRepository(); //we will replace this with real repository later
 
   runApp(const MainApp());
 }
@@ -98,84 +98,87 @@ class MainApp extends StatelessWidget {
                   debugShowCheckedModeBanner: false,
                   locale: Locale(language),
                   localizationsDelegates: [
-                AppLocalizations.delegate,
-                GlobalMaterialLocalizations.delegate,
-                GlobalWidgetsLocalizations.delegate,
-                GlobalCupertinoLocalizations.delegate,
-              ],
-              supportedLocales: [
-                Locale('en'),
-                Locale('ar'),
-                Locale('fr'),
-              ],
-              initialRoute: '/landing',
-              onGenerateRoute: (settings) {
-                // Handle edit listing route with arguments
-                if (settings.name == '/edit-listing') {
-                  final listing = settings.arguments;
-                  return MaterialPageRoute(
-                    builder: (context) =>
-                        EditListingScreen(listing: listing as PropertyListing),
-                  );
-                }
-                // Handle sponsorship plans route with arguments
-                if (settings.name == '/sponsorship-plans') {
-                  final listing = settings.arguments as PropertyListing;
-                  return MaterialPageRoute(
-                    builder: (context) =>
-                        SponsorshipPlansScreen(listing: listing),
-                  );
-                }
-                // Handle payment confirmation route with arguments
-                if (settings.name == '/payment-confirmation') {
-                  final args = settings.arguments as Map<String, dynamic>;
-                  return MaterialPageRoute(
-                    builder: (context) => PaymentConfirmationScreen(
-                      listing: args['listing'] as PropertyListing,
-                      plan: args['plan'] as SponsorshipPlan,
-                    ),
-                  );
-                }
-                // Handle user profile route with userId argument
-                if (settings.name == '/user-profile') {
-                  final userId = settings.arguments as String;
-                  return MaterialPageRoute(
-                    builder: (context) => UserProfileScreen(userId: userId),
-                  );
-                }
-                // Default routes
-                final routes = {
-                  '/landing': (context) => const SplashScreen(),
-                  '/login': (context) => const LoginScreen(),
-                  '/register': (context) => RegisterScreen(),
-                  '/profile-picture-setup': (context) => const ProfilePictureSetupScreen(),
-                  '/forgot-password': (context) => const ForgotPasswordScreen(),
-                  '/reset-password': (context) => const ResetPasswordScreen(),
-                  '/home': (context) => const HomeScreen(),
-                  '/filtering': (context) => const FilteringScreen(),
-                  '/my-listings': (context) => const MyListingsScreen(),
-                  '/saved-listings': (context) => const SavedListingsScreen(),
-                  '/search-results': (context) => const SearchResultsScreen(),
-                  '/demoscreen': (context) => const Demoscreen(),
-                  // '/demo-test': (context) => const DemoTestScreen(),
-                  '/settings': (context) => const SettingsScreen(),
-                  '/property-details': (context) =>
-                      const PropertyDetailsScreen(),
-                  '/create-listing': (context) => const CreateListingScreen(),
-                  '/profile': (context) => const ProfileScreen(),
-                  '/edit-profile': (context) => const EditProfileScreen(),
-                };
+                    AppLocalizations.delegate,
+                    GlobalMaterialLocalizations.delegate,
+                    GlobalWidgetsLocalizations.delegate,
+                    GlobalCupertinoLocalizations.delegate,
+                  ],
+                  supportedLocales: [Locale('en'), Locale('ar'), Locale('fr')],
+                  initialRoute: '/landing',
+                  onGenerateRoute: (settings) {
+                    // Handle edit listing route with arguments
+                    if (settings.name == '/edit-listing') {
+                      final listing = settings.arguments;
+                      return MaterialPageRoute(
+                        builder: (context) => EditListingScreen(
+                          listing: listing as PropertyListing,
+                        ),
+                      );
+                    }
+                    // Handle sponsorship plans route with arguments
+                    if (settings.name == '/sponsorship-plans') {
+                      final listing = settings.arguments as PropertyListing;
+                      return MaterialPageRoute(
+                        builder: (context) =>
+                            SponsorshipPlansScreen(listing: listing),
+                      );
+                    }
+                    // Handle payment confirmation route with arguments
+                    if (settings.name == '/payment-confirmation') {
+                      final args = settings.arguments as Map<String, dynamic>;
+                      return MaterialPageRoute(
+                        builder: (context) => PaymentConfirmationScreen(
+                          listing: args['listing'] as PropertyListing,
+                          plan: args['plan'] as SponsorshipPlan,
+                        ),
+                      );
+                    }
+                    // Handle user profile route with userId argument
+                    if (settings.name == '/user-profile') {
+                      final userId = settings.arguments as String;
+                      return MaterialPageRoute(
+                        builder: (context) => UserProfileScreen(userId: userId),
+                      );
+                    }
+                    // Default routes
+                    final routes = {
+                      '/landing': (context) => const SplashScreen(),
+                      '/login': (context) => const LoginScreen(),
+                      '/register': (context) => RegisterScreen(),
+                      '/profile-picture-setup': (context) =>
+                          const ProfilePictureSetupScreen(),
+                      '/forgot-password': (context) =>
+                          const ForgotPasswordScreen(),
+                      '/reset-password': (context) =>
+                          const ResetPasswordScreen(),
+                      '/home': (context) => const HomeScreen(),
+                      '/filtering': (context) => const FilteringScreen(),
+                      '/my-listings': (context) => const MyListingsScreen(),
+                      '/saved-listings': (context) =>
+                          const SavedListingsScreen(),
+                      '/search-results': (context) =>
+                          const SearchResultsScreen(),
+                      '/demoscreen': (context) => const Demoscreen(),
+                      // '/demo-test': (context) => const DemoTestScreen(),
+                      '/settings': (context) => const SettingsScreen(),
+                      '/property-details': (context) =>
+                          const PropertyDetailsScreen(),
+                      '/create-listing': (context) =>
+                          const CreateListingScreen(),
+                      '/profile': (context) => const ProfileScreen(),
+                      '/edit-profile': (context) => const EditProfileScreen(),
+                    };
 
-                final builder = routes[settings.name];
-                if (builder != null) {
-                  return MaterialPageRoute(builder: builder);
-                }
+                    final builder = routes[settings.name];
+                    if (builder != null) {
+                      return MaterialPageRoute(builder: builder);
+                    }
 
-                return MaterialPageRoute(
-                  builder: (context) => const SplashScreen(),
+                    return MaterialPageRoute(
+                      builder: (context) => const SplashScreen(),
+                    );
+                  },
                 );
-              },
-            );
               },
             );
           },

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../models/property_listing_model.dart';
+import 'package:findar/core/models/property_listing_model.dart';
+
 import 'package:findar/logic/cubits/property_details_cubit.dart';
 import 'primary_button.dart';
 

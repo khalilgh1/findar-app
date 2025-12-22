@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../../../core/models/property_listing_model.dart';
+import 'package:findar/core/models/property_listing_model.dart';
+
 import '../../../../../core/models/sponsorship_plan.dart';
 
 class OrderSummary extends StatelessWidget {

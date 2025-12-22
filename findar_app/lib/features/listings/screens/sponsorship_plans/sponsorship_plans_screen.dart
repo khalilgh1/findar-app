@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/models/sponsorship_plan.dart';
-import '../../../../core/models/property_listing_model.dart';
+import 'package:findar/core/models/property_listing_model.dart';
+
 import '../../widgets/plan_card.dart';
 import 'package:findar/l10n/app_localizations.dart';
 

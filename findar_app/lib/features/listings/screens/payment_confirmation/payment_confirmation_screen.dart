@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/models/sponsorship_plan.dart';
-import '../../../../core/models/property_listing_model.dart';
+import 'package:findar/core/models/property_listing_model.dart';
+
 import '../../../../logic/cubits/boost_cubit.dart';
 // import '../../../../logic/cubits/listing_cubit.dart'; // Disabled - has incompatible methods
 import '../../../../core/widgets/progress_button.dart';
