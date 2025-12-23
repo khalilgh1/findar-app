@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../core/models/sponsorship_plan.dart';
+import 'package:findar/core/models/sponsorship_plan.dart';
 import 'package:findar/l10n/app_localizations.dart';
 
 class PlanCard extends StatelessWidget {

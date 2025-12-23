@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:findar/logic/cubits/home/recent_listings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'property.dart';
+import 'package:findar/features/home/property.dart';
 
 class ListingTile extends StatefulWidget {
   final Property property;

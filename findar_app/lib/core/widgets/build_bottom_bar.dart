@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../core/layout/bottom_bar.dart';
+import 'package:findar/core/layout/bottom_bar.dart';
 
 class BuildBottomNavBar extends StatelessWidget {
   final int index;

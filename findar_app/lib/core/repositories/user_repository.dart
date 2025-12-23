@@ -1,6 +1,6 @@
 import 'package:findar/core/models/return_result.dart';
 import 'package:findar/core/services/api_service.dart';
-import 'auth_repository.dart';
+import 'package:findar/core/repositories/auth_repository.dart';
 
 /// Extended user profile with additional fields
 class UserProfile {

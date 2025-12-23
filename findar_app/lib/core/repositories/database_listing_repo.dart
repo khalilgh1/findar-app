@@ -1,7 +1,7 @@
-import '../../data/dbhelper.dart';
-import '../models/property_listing_model.dart';
-import '../models/return_result.dart';
-import 'abstract_listing_repo.dart';
+import 'package:findar/data/dbhelper.dart';
+import 'package:findar/core/models/property_listing_model.dart';
+import 'package:findar/core/models/return_result.dart';
+import 'package:findar/core/repositories/abstract_listing_repo.dart';
 
 class LocalListingRepository implements ListingRepository {
   final db = DatabaseHelper.instance;

@@ -5,17 +5,17 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:findar/l10n/app_localizations.dart';
 
 //widgets
-import './widgets/property_title.dart';
-import './widgets/description.dart';
-import 'widgets/custom_selector.dart';
-import './widgets/price_field.dart';
-import './widgets/numeric_field.dart';
-import './widgets/location_field.dart';
+import 'package:findar/features/create_listing/widgets/property_title.dart';
+import 'package:findar/features/create_listing/widgets/description.dart';
+import 'package:findar/features/create_listing/widgets/custom_selector.dart';
+import 'package:findar/features/create_listing/widgets/price_field.dart';
+import 'package:findar/features/create_listing/widgets/numeric_field.dart';
+import 'package:findar/features/create_listing/widgets/location_field.dart';
 //package imports
 import 'package:findar/logic/cubits/my_listings_cubit.dart';
 
 //widgets
-import '../../core/widgets/progress_button.dart';
+import 'package:findar/core/widgets/progress_button.dart';
 
 class CreateListingScreen extends StatefulWidget {
   const CreateListingScreen({super.key});

@@ -3,8 +3,8 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
-import '../../../logic/cubits/profile_picture_setup_cubit.dart';
-import '../../../logic/cubits/auth_cubit.dart';
+import 'package:findar/logic/cubits/profile_picture_setup_cubit.dart';
+import 'package:findar/logic/cubits/auth_cubit.dart';
 
 class ProfilePictureSetupScreen extends StatefulWidget {
   const ProfilePictureSetupScreen({super.key});

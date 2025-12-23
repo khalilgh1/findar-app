@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'package:findar/logic/cubits/home/sponsored_listings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'property.dart';
+import 'package:findar/features/home/property.dart';
 
 class PropertyCard extends StatefulWidget {
   final Property property;

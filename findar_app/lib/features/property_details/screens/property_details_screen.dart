@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:findar/logic/cubits/property_details_cubit.dart';
-import '../../../core/widgets/progress_button.dart';
-import '../widgets/property_image_carousel.dart';
-import '../widgets/property_header.dart';
-import '../widgets/property_features.dart';
-import '../widgets/property_description.dart';
-import '../widgets/agent_card.dart';
-import '../widgets/similar_properties_list.dart';
+import 'package:findar/core/widgets/progress_button.dart';
+import 'package:findar/features/property_details/widgets/property_image_carousel.dart';
+import 'package:findar/features/property_details/widgets/property_header.dart';
+import 'package:findar/features/property_details/widgets/property_features.dart';
+import 'package:findar/features/property_details/widgets/property_description.dart';
+import 'package:findar/features/property_details/widgets/agent_card.dart';
+import 'package:findar/features/property_details/widgets/similar_properties_list.dart';
 import 'package:findar/l10n/app_localizations.dart';
 
 class PropertyDetailsScreen extends StatefulWidget {
