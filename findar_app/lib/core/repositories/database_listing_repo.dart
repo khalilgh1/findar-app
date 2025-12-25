@@ -145,13 +145,13 @@ class LocalListingRepository implements ListingRepository {
     }
 
     final rows = await db.query(table, where: where, whereArgs: args);
-    return rows.map((r) => PropertyListing.fromMap(r)).toList();
+    return rows.map((r) => PropertyListing.fromJson(r)).toList();
   }
 
   @override
   Future<Map<String, List<PropertyListing>>> getUserListings() async {
     final rows = await db.query(table);
-    final list = rows.map((r) => PropertyListing.fromMap(r)).toList();
+    final list = rows.map((r) => PropertyListing.fromJson(r)).toList();
 
     return {
       "active": list.where((e) => e.isOnline).toList(),
@@ -185,14 +185,14 @@ class LocalListingRepository implements ListingRepository {
       LIMIT 20
     """, args);
 
-    return rows.map((r) => PropertyListing.fromMap(r)).toList();
+    return rows.map((r) => PropertyListing.fromJson(r)).toList();
   }
 
   @override
   Future<List<PropertyListing>> getSponsoredListings() async {
     final rows = await db.query(table, where: "is_boosted = ?", whereArgs: [1]);
 
-    return rows.map((r) => PropertyListing.fromMap(r)).toList();
+    return rows.map((r) => PropertyListing.fromJson(r)).toList();
   }
 
   // ----------------------------------------------------------------
@@ -205,7 +205,7 @@ class LocalListingRepository implements ListingRepository {
 
     final rows = await db.query(table, where: "id IN (${_savedIds.join(",")})");
 
-    return rows.map((r) => PropertyListing.fromMap(r)).toList();
+    return rows.map((r) => PropertyListing.fromJson(r)).toList();
   }
 
   @override
@@ -229,7 +229,7 @@ class LocalListingRepository implements ListingRepository {
   Future<PropertyListing?> getListingById(int id) async {
     final rows = await db.query(table, where: "id = ?", whereArgs: [id]);
     if (rows.isNotEmpty) {
-      return PropertyListing.fromMap(rows.first);
+      return PropertyListing.fromJson(rows.first);
     }
     return null;
   }

@@ -51,12 +51,10 @@ import 'package:findar/logic/cubits/search_cubit.dart';
 import 'package:findar/logic/cubits/settings_cubit.dart';
 import 'package:findar/logic/cubits/sort_cubit.dart';
 
-late ListingRepository repo;
+import 'package:get_it/get_it.dart';
+import 'package:findar/core/di/service_locator.dart';
 void main() {
-  //later: repo = (online)? RemoteListingRepository(): LocalListingRepository();
-  repo =
-      LocalListingRepository(); //we will replace this with real repository later
-
+  SetupRepositories();
   runApp(const MainApp());
 }
 
@@ -69,20 +67,20 @@ class MainApp extends StatelessWidget {
       providers: [
         BlocProvider(create: (_) => LanguageCubit()),
         BlocProvider(create: (_) => AuthCubit()),
-        BlocProvider(create: (_) => CreateListingCubit(repo)),
-        BlocProvider(create: (_) => ListingsCubit(repo)),
-        // BlocProvider(create: (_) => ListingCubit(repo)), // Disabled - has incompatible methods
-        BlocProvider(create: (_) => SearchCubit(repo)),
-        BlocProvider(create: (_) => SavedListingsCubit(repo)),
-        BlocProvider(create: (_) => PropertyDetailsCubit(repo)),
-        BlocProvider(create: (_) => MyListingsCubit(repo)),
+        BlocProvider(create: (_) => CreateListingCubit(getIt<ListingRepository>())),
+        BlocProvider(create: (_) => ListingsCubit(getIt<ListingRepository>())),
+        // BlocProvider(create: (_) => ListingCubit(getIt<ListingRepository>())), // Disabled - has incompatible methods
+        BlocProvider(create: (_) => SearchCubit(getIt<ListingRepository>())),
+        BlocProvider(create: (_) => SavedListingsCubit(getIt<ListingRepository>())),
+        BlocProvider(create: (_) => PropertyDetailsCubit(getIt<ListingRepository>())),
+        BlocProvider(create: (_) => MyListingsCubit(getIt<ListingRepository>())),
         BlocProvider(create: (_) => ProfileCubit()),
         BlocProvider(create: (_) => ProfilePictureSetupCubit()),
         BlocProvider(create: (_) => SettingsCubit()),
         BlocProvider(create: (_) => SortCubit()),
         BlocProvider(create: (_) => BoostCubit()),
-        BlocProvider(create: (_) => RecentCubit(repo)),
-        BlocProvider(create: (_) => SponsoredCubit(repo)),
+        BlocProvider(create: (_) => RecentCubit(getIt<ListingRepository>())),
+        BlocProvider(create: (_) => SponsoredCubit(getIt<ListingRepository>())),
       ],
       child: ChangeNotifierProvider(
         create: (context) => ThemeProvider(),

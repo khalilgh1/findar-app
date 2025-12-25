@@ -42,14 +42,14 @@ class DatabaseHelper {
         is_boosted INTEGER NOT NULL,
         boost_expiry_date INTEGER,
         sponsorship_plan_id TEXT,
-        owner_name TEXT,
-        owner_image TEXT,
-        owner_phone TEXT
+        ownerName TEXT,
+        ownerImage TEXT,
+        ownerPhone TEXT
       );
 
     ''');
     await db.execute('''
-INSERT INTO $table (title, description, price, location, bedrooms, bathrooms, classification, property_type, image, is_online, created_at, updated_at, is_boosted, boost_expiry_date, sponsorship_plan_id, owner_name, owner_image, owner_phone) VALUES
+INSERT INTO $table (title, description, price, location, bedrooms, bathrooms, classification, property_type, image, is_online, created_at, updated_at, is_boosted, boost_expiry_date, sponsorship_plan_id, ownerName, ownerImage, ownerPhone) VALUES
       ('Cozy Cottage', 'A lovely cottage in the countryside.', 150000, 'Countryside', 2, 1, 'Residential', 'Cottage', 'https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=800', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 1, NULL, NULL, 'John Doe', 'https://i.pravatar.cc/150?img=1', '123-456-7890'),
       ('Modern Apartment', 'A modern apartment in the city center.', 250000, 'City Center', 3, 2, 'Residential', 'Apartment', 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, NULL, NULL, 'Jane Smith', 'https://i.pravatar.cc/150?img=2', '098-765-4321'),
       ('Beach House', 'A beautiful house by the beach.', 500000, 'Beachfront', 4, 3, 'Residential', 'House', 'https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?w=800', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, NULL, NULL, 'Alice Johnson', 'https://i.pravatar.cc/150?img=3', '555-555-5555'),
