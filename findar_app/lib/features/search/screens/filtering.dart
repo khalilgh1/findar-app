@@ -59,6 +59,7 @@ class _FilteringScreenState extends State<FilteringScreen> {
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
       appBar: AppBar(
@@ -69,12 +70,7 @@ class _FilteringScreenState extends State<FilteringScreen> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Builder(
-          builder: (context) {
-            final l10n = AppLocalizations.of(context)!;
-            return Text(l10n.advancedSearch);
-          },
-        ),
+        title: Text(l10n.advancedSearch),
         centerTitle: true,
 
         elevation: 0,
@@ -85,7 +81,7 @@ class _FilteringScreenState extends State<FilteringScreen> {
           padding: const EdgeInsets.all(16),
           children: [
             // Location
-            Text('Location', style: theme.textTheme.headlineSmall),
+            Text(l10n.location, style: theme.textTheme.headlineSmall),
             const SizedBox(height: 8),
             TextField(
               controller: locationController,
@@ -101,7 +97,7 @@ class _FilteringScreenState extends State<FilteringScreen> {
                   ),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                hintText: 'Enter a city, zip code, or neighborhood',
+                hintText: l10n.enterLocationHint,
                 prefixIcon: const Icon(Icons.location_on),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -112,7 +108,7 @@ class _FilteringScreenState extends State<FilteringScreen> {
             const SizedBox(height: 24),
 
             // Price Range
-            Text('Price range', style: theme.textTheme.headlineSmall),
+            Text(l10n.priceRange, style: theme.textTheme.headlineSmall),
 
             RangeSlider(
               values: priceRange,
@@ -137,7 +133,7 @@ class _FilteringScreenState extends State<FilteringScreen> {
             const SizedBox(height: 24),
 
             // Property Type
-            Text('Propoerty type', style: theme.textTheme.headlineSmall),
+            Text(l10n.propertyType, style: theme.textTheme.headlineSmall),
 
             const SizedBox(height: 8),
             Builder(
@@ -177,7 +173,7 @@ class _FilteringScreenState extends State<FilteringScreen> {
             const SizedBox(height: 24),
 
             // Building Type
-            Text('Building Type', style: theme.textTheme.headlineSmall),
+            Text(l10n.buildingType, style: theme.textTheme.headlineSmall),
             const SizedBox(height: 8),
             Column(
               children: [
@@ -196,7 +192,7 @@ class _FilteringScreenState extends State<FilteringScreen> {
             const SizedBox(height: 24),
 
             // Beds & Baths
-            Text('Beds & Baths', style: theme.textTheme.headlineSmall),
+            Text(l10n.bedsAndBaths, style: theme.textTheme.headlineSmall),
             const SizedBox(height: 8),
             _buildCounterRow(
               'Bedrooms',
@@ -213,7 +209,7 @@ class _FilteringScreenState extends State<FilteringScreen> {
             const SizedBox(height: 24),
 
             // Square Footage
-            Text('Square Footage', style: theme.textTheme.headlineSmall),
+            Text(l10n.squareFootage, style: theme.textTheme.headlineSmall),
             const SizedBox(height: 8),
             Row(
               children: [
@@ -280,11 +276,11 @@ class _FilteringScreenState extends State<FilteringScreen> {
             const SizedBox(height: 24),
 
             // Listed By
-            Text('Listed by', style: theme.textTheme.headlineSmall),
+            Text(l10n.listedBy, style: theme.textTheme.headlineSmall),
             Column(
               children: [
                 RadioListTile<String>(
-                  title: Text('Any'),
+                  title: Text(l10n.any),
                   value: 'Any',
                   activeColor: theme.colorScheme.primary,
                   groupValue: listedBy,

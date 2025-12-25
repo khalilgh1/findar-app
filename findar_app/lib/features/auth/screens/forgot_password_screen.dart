@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:findar/core/widgets/progress_button.dart';
+import 'package:findar/l10n/app_localizations.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -88,6 +89,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
@@ -130,7 +132,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   const SizedBox(height: 40),
 
                   Text(
-                    'Email Address',
+                    l10n.emailAddress,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.onSurface,
                       fontWeight: FontWeight.w600,
@@ -147,7 +149,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: theme.colorScheme.secondaryContainer,
-                      hintText: 'Enter your email',
+                      hintText: l10n.enterEmail,
                       hintStyle: TextStyle(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
@@ -182,7 +184,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   if (!_codeSent)
                     ProgressButton(
                       onPressed: _handleGetCode,
-                      label: 'Get Code',
+                      label: l10n.getCode,
                       isLoading: _isLoading,
                       backgroundColor: theme.colorScheme.primary,
                       textColor: Colors.white,
@@ -190,7 +192,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
                   if (_codeSent) ...[
                     Text(
-                      'Verification Code',
+                      l10n.verificationCode,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.onSurface,
                         fontWeight: FontWeight.w600,
@@ -206,7 +208,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       decoration: InputDecoration(
                         filled: true,
                         fillColor: theme.colorScheme.secondaryContainer,
-                        hintText: 'Enter verification code',
+                        hintText: l10n.enterVerificationCodeHint,
                         hintStyle: TextStyle(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),

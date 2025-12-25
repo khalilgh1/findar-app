@@ -442,10 +442,11 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
         padding: const EdgeInsets.all(16.0),
         child: BlocListener<MyListingsCubit, Map<String, dynamic>>(
           listener: (context, state) {
+            final l10n = AppLocalizations.of(context)!;
             if (state['state'] == 'done') {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Listing Created Successfully!'),
+                SnackBar(
+                  content: Text(l10n.listingCreatedSuccessfully),
                   backgroundColor: Colors.green,
                 ),
               );
@@ -454,7 +455,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
             } else if (state['state'] == 'error') {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text(state['message'] ?? 'Failed to create listing'),
+                  content: Text(state['message'] ?? l10n.listingCreateFailed),
                   backgroundColor: Colors.red,
                 ),
               );

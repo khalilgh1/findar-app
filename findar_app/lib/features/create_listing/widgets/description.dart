@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:findar/l10n/app_localizations.dart';
 
 class Description extends StatelessWidget {
   const Description({
@@ -14,6 +15,7 @@ class Description extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return TextFormField(
       controller: _descriptionController,
       validator: validator,
@@ -41,7 +43,7 @@ class Description extends StatelessWidget {
           borderSide: const BorderSide(color: Colors.red, width: 2),
           borderRadius: BorderRadius.circular(12),
         ),
-        hintText: 'Describe the property details here...',
+  hintText: l10n.propertyDescriptionHint,
         hintStyle: TextStyle(
           color: theme.colorScheme.onSurfaceVariant,
           fontSize: 15,

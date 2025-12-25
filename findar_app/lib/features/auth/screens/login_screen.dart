@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:findar/logic/cubits/auth_cubit.dart';
 import 'package:findar/core/widgets/progress_button.dart';
 import 'package:findar/l10n/app_localizations.dart';
+import 'package:findar/core/repositories/local_user_store.dart';
 
 
 class LoginScreen extends StatefulWidget {
@@ -175,6 +176,11 @@ class _LoginScreenState extends State<LoginScreen> {
                       Navigator.pop(context);
                       Navigator.pushNamed(context, '/home');
                     }
+                    if (state['state'] == 'error' && state['message'] != null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(state['message'] as String)),
+                      );
+                    }
                   },
                   builder: (context, state) {
                     final isLoading = state['state'] == 'loading';
@@ -196,6 +202,38 @@ class _LoginScreenState extends State<LoginScreen> {
                       errorMessage: errorMessage,
                       backgroundColor: theme.colorScheme.primary,
                       textColor: Colors.white,
+                    );
+                  },
+                ),
+                const SizedBox(height: 12),
+                BlocConsumer<AuthCubit, Map<String, dynamic>>(
+                  listener: (context, state) {
+                    if (state['state'] == 'done' && state['data'] != null) {
+                      Navigator.pop(context);
+                      Navigator.pushNamed(context, '/home');
+                    }
+                    if (state['state'] == 'error' && state['message'] != null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(state['message'] as String)),
+                      );
+                    }
+                  },
+                  builder: (context, state) {
+                    final isLoading = state['state'] == 'loading';
+                    return ProgressButton(
+                      onPressed: isLoading
+                          ? null
+                          : () {
+                // Seed a debug cached user into SharedPreferences, then load it
+                final cubit = context.read<AuthCubit>();
+                LocalUserStore()
+                  .seedDebugUser()
+                  .then((_) => cubit.loadCachedUser());
+                            },
+                      label: 'Access cached user',
+                      isLoading: isLoading,
+                      backgroundColor: theme.colorScheme.secondary,
+                      textColor: theme.colorScheme.onSecondary,
                     );
                   },
                 ),

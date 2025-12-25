@@ -83,6 +83,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               : <String, dynamic>{};
           final username = user['name'] ?? 'User Name';
           final email = user['email'] ?? 'user@example.com';
+      final phone = user['phone'] ?? 'N/A';
           final profileImageUrl = user['profileImage'] as String?;
           final myListings =
               (user['listings'] as List?)?.cast<Map<String, dynamic>>() ??
@@ -118,7 +119,10 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 Text(email, style: const TextStyle(color: Colors.grey)),
                 const SizedBox(height: 25),
                 // Profile info card
-                ProfileInfoCard(),
+                ProfileInfoCard(
+                  phone: phone,
+                  email: email,
+                ),
                 const SizedBox(height: 30),
                 // Listings section (without "Add New" button)
                 Row(

@@ -2,14 +2,26 @@ import 'package:findar/data/dbhelper.dart';
 import 'package:findar/core/models/property_listing_model.dart';
 import 'package:findar/core/models/return_result.dart';
 import 'package:findar/core/repositories/abstract_listing_repo.dart';
+import 'package:findar/core/repositories/local_user_store.dart';
 
 class LocalListingRepository implements ListingRepository {
   final db = DatabaseHelper.instance;
   final String table = DatabaseHelper.table;
 
+  final LocalUserStore _userStore;
+
   // Dummy in-memory saved listing IDs
   // kahlil thala fiha
-  final Set<int> _savedIds = {};
+  Set<int>? _savedIdsCache;
+  Set<int>? _myListingIdsCache;
+
+  LocalListingRepository({LocalUserStore? userStore})
+      : _userStore = userStore ?? LocalUserStore();
+
+  Future<void> _ensureCachesLoaded() async {
+    _savedIdsCache ??= await _userStore.loadSavedIds();
+    _myListingIdsCache ??= await _userStore.loadMyListingIds();
+  }
 
   @override
   Future<ReturnResult> createListing({
@@ -43,7 +55,11 @@ class LocalListingRepository implements ListingRepository {
         "created_at": DateTime.now().toIso8601String(),
       };
 
-      await db.insert(table, row);
+      final newId = await db.insert(table, row);
+
+      await _ensureCachesLoaded();
+      _myListingIdsCache!.add(newId);
+      await _userStore.saveMyListingIds(_myListingIdsCache!);
       return ReturnResult(state: true, message: "Listing created.");
     } catch (e) {
       return ReturnResult(state: false, message: e.toString());
@@ -90,6 +106,12 @@ class LocalListingRepository implements ListingRepository {
   @override
   Future<ReturnResult> deleteListing(int id) async {
     try {
+      await _ensureCachesLoaded();
+      _myListingIdsCache!.remove(id);
+      _savedIdsCache!.remove(id);
+      await _userStore.saveMyListingIds(_myListingIdsCache!);
+      await _userStore.saveSavedIds(_savedIdsCache!);
+
       await db.delete(table, id);
       return ReturnResult(state: true, message: "Listing deleted.");
     } catch (e) {
@@ -150,7 +172,21 @@ class LocalListingRepository implements ListingRepository {
 
   @override
   Future<Map<String, List<PropertyListing>>> getUserListings() async {
-    final rows = await db.query(table);
+    await _ensureCachesLoaded();
+    final myIds = _myListingIdsCache!;
+    if (myIds.isEmpty) {
+      return {
+        "active": const [],
+        "inactive": const [],
+      };
+    }
+
+    final placeholders = List.filled(myIds.length, '?').join(',');
+    final rows = await db.query(
+      table,
+      where: "id IN ($placeholders)",
+      whereArgs: myIds.toList(),
+    );
     final list = rows.map((r) => PropertyListing.fromMap(r)).toList();
 
     return {
@@ -201,27 +237,39 @@ class LocalListingRepository implements ListingRepository {
 
   @override
   Future<List<PropertyListing>> getSavedListings() async {
-    if (_savedIds.isEmpty) return [];
+    await _ensureCachesLoaded();
+    final savedIds = _savedIdsCache!;
+    if (savedIds.isEmpty) return [];
 
-    final rows = await db.query(table, where: "id IN (${_savedIds.join(",")})");
+    final placeholders = List.filled(savedIds.length, '?').join(',');
+    final rows = await db.query(
+      table,
+      where: "id IN ($placeholders)",
+      whereArgs: savedIds.toList(),
+    );
 
     return rows.map((r) => PropertyListing.fromMap(r)).toList();
   }
 
   @override
   Future<Set<int>> getSavedListingIds() async {
-    return _savedIds;
+    await _ensureCachesLoaded();
+    return Set<int>.from(_savedIdsCache!);
   }
 
   @override
   Future<ReturnResult> saveListing(int listingId) async {
-    _savedIds.add(listingId);
+    await _ensureCachesLoaded();
+    _savedIdsCache!.add(listingId);
+    await _userStore.saveSavedIds(_savedIdsCache!);
     return ReturnResult(state: true, message: "Listing saved.");
   }
 
   @override
   Future<ReturnResult> unsaveListing(int listingId) async {
-    _savedIds.remove(listingId);
+    await _ensureCachesLoaded();
+    _savedIdsCache!.remove(listingId);
+    await _userStore.saveSavedIds(_savedIdsCache!);
     return ReturnResult(state: true, message: "Listing unsaved.");
   }
 

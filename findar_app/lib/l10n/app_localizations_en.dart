@@ -1,6 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
-import 'package:findar/l10n/app_localizations.dart';
+import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
 
@@ -195,8 +195,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noPropertiesFound => 'No properties found';
 
   @override
-  String get pleaseTryAdjustingFilters =>
-      'Please try adjusting your search filters';
+  String get pleaseTryAdjustingFilters => 'Please try adjusting your search filters';
 
   @override
   String get sortBy => 'Sort by';
@@ -284,6 +283,53 @@ class AppLocalizationsEn extends AppLocalizations {
   String get propertyDescriptionHint => 'Describe the property details here...';
 
   @override
+  String get verificationCode => 'Verification Code';
+
+  @override
+  String get getCode => 'Get Code';
+
+  @override
+  String get enterVerificationCodeHint => 'Enter verification code';
+
+  @override
+  String get enterNewPasswordHint => 'Enter new password';
+
+  @override
+  String get confirmNewPasswordHint => 'Confirm new password';
+
+  @override
+  String get priceOnRequest => 'Price on request';
+
+  @override
+  String get boostedBadge => 'Boosted';
+
+  @override
+  String get boostAction => 'Boost';
+
+  @override
+  String get toggleStatus => 'Toggle Status';
+
+  @override
+  String get passwordResetSuccess => 'Password reset successfully!';
+
+  @override
+  String get listingCreateFailed => 'Failed to create listing';
+
+  @override
+  String get chooseImageSource => 'Choose Image Source';
+
+  @override
+  String get gallery => 'Gallery';
+
+  @override
+  String get camera => 'Camera';
+
+  @override
+  String errorPickingImage(String error) {
+    return 'Error picking image: $error';
+  }
+
+  @override
   String get classification => 'Classification';
 
   @override
@@ -320,8 +366,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noSavedListings => 'No saved listings yet';
 
   @override
-  String get startExploring =>
-      'Start exploring properties to save your favorites';
+  String get startExploring => 'Start exploring properties to save your favorites';
 
   @override
   String get myListings => 'My Listings';
@@ -509,12 +554,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get passwordTooShort => 'Password must be at least 6 characters';
 
   @override
-  String get passwordMissingUppercase =>
-      'Password must contain at least one uppercase letter';
+  String get passwordMissingUppercase => 'Password must contain at least one uppercase letter';
 
   @override
-  String get passwordMissingNumber =>
-      'Password must contain at least one number';
+  String get passwordMissingNumber => 'Password must contain at least one number';
 
   @override
   String get phoneRequired => 'Phone number is required';
@@ -573,8 +616,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get chooseSponsorshipPlan => 'Choose Sponsorship Plan';
 
   @override
-  String get selectPlanToBoostProperty =>
-      'Select a plan to boost your property';
+  String get selectPlanToBoostProperty => 'Select a plan to boost your property';
 
   @override
   String get continueToPayment => 'Continue to Payment';
@@ -668,8 +710,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get validateDescriptionEmpty => 'Please enter a description';
 
   @override
-  String get validateDescriptionMinLength =>
-      'Description must be at least 20 characters';
+  String get validateDescriptionMinLength => 'Description must be at least 20 characters';
 
   @override
   String get validatePriceEmpty => 'Please enter a price';

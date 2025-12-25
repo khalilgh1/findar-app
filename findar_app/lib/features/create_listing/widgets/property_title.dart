@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:findar/l10n/app_localizations.dart';
 class PropertyTitle extends StatelessWidget {
   const PropertyTitle({
     super.key,
@@ -13,6 +14,7 @@ class PropertyTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return TextFormField(
       controller: _titleController,
       validator: validator,
@@ -38,7 +40,7 @@ class PropertyTitle extends StatelessWidget {
           borderSide: const BorderSide(color: Colors.red, width: 2),
           borderRadius: BorderRadius.circular(12),
         ),
-        hintText: 'e.g. Spacious 3 Bedroom Apartment',
+  hintText: l10n.examplePropertyTitleHint,
         hintStyle: TextStyle(
           color: theme.colorScheme.onSurfaceVariant,
           fontSize: 15,

@@ -20,7 +20,11 @@ class DatabaseHelper {
   Future<Database> _initDatabase() async {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, _dbName);
-    return await openDatabase(path, version: _dbVersion, onCreate: _onCreate);
+    return await openDatabase(
+      path,
+      version: _dbVersion,
+      onCreate: _onCreate,
+    );
   }
 
   Future _onCreate(Database db, int version) async {
@@ -96,4 +100,5 @@ INSERT INTO $table (title, description, price, location, bedrooms, bathrooms, cl
     final db = await database;
     return await db.rawQuery(sql, args);
   }
+
 }

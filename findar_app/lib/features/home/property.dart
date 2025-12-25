@@ -1,4 +1,5 @@
 import 'package:findar/core/models/property_listing_model.dart';
+import 'package:findar/l10n/app_localizations.dart';
 
 class Property {
   final int id;
@@ -18,15 +19,44 @@ class Property {
     required this.details,
     required this.bookmarked,
   });
-  static Property convertListing(PropertyListing p, {bool bookmarked = false}) {
+  static Property convertListing(
+    PropertyListing p,
+    AppLocalizations l10n, {
+    bool bookmarked = false,
+  }) {
     return Property(
       id: p.id,
       title: p.title,
       image: p.image,
       price: p.price,
       address: p.location,
-      details: "${p.bedrooms} beds • ${p.bathrooms} baths •",
+      details:
+          "${l10n.bedroomsCount(p.bedrooms)} • ${l10n.bathroomsCount(p.bathrooms)} • ${_localizedPropertyType(p.propertyType, l10n)}",
       bookmarked: bookmarked,
     );
+  }
+
+  static String _localizedPropertyType(
+    String propertyType,
+    AppLocalizations l10n,
+  ) {
+    switch (propertyType.toLowerCase()) {
+      case 'house':
+        return l10n.house;
+      case 'apartment':
+        return l10n.apartment;
+      case 'condo':
+        return l10n.condo;
+      case 'townhouse':
+        return l10n.townhouse;
+      case 'villa':
+        return l10n.villa;
+      case 'studio':
+        return l10n.studio;
+      case 'commercial':
+        return l10n.commercial;
+      default:
+        return propertyType;
+    }
   }
 }

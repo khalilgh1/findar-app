@@ -5,9 +5,9 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
-import 'package:findar/l10n/app_localizations_ar.dart';
-import 'package:findar/l10n/app_localizations_en.dart';
-import 'package:findar/l10n/app_localizations_fr.dart';
+import 'app_localizations_ar.dart';
+import 'app_localizations_en.dart';
+import 'app_localizations_fr.dart';
 
 // ignore_for_file: type=lint
 
@@ -63,8 +63,7 @@ import 'package:findar/l10n/app_localizations_fr.dart';
 /// be consistent with the languages listed in the AppLocalizations.supportedLocales
 /// property.
 abstract class AppLocalizations {
-  AppLocalizations(String locale)
-    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+  AppLocalizations(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -72,8 +71,7 @@ abstract class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
 
-  static const LocalizationsDelegate<AppLocalizations> delegate =
-      _AppLocalizationsDelegate();
+  static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
 
   /// A list of this localizations delegate along with the default localizations
   /// delegates.
@@ -85,19 +83,18 @@ abstract class AppLocalizations {
   /// Additional delegates can be added by appending to this list in
   /// MaterialApp. This list does not have to be used at all if a custom list
   /// of delegates is preferred or required.
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
-      <LocalizationsDelegate<dynamic>>[
-        delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-      ];
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
+    delegate,
+    GlobalMaterialLocalizations.delegate,
+    GlobalCupertinoLocalizations.delegate,
+    GlobalWidgetsLocalizations.delegate,
+  ];
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
-    Locale('en'),
-    Locale('fr'),
     Locale('ar'),
+    Locale('en'),
+    Locale('fr')
   ];
 
   /// No description provided for @appTitle.
@@ -639,6 +636,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Describe the property details here...'**
   String get propertyDescriptionHint;
+
+  /// No description provided for @verificationCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification Code'**
+  String get verificationCode;
+
+  /// No description provided for @getCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Get Code'**
+  String get getCode;
+
+  /// No description provided for @enterVerificationCodeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter verification code'**
+  String get enterVerificationCodeHint;
+
+  /// No description provided for @enterNewPasswordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter new password'**
+  String get enterNewPasswordHint;
+
+  /// No description provided for @confirmNewPasswordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm new password'**
+  String get confirmNewPasswordHint;
+
+  /// No description provided for @priceOnRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Price on request'**
+  String get priceOnRequest;
+
+  /// No description provided for @boostedBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Boosted'**
+  String get boostedBadge;
+
+  /// No description provided for @boostAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Boost'**
+  String get boostAction;
+
+  /// No description provided for @toggleStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle Status'**
+  String get toggleStatus;
+
+  /// No description provided for @passwordResetSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Password reset successfully!'**
+  String get passwordResetSuccess;
+
+  /// No description provided for @listingCreateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to create listing'**
+  String get listingCreateFailed;
+
+  /// No description provided for @chooseImageSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Image Source'**
+  String get chooseImageSource;
+
+  /// No description provided for @gallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery'**
+  String get gallery;
+
+  /// No description provided for @camera.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera'**
+  String get camera;
+
+  /// No description provided for @errorPickingImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Error picking image: {error}'**
+  String errorPickingImage(String error);
 
   /// No description provided for @classification.
   ///
@@ -1421,8 +1508,7 @@ abstract class AppLocalizations {
   String get validateBedroomsEmpty;
 }
 
-class _AppLocalizationsDelegate
-    extends LocalizationsDelegate<AppLocalizations> {
+class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
 
   @override
@@ -1431,28 +1517,26 @@ class _AppLocalizationsDelegate
   }
 
   @override
-  bool isSupported(Locale locale) =>
-      <String>['ar', 'en', 'fr'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>['ar', 'en', 'fr'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
 }
 
 AppLocalizations lookupAppLocalizations(Locale locale) {
+
+
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
-    case 'ar':
-      return AppLocalizationsAr();
-    case 'en':
-      return AppLocalizationsEn();
-    case 'fr':
-      return AppLocalizationsFr();
+    case 'ar': return AppLocalizationsAr();
+    case 'en': return AppLocalizationsEn();
+    case 'fr': return AppLocalizationsFr();
   }
 
   throw FlutterError(
     'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
     'an issue with the localizations generation tool. Please file an issue '
     'on GitHub with a reproducible sample app and the gen-l10n configuration '
-    'that was used.',
+    'that was used.'
   );
 }

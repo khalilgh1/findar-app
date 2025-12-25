@@ -1,6 +1,6 @@
 {
   "@@locale": "ar",
-  "appTitle": "فايند دار",
+  "appTitle": "FinDar",
   "welcomeBack": "مرحبًا بعودتك!",
   "completeRegistration": "أكمل تسجيلك",
   "selectAccountType": "اختر نوع الحساب",
@@ -104,6 +104,28 @@
   "examplePriceHint": "250 000",
   "exampleLocationHint": "مثال: 15 شارع ديدوش مراد، الجزائر",
   "propertyDescriptionHint": "اكتب تفاصيل العقار هنا...",
+  "verificationCode": "رمز التحقق",
+  "getCode": "الحصول على الرمز",
+  "enterVerificationCodeHint": "أدخل رمز التحقق",
+  "enterNewPasswordHint": "أدخل كلمة المرور الجديدة",
+  "confirmNewPasswordHint": "تأكيد كلمة المرور الجديدة",
+  "priceOnRequest": "السعر عند الطلب",
+  "boostedBadge": "مُعزَّز",
+  "boostAction": "تعزيز",
+  "toggleStatus": "تبديل الحالة",
+  "passwordResetSuccess": "تمت إعادة تعيين كلمة المرور بنجاح!",
+  "listingCreateFailed": "فشل إنشاء الإعلان",
+  "chooseImageSource": "اختر مصدر الصورة",
+  "gallery": "المعرض",
+  "camera": "الكاميرا",
+  "errorPickingImage": "خطأ أثناء اختيار الصورة: {error}",
+  "@errorPickingImage": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "classification": "التصنيف",
   "propertyStatus": "حالة العقار",
   "online": "متاح",

@@ -97,6 +97,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           final user = data is Map ? Map<String, dynamic>.from(data) : <String, dynamic>{};
           final username = user['name'] ?? 'null null';
           final email = user['email'] ?? 'null@null.com';
+          final phone = user['phone'] ?? 'N/A';
           final myListings = (user['listings'] as List?)?.cast<Map<String, dynamic>>() ??
               [
                 {
@@ -125,7 +126,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 Text(email, style: const TextStyle(color: Colors.grey)),
                 const SizedBox(height: 25),
-                ProfileInfoCard(),
+                ProfileInfoCard(
+                  phone: phone,
+                  email: email,
+                ),
                 const SizedBox(height: 30),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,

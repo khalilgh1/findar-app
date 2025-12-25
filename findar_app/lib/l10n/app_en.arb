@@ -104,6 +104,28 @@
   "examplePriceHint": "250 000",
   "exampleLocationHint": "e.g. 15 Rue Didouche Mourad, Algiers",
   "propertyDescriptionHint": "Describe the property details here...",
+  "verificationCode": "Verification Code",
+  "getCode": "Get Code",
+  "enterVerificationCodeHint": "Enter verification code",
+  "enterNewPasswordHint": "Enter new password",
+  "confirmNewPasswordHint": "Confirm new password",
+  "priceOnRequest": "Price on request",
+  "boostedBadge": "Boosted",
+  "boostAction": "Boost",
+  "toggleStatus": "Toggle Status",
+  "passwordResetSuccess": "Password reset successfully!",
+  "listingCreateFailed": "Failed to create listing",
+  "chooseImageSource": "Choose Image Source",
+  "gallery": "Gallery",
+  "camera": "Camera",
+  "errorPickingImage": "Error picking image: {error}",
+  "@errorPickingImage": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "classification": "Classification",
   "propertyStatus": "Property Status",
   "online": "Online",

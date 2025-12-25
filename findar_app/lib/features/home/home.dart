@@ -159,15 +159,17 @@ class _HomeScreenState extends State<HomeScreen> {
                         );
                       }
 
-                      final raw = state['data'];
-                      final savedIds =
-                          state['savedIds'] as Set<int>? ?? <int>{};
+            final raw = state['data'];
+            final savedIds =
+              state['savedIds'] as Set<int>? ?? <int>{};
+            final l10n = AppLocalizations.of(context)!;
 
                       final listings = raw is List
                           ? raw
                                 .map(
                                   (e) => Property.convertListing(
                                     e,
+                                    l10n,
                                     bookmarked: savedIds.contains(e.id),
                                   ),
                                 )
@@ -239,15 +241,17 @@ class _HomeScreenState extends State<HomeScreen> {
                         );
                       }
 
-                      final recentraw = state['data'];
-                      final savedIds =
-                          state['savedIds'] as Set<int>? ?? <int>{};
+            final recentraw = state['data'];
+            final savedIds =
+              state['savedIds'] as Set<int>? ?? <int>{};
+            final l10n = AppLocalizations.of(context)!;
 
                       final recentlistings = recentraw is List
                           ? recentraw
                                 .map(
                                   (e) => Property.convertListing(
                                     e,
+                                    l10n,
                                     bookmarked: savedIds.contains(e.id),
                                   ),
                                 )

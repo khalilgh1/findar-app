@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:findar/l10n/app_localizations.dart';
 
 class LocationField extends StatelessWidget {
   const LocationField({
@@ -14,6 +15,7 @@ class LocationField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return TextFormField(
       controller: _locationController,
       validator: validator,
@@ -37,7 +39,7 @@ class LocationField extends StatelessWidget {
           borderSide: const BorderSide(color: Colors.red, width: 2),
           borderRadius: BorderRadius.circular(12),
         ),
-        hintText: 'e.g. 15 Rue Didouche Mourad, Algiers',
+  hintText: l10n.exampleLocationHint,
         hintStyle: TextStyle(
           color: theme.colorScheme.onSurfaceVariant,
           fontSize: 15,

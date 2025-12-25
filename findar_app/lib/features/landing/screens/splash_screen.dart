@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:findar/features/landing/animations/splash_animation_controller.dart';
+import 'package:findar/l10n/app_localizations.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -30,6 +31,7 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       body: AnimatedBuilder(
         animation: Listenable.merge([
@@ -63,11 +65,14 @@ class _SplashScreenState extends State<SplashScreen>
                             // Animated FinDAR text with slide
                             SlideTransition(
                               position: _animationController.textSlideAnimation,
-                              child: _buildFinDARText(),
+                              child: Directionality(
+                                textDirection: TextDirection.ltr,
+                                child: _buildFinDARText(),
+                              ),
                             ),
                             
                             // Content that fades in
-                            _buildContent(),
+                            _buildContent(l10n),
                             
                             const SizedBox(height: 48),
                           ],
@@ -160,14 +165,14 @@ class _SplashScreenState extends State<SplashScreen>
     );
   }
 
-  Widget _buildContent() {
+  Widget _buildContent(AppLocalizations l10n) {
     return Column(
       children: [
         // Welcome heading
         FadeTransition(
           opacity: _animationController.welcomeFadeAnimation,
           child: Text(
-            'Welcome',
+            l10n.welcome,
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 32,
@@ -183,7 +188,7 @@ class _SplashScreenState extends State<SplashScreen>
         FadeTransition(
           opacity: _animationController.subtitleFadeAnimation,
           child: Text(
-            'Your property marketplace',
+            l10n.yourPropertyMarketplace,
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 17,
