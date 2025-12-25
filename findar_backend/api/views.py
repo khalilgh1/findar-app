@@ -51,6 +51,20 @@ def recent_listings(request):
     serialized_posts = PostSerializers(recent_posts , many=True).data
     return Response(serialized_posts , status=status.HTTP_200_OK)
 
+
+#########get listing VIEW#########
+@api_view(['GET'])
+# @permission_classes([IsAuthenticated])
+def get_listing(request , listing_id):
+    try:
+        post = Post.objects.get(id=listing_id , active=True)
+    except Post.DoesNotExist:
+        return Response({'errors':"not found"} , status=status.HTTP_404_NOT_FOUND)
+    
+    serialized_post = PostSerializers(post).data
+    return Response(serialized_post , status=status.HTTP_200_OK)
+
+
 #########Advanced Search VIEW#########
 
 @api_view(['GET'])
@@ -193,7 +207,7 @@ def my_listings(request):
         status=status.HTTP_200_OK
     )
 
-######## create Listings VIEW#########
+######## create Listing VIEW#########
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -207,6 +221,26 @@ def create_listing(request):
         serializer.save()
         return Response(serializer.data, status=201)
     return Response(serializer.errors, status=400)
+
+
+######## edit Listing VIEW#########
+@api_view(['PUT'])
+# @permission_classes([IsAuthenticated])
+def edit_listing(request , listing_id):
+    try:
+        post = Post.objects.get(id=listing_id)
+    except Post.DoesNotExist:
+        return Response({'errors':"not found"} , status=status.HTTP_404_NOT_FOUND)
+    #TODO turn this on later after authentication is done
+    # if post.owner.id != request.user.id:
+    #     return Response({"error" : "dont have permission"} , status=status.HTTP_401_UNAUTHORIZED)
+    
+    serializer = PostSerializers(post , data=request.data , partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data , status=status.HTTP_200_OK)
+    return Response(serializer.errors , status=status.HTTP_400_BAD_REQUEST)
+
 
 ######## toggle active-unactive Listing VIEW#########
 

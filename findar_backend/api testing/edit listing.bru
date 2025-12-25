@@ -1,0 +1,24 @@
+meta {
+  name: edit listing
+  type: http
+  seq: 11
+}
+
+put {
+  url: http://127.0.0.1:8000/api/edit-listing/
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "title":"hedqfllo",
+    "price":12245787845.7,
+    "description":"hello idsqdqsdqs dsqdqsdqsthe definitdsqdsqdion of hi"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

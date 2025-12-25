@@ -2,7 +2,9 @@ from django.urls import path
 from .views import *
 
 urlpatterns = [
+    path('get-listing/<int:listing_id>', get_listing, name='get-listing'),
     path('create-listing/', create_listing, name='create-listing'),
+    path('edit-listing/<int:listing_id>', edit_listing, name='edit-listing'),
     path('my_listings/', my_listings, name='listings'),
     path('toggle_active_listing/<int:listing_id>', toggle_active_listing, name='toggle_active_listing'),
     path('login/', login, name='login'),
