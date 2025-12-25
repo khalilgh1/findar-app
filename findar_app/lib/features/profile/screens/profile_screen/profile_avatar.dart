@@ -5,7 +5,7 @@ import 'dart:typed_data';
 import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../logic/cubits/auth_cubit.dart';
+import 'package:findar/logic/cubits/auth_cubit.dart';
 
 class ProfileAvatar extends StatefulWidget {
   const ProfileAvatar({super.key});

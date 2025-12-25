@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../core/models/sponsorship_plan.dart';
+import 'package:findar/core/models/sponsorship_plan.dart';
 import 'package:findar/core/models/property_listing_model.dart';
-
-import '../../../../logic/cubits/boost_cubit.dart';
+import 'package:findar/logic/cubits/boost_cubit.dart';
 // import '../../../../logic/cubits/listing_cubit.dart'; // Disabled - has incompatible methods
-import '../../../../core/widgets/progress_button.dart';
-import 'widgets/order_summary.dart';
-import 'widgets/payment_form.dart';
+import 'package:findar/core/widgets/progress_button.dart';
+import 'package:findar/features/listings/screens/payment_confirmation/widgets/order_summary.dart';
+import 'package:findar/features/listings/screens/payment_confirmation/widgets/payment_form.dart';
 import 'package:findar/l10n/app_localizations.dart';
 
 class PaymentConfirmationScreen extends StatefulWidget {

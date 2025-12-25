@@ -1,56 +1,55 @@
-import 'package:findar/features/create_listing/create_listing.dart';
+import 'package:findar/core/models/property_listing_model.dart';
+import 'package:findar/core/repositories/abstract_listing_repo.dart';
+//import repository
+import 'package:findar/core/repositories/database_listing_repo.dart';
+import 'package:findar/logic/cubits/home/recent_listings.dart';
+import 'package:findar/logic/cubits/home/sponsored_listings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
-import 'l10n/app_localizations.dart';
-import './features/home/home.dart';
-import './features/search/screens/filtering.dart';
-import 'core/theme/app_theme.dart';
-import './features/landing/screens/splash_screen.dart';
-import 'features/auth/screens/login_screen.dart';
-import 'features/auth/screens/register_screen.dart';
-import 'features/auth/screens/profile_picture_setup_screen.dart';
-import 'features/auth/screens/forgot_password_screen.dart';
-import 'features/auth/screens/reset_password_screen.dart';
-import './features/listings/screens/my_listings_screen.dart';
-import './features/listings/screens/edit_listing/edit_listing_screen.dart';
-import './features/saved/screens/saved_listings_screen.dart';
-import './features/search/screens/search_results.dart';
-import './features/demoscreen.dart';
-import './features/settings/settings_screen.dart';
-import 'core/theme/theme_provider.dart';
-import './features/profile/screens/profile_screen/profile_screen.dart';
-import './features/profile/screens/edit_profile/edit_profile_screen.dart';
-import './features/profile/screens/user_profile_screen/user_profile_screen.dart';
-import './features/property_details/screens/property_details_screen.dart';
+
+import 'package:findar/core/models/sponsorship_plan.dart';
+import 'package:findar/core/theme/app_theme.dart';
+import 'package:findar/core/theme/theme_provider.dart';
+import 'package:findar/features/auth/screens/forgot_password_screen.dart';
+import 'package:findar/features/auth/screens/login_screen.dart';
+import 'package:findar/features/auth/screens/profile_picture_setup_screen.dart';
+import 'package:findar/features/auth/screens/register_screen.dart';
+import 'package:findar/features/auth/screens/reset_password_screen.dart';
+import 'package:findar/features/create_listing/create_listing.dart';
+import 'package:findar/features/demoscreen.dart';
+import 'package:findar/features/home/home.dart';
+import 'package:findar/features/landing/screens/splash_screen.dart';
+import 'package:findar/features/listings/screens/edit_listing/edit_listing_screen.dart';
+import 'package:findar/features/listings/screens/my_listings_screen.dart';
+import 'package:findar/features/listings/screens/payment_confirmation/payment_confirmation_screen.dart';
+import 'package:findar/features/listings/screens/sponsorship_plans/sponsorship_plans_screen.dart';
+import 'package:findar/features/profile/screens/edit_profile/edit_profile_screen.dart';
+import 'package:findar/features/profile/screens/profile_screen/profile_screen.dart';
+import 'package:findar/features/profile/screens/user_profile_screen/user_profile_screen.dart';
+import 'package:findar/features/property_details/screens/property_details_screen.dart';
+import 'package:findar/features/saved/screens/saved_listings_screen.dart';
+import 'package:findar/features/search/screens/filtering.dart';
+import 'package:findar/features/search/screens/search_results.dart';
+import 'package:findar/features/settings/settings_screen.dart';
+import 'package:findar/l10n/app_localizations.dart';
 // import './features/demo/demo_test_screen.dart';
 // Import all cubits
-import 'logic/cubits/auth_cubit.dart';
-import 'package:findar/logic/cubits/home/recent_listings.dart';
-import 'package:findar/logic/cubits/home/sponsored_listings.dart';
-import 'logic/cubits/create_listing_cubit.dart';
-import 'logic/cubits/listings_cubit.dart';
+import 'package:findar/logic/cubits/auth_cubit.dart';
+import 'package:findar/logic/cubits/boost_cubit.dart';
+import 'package:findar/logic/cubits/create_listing_cubit.dart';
+import 'package:findar/logic/cubits/language_cubit.dart';
+import 'package:findar/logic/cubits/listings_cubit.dart';
+import 'package:findar/logic/cubits/my_listings_cubit.dart';
+import 'package:findar/logic/cubits/profile_cubit.dart';
+import 'package:findar/logic/cubits/profile_picture_setup_cubit.dart';
+import 'package:findar/logic/cubits/property_details_cubit.dart';
+import 'package:findar/logic/cubits/saved_listings_cubit.dart';
 // import 'logic/cubits/listing_cubit.dart'; // Disabled - has incompatible methods
-import 'logic/cubits/search_cubit.dart';
-import 'logic/cubits/saved_listings_cubit.dart';
-import 'logic/cubits/property_details_cubit.dart';
-import 'logic/cubits/my_listings_cubit.dart';
-import 'logic/cubits/profile_cubit.dart';
-import 'logic/cubits/profile_picture_setup_cubit.dart';
-import 'logic/cubits/settings_cubit.dart';
-import 'logic/cubits/boost_cubit.dart';
-import 'logic/cubits/sort_cubit.dart';
-import 'package:findar/core/models/property_listing_model.dart';
-
-import 'logic/cubits/language_cubit.dart';
-import 'core/models/sponsorship_plan.dart';
-import 'features/listings/screens/sponsorship_plans/sponsorship_plans_screen.dart';
-import 'features/listings/screens/payment_confirmation/payment_confirmation_screen.dart';
-
-//import repository
-import 'package:findar/core/repositories/abstract_listing_repo.dart';
-import 'package:findar/core/repositories/database_listing_repo.dart';
+import 'package:findar/logic/cubits/search_cubit.dart';
+import 'package:findar/logic/cubits/settings_cubit.dart';
+import 'package:findar/logic/cubits/sort_cubit.dart';
 
 late ListingRepository repo;
 void main() {
@@ -103,7 +102,11 @@ class MainApp extends StatelessWidget {
                     GlobalWidgetsLocalizations.delegate,
                     GlobalCupertinoLocalizations.delegate,
                   ],
-                  supportedLocales: [Locale('en'), Locale('ar'), Locale('fr')],
+                  supportedLocales: [
+                    Locale('en'),
+                    Locale('ar'),
+                    Locale('fr'),
+                  ],
                   initialRoute: '/landing',
                   onGenerateRoute: (settings) {
                     // Handle edit listing route with arguments
@@ -111,8 +114,7 @@ class MainApp extends StatelessWidget {
                       final listing = settings.arguments;
                       return MaterialPageRoute(
                         builder: (context) => EditListingScreen(
-                          listing: listing as PropertyListing,
-                        ),
+                            listing: listing as PropertyListing),
                       );
                     }
                     // Handle sponsorship plans route with arguments

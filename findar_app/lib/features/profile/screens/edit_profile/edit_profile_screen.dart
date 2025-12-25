@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:findar/logic/cubits/profile_cubit.dart';
-import '../../../../core/widgets/progress_button.dart';
-import 'widgets/profile_text_field.dart';
-import 'utils/validators.dart';
-import 'utils/edit_profile_handler.dart';
+import 'package:findar/core/widgets/progress_button.dart';
+import 'package:findar/features/profile/screens/edit_profile/widgets/profile_text_field.dart';
+import 'package:findar/features/profile/screens/edit_profile/utils/validators.dart';
+import 'package:findar/features/profile/screens/edit_profile/utils/edit_profile_handler.dart';
 import 'package:findar/l10n/app_localizations.dart';
 
 class EditProfileScreen extends StatefulWidget {

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:findar/logic/cubits/profile_cubit.dart';
-import 'profile_avatar.dart';
-import 'profile_info.dart';
+import 'package:findar/features/profile/screens/profile_screen/profile_avatar.dart';
+import 'package:findar/features/profile/screens/profile_screen/profile_info.dart';
 import 'package:findar/logic/cubits/my_listings_cubit.dart';
 
-import '../../../../core/widgets/progress_button.dart';
-import '../../../../core/widgets/build_bottom_bar.dart';
+import 'package:findar/core/widgets/progress_button.dart';
+import 'package:findar/core/widgets/build_bottom_bar.dart';
 import 'package:findar/l10n/app_localizations.dart';
 
 class ProfileScreen extends StatefulWidget {

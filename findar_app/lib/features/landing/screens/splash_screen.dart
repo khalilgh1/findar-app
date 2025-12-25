@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../animations/splash_animation_controller.dart';
+import 'package:findar/features/landing/animations/splash_animation_controller.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});

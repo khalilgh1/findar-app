@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'color_schemes.dart';
-import 'text_styles.dart';
+import 'package:findar/core/theme/color_schemes.dart';
+import 'package:findar/core/theme/text_styles.dart';
 
 ThemeData lightTheme = ThemeData(
   colorScheme: lightColorScheme,

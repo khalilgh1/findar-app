@@ -1,7 +1,5 @@
-import '../models/property_listing_model.dart';
 import 'package:findar/core/models/property_listing_model.dart';
-
-import '../models/return_result.dart';
+import 'package:findar/core/models/return_result.dart';
 
 /// Abstract repository defining all possible listing operations in the app
 abstract class ListingRepository {

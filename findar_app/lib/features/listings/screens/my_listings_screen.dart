@@ -4,11 +4,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:findar/logic/cubits/my_listings_cubit.dart';
 import 'package:findar/core/models/property_listing_model.dart';
 import 'package:findar/l10n/app_localizations.dart';
-import '../../../core/widgets/property_card.dart';
-import '../../../core/widgets/segment_control.dart';
-import '../../../core/widgets/progress_button.dart';
-import '../../../core/widgets/build_bottom_bar.dart';
-import '../../../core/widgets/confirmation_dialog.dart';
+import 'package:findar/core/widgets/property_card.dart';
+import 'package:findar/core/widgets/segment_control.dart';
+import 'package:findar/core/widgets/progress_button.dart';
+import 'package:findar/core/widgets/build_bottom_bar.dart';
+import 'package:findar/core/widgets/confirmation_dialog.dart';
 
 class MyListingsScreen extends StatefulWidget {
   const MyListingsScreen({super.key});

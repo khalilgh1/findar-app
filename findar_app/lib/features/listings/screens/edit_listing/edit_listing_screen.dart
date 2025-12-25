@@ -3,13 +3,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:findar/core/models/property_listing_model.dart';
 import 'package:findar/logic/cubits/my_listings_cubit.dart';
-import '../../../create_listing/widgets/property_title.dart';
-import '../../../create_listing/widgets/description.dart';
-import '../../../create_listing/widgets/custom_selector.dart';
-import '../../../create_listing/widgets/price_field.dart';
-import '../../../create_listing/widgets/numeric_field.dart';
-import '../../../create_listing/widgets/location_field.dart';
-import '../../../../core/widgets/progress_button.dart';
+import 'package:findar/features/create_listing/widgets/property_title.dart';
+import 'package:findar/features/create_listing/widgets/description.dart';
+import 'package:findar/features/create_listing/widgets/custom_selector.dart';
+import 'package:findar/features/create_listing/widgets/price_field.dart';
+import 'package:findar/features/create_listing/widgets/numeric_field.dart';
+import 'package:findar/features/create_listing/widgets/location_field.dart';
+import 'package:findar/core/widgets/progress_button.dart';
 
 class EditListingScreen extends StatefulWidget {
   final PropertyListing listing;

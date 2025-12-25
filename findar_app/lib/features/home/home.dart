@@ -3,12 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:findar/logic/cubits/home/recent_listings.dart';
 import 'package:findar/logic/cubits/home/sponsored_listings.dart';
 import 'package:findar/logic/cubits/property_details_cubit.dart';
-import '../../core/widgets/progress_button.dart';
-import 'search_bar.dart';
-import 'categories.dart';
-import 'property.dart';
-import 'listings.dart';
-import 'sponsored.dart';
+import 'package:findar/core/widgets/progress_button.dart';
+import 'package:findar/features/home/search_bar.dart';
+import 'package:findar/features/home/categories.dart';
+import 'package:findar/features/home/property.dart';
+import 'package:findar/features/home/listings.dart';
+import 'package:findar/features/home/sponsored.dart';
 import '../../../core/widgets/build_bottom_bar.dart';
 import 'package:findar/l10n/app_localizations.dart';
 

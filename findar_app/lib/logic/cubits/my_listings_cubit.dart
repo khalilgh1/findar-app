@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'package:findar/core/repositories/abstract_listing_repo.dart';
 /// MyListingsCubit manages the current user's listings
 class MyListingsCubit extends Cubit<Map<String, dynamic>> {

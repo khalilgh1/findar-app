@@ -1,7 +1,7 @@
 import 'package:findar/core/models/property_listing_model.dart';
-
-import '../models/return_result.dart';
+import 'package:findar/core/models/return_result.dart';
 import 'package:findar/core/repositories/abstract_listing_repo.dart';
+
 /// Dummy implementation of ListingRepository for testing and development
 class DummyListingRepository implements ListingRepository {
   // In-memory storage for listings
