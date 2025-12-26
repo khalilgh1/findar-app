@@ -21,6 +21,30 @@ class ProfileCubit extends Cubit<Map<String, dynamic>> {
     emit({...state, 'state': 'loading', 'message': ''});
 
     try {
+      // If we already have a user in memory, use it
+      final inMemory = authRepository.getCurrentUser();
+      if (inMemory != null) {
+        emit({
+          ...state,
+          'data': _mapUser(inMemory),
+          'state': 'done',
+          'message': 'Profile loaded (in-memory)',
+        });
+        return;
+      }
+
+      // Try cached user first (offline support)
+      final cached = await authRepository.loadCachedUser();
+      if (cached != null) {
+        emit({
+          ...state,
+          'data': _mapUser(cached),
+          'state': 'done',
+          'message': 'Profile loaded (cached)',
+        });
+        return;
+      }
+
       final result = await authRepository.getProfile();
 
       if (result.state) {
@@ -29,17 +53,7 @@ class ProfileCubit extends Cubit<Map<String, dynamic>> {
 
         emit({
           ...state,
-          'data': user != null
-              ? {
-                  'id': user.id,
-                  'name': user.name,
-                  'email': user.email,
-                  'phone': user.phone,
-                  'profilePic': user.profilePic,
-                  'accountType': user.accountType,
-                  'credits': user.credits,
-                }
-              : {},
+          'data': user != null ? _mapUser(user) : {},
           'state': 'done',
           'message': result.message,
         });
@@ -51,12 +65,35 @@ class ProfileCubit extends Cubit<Map<String, dynamic>> {
         });
       }
     } catch (e) {
-      emit({
-        ...state,
-        'state': 'error',
-        'message': 'Error fetching profile: ${e.toString()}',
-      });
+      // On error, last attempt: try cached user to at least show something
+      final cached = await authRepository.loadCachedUser();
+      if (cached != null) {
+        emit({
+          ...state,
+          'data': _mapUser(cached),
+          'state': 'done',
+          'message': 'Profile loaded (cached)',
+        });
+      } else {
+        emit({
+          ...state,
+          'state': 'error',
+          'message': 'Error fetching profile: ${e.toString()}',
+        });
+      }
     }
+  }
+
+  Map<String, dynamic> _mapUser(User user) {
+    return {
+      'id': user.id,
+      'name': user.name,
+      'email': user.email,
+      'phone': user.phone,
+      'profilePic': user.profilePic,
+      'accountType': user.accountType,
+      'credits': user.credits,
+    };
   }
 
   /// Update user profile

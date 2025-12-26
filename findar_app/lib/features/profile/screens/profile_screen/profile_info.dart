@@ -7,8 +7,8 @@ class ProfileInfoCard extends StatelessWidget {
 
   const ProfileInfoCard({
     super.key,
-    this.phone = "0797987620",
-    this.email = "yahia@gmail.com",
+    required this.phone,
+    required this.email,
   });
 
   @override

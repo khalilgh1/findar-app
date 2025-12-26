@@ -104,6 +104,28 @@
   "examplePriceHint": "250 000",
   "exampleLocationHint": "e.g. 15 Rue Didouche Mourad, Algiers",
   "propertyDescriptionHint": "Describe the property details here...",
+  "verificationCode": "Verification Code",
+  "getCode": "Get Code",
+  "enterVerificationCodeHint": "Enter verification code",
+  "enterNewPasswordHint": "Enter new password",
+  "confirmNewPasswordHint": "Confirm new password",
+  "priceOnRequest": "Price on request",
+  "boostedBadge": "Boosted",
+  "boostAction": "Boost",
+  "toggleStatus": "Toggle Status",
+  "passwordResetSuccess": "Password reset successfully!",
+  "listingCreateFailed": "Failed to create listing",
+  "chooseImageSource": "Choose Image Source",
+  "gallery": "Gallery",
+  "camera": "Camera",
+  "errorPickingImage": "Error picking image: {error}",
+  "@errorPickingImage": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "classification": "Classification",
   "propertyStatus": "Property Status",
   "online": "Online",
@@ -301,5 +323,12 @@
   "validatePriceInvalid": "Please enter a valid price",
   "validatePricePositive": "Price must be greater than 0",
   "validateLocationEmpty": "Please enter a location",
-  "validateBedroomsEmpty": "Please enter number of bedrooms"
+  "validateBedroomsEmpty": "Please enter number of bedrooms",
+  "reportProperty": "Report Property",
+  "selectReportReason": "Please select a reason for reporting this property",
+  "inaccurateInformation": "Inaccurate Information",
+  "fraudulentListing": "Fraudulent Listing",
+  "inappropriateContent": "Inappropriate Content",
+  "propertyNotAvailable": "Property Not Available",
+  "propertyReportedThankYou": "Property reported, thank you!"
 }

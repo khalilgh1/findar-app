@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:findar/core/widgets/progress_button.dart';
+import 'package:findar/l10n/app_localizations.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
   const ResetPasswordScreen({super.key});
@@ -45,6 +46,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   }
 
   void _handleResetPassword() async {
+    final l10n = AppLocalizations.of(context)!;
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -64,7 +66,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
       // Show success message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Password reset successfully!'),
+          content: Text(l10n.passwordResetSuccess),
           backgroundColor: Colors.green,
         ),
       );
@@ -87,6 +89,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
@@ -132,7 +135,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
                   // New Password Field
                   Text(
-                    'New Password',
+                    l10n.password,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.onSurface,
                       fontWeight: FontWeight.w600,
@@ -148,7 +151,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: theme.colorScheme.secondaryContainer,
-                      hintText: 'Enter new password',
+                      hintText: l10n.enterNewPasswordHint,
                       hintStyle: TextStyle(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
@@ -193,7 +196,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
                   // Confirm Password Field
                   Text(
-                    'Confirm Password',
+                    l10n.confirm,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.onSurface,
                       fontWeight: FontWeight.w600,
@@ -209,7 +212,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: theme.colorScheme.secondaryContainer,
-                      hintText: 'Confirm new password',
+                      hintText: l10n.confirmNewPasswordHint,
                       hintStyle: TextStyle(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),

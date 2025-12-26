@@ -8,6 +8,7 @@ import 'package:findar/features/property_details/widgets/property_features.dart'
 import 'package:findar/features/property_details/widgets/property_description.dart';
 import 'package:findar/features/property_details/widgets/agent_card.dart';
 import 'package:findar/features/property_details/widgets/similar_properties_list.dart';
+import 'package:findar/features/property_details/widgets/report_bottom_sheet.dart';
 import 'package:findar/l10n/app_localizations.dart';
 
 class PropertyDetailsScreen extends StatefulWidget {
@@ -21,14 +22,61 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
   @override
   void initState() {
     super.initState();
-    // Fetch property details when screen loads
+  }
+
+  void _showReportBottomSheet(BuildContext context, int propertyId) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(screenWidth * 0.05),
+        ),
+      ),
+      builder: (sheetContext) {
+        return ReportBottomSheet(
+          onReasonSelected: (reason) {
+            context.read<PropertyDetailsCubit>().reportListing(
+              propertyId: propertyId,
+              reason: reason,
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _handleReportStateChange(BuildContext context, Map<String, dynamic> state) {
+    final reportState = state['reportState'];
+    final l10n = AppLocalizations.of(context);
+
+    if (reportState == 'success' && l10n != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.propertyReportedThankYou),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } else if (reportState == 'error') {
+      final message = state['message'] as String?;
+      if (message != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(message),
+          ),
+        );
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
-      appBar: AppBar(
+    return BlocListener<PropertyDetailsCubit, Map<String, dynamic>>(
+      listener: _handleReportStateChange,
+      child: Scaffold(
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        appBar: AppBar(
         elevation: 0.5,
         backgroundColor: Theme.of(context).colorScheme.surface,
         foregroundColor: Theme.of(context).colorScheme.onSurface,
@@ -165,6 +213,13 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                           ),
                         ),
                       const SizedBox(height: 24),
+                      _ReportPropertyButton(
+                        onPressed: () {
+                          final propertyId = property['id'] as int? ?? 1;
+                          _showReportBottomSheet(context, propertyId);
+                        },
+                      ),
+                      const SizedBox(height: 24),
                     ],
                   ),
                 ),
@@ -172,6 +227,37 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
             ],
           );
         },
+      ),
+        ),
+      );
+  }
+}
+
+class _ReportPropertyButton extends StatelessWidget {
+  final VoidCallback onPressed;
+
+  const _ReportPropertyButton({
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
+        onPressed: onPressed,
+        icon: const Icon(Icons.flag_outlined),
+        label: Text(l10n?.reportProperty ?? 'Report Property'),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: Colors.red[700],
+          side: BorderSide(color: Colors.red[300]!),
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
       ),
     );
   }

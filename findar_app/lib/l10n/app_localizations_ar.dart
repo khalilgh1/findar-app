@@ -1,6 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
-import 'package:findar/l10n/app_localizations.dart';
+import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
 
@@ -9,7 +9,7 @@ class AppLocalizationsAr extends AppLocalizations {
   AppLocalizationsAr([String locale = 'ar']) : super(locale);
 
   @override
-  String get appTitle => 'فايند دار';
+  String get appTitle => 'FinDar';
 
   @override
   String get welcomeBack => 'مرحبًا بعودتك!';
@@ -283,6 +283,53 @@ class AppLocalizationsAr extends AppLocalizations {
   String get propertyDescriptionHint => 'اكتب تفاصيل العقار هنا...';
 
   @override
+  String get verificationCode => 'رمز التحقق';
+
+  @override
+  String get getCode => 'الحصول على الرمز';
+
+  @override
+  String get enterVerificationCodeHint => 'أدخل رمز التحقق';
+
+  @override
+  String get enterNewPasswordHint => 'أدخل كلمة المرور الجديدة';
+
+  @override
+  String get confirmNewPasswordHint => 'تأكيد كلمة المرور الجديدة';
+
+  @override
+  String get priceOnRequest => 'السعر عند الطلب';
+
+  @override
+  String get boostedBadge => 'مُعزَّز';
+
+  @override
+  String get boostAction => 'تعزيز';
+
+  @override
+  String get toggleStatus => 'تبديل الحالة';
+
+  @override
+  String get passwordResetSuccess => 'تمت إعادة تعيين كلمة المرور بنجاح!';
+
+  @override
+  String get listingCreateFailed => 'فشل إنشاء الإعلان';
+
+  @override
+  String get chooseImageSource => 'اختر مصدر الصورة';
+
+  @override
+  String get gallery => 'المعرض';
+
+  @override
+  String get camera => 'الكاميرا';
+
+  @override
+  String errorPickingImage(String error) {
+    return 'خطأ أثناء اختيار الصورة: $error';
+  }
+
+  @override
   String get classification => 'التصنيف';
 
   @override
@@ -507,12 +554,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get passwordTooShort => 'يجب أن تكون كلمة المرور 6 أحرف على الأقل';
 
   @override
-  String get passwordMissingUppercase =>
-      'يجب أن تحتوي كلمة المرور على حرف كبير واحد على الأقل';
+  String get passwordMissingUppercase => 'يجب أن تحتوي كلمة المرور على حرف كبير واحد على الأقل';
 
   @override
-  String get passwordMissingNumber =>
-      'يجب أن تحتوي كلمة المرور على رقم واحد على الأقل';
+  String get passwordMissingNumber => 'يجب أن تحتوي كلمة المرور على رقم واحد على الأقل';
 
   @override
   String get phoneRequired => 'رقم الهاتف مطلوب';
@@ -659,15 +704,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get validateTitleEmpty => 'يرجى إدخال عنوان العقار';
 
   @override
-  String get validateTitleMinLength =>
-      'يجب أن يكون العنوان بطول 5 أحرف على الأقل';
+  String get validateTitleMinLength => 'يجب أن يكون العنوان بطول 5 أحرف على الأقل';
 
   @override
   String get validateDescriptionEmpty => 'يرجى إدخال وصف';
 
   @override
-  String get validateDescriptionMinLength =>
-      'يجب أن يكون الوصف بطول 20 حرفًا على الأقل';
+  String get validateDescriptionMinLength => 'يجب أن يكون الوصف بطول 20 حرفًا على الأقل';
 
   @override
   String get validatePriceEmpty => 'يرجى إدخال السعر';
@@ -683,4 +726,25 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get validateBedroomsEmpty => 'يرجى إدخال عدد غرف النوم';
+
+  @override
+  String get reportProperty => 'الإبلاغ عن العقار';
+
+  @override
+  String get selectReportReason => 'يرجى اختيار سبب الإبلاغ عن هذا العقار';
+
+  @override
+  String get inaccurateInformation => 'معلومات غير دقيقة';
+
+  @override
+  String get fraudulentListing => 'إعلان احتيالي';
+
+  @override
+  String get inappropriateContent => 'محتوى غير لائق';
+
+  @override
+  String get propertyNotAvailable => 'العقار غير متوفر';
+
+  @override
+  String get propertyReportedThankYou => 'تم الإبلاغ عن العقار، شكراً لك!';
 }

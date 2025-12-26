@@ -1,5 +1,6 @@
 import 'package:findar/core/models/return_result.dart';
 import 'package:findar/core/services/api_service.dart';
+import 'package:findar/core/repositories/local_user_store.dart';
 
 /// User model for authentication
 class User {
@@ -47,6 +48,7 @@ class User {
       'profile_pic': profilePic,
       'account_type': accountType,
       'credits': credits,
+      'token': token,
     };
   }
 }
@@ -56,11 +58,13 @@ class User {
 /// Currently uses mock data - will connect to real API when backend is complete
 class AuthRepository {
   final ApiService apiService;
+  final LocalUserStore _userStore;
   
   // Mock storage for current user session
   User? _currentUser;
 
-  AuthRepository({required this.apiService});
+  AuthRepository({required this.apiService, LocalUserStore? userStore})
+      : _userStore = userStore ?? LocalUserStore();
 
   /// Register a new user
   /// 
@@ -119,6 +123,7 @@ class AuthRepository {
 
       // Store user data
       _currentUser = User.fromJson(response['data']);
+      await _userStore.saveUser(_currentUser!);
       
       // Store token for future requests
       if (_currentUser?.token != null) {
@@ -176,6 +181,7 @@ class AuthRepository {
 
       // Store user data
       _currentUser = User.fromJson(response['data']);
+      await _userStore.saveUser(_currentUser!);
       
       // Store token for future requests
       if (_currentUser?.token != null) {
@@ -200,6 +206,7 @@ class AuthRepository {
     try {
       apiService.clearAuthToken();
       _currentUser = null;
+      await _userStore.clearUser();
       
       return ReturnResult(
         state: true,
@@ -223,6 +230,15 @@ class AuthRepository {
         return ReturnResult(
           state: true,
           message: 'Profile loaded',
+        );
+      }
+
+      final cached = await _userStore.loadUser();
+      if (cached != null) {
+        _currentUser = cached;
+        return ReturnResult(
+          state: true,
+          message: 'Profile loaded (cached)',
         );
       }
 
@@ -310,6 +326,15 @@ class AuthRepository {
 
   /// Get current user (helper method)
   User? getCurrentUser() {
+    return _currentUser;
+  }
+
+  /// Load cached user without touching the network
+  Future<User?> loadCachedUser() async {
+    _currentUser = await _userStore.loadUser();
+    if (_currentUser?.token != null) {
+      apiService.setAuthToken(_currentUser!.token!);
+    }
     return _currentUser;
   }
 }

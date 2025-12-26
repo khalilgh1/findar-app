@@ -22,6 +22,21 @@ class AuthCubit extends Cubit<Map<String, dynamic>> {
     authRepository = AuthRepository(apiService: ApiService());
   }
 
+  /// Attempt to hydrate from cached user on start
+  Future<void> hydrateFromCache() async {
+    emit({...state, 'state': 'loading', 'message': ''});
+    try {
+      final cached = await authRepository.loadCachedUser();
+      if (cached != null) {
+        emit({...state, 'data': cached, 'state': 'done', 'message': 'Loaded cached user'});
+      } else {
+        emit({...state, 'state': 'initial', 'message': ''});
+      }
+    } catch (e) {
+      emit({...state, 'state': 'error', 'message': 'Failed to load cached user: ${e.toString()}'});
+    }
+  }
+
   /// Register new user
   /// 
   /// Validates input, calls repository, emits states
@@ -253,6 +268,39 @@ class AuthCubit extends Cubit<Map<String, dynamic>> {
 
   /// Get current message
   String get message => state['message'] as String;
+
+  /// Load cached user without network and emit state accordingly.
+  Future<void> loadCachedUser() async {
+    emit({
+      ...state,
+      'state': 'loading',
+      'message': '',
+    });
+
+    try {
+      final cached = await authRepository.loadCachedUser();
+      if (cached != null) {
+        emit({
+          ...state,
+          'data': cached,
+          'state': 'done',
+          'message': 'Loaded cached user',
+        });
+      } else {
+        emit({
+          ...state,
+          'state': 'error',
+          'message': 'No cached user found',
+        });
+      }
+    } catch (e) {
+      emit({
+        ...state,
+        'state': 'error',
+        'message': 'Failed to load cached user: ${e.toString()}',
+      });
+    }
+  }
 
   /// Update just the profile picture
   Future<void> updateProfilePicture(String profilePicUrl) async {

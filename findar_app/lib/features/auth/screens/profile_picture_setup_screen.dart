@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:findar/logic/cubits/profile_picture_setup_cubit.dart';
 import 'package:findar/logic/cubits/auth_cubit.dart';
+import 'package:findar/l10n/app_localizations.dart';
 
 class ProfilePictureSetupScreen extends StatefulWidget {
   const ProfilePictureSetupScreen({super.key});
@@ -34,6 +35,7 @@ class _ProfilePictureSetupScreenState extends State<ProfilePictureSetupScreen>
   }
 
   Future<void> _pickImage() async {
+    final l10n = AppLocalizations.of(context)!;
     final cubit = context.read<ProfilePictureSetupCubit>();
     final state = cubit.state;
 
@@ -49,7 +51,7 @@ class _ProfilePictureSetupScreenState extends State<ProfilePictureSetupScreen>
         builder: (context) => AlertDialog(
           backgroundColor: Theme.of(context).colorScheme.surface,
           title: Text(
-            'Choose Image Source',
+            l10n.chooseImageSource,
             style: Theme.of(context).textTheme.headlineSmall,
           ),
           content: Column(
@@ -57,12 +59,12 @@ class _ProfilePictureSetupScreenState extends State<ProfilePictureSetupScreen>
             children: [
               ListTile(
                 leading: const Icon(Icons.photo_library),
-                title: const Text('Gallery'),
+                title: Text(l10n.gallery),
                 onTap: () => Navigator.pop(context, ImageSource.gallery),
               ),
               ListTile(
                 leading: const Icon(Icons.camera_alt),
-                title: const Text('Camera'),
+                title: Text(l10n.camera),
                 onTap: () => Navigator.pop(context, ImageSource.camera),
               ),
             ],
@@ -106,7 +108,7 @@ class _ProfilePictureSetupScreenState extends State<ProfilePictureSetupScreen>
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error picking image: $e'),
+          content: Text(l10n.errorPickingImage('$e')),
           backgroundColor: Colors.red,
         ),
       );

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:findar/core/models/property_listing_model.dart';
 import 'package:findar/logic/cubits/property_details_cubit.dart';
 import 'package:findar/core/widgets/primary_button.dart';
+import 'package:findar/l10n/app_localizations.dart';
 
 class PropertyListingCard extends StatelessWidget {
   final PropertyListing listing;
@@ -35,6 +36,7 @@ class PropertyListingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final colorScheme = Theme.of(
       context,
     ).colorScheme; // UPDATED: Get color scheme from theme
@@ -115,7 +117,7 @@ class PropertyListingCard extends StatelessWidget {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            'Boosted',
+                            l10n.boostedBadge,
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 12,
@@ -131,7 +133,8 @@ class PropertyListingCard extends StatelessWidget {
                   Positioned(
                     top: screenHeight * 0.015,
                     right: screenWidth * 0.03,
-                    child: _buildMenuButton(context, screenWidth, colorScheme),
+            child:
+              _buildMenuButton(context, screenWidth, colorScheme, l10n),
                   )
                 else
                   // Save/Bookmark Button (only show when menu is not shown)
@@ -188,7 +191,7 @@ class PropertyListingCard extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        _formatPrice(listing.price),
+                        _formatPrice(listing.price, l10n),
                         style: textTheme.headlineMedium?.copyWith(
                           // UPDATED: Use theme headlineMedium
                           color: colorScheme
@@ -218,11 +221,11 @@ class PropertyListingCard extends StatelessWidget {
                     children: [
                       _buildFeature(
                         context,
-                        '${listing.bedrooms} Beds',
+                        l10n.bedroomsCount(listing.bedrooms),
                         fontSize,
                         colorScheme,
                         textTheme,
-                      ), // UPDATED: Pass theme
+                      ),
                       SizedBox(width: 10),
                       Text(
                         '•',
@@ -234,11 +237,11 @@ class PropertyListingCard extends StatelessWidget {
                       SizedBox(width: 10),
                       _buildFeature(
                         context,
-                        '${listing.bathrooms} Baths',
+                        l10n.bathroomsCount(listing.bathrooms),
                         fontSize,
                         colorScheme,
                         textTheme,
-                      ), // UPDATED: Pass theme
+                      ),
                       SizedBox(width: 10),
                       Text(
                         '•',
@@ -250,7 +253,7 @@ class PropertyListingCard extends StatelessWidget {
                       SizedBox(width: 10),
                       _buildFeature(
                         context,
-                        listing.propertyType,
+                        _localizedPropertyType(listing.propertyType, l10n),
                         fontSize,
                         colorScheme,
                         textTheme,
@@ -261,7 +264,7 @@ class PropertyListingCard extends StatelessWidget {
                   if (showBoostButton) ...[
                     SizedBox(height: 15),
                     PrimaryButton(
-                      text: 'Boost',
+                      text: l10n.boostAction,
                       onPressed: onBoost,
                       icon: Icons.rocket_launch_outlined,
                     ),
@@ -280,6 +283,7 @@ class PropertyListingCard extends StatelessWidget {
     BuildContext context,
     double screenWidth,
     ColorScheme colorScheme,
+    AppLocalizations l10n,
   ) {
     return PopupMenuButton<String>(
       icon: Container(
@@ -324,7 +328,7 @@ class PropertyListingCard extends StatelessWidget {
               Icon(Icons.edit_outlined, size: 20, color: colorScheme.onSurface),
               SizedBox(width: 12),
               Text(
-                'Edit',
+                l10n.edit,
                 style: TextStyle(fontSize: 14, color: colorScheme.onSurface),
               ),
             ],
@@ -337,7 +341,7 @@ class PropertyListingCard extends StatelessWidget {
               Icon(Icons.delete_outline, size: 20, color: colorScheme.error),
               SizedBox(width: 12),
               Text(
-                'Remove',
+                l10n.delete,
                 style: TextStyle(fontSize: 14, color: colorScheme.onSurface),
               ),
             ],
@@ -354,7 +358,7 @@ class PropertyListingCard extends StatelessWidget {
               ),
               SizedBox(width: 12),
               Text(
-                menuToggleText ?? 'Toggle Status',
+                menuToggleText ?? l10n.toggleStatus,
                 style: TextStyle(fontSize: 14, color: colorScheme.onSurface),
               ),
             ],
@@ -426,9 +430,9 @@ class PropertyListingCard extends StatelessWidget {
     );
   }
 
-  String _formatPrice(double price) {
+  String _formatPrice(double price, AppLocalizations l10n) {
     if (price <= 0) {
-      return 'Price on request';
+      return l10n.priceOnRequest;
     }
 
     final hasDecimals = price % 1 != 0;
@@ -443,5 +447,26 @@ class PropertyListingCard extends StatelessWidget {
     }
 
     return '$whole DZD';
+  }
+
+  String _localizedPropertyType(String propertyType, AppLocalizations l10n) {
+    switch (propertyType.toLowerCase()) {
+      case 'house':
+        return l10n.house;
+      case 'apartment':
+        return l10n.apartment;
+      case 'condo':
+        return l10n.condo;
+      case 'townhouse':
+        return l10n.townhouse;
+      case 'villa':
+        return l10n.villa;
+      case 'studio':
+        return l10n.studio;
+      case 'commercial':
+        return l10n.commercial;
+      default:
+        return propertyType;
+    }
   }
 }

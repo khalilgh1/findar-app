@@ -104,6 +104,28 @@
   "examplePriceHint": "250 000",
   "exampleLocationHint": "ex. 15 Rue Didouche Mourad, Alger",
   "propertyDescriptionHint": "Décrivez les détails de la propriété ici...",
+  "verificationCode": "Code de vérification",
+  "getCode": "Obtenir le code",
+  "enterVerificationCodeHint": "Entrez le code de vérification",
+  "enterNewPasswordHint": "Entrez le nouveau mot de passe",
+  "confirmNewPasswordHint": "Confirmez le nouveau mot de passe",
+  "priceOnRequest": "Prix sur demande",
+  "boostedBadge": "Mise en avant",
+  "boostAction": "Booster",
+  "toggleStatus": "Basculer l'état",
+  "passwordResetSuccess": "Réinitialisation du mot de passe réussie !",
+  "listingCreateFailed": "Échec de création de l'annonce",
+  "chooseImageSource": "Choisir la source de l'image",
+  "gallery": "Galerie",
+  "camera": "Caméra",
+  "errorPickingImage": "Erreur lors de la sélection de l'image : {error}",
+  "@errorPickingImage": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "classification": "Classification",
   "propertyStatus": "Statut de la propriété",
   "online": "En ligne",
@@ -301,5 +323,12 @@
   "validatePriceInvalid": "Veuillez entrer un prix valide",
   "validatePricePositive": "Le prix doit être supérieur à 0",
   "validateLocationEmpty": "Veuillez entrer un lieu",
-  "validateBedroomsEmpty": "Veuillez entrer le nombre de chambres"
+  "validateBedroomsEmpty": "Veuillez entrer le nombre de chambres",
+  "reportProperty": "Signaler la propriété",
+  "selectReportReason": "Veuillez sélectionner une raison pour signaler cette propriété",
+  "inaccurateInformation": "Informations inexactes",
+  "fraudulentListing": "Annonce frauduleuse",
+  "inappropriateContent": "Contenu inapproprié",
+  "propertyNotAvailable": "Propriété non disponible",
+  "propertyReportedThankYou": "Propriété signalée, merci !"
 }

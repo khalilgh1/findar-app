@@ -57,6 +57,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -102,32 +103,32 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 
                 // Full Name Field
                 ProfileTextField(
-                  label: 'Full Name',
+                  label: l10n.fullName,
                   controller: _nameController,
                   validator: ProfileValidators.validateName,
-                  hintText: 'Enter your full name',
+                  hintText: l10n.enterFullName,
                 ),
                 
                 const SizedBox(height: 24),
                 
                 // Email Field
                 ProfileTextField(
-                  label: 'Email Address',
+                  label: l10n.emailAddress,
                   controller: _emailController,
                   validator: ProfileValidators.validateEmail,
                   keyboardType: TextInputType.emailAddress,
-                  hintText: 'Enter your email address',
+                  hintText: l10n.enterEmail,
                 ),
                 
                 const SizedBox(height: 24),
                 
                 // Phone Number Field
                 ProfileTextField(
-                  label: 'Phone Number',
+                  label: l10n.phoneNumber,
                   controller: _phoneController,
                   validator: ProfileValidators.validatePhone,
                   keyboardType: TextInputType.phone,
-                  hintText: 'Enter your phone number',
+                  hintText: l10n.enterPhone,
                 ),
                 
                 const SizedBox(height: 40),
@@ -136,7 +137,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 SizedBox(
                   width: double.infinity,
                   child: ProgressButton(
-                    label: 'Save Changes',
+                    label: l10n.saveChanges,
                     backgroundColor: theme.colorScheme.primary,
                     textColor: Colors.white,
                     isLoading: _isLoading,
