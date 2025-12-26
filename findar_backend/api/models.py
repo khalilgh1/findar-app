@@ -17,17 +17,16 @@ from django.db import models
 ################# Customized User Model
 
 ACCOUNT_CHOICES = [
-    ('normal' , 'Normal'),
+    ('individual' , 'Individual'),
     ('agency' , 'Agency')
 ]
 
 class CustomUser(AbstractUser):
 
     email = models.EmailField(unique=True)
-    phone_number    = models.CharField(max_length=15)
+    phone_number    = models.CharField(max_length=15 , unique=True)
     profile_pic     = models.ImageField(upload_to="profiles/" , blank=True , null=True)
-    account_type    = models.CharField(max_length=20, choices=ACCOUNT_CHOICES, default='normal')
-    credits         = models.FloatField(default=0.0) 
+    account_type    = models.CharField(max_length=20, choices=ACCOUNT_CHOICES)
 
 
     def __str__(self):
