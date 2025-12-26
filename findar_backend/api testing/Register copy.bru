@@ -5,17 +5,18 @@ meta {
 }
 
 post {
-  url: http://127.0.0.1:8000/api/register/
+  url: http://127.0.0.1:8000/api/auth/register
   body: json
   auth: inherit
 }
 
 body:json {
   {
-    "username": "user1",
-    "password": "user1",
-    "phone_number": "111111111",
-    "email": "user1@user1.com"
+    "username": "user3",
+    "password": "user3user3",
+    "phone_number": "4111111118",
+    "email": "user2@user8.com",
+    "account_type":"agsdency"
   }
 }
 

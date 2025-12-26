@@ -1,9 +1,12 @@
 from rest_framework import serializers
+from rest_framework.serializers import ValidationError
+import re
+
 from .models import (
     CustomUser, Post, Photos, SavedPosts, Report, BoostingPlan, Boosting
 )
 
-class CustomUserSerializers(serializers.ModelSerializer):
+class UserSerializers(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields= "__all__"
@@ -46,13 +49,46 @@ class RegisterSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = ("username", "email", "password", "phone_number", "profile_pic", "account_type")
 
+    def validate_account_type(self, value):
+        if value not in ["individual", "Individual" , "agency" , "Agency"]:
+            raise ValidationError("Invalid account type.")
+        return value
+    
+    def validate_username(self,value):
+        if len(value) < 4:
+            raise ValidationError("Username must be at least 4 characters long.")
+
+        if not re.match(r'^[a-zA-Z0-9_]+$', value):
+            raise ValidationError("Username can only contain letters, numbers, and underscores.")
+
+        if CustomUser.objects.filter(username=value).exists():
+            raise ValidationError("This username is already taken.")
+        return value
+
+
+    def validate_password(self,value):
+        if len(value) < 8:
+            raise ValidationError("Password must be at least 8 characters long.")
+
+        if not re.search(r'[A-Z]', value):
+            raise ValidationError("Password must contain at least one uppercase letter.")
+
+        if not re.search(r'[a-z]', value):
+            raise ValidationError("Password must contain at least one lowercase letter.")
+
+        if not re.search(r'\d', value):
+            raise ValidationError("Password must contain at least one digit.")
+        return value
+
+
+    def validate_phone_number(self,value):
+        if value and not re.match(r'^\+?\d{9,15}$', value):
+            raise ValidationError("Enter a valid phone number.")
+        return value
+    
     def create(self, validated_data):
         user = CustomUser.objects.create_user(
-            username      = validated_data["username"],
-            email         = validated_data["email"],
-            password      = validated_data["password"],
-            phone_number  = validated_data.get("phone_number"),
-            profile_pic   = validated_data.get("profile_pic"),
-            account_type  = validated_data.get("account_type", "user"),
+            **validated_data
         )
         return user
+    

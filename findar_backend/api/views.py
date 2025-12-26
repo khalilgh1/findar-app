@@ -225,28 +225,7 @@ def toggle_active_listing(request , listing_id):
     post.save()
     return Response(status=status.HTTP_200_OK)
 
-
-#########  Create User  #########
-
-@api_view(["POST"])
-def register(request):
-    serializer = RegisterSerializer(data=request.data)
-
-    if not serializer.is_valid():
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-    user = serializer.save()
-    refresh = RefreshToken.for_user(user)
-    return Response({
-                    "message": "User created",
-                    "refresh": str(refresh),
-                    "access": str(refresh.access_token),
-                    "username": user.username,
-                    "email": user.email,
-                    "account_type": user.account_type,
-                    }, status=status.HTTP_201_CREATED)
-
-#########  Login as User  #########
+#########  AUTHENTICATION VIEWS  #########
 
 @api_view(["POST"])
 def login(request):
@@ -269,5 +248,26 @@ def login(request):
         "credits": user.credits,
     })
 
+@api_view(["POST"])
+def register(request):
 
+    serializer = RegisterSerializer(data=request.data)
+
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    user = serializer.save()
+    refresh = RefreshToken.for_user(user)
+    return Response({
+                    "message": "registered successfully",
+                    "refresh": str(refresh),
+                    "access": str(refresh.access_token),
+                    "username": user.username,
+                    "email": user.email,
+                    "account_type": user.account_type,
+                    }, status=status.HTTP_201_CREATED)
+
+@api_view(["POST"])
+def me(request):
+    pass
 
