@@ -323,5 +323,12 @@
   "validatePriceInvalid": "يرجى إدخال سعر صحيح",
   "validatePricePositive": "يجب أن يكون السعر أكبر من 0",
   "validateLocationEmpty": "يرجى إدخال الموقع",
-  "validateBedroomsEmpty": "يرجى إدخال عدد غرف النوم"
+  "validateBedroomsEmpty": "يرجى إدخال عدد غرف النوم",
+  "reportProperty": "الإبلاغ عن العقار",
+  "selectReportReason": "يرجى اختيار سبب الإبلاغ عن هذا العقار",
+  "inaccurateInformation": "معلومات غير دقيقة",
+  "fraudulentListing": "إعلان احتيالي",
+  "inappropriateContent": "محتوى غير لائق",
+  "propertyNotAvailable": "العقار غير متوفر",
+  "propertyReportedThankYou": "تم الإبلاغ عن العقار، شكراً لك!"
 }

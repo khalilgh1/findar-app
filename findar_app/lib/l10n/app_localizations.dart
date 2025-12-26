@@ -1506,6 +1506,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please enter number of bedrooms'**
   String get validateBedroomsEmpty;
+
+  /// No description provided for @reportProperty.
+  ///
+  /// In en, this message translates to:
+  /// **'Report Property'**
+  String get reportProperty;
+
+  /// No description provided for @selectReportReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a reason for reporting this property'**
+  String get selectReportReason;
+
+  /// No description provided for @inaccurateInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'Inaccurate Information'**
+  String get inaccurateInformation;
+
+  /// No description provided for @fraudulentListing.
+  ///
+  /// In en, this message translates to:
+  /// **'Fraudulent Listing'**
+  String get fraudulentListing;
+
+  /// No description provided for @inappropriateContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Inappropriate Content'**
+  String get inappropriateContent;
+
+  /// No description provided for @propertyNotAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Property Not Available'**
+  String get propertyNotAvailable;
+
+  /// No description provided for @propertyReportedThankYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Property reported, thank you'**
+  String get propertyReportedThankYou;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -323,5 +323,12 @@
   "validatePriceInvalid": "Please enter a valid price",
   "validatePricePositive": "Price must be greater than 0",
   "validateLocationEmpty": "Please enter a location",
-  "validateBedroomsEmpty": "Please enter number of bedrooms"
+  "validateBedroomsEmpty": "Please enter number of bedrooms",
+  "reportProperty": "Report Property",
+  "selectReportReason": "Please select a reason for reporting this property",
+  "inaccurateInformation": "Inaccurate Information",
+  "fraudulentListing": "Fraudulent Listing",
+  "inappropriateContent": "Inappropriate Content",
+  "propertyNotAvailable": "Property Not Available",
+  "propertyReportedThankYou": "Property reported, thank you!"
 }

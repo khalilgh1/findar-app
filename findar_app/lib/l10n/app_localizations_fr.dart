@@ -726,4 +726,25 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get validateBedroomsEmpty => 'Veuillez entrer le nombre de chambres';
+
+  @override
+  String get reportProperty => 'Signaler la propriété';
+
+  @override
+  String get selectReportReason => 'Veuillez sélectionner une raison pour signaler cette propriété';
+
+  @override
+  String get inaccurateInformation => 'Informations inexactes';
+
+  @override
+  String get fraudulentListing => 'Annonce frauduleuse';
+
+  @override
+  String get inappropriateContent => 'Contenu inapproprié';
+
+  @override
+  String get propertyNotAvailable => 'Propriété non disponible';
+
+  @override
+  String get propertyReportedThankYou => 'Propriété signalée, merci !';
 }

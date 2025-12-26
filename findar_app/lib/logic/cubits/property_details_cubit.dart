@@ -72,27 +72,27 @@ class PropertyDetailsCubit extends Cubit<Map<String, dynamic>> {
     }
   }
 
-  /// Report/flag inappropriate listing
   Future<void> reportListing({
     required int propertyId,
     required String reason,
-    String? description,
   }) async {
-    emit({...state, 'state': 'loading', 'message': ''});
-
     try {
-      // Mock report submission
-      await Future.delayed(const Duration(milliseconds: 800));
+      await Future.delayed(const Duration(milliseconds: 500));
 
       emit({
         ...state,
-        'state': 'done',
-        'message': 'Report submitted successfully',
+        'reportState': 'success',
+      });
+
+      await Future.delayed(const Duration(milliseconds: 100));
+      emit({
+        ...state,
+        'reportState': 'idle',
       });
     } catch (e) {
       emit({
         ...state,
-        'state': 'error',
+        'reportState': 'error',
         'message': 'Error submitting report: ${e.toString()}',
       });
     }

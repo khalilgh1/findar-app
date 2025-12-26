@@ -323,5 +323,12 @@
   "validatePriceInvalid": "Veuillez entrer un prix valide",
   "validatePricePositive": "Le prix doit être supérieur à 0",
   "validateLocationEmpty": "Veuillez entrer un lieu",
-  "validateBedroomsEmpty": "Veuillez entrer le nombre de chambres"
+  "validateBedroomsEmpty": "Veuillez entrer le nombre de chambres",
+  "reportProperty": "Signaler la propriété",
+  "selectReportReason": "Veuillez sélectionner une raison pour signaler cette propriété",
+  "inaccurateInformation": "Informations inexactes",
+  "fraudulentListing": "Annonce frauduleuse",
+  "inappropriateContent": "Contenu inapproprié",
+  "propertyNotAvailable": "Propriété non disponible",
+  "propertyReportedThankYou": "Propriété signalée, merci !"
 }

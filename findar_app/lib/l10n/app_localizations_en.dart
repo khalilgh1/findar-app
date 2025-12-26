@@ -726,4 +726,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get validateBedroomsEmpty => 'Please enter number of bedrooms';
+
+  @override
+  String get reportProperty => 'Report Property';
+
+  @override
+  String get selectReportReason => 'Please select a reason for reporting this property';
+
+  @override
+  String get inaccurateInformation => 'Inaccurate Information';
+
+  @override
+  String get fraudulentListing => 'Fraudulent Listing';
+
+  @override
+  String get inappropriateContent => 'Inappropriate Content';
+
+  @override
+  String get propertyNotAvailable => 'Property Not Available';
+
+  @override
+  String get propertyReportedThankYou => 'Property reported, thank you!';
 }

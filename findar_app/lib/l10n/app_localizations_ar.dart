@@ -726,4 +726,25 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get validateBedroomsEmpty => 'يرجى إدخال عدد غرف النوم';
+
+  @override
+  String get reportProperty => 'الإبلاغ عن العقار';
+
+  @override
+  String get selectReportReason => 'يرجى اختيار سبب الإبلاغ عن هذا العقار';
+
+  @override
+  String get inaccurateInformation => 'معلومات غير دقيقة';
+
+  @override
+  String get fraudulentListing => 'إعلان احتيالي';
+
+  @override
+  String get inappropriateContent => 'محتوى غير لائق';
+
+  @override
+  String get propertyNotAvailable => 'العقار غير متوفر';
+
+  @override
+  String get propertyReportedThankYou => 'تم الإبلاغ عن العقار، شكراً لك!';
 }
