@@ -18,12 +18,14 @@ class RecentCubit extends Cubit<Map<String, dynamic>> {
       final recentListings = await repository.getRecentListings(
         listingType: listingType, 
       );
-      final savedIds = await repository.getSavedListingIds();
+      print('🔴🔴🔴');
+      print('Fetched recent listings: $recentListings');
+      // final savedIds = await repository.getSavedListingIds();
 
       emit({
         ...state,
         'data': recentListings,
-        'savedIds': savedIds,
+        // 'savedIds': savedIds,
         'state': 'done',
         'message': 'Listings loaded',
       });

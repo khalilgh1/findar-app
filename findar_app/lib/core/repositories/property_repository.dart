@@ -22,7 +22,6 @@ class Property {
   final double? latitude;
   final double? longitude;
   final DateTime? createdAt;
-  final DateTime? updatedAt;
 
   const Property({
     required this.id,
@@ -44,7 +43,6 @@ class Property {
     this.latitude,
     this.longitude,
     this.createdAt,
-    this.updatedAt,
   });
 
   /// Convert from API response
@@ -69,7 +67,6 @@ class Property {
       latitude: (json['latitude'] as num?)?.toDouble(),
       longitude: (json['longitude'] as num?)?.toDouble(),
       createdAt: json['created_at'] != null ? DateTime.tryParse(json['created_at']) : null,
-      updatedAt: json['updated_at'] != null ? DateTime.tryParse(json['updated_at']) : null,
     );
   }
 
@@ -138,7 +135,6 @@ class Property {
       latitude: latitude ?? this.latitude,
       longitude: longitude ?? this.longitude,
       createdAt: createdAt,
-      updatedAt: updatedAt,
     );
   }
 }
