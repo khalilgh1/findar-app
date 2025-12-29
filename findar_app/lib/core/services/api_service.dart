@@ -2,8 +2,12 @@
 // import 'package:http/http.dart' as http;
 // import 'dart:convert';
 import 'dart:async';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 /// Custom exception for API errors
+
 class ApiException implements Exception {
   final String message;
   final int? statusCode;
@@ -15,240 +19,277 @@ class ApiException implements Exception {
   String toString() => 'ApiException: $message (Status: $statusCode)';
 }
 
-/// Centralized API Service
-/// Handles all HTTP communication with backend
-/// Currently uses mock data for testing - will be replaced with real API calls
-class ApiService {
-  // TODO: Replace with real backend URL when API is complete
-  // static const String _baseUrl = 'http://localhost:8000/api';
-  // static const Duration _timeout = Duration(seconds: 10);
+class AuthTokens {
+  final String accessToken;
+  final String refreshToken;
 
-  // Singleton instance
-  static final ApiService _instance = ApiService._internal();
+  AuthTokens({
+    required this.accessToken,
+    required this.refreshToken,
+  });
+}
 
-  // TODO: Use _authToken when connecting to real API
-  // ignore: unused_field
-  String? _authToken;
 
-  ApiService._internal();
+class TokenStorage {
+  static const _accessKey = 'access_token';
+  static const _refreshKey = 'refresh_token';
 
-  factory ApiService() {
-    return _instance;
+  static final TokenStorage _instance = TokenStorage._internal();
+  factory TokenStorage() => _instance;
+  TokenStorage._internal();
+
+  final FlutterSecureStorage _storage =
+      const FlutterSecureStorage();
+
+  Future<void> saveTokens(AuthTokens tokens) async {
+    await _storage.write(key: _accessKey, value: tokens.accessToken);
+    await _storage.write(key: _refreshKey, value: tokens.refreshToken);
   }
 
-  /// Set authentication token for authorized requests
-  /// TODO: Will be used when connecting to real backend API
-  void setAuthToken(String token) {
-    _authToken = token;
+  Future<AuthTokens?> loadTokens() async {
+    final access = await _storage.read(key: _accessKey);
+    final refresh = await _storage.read(key: _refreshKey);
+
+    if (access != null && refresh != null) {
+      return AuthTokens(accessToken: access, refreshToken: refresh);
+    }
+    return null;
   }
 
-  /// Clear authentication token on logout
-  /// TODO: Will be used when connecting to real backend API
-  void clearAuthToken() {
-    _authToken = null;
+  Future<void> clear() async {
+    await _storage.delete(key: _accessKey);
+    await _storage.delete(key: _refreshKey);
   }
+}
 
-  /// Mock GET request
-  /// In production, replace with actual HTTP GET
-  Future<Map<String, dynamic>> get(String endpoint) async {
-    try {
-      // Simulate network delay
-      await Future.delayed(const Duration(milliseconds: 800));
 
-      // For now, return mock data based on endpoint
-      return _getMockData(endpoint);
-    } catch (e) {
-      throw ApiException(message: 'Failed to fetch data: ${e.toString()}');
+class AuthManager {
+  static final AuthManager _instance = AuthManager._internal();
+  factory AuthManager() => _instance;
+  AuthManager._internal();
+
+  final TokenStorage _storage = TokenStorage();
+
+  String? _accessToken;
+  String? _refreshToken;
+
+  bool get isAuthenticated => _accessToken != null;
+  String? get accessToken => _accessToken;
+  String? get refreshToken => _refreshToken;
+
+  Future<void> init() async {
+    final tokens = await _storage.loadTokens();
+    if (tokens != null) {
+      _accessToken = tokens.accessToken;
+      _refreshToken = tokens.refreshToken;
     }
   }
 
-  /// Mock POST request
-  /// In production, replace with actual HTTP POST
+  Future<void> setTokens(AuthTokens tokens) async {
+    _accessToken = tokens.accessToken;
+    _refreshToken = tokens.refreshToken;
+    await _storage.saveTokens(tokens);
+  }
+
+  Future<void> clear() async {
+    _accessToken = null;
+    _refreshToken = null;
+    await _storage.clear();
+  }
+}
+
+
+class ApiService {
+  static const String _baseUrl = 'http://localhost:8000/api';
+  static const Duration _timeout = Duration(seconds: 10);
+
+  static final ApiService _instance = ApiService._internal();
+  factory ApiService() => _instance;
+
+  ApiService._internal();
+
+  final http.Client _client = http.Client();
+  final AuthManager _auth = AuthManager();
+
+  // =========================
+  // CORE REQUEST HANDLER
+  // =========================
+  Future<http.Response> _sendRequest(
+    String method,
+    String endpoint, {
+    Map<String, dynamic>? body,
+    bool retryOnAuthFail = true,
+  }) async {
+    final uri = Uri.parse('$_baseUrl$endpoint');
+
+    final headers = {
+      'Content-Type': 'application/json',
+      if (_auth.accessToken != null)
+        'Authorization': 'Bearer ${_auth.accessToken}',
+    };
+
+    http.Response response;
+
+    switch (method) {
+      case 'GET':
+        response = await _client
+            .get(uri, headers: headers)
+            .timeout(_timeout);
+        break;
+
+      case 'POST':
+        response = await _client
+            .post(uri, headers: headers, body: jsonEncode(body))
+            .timeout(_timeout);
+        break;
+
+      case 'PUT':
+        response = await _client
+            .put(uri, headers: headers, body: jsonEncode(body))
+            .timeout(_timeout);
+        break;
+
+      case 'DELETE':
+        response = await _client
+            .delete(uri, headers: headers)
+            .timeout(_timeout);
+        break;
+
+      default:
+        throw ApiException(message: 'Unsupported HTTP method');
+    }
+
+    // Access token expired
+    if (response.statusCode == 401 &&
+        retryOnAuthFail &&
+        _auth.refreshToken != null) {
+      final refreshed = await _refreshToken();
+      if (refreshed) {
+        return _sendRequest(
+          method,
+          endpoint,
+          body: body,
+          retryOnAuthFail: false,
+        );
+      } else {
+        await _auth.clear();
+        throw ApiException(message: 'Session expired. Please login again.');
+      }
+    }
+
+    return response;
+  }
+
+  // =========================
+  // TOKEN REFRESH
+  // =========================
+
+  Future<bool> _refreshToken() async {
+    try {
+      final response = await _client.post(
+        Uri.parse('$_baseUrl/auth/refresh'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'refresh_token': _auth.refreshToken,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        await _auth.setTokens(
+          AuthTokens(
+            accessToken: json['access_token'],
+            refreshToken: json['refresh_token'],
+          ),
+        );
+        return true;
+      }
+    } catch (_) {}
+
+    return false;
+  }
+
+  // =========================
+  // PUBLIC API METHODS
+  // =========================
+
+  Future<Map<String, dynamic>> get(String endpoint) async {
+    final response = await _sendRequest('GET', endpoint);
+    return _decodeResponse(response);
+  }
+
   Future<Map<String, dynamic>> post(
     String endpoint, {
     required Map<String, dynamic> body,
   }) async {
-    try {
-      // Simulate network delay
-      await Future.delayed(const Duration(milliseconds: 1000));
-
-      // For now, return mock response based on endpoint
-      return _postMockData(endpoint, body);
-    } catch (e) {
-      throw ApiException(message: 'Failed to post data: ${e.toString()}');
-    }
+    final response =
+        await _sendRequest('POST', endpoint, body: body);
+    return _decodeResponse(response);
   }
 
-  /// Mock PUT request
-  /// In production, replace with actual HTTP PUT
   Future<Map<String, dynamic>> put(
     String endpoint, {
     required Map<String, dynamic> body,
   }) async {
-    try {
-      await Future.delayed(const Duration(milliseconds: 800));
-      return _putMockData(endpoint, body);
-    } catch (e) {
-      throw ApiException(message: 'Failed to update data: ${e.toString()}');
-    }
+    final response =
+        await _sendRequest('PUT', endpoint, body: body);
+    return _decodeResponse(response);
   }
 
-  /// Mock DELETE request
-  /// In production, replace with actual HTTP DELETE
   Future<void> delete(String endpoint) async {
-    try {
-      await Future.delayed(const Duration(milliseconds: 600));
-      // Mock delete always succeeds
-    } catch (e) {
-      throw ApiException(message: 'Failed to delete data: ${e.toString()}');
+    final response = await _sendRequest('DELETE', endpoint);
+    if (response.statusCode >= 400) {
+      throw ApiException(
+        message: 'Delete failed',
+        statusCode: response.statusCode,
+      );
     }
   }
 
-  /// Get mock data based on endpoint
-  Map<String, dynamic> _getMockData(String endpoint) {
-    if (endpoint.contains('/listings/')) {
-      return {
-        'success': true,
-        'data': [
-          {
-            'id': 1,
-            'title': 'Beautiful Apartment in Downtown',
-            'price': 50000,
-            'location': 'Downtown',
-            'bedrooms': 3,
-            'bathrooms': 2,
-            'image': 'assets/find-dar-test1.jpg',
-            'description': 'Spacious apartment with modern amenities',
-          },
-          {
-            'id': 2,
-            'title': 'Cozy Studio Near Beach',
-            'price': 30000,
-            'location': 'Beach Area',
-            'bedrooms': 1,
-            'bathrooms': 1,
-            'image': 'assets/find-dar-test2.jpg',
-            'description': 'Perfect for couples',
-          },
-          {
-            'id': 3,
-            'title': 'Luxury Villa with Pool',
-            'price': 150000,
-            'location': 'Suburban',
-            'bedrooms': 5,
-            'bathrooms': 4,
-            'image': 'assets/find-dar-test3.jpg',
-            'description': 'Exclusive property with premium features',
-          },
-        ],
-      };
-    } else if (endpoint.contains('/users/')) {
-      return {
-        'success': true,
-        'data': {
-          'id': 1,
-          'name': 'John Doe',
-          'email': 'john@example.com',
-          'phone': '+1234567890',
-          'profile_pic': 'assets/profile.png',
-          'account_type': 'buyer',
-          'credits': 100,
-        },
-      };
+  // =========================
+  // AUTH METHODS
+  // =========================
+
+  Future<void> login(String email, String password) async {
+    final response = await _client.post(
+      Uri.parse('$_baseUrl/auth/login'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'email': email,
+        'password': password,
+      }),
+    );
+
+    final json = _decodeResponse(response);
+
+    await _auth.setTokens(
+      AuthTokens(
+        accessToken: json['access_token'],
+        refreshToken: json['refresh_token'],
+      ),
+    );
+  }
+
+  void logout() async {
+    await _auth.clear();
+  }
+
+  // =========================
+  // HELPERS
+  // =========================
+  Map<String, dynamic> _decodeResponse(http.Response response) {
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return jsonDecode(response.body);
     }
 
-    return {'success': true, 'data': {}};
+    throw ApiException(
+      message: 'API Error',
+      statusCode: response.statusCode,
+      response: response.body,
+    );
   }
 
-  /// Handle POST requests with mock data
-  Map<String, dynamic> _postMockData(
-    String endpoint,
-    Map<String, dynamic> body,
-  ) {
-    if (endpoint.contains('/auth/register')) {
-      // Mock successful registration
-      return {
-        'success': true,
-        'message': 'Registration successful',
-        'data': {
-          'id': 1,
-          'email': body['email'],
-          'name': body['name'],
-          'phone': body['phone'] ?? '',
-          'account_type': body['account_type'] ?? 'buyer',
-          'token': 'mock_token_${DateTime.now().millisecondsSinceEpoch}',
-        },
-      };
-    } else if (endpoint.contains('/auth/login')) {
-      // Mock successful login
-      return {
-        'success': true,
-        'message': 'Login successful',
-        'data': {
-          'id': 1,
-          'email': body['email'],
-          'token': 'mock_token_${DateTime.now().millisecondsSinceEpoch}',
-          'user': {
-            'id': 1,
-            'name': 'John Doe',
-            'email': body['email'],
-            'phone': '+1234567890',
-            'account_type': 'buyer',
-          },
-        },
-      };
-    } else if (endpoint.contains('/listings/create')) {
-      // Mock successful listing creation
-      return {
-        'success': true,
-        'message': 'Listing created successfully',
-        'data': {
-          'id': 4,
-          'title': body['title'],
-          'price': body['price'],
-          'location': body['location'],
-          'bedrooms': body['bedrooms'],
-          'bathrooms': body['bathrooms'],
-          'description': body['description'],
-          'image': 'assets/find-dar-test1.jpg',
-        },
-      };
-    }
-
-    return {'success': true, 'message': 'Operation successful', 'data': body};
-  }
-
-  /// Handle PUT requests with mock data
-  Map<String, dynamic> _putMockData(
-    String endpoint,
-    Map<String, dynamic> body,
-  ) {
-    return {'success': true, 'message': 'Update successful', 'data': body};
-  }
-
-  /// Parse error response
-  // TODO: Use when connecting to real API
-  // ApiException _parseError(http.Response response) {
-  //   try {
-  //     final json = jsonDecode(response.body);
-  //     return ApiException(
-  //       message: json['message'] ?? 'An error occurred',
-  //       statusCode: response.statusCode,
-  //       response: response.body,
-  //     );
-  //   } catch (e) {
-  //     return ApiException(
-  //       message: 'Status ${response.statusCode}: ${response.reasonPhrase}',
-  //       statusCode: response.statusCode,
-  //       response: response.body,
-  //     );
-  //   }
-  // }
-
-  /// Close HTTP client (call on app shutdown)
-  /// Currently no-op - will be used when real HTTP client is added
   void close() {
-    // TODO: Uncomment when using real http.Client
-    // _client.close();
+    _client.close();
   }
 }

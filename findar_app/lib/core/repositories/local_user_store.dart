@@ -70,7 +70,6 @@ class LocalUserStore {
       profilePic: profilePic,
       accountType: accountType,
       credits: credits,
-      token: token,
     );
 
     // Persist user only in SharedPreferences (no DB write for this debug path)

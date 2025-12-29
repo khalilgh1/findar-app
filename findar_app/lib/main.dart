@@ -9,6 +9,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 
+import 'package:findar/core/services/api_service.dart';
 import 'package:findar/core/models/sponsorship_plan.dart';
 import 'package:findar/core/theme/app_theme.dart';
 import 'package:findar/core/theme/theme_provider.dart';
@@ -50,11 +51,12 @@ import 'package:findar/logic/cubits/saved_listings_cubit.dart';
 import 'package:findar/logic/cubits/search_cubit.dart';
 import 'package:findar/logic/cubits/settings_cubit.dart';
 import 'package:findar/logic/cubits/sort_cubit.dart';
-
 import 'package:get_it/get_it.dart';
 import 'package:findar/core/di/service_locator.dart';
-void main() {
+
+void main() async {
   SetupRepositories();
+  await AuthManager().init();
   runApp(const MainApp());
 }
 

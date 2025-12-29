@@ -9,9 +9,8 @@ class User {
   final String email;
   final String phone;
   final String? profilePic;
-  final String accountType; // 'buyer' or 'seller'
+  final String accountType;
   final int credits;
-  final String? token;
 
   const User({
     required this.id,
@@ -21,24 +20,20 @@ class User {
     this.profilePic,
     required this.accountType,
     required this.credits,
-    this.token,
   });
 
-  /// Convert from API response
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      id: json['id'] as int? ?? 0,
-      name: json['name'] as String? ?? '',
-      email: json['email'] as String? ?? '',
-      phone: json['phone'] as String? ?? '',
-      profilePic: json['profile_pic'] as String?,
-      accountType: json['account_type'] as String? ?? 'buyer',
-      credits: json['credits'] as int? ?? 0,
-      token: json['token'] as String?,
+      id: json['id'] ?? 0,
+      name: json['name'] ?? '',
+      email: json['email'] ?? '',
+      phone: json['phone'] ?? '',
+      profilePic: json['profile_pic'],
+      accountType: json['account_type'] ?? 'normal',
+      credits: json['credits'] ?? 0,
     );
   }
 
-  /// Convert to JSON for API
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -48,11 +43,14 @@ class User {
       'profile_pic': profilePic,
       'account_type': accountType,
       'credits': credits,
-      'token': token,
     };
   }
 }
 
+
+/// Repository for authentication operations
+/// Handles user registration, login, and token management
+/// Currently uses mock data - will connect to real API when backend is complete
 /// Repository for authentication operations
 /// Handles user registration, login, and token management
 /// Currently uses mock data - will connect to real API when backend is complete
@@ -122,13 +120,16 @@ class AuthRepository {
       }
 
       // Store user data
-      _currentUser = User.fromJson(response['data']);
+      _currentUser = User.fromJson(response['data']['user']);
       await _userStore.saveUser(_currentUser!);
-      
-      // Store token for future requests
-      if (_currentUser?.token != null) {
-        apiService.setAuthToken(_currentUser!.token!);
-      }
+
+      // Store tokens securely (NEW)
+      await AuthManager().setTokens(
+        AuthTokens(
+          accessToken: response['data']['access_token'],
+          refreshToken: response['data']['refresh_token'],
+        ),
+      );
 
       return ReturnResult(
         state: true,
@@ -180,13 +181,16 @@ class AuthRepository {
       }
 
       // Store user data
-      _currentUser = User.fromJson(response['data']);
+      _currentUser = User.fromJson(response['data']['user']);
       await _userStore.saveUser(_currentUser!);
-      
-      // Store token for future requests
-      if (_currentUser?.token != null) {
-        apiService.setAuthToken(_currentUser!.token!);
-      }
+
+      // Store tokens securely (NEW)
+      await AuthManager().setTokens(
+        AuthTokens(
+          accessToken: response['data']['access_token'],
+          refreshToken: response['data']['refresh_token'],
+        ),
+      );
 
       return ReturnResult(
         state: true,
@@ -204,7 +208,7 @@ class AuthRepository {
   /// Clears stored token and user data
   Future<ReturnResult> logout() async {
     try {
-      apiService.clearAuthToken();
+      await AuthManager().clear();
       _currentUser = null;
       await _userStore.clearUser();
       
@@ -252,6 +256,7 @@ class AuthRepository {
       }
 
       _currentUser = User.fromJson(response['data']);
+      await _userStore.saveUser(_currentUser!);
       
       return ReturnResult(
         state: true,
@@ -311,6 +316,7 @@ class AuthRepository {
       }
 
       _currentUser = User.fromJson(response['data']);
+      await _userStore.saveUser(_currentUser!);
       
       return ReturnResult(
         state: true,
@@ -332,9 +338,6 @@ class AuthRepository {
   /// Load cached user without touching the network
   Future<User?> loadCachedUser() async {
     _currentUser = await _userStore.loadUser();
-    if (_currentUser?.token != null) {
-      apiService.setAuthToken(_currentUser!.token!);
-    }
     return _currentUser;
   }
 }
