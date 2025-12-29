@@ -3,6 +3,11 @@ from .views import *
 
 urlpatterns = [
     path('get-listing/<int:listing_id>', get_listing, name='get-listing'),
+    # authentication urls 
+    path('auth/login' , login , name="login"),
+    path('auth/register' , register, name="register"),
+    path('auth/me' , me , name="me"),
+
     path('create-listing/', create_listing, name='create-listing'),
     path('edit-listing/<int:listing_id>', edit_listing, name='edit-listing'),
     path('my_listings/', my_listings, name='listings'),
