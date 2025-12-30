@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:findar/l10n/app_localizations.dart';
-
 const hpaddingSearchBar = 12.0;
 const vpaddingSearchBar = 3.0;
 
 class SearchBarWidget extends StatelessWidget {
-  const SearchBarWidget({super.key});
+  final TextEditingController _controller = TextEditingController();
+  SearchBarWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -41,10 +41,13 @@ class SearchBarWidget extends StatelessWidget {
                       fontSize: 14,
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
+                    
                     hintText: l10n?.searchHint ?? 'Search...',
                     border: InputBorder.none,
                   ),
+                  controller: _controller,
                   onSubmitted: (value) {
+                    print('😂😁Search submitted: $value');
                     Navigator.pushNamed(context, '/search-results', arguments: value);
                   },
                 );

@@ -26,6 +26,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
     // Get the search query from route arguments and perform search once
     if (!_hasSearched) {
       final rawQuery = ModalRoute.of(context)?.settings.arguments;
+      print('🔍 Raw search query from arguments: $rawQuery');
       // Handle string "null" or actual null by converting to empty string
       final query = (rawQuery == null || rawQuery.toString() == 'null' || rawQuery.toString().isEmpty) 
           ? '' 
