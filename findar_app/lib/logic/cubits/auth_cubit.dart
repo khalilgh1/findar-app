@@ -1,6 +1,6 @@
+import 'package:findar/core/services/findar_api_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:findar/core/repositories/auth_repository.dart';
-import 'package:findar/core/services/api_service.dart';
 
 /// AuthCubit handles all authentication operations
 /// 
@@ -19,7 +19,7 @@ class AuthCubit extends Cubit<Map<String, dynamic>> {
     'message': ''
   }) {
     // Initialize repository with ApiService
-    authRepository = AuthRepository(apiService: ApiService());
+    authRepository = AuthRepository(apiService: FindarApiService());
   }
 
   /// Attempt to hydrate from cached user on start

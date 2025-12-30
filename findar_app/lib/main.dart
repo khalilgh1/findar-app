@@ -9,7 +9,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 
-import 'package:findar/core/services/api_service.dart';
+import 'package:findar/core/services/auth_manager.dart';
 import 'package:findar/core/models/sponsorship_plan.dart';
 import 'package:findar/core/theme/app_theme.dart';
 import 'package:findar/core/theme/theme_provider.dart';

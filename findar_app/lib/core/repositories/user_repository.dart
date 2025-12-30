@@ -1,6 +1,7 @@
 import 'package:findar/core/models/return_result.dart';
 import 'package:findar/core/services/api_service.dart';
 import 'package:findar/core/repositories/auth_repository.dart';
+import 'package:findar/core/services/findar_api_service.dart';
 
 /// Extended user profile with additional fields
 class UserProfile {
@@ -147,7 +148,7 @@ class UserProfile {
 
 /// Repository for user profile operations
 class UserRepository {
-  final ApiService apiService;
+  final FindarApiService apiService;
 
   UserRepository({required this.apiService});
 

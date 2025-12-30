@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:findar/features/landing/animations/splash_animation_controller.dart';
 import 'package:findar/l10n/app_localizations.dart';
-import 'package:findar/core/services/api_service.dart';
+import 'package:findar/core/services/auth_manager.dart';
 
 
 class SplashScreen extends StatefulWidget {

@@ -1,6 +1,6 @@
+import 'package:findar/core/services/findar_api_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:findar/core/repositories/auth_repository.dart';
-import 'package:findar/core/services/api_service.dart';
 
 /// ProfileCubit handles user profile operations
 /// State: {data: {}, state: 'loading|done|error', message: ''}
@@ -13,7 +13,7 @@ class ProfileCubit extends Cubit<Map<String, dynamic>> {
           'state': 'initial',
           'message': '',
         }) {
-    authRepository = AuthRepository(apiService: ApiService());
+    authRepository = AuthRepository(apiService: FindarApiService());
   }
 
   /// Fetch current user profile

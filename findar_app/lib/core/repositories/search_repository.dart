@@ -1,11 +1,11 @@
 import 'package:findar/core/models/return_result.dart';
-import 'package:findar/core/services/api_service.dart';
+import 'package:findar/core/services/findar_api_service.dart';
 
 /// Repository for search operations
 /// Handles filtering, searching, and retrieving filtered listings
 /// Currently uses mock data - will connect to real API when backend is complete
 class SearchRepository {
-  final ApiService apiService;
+  final FindarApiService apiService;
 
   SearchRepository({required this.apiService});
 

@@ -1,5 +1,5 @@
 import 'package:findar/core/models/return_result.dart';
-import 'package:findar/core/services/api_service.dart';
+import 'package:findar/core/services/findar_api_service.dart';
 
 /// Property model
 class Property {
@@ -142,7 +142,7 @@ class Property {
 /// Repository for property operations
 /// Handles fetching property details, similar properties, and property actions
 class PropertyRepository {
-  final ApiService apiService;
+  final FindarApiService apiService;
 
   PropertyRepository({required this.apiService});
 
