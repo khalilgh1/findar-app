@@ -9,6 +9,7 @@ urlpatterns = [
     path('toggle_active_listing/<int:listing_id>', toggle_active_listing, name='toggle_active_listing'),
     path('login/', login, name='login'),
     path('save_listing/<int:listing_id>', save_listing, name='save_listing'),
+    path('saved-listings/', saved_listings, name='saved-listings'),
     path('register/', register, name='register'),
     path('listing-details/<int:listing_id>', listing_details, name='listing-details'),
     path('sponsored-listings/', sponsored_listings, name='sponsored-listings'),

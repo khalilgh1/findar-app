@@ -25,7 +25,89 @@ class RemoteListingRepository implements ListingRepository {
     int? livingrooms,
     double? area,
   }) async {
-    throw UnimplementedError();
+    print('🔍 Creating listing: $title');
+
+    try {
+      // Map classification to backend values
+      String listingType = classification.toLowerCase();
+      if (listingType == 'for sale') listingType = 'sale';
+      if (listingType == 'for rent') listingType = 'rent';
+
+      // Map propertyType to backend values (lowercase)
+      String buildingType = propertyType.toLowerCase();
+
+      // Build the request body matching backend Post model fields
+      final body = <String, dynamic>{
+        'title': title,
+        'description': description,
+        'price': price,
+        'bedrooms': bedrooms,
+        'bathrooms': bathrooms,
+        'listing_type': listingType, // 'rent' or 'sale'
+        'building_type': buildingType,  // 'apartment', 'house', etc.
+      };
+
+      // Don't send main_pic if it's an asset path
+      if (!image.startsWith('assets/')) {
+        body['main_pic'] = image;
+      }
+
+      // Add optional fields if provided
+      if (latitude != null) {
+        body['latitude'] = latitude;
+      }
+      if (longitude != null) {
+        body['longitude'] = longitude;
+      }
+      if (livingrooms != null) {
+        body['livingrooms'] = livingrooms;
+      }
+      if (area != null) {
+        body['area'] = area;
+      }
+
+      print('📤 Request body: $body');
+
+      final response = await apiService.post(
+        ApiConfig.createListing,
+        body: body,
+      );
+
+      print('📥 Create listing response: $response');
+
+      // If the service returned an error wrapper
+      if (response is ReturnResult) {
+        print('⚠️ createListing returned error: ${response.message}');
+        return response;
+      }
+
+      // Success case - backend returns the created listing object
+      if (response is Map) {
+        final map = Map<String, dynamic>.from(response);
+        
+        // Check if it has an 'id' field (indicates successful creation)
+        if (map.containsKey('id')) {
+          print('✅ Listing created successfully with ID: ${map['id']}');
+          return ReturnResult(
+            state: true,
+            message: 'Listing created successfully',
+          );
+        }
+      }
+
+      // Unexpected response shape
+      print('⚠️ Unexpected response shape for createListing');
+      return ReturnResult(
+        state: false,
+        message: 'Unexpected response from server',
+      );
+    } catch (e) {
+      print('❌ Error creating listing: $e');
+      return ReturnResult(
+        state: false,
+        message: 'Failed to create listing: $e',
+      );
+    }
   }
 
   @override
@@ -42,16 +124,88 @@ class RemoteListingRepository implements ListingRepository {
     String? image,
     bool? isOnline,
   }) async {
-    // Implementation for editing a listing using the API service
-    // ...
-    throw UnimplementedError();
+    print('🔍 Editing listing: $id');
+
+    try {
+      final body = <String, dynamic>{};
+
+      // Only add fields that are provided
+      if (title != null) body['title'] = title;
+      if (description != null) body['description'] = description;
+      if (price != null) body['price'] = price;
+      if (bedrooms != null) body['bedrooms'] = bedrooms;
+      if (bathrooms != null) body['bathrooms'] = bathrooms;
+      if (isOnline != null) body['active'] = isOnline;
+
+      // Map classification to backend values
+      if (classification != null) {
+        String listingType = classification.toLowerCase();
+        if (listingType == 'for sale') listingType = 'sale';
+        if (listingType == 'for rent') listingType = 'rent';
+        body['listing_type'] = listingType;
+      }
+
+      // Map propertyType to backend values
+      if (propertyType != null) {
+        body['building_type'] = propertyType.toLowerCase();
+      }
+
+      // Handle image
+      if (image != null && !image.startsWith('assets/')) {
+        body['main_pic'] = image;
+      }
+
+      print('📤 Edit request body: $body');
+
+      final response = await apiService.put(
+        ApiConfig.editListing(id),
+        body: body,
+      );
+
+      print('📥 Edit listing response: $response');
+
+      if (response is ReturnResult) {
+        return response;
+      }
+
+      if (response is Map && response.containsKey('id')) {
+        return ReturnResult(
+          state: true,
+          message: 'Listing updated successfully',
+        );
+      }
+
+      return ReturnResult(
+        state: false,
+        message: 'Unexpected response from server',
+      );
+    } catch (e) {
+      print('❌ Error editing listing: $e');
+      return ReturnResult(
+        state: false,
+        message: 'Failed to edit listing: $e',
+      );
+    }
   }
 
   @override
   Future<ReturnResult> deleteListing(int id) async {
-    // Implementation for deleting a listing using the API service
-    // ...
-    throw UnimplementedError();
+    print('🔍 Deleting listing: $id');
+
+    try {
+      await apiService.delete(ApiConfig.editListing(id));
+
+      return ReturnResult(
+        state: true,
+        message: 'Listing deleted successfully',
+      );
+    } catch (e) {
+      print('❌ Error deleting listing: $e');
+      return ReturnResult(
+        state: false,
+        message: 'Failed to delete listing: $e',
+      );
+    }
   }
 
   @override
@@ -68,12 +222,100 @@ class RemoteListingRepository implements ListingRepository {
     double? maxSqft,
     String? listedBy,
   }) async {
-    throw UnimplementedError();
+    print('🔍 Fetching filtered listings');
+
+    try {
+      final queryParams = <String, dynamic>{};
+
+      if (latitude != null) queryParams['latitude'] = latitude.toString();
+      if (longitude != null) queryParams['longitude'] = longitude.toString();
+      if (minPrice != null) queryParams['min_price'] = minPrice.toString();
+      if (maxPrice != null) queryParams['max_price'] = maxPrice.toString();
+      if (listingType != null) queryParams['listing_type'] = listingType;
+      if (buildingType != null) queryParams['building_type'] = buildingType;
+      if (numBedrooms != null) queryParams['num_bedrooms'] = numBedrooms.toString();
+      if (numBathrooms != null) queryParams['num_bathrooms'] = numBathrooms.toString();
+      if (minSqft != null) queryParams['min_sqft'] = minSqft.toString();
+      if (maxSqft != null) queryParams['max_sqft'] = maxSqft.toString();
+      if (listedBy != null) queryParams['listed_by'] = listedBy;
+
+      print('📤 Filter params: $queryParams');
+
+      final response = await apiService.get(
+        ApiConfig.advancedSearch,
+        queryParams: queryParams.isNotEmpty ? queryParams : null,
+      );
+
+      print('📥 Filtered listings response: $response');
+
+      if (response is List) {
+        return _parseListingList(response);
+      }
+
+      return <PropertyListing>[];
+    } catch (e) {
+      print('❌ Error fetching filtered listings: $e');
+      return <PropertyListing>[];
+    }
   }
 
   @override
   Future<Map<String, List<PropertyListing>>> getUserListings() async {
-    throw UnimplementedError();
+    print('🔍 Fetching user listings');
+
+    try {
+      final response = await apiService.get(ApiConfig.myListings);
+
+      print('📥 My listings response: $response');
+
+      // If the service returned an error wrapper
+      if (response is ReturnResult) {
+        print('⚠️ getUserListings returned error: ${response.message}');
+        return {'active': [], 'inactive': []};
+      }
+
+      // Backend returns { "active": [...], "inactive": [...] }
+      if (response is Map) {
+        final map = Map<String, dynamic>.from(response);
+
+        final activeList = map['active'] is List ? List.from(map['active']) : [];
+        final inactiveList = map['inactive'] is List ? List.from(map['inactive']) : [];
+
+        return {
+          'active': _parseListingList(activeList),
+          'inactive': _parseListingList(inactiveList),
+        };
+      }
+
+      print('⚠️ Unexpected response shape for getUserListings');
+      return {'active': [], 'inactive': []};
+    } catch (e) {
+      print('❌ Error fetching user listings: $e');
+      return {'active': [], 'inactive': []};
+    }
+  }
+
+  /// Helper method to parse a list of listing objects
+  List<PropertyListing> _parseListingList(List rawList) {
+    try {
+      return rawList.map<PropertyListing>((e) {
+        final data = Map<String, dynamic>.from(e as Map);
+
+        // Map backend field names to model field names
+        data['image'] = data['main_pic'] ?? data['image'] ?? '';
+        data['isOnline'] = data['active'] ?? data['isOnline'] ?? true;
+        data['isBoosted'] = data['boosted'] ?? data['isBoosted'] ?? false;
+
+        if (!data.containsKey('location')) {
+          data['location'] = data['city'] ?? 'Unknown';
+        }
+
+        return PropertyListing.fromJson(data);
+      }).toList();
+    } catch (e) {
+      print('❌ Error parsing listing list: $e');
+      return <PropertyListing>[];
+    }
   }
 
   @override
@@ -137,31 +379,130 @@ class RemoteListingRepository implements ListingRepository {
 
   @override
   Future<List<PropertyListing>> getSponsoredListings() async {
-    throw UnimplementedError();
+    print('🔍 Fetching sponsored listings');
+
+    try {
+      final response = await apiService.get(ApiConfig.sponsoredListings);
+
+      print('📥 Sponsored listings response: $response');
+
+      if (response is List) {
+        return _parseListingList(response);
+      }
+
+      return <PropertyListing>[];
+    } catch (e) {
+      print('❌ Error fetching sponsored listings: $e');
+      return <PropertyListing>[];
+    }
   }
 
   @override
   Future<List<PropertyListing>> getSavedListings() async {
-    throw UnimplementedError();
+    print('🔍 Fetching saved listings');
+
+    try {
+      final response = await apiService.get(ApiConfig.savedListings);
+
+      print('📥 Saved listings response: $response');
+
+      if (response is List) {
+        return _parseListingList(response);
+      }
+
+      return <PropertyListing>[];
+    } catch (e) {
+      print('❌ Error fetching saved listings: $e');
+      return <PropertyListing>[];
+    }
   }
 
   @override
   Future<Set<int>> getSavedListingIds() async {
-    throw UnimplementedError();
+    print('🔍 Fetching saved listing IDs');
+
+    try {
+      final listings = await getSavedListings();
+      return listings.map((listing) => listing.id).toSet();
+    } catch (e) {
+      print('❌ Error fetching saved listing IDs: $e');
+      return <int>{};
+    }
   }
 
   @override
   Future<ReturnResult> saveListing(int listingId) async {
-    throw UnimplementedError();
+    print('🔍 Saving listing: $listingId');
+
+    try {
+      final response = await apiService.get(ApiConfig.saveListing(listingId));
+
+      print('📥 Save listing response: $response');
+
+      return ReturnResult(
+        state: true,
+        message: 'Listing saved successfully',
+      );
+    } catch (e) {
+      print('❌ Error saving listing: $e');
+      return ReturnResult(
+        state: false,
+        message: 'Failed to save listing: $e',
+      );
+    }
   }
 
   @override
   Future<ReturnResult> unsaveListing(int listingId) async {
-    throw UnimplementedError();
+    print('🔍 Unsaving listing: $listingId');
+
+    try {
+      // TODO: Update with correct unsave endpoint when available
+      await apiService.delete(ApiConfig.saveListing(listingId));
+
+      print('📥 Unsave listing completed');
+
+      return ReturnResult(
+        state: true,
+        message: 'Listing unsaved successfully',
+      );
+    } catch (e) {
+      print('❌ Error unsaving listing: $e');
+      return ReturnResult(
+        state: false,
+        message: 'Failed to unsave listing: $e',
+      );
+    }
   }
 
   @override
   Future<PropertyListing?> getListingById(int id) async {
-    throw UnimplementedError();
+    print('🔍 Fetching listing by ID: $id');
+
+    try {
+      final response = await apiService.get(ApiConfig.getListing(id));
+
+      print('📥 Get listing response: $response');
+
+      if (response is Map) {
+        final data = Map<String, dynamic>.from(response);
+        
+        // Map backend field names to model field names
+        data['image'] = data['main_pic'] ?? data['image'] ?? '';
+        data['isOnline'] = data['active'] ?? data['isOnline'] ?? true;
+        data['isBoosted'] = data['boosted'] ?? data['isBoosted'] ?? false;
+
+        if (!data.containsKey('location')) {
+          data['location'] = data['city'] ?? 'Unknown';
+        }
+
+        return PropertyListing.fromJson(data);
+      }
+
+      return null;
+    } catch (e) {
+      print('❌ Error fetching listing by ID: $e');
+      return null;
+    }
   }
 }
