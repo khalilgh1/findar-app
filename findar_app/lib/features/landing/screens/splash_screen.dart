@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:findar/features/landing/animations/splash_animation_controller.dart';
 import 'package:findar/l10n/app_localizations.dart';
+import 'package:findar/core/services/api_service.dart';
+
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -18,9 +20,24 @@ class _SplashScreenState extends State<SplashScreen>
     super.initState();
     _animationController = SplashAnimationController();
     _animationController.initialize(this);
-    
-    // Start animations
-    _animationController.startAnimation();
+  
+    _checkAuthAndStart();
+  }
+
+  Future<void> _checkAuthAndStart() async {
+    final authmanger = AuthManager();
+    final isLoggedIn = authmanger.isAuthenticated;
+
+    if (!mounted) return;
+
+    if (isLoggedIn) {
+      // Small delay to avoid frame issues
+      await Future.delayed(const Duration(milliseconds: 100));
+
+      Navigator.pushReplacementNamed(context, '/home');
+    } else {
+      _animationController.startAnimation();
+    }
   }
 
   @override

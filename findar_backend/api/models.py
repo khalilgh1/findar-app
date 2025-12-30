@@ -29,7 +29,9 @@ class CustomUser(AbstractUser):
     profile_pic     = models.ImageField(upload_to="profiles/" , blank=True , null=True)
     account_type    = models.CharField(max_length=20, choices=ACCOUNT_CHOICES)
 
-
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = ["username"]
+    
     def __str__(self):
         return self.username
     

@@ -267,7 +267,7 @@ def login(request):
     password = request.data.get("password")
 
     user = authenticate(request=request,email=email, password=password)
-
+    print( request.data  )
     if not user:
         return Response({"error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
 
