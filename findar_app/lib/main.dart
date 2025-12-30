@@ -56,6 +56,7 @@ import 'package:findar/core/di/service_locator.dart';
 
 void main() async {
   SetupRepositories();
+  WidgetsFlutterBinding.ensureInitialized();
   await AuthManager().init();
   runApp(const MainApp());
 }

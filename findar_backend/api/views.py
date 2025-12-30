@@ -263,23 +263,28 @@ def toggle_active_listing(request , listing_id):
 
 @api_view(["POST"])
 def login(request):
-    username = request.data.get("username")
+    email = request.data.get("email")
     password = request.data.get("password")
 
-    user = authenticate(username=username, password=password)
+    user = authenticate(request=request,email=email, password=password)
 
     if not user:
         return Response({"error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
 
     refresh = RefreshToken.for_user(user)
+    user = UserSerializers(user).data
 
-    return Response({
+    response= Response({
+        "message":"login successful",
+        "success":True,
+        "data": {
         "refresh": str(refresh),
         "access": str(refresh.access_token),
-        "username": user.username,
-        "email": user.email,
-        "account_type": user.account_type,
+        "user": user
+        }
     })
+
+    return response 
 
 @api_view(["POST"])
 def register(request):
@@ -290,17 +295,29 @@ def register(request):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     user = serializer.save()
+    user = UserSerializers(user).data
+    
     refresh = RefreshToken.for_user(user)
-    return Response({
-                    "message": "registered successfully",
-                    "refresh": str(refresh),
-                    "access": str(refresh.access_token),
-                    "username": user.username,
-                    "email": user.email,
-                    "account_type": user.account_type,
-                    }, status=status.HTTP_201_CREATED)
 
-@api_view(["POST"])
+    response= Response({
+        "message":"registered successful",
+        "success":True,
+        "data": {
+        "refresh": str(refresh),
+        "access": str(refresh.access_token),
+        "user": user
+        }
+    })
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def me(request):
-    pass
+    
+    user = request.user
+    user = UserSerializers(user).data
 
+    response= Response({
+        "user": user
+    } , status=status.HTTP_200_OK )
+
+    return response

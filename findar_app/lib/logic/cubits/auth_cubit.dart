@@ -114,7 +114,6 @@ class AuthCubit extends Cubit<Map<String, dynamic>> {
         email: email,
         password: password,
       );
-
       // 3. Check result.state
       if (result.state) {
         // Success

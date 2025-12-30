@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-hn!e^*&nytn-0sipc@_7_g1-zeuhp8usjnic50ce1n(3m4@tbk
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -48,6 +48,11 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',  # if using JWT
     ),
 }
+
+AUTHENTICATION_BACKENDS = [
+    'api.auth_backend.EmailBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

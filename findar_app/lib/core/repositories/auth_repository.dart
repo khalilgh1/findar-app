@@ -28,7 +28,7 @@ class User {
       name: json['name'] ?? '',
       email: json['email'] ?? '',
       phone: json['phone'] ?? '',
-      profilePic: json['profile_pic'],
+      profilePic: json['profile_pic'] ?? "",
       accountType: json['account_type'] ?? 'normal',
       credits: json['credits'] ?? 0,
     );
@@ -126,8 +126,8 @@ class AuthRepository {
       // Store tokens securely (NEW)
       await AuthManager().setTokens(
         AuthTokens(
-          accessToken: response['data']['access_token'],
-          refreshToken: response['data']['refresh_token'],
+          accessToken: response['data']['access'],
+          refreshToken: response['data']['refresh'],
         ),
       );
 
@@ -187,8 +187,8 @@ class AuthRepository {
       // Store tokens securely (NEW)
       await AuthManager().setTokens(
         AuthTokens(
-          accessToken: response['data']['access_token'],
-          refreshToken: response['data']['refresh_token'],
+          accessToken: response['data']['access'],
+          refreshToken: response['data']['refresh'],
         ),
       );
 

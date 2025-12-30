@@ -1,7 +1,4 @@
-// TODO: Uncomment when connecting to real API
-// import 'package:http/http.dart' as http;
-// import 'dart:convert';
-import 'dart:async';
+// import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -31,8 +28,8 @@ class AuthTokens {
 
 
 class TokenStorage {
-  static const _accessKey = 'access_token';
-  static const _refreshKey = 'refresh_token';
+  static const _accessKey = 'access';
+  static const _refreshKey = 'refresh';
 
   static final TokenStorage _instance = TokenStorage._internal();
   factory TokenStorage() => _instance;
@@ -96,11 +93,12 @@ class AuthManager {
     _refreshToken = null;
     await _storage.clear();
   }
+
 }
 
 
 class ApiService {
-  static const String _baseUrl = 'http://localhost:8000/api';
+  static const String _baseUrl = 'http://192.168.1.42:8000/api';
   static const Duration _timeout = Duration(seconds: 10);
 
   static final ApiService _instance = ApiService._internal();
@@ -190,7 +188,7 @@ class ApiService {
         Uri.parse('$_baseUrl/auth/refresh'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          'refresh_token': _auth.refreshToken,
+          'refresh': _auth.refreshToken,
         }),
       );
 
@@ -198,8 +196,8 @@ class ApiService {
         final json = jsonDecode(response.body);
         await _auth.setTokens(
           AuthTokens(
-            accessToken: json['access_token'],
-            refreshToken: json['refresh_token'],
+            accessToken: json['access'],
+            refreshToken: json['refresh'],
           ),
         );
         return true;
@@ -264,8 +262,8 @@ class ApiService {
 
     await _auth.setTokens(
       AuthTokens(
-        accessToken: json['access_token'],
-        refreshToken: json['refresh_token'],
+        accessToken: json['access'],
+        refreshToken: json['refresh'],
       ),
     );
   }
