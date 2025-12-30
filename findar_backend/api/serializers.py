@@ -43,11 +43,12 @@ class BoostingSerializers(serializers.ModelSerializer):
 
 
 class RegisterSerializer(serializers.ModelSerializer):
+
     password = serializers.CharField(write_only=True)
 
     class Meta:
         model = CustomUser
-        fields = ("username", "email", "password", "phone_number", "profile_pic", "account_type")
+        fields = ("username", "email", "password", "phone", "profile_pic", "account_type")
 
     def validate_account_type(self, value):
         if value not in ["individual", "Individual" , "agency" , "Agency"]:
@@ -58,7 +59,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         if len(value) < 4:
             raise ValidationError("Username must be at least 4 characters long.")
 
-        if not re.match(r'^[a-zA-Z0-9_]+$', value):
+        if not re.match(r'^[a-zA-Z0-9_ ]+$', value):
             raise ValidationError("Username can only contain letters, numbers, and underscores.")
 
         if CustomUser.objects.filter(username=value).exists():

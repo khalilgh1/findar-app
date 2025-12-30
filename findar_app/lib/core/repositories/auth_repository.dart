@@ -104,7 +104,7 @@ class AuthRepository {
       final response = await apiService.post(
         '/auth/register',
         body: {
-          'name': name,
+          'username': name,
           'email': email,
           'phone': phone,
           'password': password,

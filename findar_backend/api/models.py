@@ -23,8 +23,9 @@ ACCOUNT_CHOICES = [
 
 class CustomUser(AbstractUser):
 
+    username = models.CharField(max_length=150,unique=False)    
     email = models.EmailField(unique=True)
-    phone_number    = models.CharField(max_length=15 , unique=True)
+    phone    = models.CharField(max_length=15 , unique=True)
     profile_pic     = models.ImageField(upload_to="profiles/" , blank=True , null=True)
     account_type    = models.CharField(max_length=20, choices=ACCOUNT_CHOICES)
 

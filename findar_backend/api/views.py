@@ -290,16 +290,19 @@ def login(request):
 def register(request):
 
     serializer = RegisterSerializer(data=request.data)
+    print( request.data )
 
     if not serializer.is_valid():
+        print( serializer._errors )
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     user = serializer.save()
-    user = UserSerializers(user).data
     
     refresh = RefreshToken.for_user(user)
+    user = RegisterSerializer(user).data
 
-    response= Response({
+    response = Response({
         "message":"registered successful",
         "success":True,
         "data": {
@@ -308,6 +311,8 @@ def register(request):
         "user": user
         }
     })
+
+    return response
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])

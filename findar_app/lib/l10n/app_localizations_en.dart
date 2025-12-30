@@ -21,10 +21,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get selectAccountType => 'Select Account Type';
 
   @override
-  String get accountIndividual => 'Individual';
+  String get accountIndividual => 'individual';
 
   @override
-  String get accountAgency => 'Agency';
+  String get accountAgency => 'agency';
 
   @override
   String get fullName => 'Full Name';
