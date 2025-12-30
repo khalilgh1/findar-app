@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:findar/core/config/api_config.dart';
 import 'package:findar/core/models/return_result.dart';
 import 'package:findar/core/services/auth_service.dart';
+import 'package:findar/core/services/auth_manager.dart';
 
 /// Base API Service for making HTTP requests
 /// Handles all HTTP-level errors and response parsing
@@ -17,27 +18,29 @@ class FindarApiService {
   // Flag to prevent infinite refresh loops
   bool _isRefreshing = false;
 
-  /// GET request with automatic token refresh
+  // ========================================
+  // GET
+  // ========================================
   Future<dynamic> get(
     String endpoint, {
     Map<String, dynamic>? queryParams,
     String? token,
   }) async {
-
-    print("🚀 Making GET request to $endpoint with params: $queryParams");
     final url = queryParams != null
         ? ApiConfig.getUrlWithQuery(endpoint, queryParams)
         : ApiConfig.getUrl(endpoint);
-    print("🌐 Full URL: $url");
+
     if (ApiConfig.enableApiLogging) {
-      print('🔵 GET Request: $url');
+      print('🔵 GET $url');
     }
 
     try {
       final response = await _client
           .get(
             Uri.parse(url),
-            headers: ApiConfig.getHeaders(token: token),
+            headers: ApiConfig.getHeaders(
+              token: token ?? await _authService.getAccessToken(), // ✅ FIX
+            ),
           )
           .timeout(ApiConfig.requestTimeout);
 
@@ -48,7 +51,6 @@ class FindarApiService {
         retryCallback: () => get(
           endpoint,
           queryParams: queryParams,
-          token: token,
         ),
       );
     } catch (e) {
@@ -56,7 +58,9 @@ class FindarApiService {
     }
   }
 
-  /// POST request with automatic token refresh
+  // ========================================
+  // POST
+  // ========================================
   Future<dynamic> post(
     String endpoint, {
     required Map<String, dynamic> body,
@@ -65,36 +69,35 @@ class FindarApiService {
     final url = ApiConfig.getUrl(endpoint);
 
     if (ApiConfig.enableApiLogging) {
-      print('🟢 POST Request: $url');
-      print('📤 Body: ${jsonEncode(body)}');
+      print('🟢 POST $url');
+      print('📤 ${jsonEncode(body)}');
     }
 
     try {
       final response = await _client
           .post(
             Uri.parse(url),
-            headers: ApiConfig.getHeaders(token: token),
+            headers: ApiConfig.getHeaders(
+              token: token ?? await _authService.getAccessToken(), // ✅ FIX
+            ),
             body: jsonEncode(body),
           )
-          .timeout(
-            ApiConfig.requestTimeout,
-            onTimeout: () => throw TimeoutException(
-              'Request timed out after ${ApiConfig.requestTimeout.inSeconds}s',
-            ),
-          );
+          .timeout(ApiConfig.requestTimeout);
 
       return await _handleResponse(
         response,
         'POST',
         endpoint,
-        retryCallback: () => post(endpoint, body: body, token: token),
+        retryCallback: () => post(endpoint, body: body),
       );
     } catch (e) {
       return _handleError(e, 'POST', url);
     }
   }
 
-  /// PUT request with automatic token refresh
+  // ========================================
+  // PUT
+  // ========================================
   Future<dynamic> put(
     String endpoint, {
     required Map<String, dynamic> body,
@@ -103,15 +106,16 @@ class FindarApiService {
     final url = ApiConfig.getUrl(endpoint);
 
     if (ApiConfig.enableApiLogging) {
-      print('🟡 PUT Request: $url');
-      print('📤 Body: ${jsonEncode(body)}');
+      print('🟡 PUT $url');
     }
 
     try {
       final response = await _client
           .put(
             Uri.parse(url),
-            headers: ApiConfig.getHeaders(token: token),
+            headers: ApiConfig.getHeaders(
+              token: token ?? await _authService.getAccessToken(), // ✅ FIX
+            ),
             body: jsonEncode(body),
           )
           .timeout(ApiConfig.requestTimeout);
@@ -120,14 +124,16 @@ class FindarApiService {
         response,
         'PUT',
         endpoint,
-        retryCallback: () => put(endpoint, body: body, token: token),
+        retryCallback: () => put(endpoint, body: body),
       );
     } catch (e) {
       return _handleError(e, 'PUT', url);
     }
   }
 
-  /// PATCH request with automatic token refresh
+  // ========================================
+  // PATCH
+  // ========================================
   Future<dynamic> patch(
     String endpoint, {
     required Map<String, dynamic> body,
@@ -136,15 +142,16 @@ class FindarApiService {
     final url = ApiConfig.getUrl(endpoint);
 
     if (ApiConfig.enableApiLogging) {
-      print('🟠 PATCH Request: $url');
-      print('📤 Body: ${jsonEncode(body)}');
+      print('🟠 PATCH $url');
     }
 
     try {
       final response = await _client
           .patch(
             Uri.parse(url),
-            headers: ApiConfig.getHeaders(token: token),
+            headers: ApiConfig.getHeaders(
+              token: token ?? await _authService.getAccessToken(), // ✅ FIX
+            ),
             body: jsonEncode(body),
           )
           .timeout(ApiConfig.requestTimeout);
@@ -153,29 +160,33 @@ class FindarApiService {
         response,
         'PATCH',
         endpoint,
-        retryCallback: () => patch(endpoint, body: body, token: token),
+        retryCallback: () => patch(endpoint, body: body),
       );
     } catch (e) {
       return _handleError(e, 'PATCH', url);
     }
   }
 
-  /// DELETE request with automatic token refresh
-  Future<void> delete(
+  // ========================================
+  // DELETE
+  // ========================================
+  Future<dynamic> delete(
     String endpoint, {
     String? token,
   }) async {
     final url = ApiConfig.getUrl(endpoint);
 
     if (ApiConfig.enableApiLogging) {
-      print('🔴 DELETE Request: $url');
+      print('🔴 DELETE $url');
     }
 
     try {
       final response = await _client
           .delete(
             Uri.parse(url),
-            headers: ApiConfig.getHeaders(token: token),
+            headers: ApiConfig.getHeaders(
+              token: token ?? await _authService.getAccessToken(), // ✅ FIX
+            ),
           )
           .timeout(ApiConfig.requestTimeout);
 
@@ -183,7 +194,7 @@ class FindarApiService {
         response,
         'DELETE',
         endpoint,
-        retryCallback: () => delete(endpoint, token: token),
+        retryCallback: () => delete(endpoint),
       );
     } catch (e) {
       return _handleError(e, 'DELETE', url);
@@ -191,267 +202,110 @@ class FindarApiService {
   }
 
   // ========================================
-  // TOKEN REFRESH LOGIC
+  // TOKEN REFRESH
   // ========================================
-
-  /// Check if endpoint is an authentication endpoint
-  /// ✅ NEW METHOD - Identifies endpoints that shouldn't trigger token refresh
   bool _isAuthEndpoint(String endpoint) {
-    final lowerEndpoint = endpoint.toLowerCase();
-    return lowerEndpoint.contains('/login') ||
-        lowerEndpoint.contains('/register') ||
-        lowerEndpoint.contains('/refresh') ||
-        lowerEndpoint.contains('/logout') ||
-        lowerEndpoint.contains('/auth/login') ||
-        lowerEndpoint.contains('/auth/register');
+    final e = endpoint.toLowerCase();
+    return e.contains('/login') ||
+        e.contains('/register') ||
+        e.contains('/refresh') ||
+        e.contains('/logout');
   }
 
-  /// Refresh the access token using the refresh token
   Future<bool> _refreshToken() async {
     if (_isRefreshing) {
-      if (ApiConfig.enableApiLogging) {
-        print('⚠️ Already refreshing token, waiting...');
-      }
-      await Future.delayed(const Duration(milliseconds: 500));
-      return await _authService.getAccessToken() != null;
+      return _authService.getAccessToken() != null; // ✅ FIX
     }
 
     _isRefreshing = true;
 
     try {
-      if (ApiConfig.enableApiLogging) {
-        print('🔄 Attempting to refresh access token...');
-      }
-
-      final refreshed = await _authService.refreshTokenIfPossible();
-
-      if (refreshed) {
-        if (ApiConfig.enableApiLogging) {
-          print('✅ Token refreshed successfully');
-        }
-        return true;
-      } else {
-        if (ApiConfig.enableApiLogging) {
-          print('❌ Refresh token expired - logging out user');
-        }
-
+      final refreshed = await _authService.refreshToken();
+      if (!refreshed) {
         await _authService.logout();
-        return false;
       }
-    } catch (e) {
-      if (ApiConfig.enableApiLogging) {
-        print('❌ Token refresh error: $e');
-      }
-
-      await _authService.logout();
-      return false;
+      return refreshed;
     } finally {
       _isRefreshing = false;
     }
   }
 
   // ========================================
-  // PRIVATE HELPER METHODS
+  // RESPONSE HANDLING
   // ========================================
-
-  /// Handle successful and error responses with automatic retry on 401
   Future<dynamic> _handleResponse(
-      http.Response response, String method, String endpoint,
-      {required Future<dynamic> Function() retryCallback}) async {
+    http.Response response,
+    String method,
+    String endpoint, {
+    required Future<dynamic> Function() retryCallback,
+  }) async {
     if (ApiConfig.enableApiLogging) {
-      print('📥 $method Response (${response.statusCode}): ${response.body}');
+      print('📥 $method ${response.statusCode}: ${response.body}');
     }
 
-    // SUCCESS CASES (200-299)
+    // SUCCESS
     if (response.statusCode >= 200 && response.statusCode < 300) {
-      try {
-        final decoded = jsonDecode(response.body);
-        print('✅ Decoded response: $decoded');
-        return decoded;
-      } on FormatException {
-        return ReturnResult(
-          state: false,
-          message: 'Invalid JSON response from server',
-        );
-      }
+      if (response.body.isEmpty) return true; // ✅ FIX
+      return jsonDecode(response.body);
     }
 
-    // ✅ CHECK: Is this an auth endpoint?
-    final isAuthEndpoint = _isAuthEndpoint(endpoint);
-
-    // UNAUTHORIZED (401)
-    if (response.statusCode == 401) {
-      // ✅ For auth endpoints (login/register), don't try to refresh - just throw error
-      if (isAuthEndpoint) {
-        if (ApiConfig.enableApiLogging) {
-          print(
-              '❌ 401 on auth endpoint - invalid credentials, not session expired');
-        }
-        return _createErrorResult(response, method);
+    // 401
+    if (response.statusCode == 401 && !_isAuthEndpoint(endpoint)) {
+      final refreshed = await _refreshToken();
+      if (refreshed) {
+        return await retryCallback();
       }
 
-      // ✅ For protected endpoints, try to refresh token
-      if (!_isRefreshing) {
-        if (ApiConfig.enableApiLogging) {
-          print('🔄 Got 401 Unauthorized, attempting token refresh...');
-        }
-
-        final refreshed = await _refreshToken();
-
-        if (refreshed) {
-          if (ApiConfig.enableApiLogging) {
-            print('✅ Token refreshed, retrying original request...');
-          }
-          return await retryCallback();
-        } else {
-          if (ApiConfig.enableApiLogging) {
-            print('❌ Token refresh failed - session expired');
-          }
-          return ReturnResult(
-            state: false,
-            message: 'Your session has expired. Please log in again.',
-          );
-        }
-      }
-    }
-
-    // OTHER ERROR CASES
-    return _createErrorResult(response, method);
-  }
-
-  /// Create a `ReturnResult` describing the error response
-  ReturnResult _createErrorResult(http.Response response, String method) {
-    final statusCode = response.statusCode;
-    String message;
-
-    // Try to parse error body
-    try {
-      final body = jsonDecode(response.body);
-
-      if (body is Map<String, dynamic>) {
-        if (body.containsKey('detail')) {
-          message = body['detail'].toString();
-        } else if (body.containsKey('error')) {
-          message = body['error'].toString();
-        } else {
-          message = _parseFieldErrors(body);
-        }
-      } else {
-        message = body.toString();
-      }
-    } catch (e) {
-      message = response.body.isNotEmpty
-          ? response.body
-          : 'Request failed with status $statusCode';
-    }
-
-    // Improve messages for common statuses
-    if (statusCode >= 400 && statusCode < 500) {
-      if (statusCode == 401) {
-        if (!(message.toLowerCase().contains('invalid') ||
-            message.toLowerCase().contains('incorrect') ||
-            message.toLowerCase().contains('credentials'))) {
-          message =
-              'Invalid credentials. Please check your email/username and password.';
-        }
-      } else if (statusCode == 403) {
-        message = 'Access forbidden';
-      } else if (statusCode == 404) {
-        message = 'Resource not found';
-      } else if (statusCode == 429) {
-        message = 'Too many requests. Please try again later.';
-      }
-    } else if (statusCode >= 500) {
-      message = 'Server error. Please try again later.';
-    }
-
-    if (ApiConfig.enableApiLogging) {
-      print('❌ API Error ($statusCode): $message');
-    }
-
-    return ReturnResult(
-      state: false,
-      message: message,
-    );
-  }
-
-  /// Parse Django-style field errors into readable message
-  String _parseFieldErrors(Map<String, dynamic> errors) {
-    final messages = <String>[];
-
-    errors.forEach((key, value) {
-      if (value is List && value.isNotEmpty) {
-        final fieldName = _formatFieldName(key);
-        messages.add('$fieldName: ${value.first}');
-      } else if (value is String) {
-        final fieldName = _formatFieldName(key);
-        messages.add('$fieldName: $value');
-      }
-    });
-
-    return messages.isNotEmpty ? messages.join('\n') : 'Validation failed';
-  }
-
-  /// Convert snake_case field names to Title Case
-  String _formatFieldName(String fieldName) {
-    return fieldName
-        .replaceAll('_', ' ')
-        .split(' ')
-        .map((word) =>
-            word.isEmpty ? '' : word[0].toUpperCase() + word.substring(1))
-        .join(' ');
-  }
-
-  /// Handle exceptions during HTTP calls
-  dynamic _handleError(dynamic error, String method, String url) {
-    if (ApiConfig.enableApiLogging) {
-      print('❌ $method Error: $error');
-    }
-
-    if (error is ReturnResult) {
-      return error;
-    }
-
-    if (error is http.ClientException) {
       return ReturnResult(
         state: false,
-        message: 'Connection failed. Check your internet connection.',
+        message: 'Session expired. Please login again.',
       );
     }
 
+    return _createErrorResult(response, method);
+  }
+
+  // ========================================
+  // ERRORS
+  // ========================================
+  ReturnResult _createErrorResult(http.Response response, String method) {
+    String message;
+
+    try {
+      final body = jsonDecode(response.body);
+      message = body is Map && body['detail'] != null
+          ? body['detail'].toString()
+          : response.body;
+    } catch (_) {
+      message = response.body.isNotEmpty
+          ? response.body
+          : 'Request failed (${response.statusCode})';
+    }
+
+    return ReturnResult(state: false, message: message);
+  }
+
+  dynamic _handleError(dynamic error, String method, String url) {
     if (error is SocketException) {
       return ReturnResult(
         state: false,
-        message: 'Cannot reach server. Please check:\n'
-            '• Internet connection\n'
-            '• Server is running\n'
-            '• Correct IP address: ${ApiConfig.baseUrl}',
+        message: 'Cannot reach server (${ApiConfig.baseUrl})',
       );
     }
 
     if (error is TimeoutException) {
       return ReturnResult(
         state: false,
-        message:
-            'Request timed out. The server is taking too long to respond. Please check your connection and try again.',
+        message: 'Request timed out',
       );
     }
 
-    if (error is FormatException) {
-      return ReturnResult(
-        state: false,
-        message: 'Invalid data format received from server',
-      );
-    }
-
-    // If an Api HTTP error object was returned earlier in the flow, pass it through
     return ReturnResult(
       state: false,
-      message: 'Unexpected error: ${error.toString()}',
+      message: 'Unexpected error: $error',
     );
   }
 
-  /// Dispose resources
   void dispose() {
     _client.close();
   }

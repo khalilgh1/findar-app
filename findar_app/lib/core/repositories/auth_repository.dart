@@ -1,5 +1,6 @@
 import 'package:findar/core/models/return_result.dart';
-import 'package:findar/core/services/api_service.dart';
+import 'package:findar/core/services/findar_api_service.dart';
+import 'package:findar/core/services/auth_manager.dart';
 import 'package:findar/core/repositories/local_user_store.dart';
 
 /// User model for authentication
@@ -55,7 +56,7 @@ class User {
 /// Handles user registration, login, and token management
 /// Currently uses mock data - will connect to real API when backend is complete
 class AuthRepository {
-  final ApiService apiService;
+  final FindarApiService apiService;
   final LocalUserStore _userStore;
   
   // Mock storage for current user session
