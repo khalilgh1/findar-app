@@ -8,10 +8,17 @@ class PropertyListing {
   final String title;
   final String description;
   final double price;
+
+  @JsonKey(defaultValue: 'Unknown')
   final String location;
+
   final int bedrooms;
   final int bathrooms;
+
+  @JsonKey(name: 'listing_type')
   final String classification;
+
+  @JsonKey(name: 'building_type')
   final String propertyType;
   final String image;
 
@@ -22,7 +29,6 @@ class PropertyListing {
   )
   final bool isOnline;
   final String? createdAt;
-  final String? updatedAt;
 
 
   @JsonKey(
@@ -55,7 +61,6 @@ class PropertyListing {
     required this.image,
     this.isOnline = true,
     this.createdAt,
-    this.updatedAt,
     this.isBoosted = false,
     this.boostExpiryDate,
     this.sponsorshipPlanId,
@@ -85,7 +90,6 @@ class PropertyListing {
     String? image,
     bool? isOnline,
     String? createdAt,
-    String? updatedAt,
     bool? isBoosted,
     DateTime? boostExpiryDate,
     String? sponsorshipPlanId,
@@ -106,7 +110,6 @@ class PropertyListing {
       image: image ?? this.image,
       isOnline: isOnline ?? this.isOnline,
       createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
       isBoosted: isBoosted ?? this.isBoosted,
       boostExpiryDate: boostExpiryDate ?? this.boostExpiryDate,
       sponsorshipPlanId: sponsorshipPlanId ?? this.sponsorshipPlanId,

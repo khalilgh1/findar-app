@@ -51,7 +51,6 @@ import 'package:findar/logic/cubits/saved_listings_cubit.dart';
 import 'package:findar/logic/cubits/search_cubit.dart';
 import 'package:findar/logic/cubits/settings_cubit.dart';
 import 'package:findar/logic/cubits/sort_cubit.dart';
-import 'package:get_it/get_it.dart';
 import 'package:findar/core/di/service_locator.dart';
 
 void main() async {

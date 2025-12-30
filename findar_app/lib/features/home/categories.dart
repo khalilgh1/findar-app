@@ -23,8 +23,6 @@ class _CategoryBarState extends State<CategoryBar> {
       l10n?.any ?? 'Any',
       l10n?.forSale ?? 'For Sale',
       l10n?.forRent ?? 'For Rent',
-      l10n?.commercial ?? 'Commercial',
-      l10n?.newConstructions ?? 'New Constructions',
     ];
   }
 
@@ -32,9 +30,15 @@ class _CategoryBarState extends State<CategoryBar> {
     var l10n = AppLocalizations.of(context);
     String? listingtype = categories[selectedIndex];
 
-    if (listingtype == (l10n?.any ?? 'Any')) {
+    // Map UI labels to DB classification values
+    if (listingtype == (l10n?.forSale ?? 'For Sale')) {
+      listingtype = 'sale'; // or 'Residential' if DB uses that
+    } else if (listingtype == (l10n?.forRent ?? 'For Rent')) {
+      listingtype = 'rent'; // or 'Rental' / whatever your DB stores
+    } else if (listingtype == (l10n?.any ?? 'Any')) {
       listingtype = null;
     }
+
     context.read<RecentCubit>().getRecentListings(listingType: listingtype);
   }
 

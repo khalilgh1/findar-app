@@ -223,7 +223,6 @@ class DummyListingRepository implements ListingRepository {
         propertyType: propertyType,
         image: image,
         isOnline: isOnline,
-        updatedAt: DateTime.now().toIso8601String(),
       );
 
       _listings[index] = updatedListing;
