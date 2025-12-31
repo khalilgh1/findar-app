@@ -1,19 +1,18 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// Sort options for property listings
+/// Maps to backend sort_by values: price_asc, price_desc, date_newest, date_oldest, area_asc, area_desc
 enum SortOption {
-  priceLowToHigh('Price: Low to High'),
-  priceHighToLow('Price: High to Low'),
-  newest('Newest'),
-  oldest('Oldest'),
-  mostPopular('Most Popular'),
-  sqftLowToHigh('Size: Small to Large'),
-  sqftHighToLow('Size: Large to Small'),
-  bedroomsLowToHigh('Bedrooms: Low to High'),
-  bedroomsHighToLow('Bedrooms: High to Low');
+  priceLowToHigh('Price: Low to High', 'price_asc'),
+  priceHighToLow('Price: High to Low', 'price_desc'),
+  newest('Newest', 'date_newest'),
+  oldest('Oldest', 'date_oldest'),
+  sqftLowToHigh('Size: Small to Large', 'area_asc'),
+  sqftHighToLow('Size: Large to Small', 'area_desc');
 
   final String displayName;
-  const SortOption(this.displayName);
+  final String backendValue;
+  const SortOption(this.displayName, this.backendValue);
 }
 
 /// SortCubit manages the current sort option for property listings
@@ -66,37 +65,12 @@ class SortCubit extends Cubit<SortOption> {
         });
         break;
 
-      case SortOption.mostPopular:
-        // Assuming properties have a 'views' or 'saves' field
-        sorted.sort((a, b) {
-          final aPopularity = (a['views'] ?? 0) + (a['saves'] ?? 0);
-          final bPopularity = (b['views'] ?? 0) + (b['saves'] ?? 0);
-          return bPopularity.compareTo(aPopularity);
-        });
-        break;
-
       case SortOption.sqftLowToHigh:
         sorted.sort((a, b) => _extractSqft(a).compareTo(_extractSqft(b)));
         break;
 
       case SortOption.sqftHighToLow:
         sorted.sort((a, b) => _extractSqft(b).compareTo(_extractSqft(a)));
-        break;
-
-      case SortOption.bedroomsLowToHigh:
-        sorted.sort((a, b) {
-          final aBeds = a['beds'] ?? a['bedrooms'] ?? 0;
-          final bBeds = b['beds'] ?? b['bedrooms'] ?? 0;
-          return aBeds.compareTo(bBeds);
-        });
-        break;
-
-      case SortOption.bedroomsHighToLow:
-        sorted.sort((a, b) {
-          final aBeds = a['beds'] ?? a['bedrooms'] ?? 0;
-          final bBeds = b['beds'] ?? b['bedrooms'] ?? 0;
-          return bBeds.compareTo(aBeds);
-        });
         break;
     }
 

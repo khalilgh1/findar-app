@@ -189,8 +189,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get noPropertiesFound => 'Aucune propriété trouvée';
 
   @override
-  String get pleaseTryAdjustingFilters =>
-      'Veuillez essayer d\'ajuster vos filtres de recherche';
+  String get pleaseTryAdjustingFilters => 'Veuillez essayer d\'ajuster vos filtres de recherche';
 
   @override
   String get sortBy => 'Trier par';
@@ -263,8 +262,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get propertyTitle => 'Titre de la propriété';
 
   @override
-  String get examplePropertyTitleHint =>
-      'ex. Appartement spacieux de 3 chambres';
+  String get examplePropertyTitleHint => 'ex. Appartement spacieux de 3 chambres';
 
   @override
   String get price => 'Prix';
@@ -276,8 +274,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get exampleLocationHint => 'ex. 15 Rue Didouche Mourad, Alger';
 
   @override
-  String get propertyDescriptionHint =>
-      'Décrivez les détails de la propriété ici...';
+  String get propertyDescriptionHint => 'Décrivez les détails de la propriété ici...';
 
   @override
   String get verificationCode => 'Code de vérification';
@@ -307,8 +304,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get toggleStatus => 'Basculer l\'état';
 
   @override
-  String get passwordResetSuccess =>
-      'Réinitialisation du mot de passe réussie !';
+  String get passwordResetSuccess => 'Réinitialisation du mot de passe réussie !';
 
   @override
   String get listingCreateFailed => 'Échec de création de l\'annonce';
@@ -364,8 +360,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get noSavedListings => 'Aucune annonce sauvegardée';
 
   @override
-  String get startExploring =>
-      'Commencez à explorer les propriétés pour sauvegarder vos favoris';
+  String get startExploring => 'Commencez à explorer les propriétés pour sauvegarder vos favoris';
 
   @override
   String get myListings => 'Mes Annonces';
@@ -550,23 +545,19 @@ class AppLocalizationsFr extends AppLocalizations {
   String get nameTooShort => 'Le nom doit contenir au moins 3 caractères';
 
   @override
-  String get passwordTooShort =>
-      'Le mot de passe doit contenir au moins 6 caractères';
+  String get passwordTooShort => 'Le mot de passe doit contenir au moins 6 caractères';
 
   @override
-  String get passwordMissingUppercase =>
-      'Le mot de passe doit contenir au moins une lettre majuscule';
+  String get passwordMissingUppercase => 'Le mot de passe doit contenir au moins une lettre majuscule';
 
   @override
-  String get passwordMissingNumber =>
-      'Le mot de passe doit contenir au moins un chiffre';
+  String get passwordMissingNumber => 'Le mot de passe doit contenir au moins un chiffre';
 
   @override
   String get phoneRequired => 'Le numéro de téléphone est requis';
 
   @override
-  String get phoneTooShort =>
-      'Le numéro de téléphone doit contenir au moins 10 chiffres';
+  String get phoneTooShort => 'Le numéro de téléphone doit contenir au moins 10 chiffres';
 
   @override
   String get accountTypeRequired => 'Veuillez sélectionner le type de compte';
@@ -605,8 +596,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get noSavedProperties => 'Aucune propriété sauvegardée';
 
   @override
-  String get savePropertiesToViewHere =>
-      'Enregistrez les propriétés pour les voir ici';
+  String get savePropertiesToViewHere => 'Enregistrez les propriétés pour les voir ici';
 
   @override
   String noListingsMessage(String tab) {
@@ -614,15 +604,13 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get addFirstPropertyListing =>
-      'Ajoutez votre première annonce immobilière';
+  String get addFirstPropertyListing => 'Ajoutez votre première annonce immobilière';
 
   @override
   String get chooseSponsorshipPlan => 'Choisir un plan de sponsorisation';
 
   @override
-  String get selectPlanToBoostProperty =>
-      'Sélectionnez un plan pour promouvoir votre propriété';
+  String get selectPlanToBoostProperty => 'Sélectionnez un plan pour promouvoir votre propriété';
 
   @override
   String get continueToPayment => 'Continuer vers le paiement';
@@ -668,15 +656,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get basicAnalytics => 'Analytiques de base';
 
   @override
-  String get topPriority =>
-      'Priorité supérieure dans les résultats de recherche';
+  String get topPriority => 'Priorité supérieure dans les résultats de recherche';
 
   @override
   String get advancedAnalytics => 'Analytiques avancées';
 
   @override
-  String get premiumAnalyticsDashboard =>
-      'Tableau de bord d\'analytiques premium';
+  String get premiumAnalyticsDashboard => 'Tableau de bord d\'analytiques premium';
 
   @override
   String get dedicatedSupport => 'Support dédié';
@@ -712,15 +698,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get validateTitleEmpty => 'Veuillez entrer un titre de propriété';
 
   @override
-  String get validateTitleMinLength =>
-      'Le titre doit comporter au moins 5 caractères';
+  String get validateTitleMinLength => 'Le titre doit comporter au moins 5 caractères';
 
   @override
   String get validateDescriptionEmpty => 'Veuillez entrer une description';
 
   @override
-  String get validateDescriptionMinLength =>
-      'La description doit comporter au moins 20 caractères';
+  String get validateDescriptionMinLength => 'La description doit comporter au moins 20 caractères';
 
   @override
   String get validatePriceEmpty => 'Veuillez entrer un prix';
@@ -741,8 +725,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get reportProperty => 'Signaler la propriété';
 
   @override
-  String get selectReportReason =>
-      'Veuillez sélectionner une raison pour signaler cette propriété';
+  String get selectReportReason => 'Veuillez sélectionner une raison pour signaler cette propriété';
 
   @override
   String get inaccurateInformation => 'Informations inexactes';

@@ -49,7 +49,7 @@ abstract class ListingRepository {
   /// Get filtered listings based on search criteria
   ///
   /// Supports filtering by location, price range, property type, building type,
-  /// number of bedrooms/bathrooms, and area
+  /// number of bedrooms/bathrooms, area, and sorting
   Future<List<PropertyListing>> getFilteredListings({
     double? latitude,
     double? longitude,
@@ -62,6 +62,7 @@ abstract class ListingRepository {
     double? minSqft,
     double? maxSqft,
     String? listedBy,
+    String? sortBy,
   });
 
   /// Get listings created by the current user

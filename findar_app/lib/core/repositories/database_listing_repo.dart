@@ -132,6 +132,7 @@ class LocalListingRepository implements ListingRepository {
     double? minSqft,
     double? maxSqft,
     String? listedBy,
+    String? sortBy,
   }) async {
     String where = "1=1";
     List<Object?> args = [];

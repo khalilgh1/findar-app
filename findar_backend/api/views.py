@@ -79,11 +79,17 @@ def advanced_search(request):
         - property type (Any ,for sale, for rent)
         - Building type (House, apartment, condo , townhouse)
         - # bedrooms, # bathrooms
+    user can sort by:
+        - price (ascending/descending)
+        - distance (when location provided)
+        - date_posted (newest/oldest)
+        - area/sqft (ascending/descending)
     """
     #constants
     radius_km = 20
     earth_radius_km = 6371
     posts = Post.objects.filter(active=True)
+    
     # filtering logic here
     latitude        = request.query_params.get('latitude' , None)
     longitude       = request.query_params.get('longitude' , None)
@@ -96,18 +102,20 @@ def advanced_search(request):
     min_sqft        = request.query_params.get('min_sqft' , None)
     max_sqft        = request.query_params.get('max_sqft' , None)
     listed_by       = request.query_params.get('listed_by' , None) # normal / agency
-
+    sort_by         = request.query_params.get('sort_by', 'date_posted')  # New parameter
+    
     if latitude and longitude:
         latitude  = float(latitude)
         longitude = float(longitude)
         # calculate distance using Haversine formula
         posts = posts.annotate(
-        distance=earth_radius_km * ACos(
-            Cos(Radians(latitude)) * Cos(Radians(F('latitude'))) *
-            Cos(Radians(F('longitude')) - Radians(longitude)) +
-            Sin(Radians(latitude)) * Sin(Radians(F('latitude')))
-        )
+            distance=earth_radius_km * ACos(
+                Cos(Radians(latitude)) * Cos(Radians(F('latitude'))) *
+                Cos(Radians(F('longitude')) - Radians(longitude)) +
+                Sin(Radians(latitude)) * Sin(Radians(F('latitude')))
+            )
         ).filter(distance__lte=radius_km)
+    
     if min_price:
         posts = posts.filter(price__gte=float(min_price))
     if max_price:
@@ -128,6 +136,24 @@ def advanced_search(request):
         posts = posts.filter(area__lte=float(max_sqft))
     if listed_by in dict(ACCOUNT_CHOICES).keys():
         posts = posts.filter(owner__account_type=listed_by)
+    
+    # Sorting logic
+    sort_mapping = {
+        'price_asc': 'price',
+        'price_desc': '-price',
+        'date_newest': '-created_at',
+        'date_oldest': 'created_at',
+        'area_asc': 'area',
+        'area_desc': '-area',
+    }
+    
+    # Apply sorting
+    if sort_by in sort_mapping:
+        posts = posts.order_by(sort_mapping[sort_by])
+    else:
+        # Default sort by newest first
+        posts = posts.order_by('-created_at')
+    
     serialized_posts = PostSerializers(posts , many=True).data
     return Response(serialized_posts , status=status.HTTP_200_OK)
 

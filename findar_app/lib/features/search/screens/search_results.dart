@@ -42,6 +42,35 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
   // Keep track of locally saved listing ids for optimistic UI updates
   final Set<int> _savedIds = {};
 
+  void _applyCurrentFiltersWithSort(String sortBy) {
+    final searchCubit = context.read<SearchCubit>();
+    final filters = searchCubit.currentFilters;
+
+    // Extract filter values, converting 'Any' to null for the API
+    final double minPrice = (filters['minPrice'] as num?)?.toDouble() ?? 0.0;
+    final double maxPrice = (filters['maxPrice'] as num?)?.toDouble() ?? 250000000.0;
+    final String? listingType = filters['listingType'] == 'Any' ? null : filters['listingType'] as String?;
+    final String? buildingType = filters['buildingType'] == 'Any' ? null : filters['buildingType'] as String?;
+    final int? numBedrooms = filters['numBedrooms'] as int?;
+    final int? numBathrooms = filters['numBathrooms'] as int?;
+    final double? minSqft = (filters['minSqft'] as num?)?.toDouble();
+    final double? maxSqft = (filters['maxSqft'] as num?)?.toDouble();
+    final String? listedBy = filters['listedBy'] == 'Any' ? null : filters['listedBy'] as String?;
+
+    searchCubit.getFilteredListings(
+      minPrice: minPrice,
+      maxPrice: maxPrice,
+      listingType: listingType,
+      buildingType: buildingType,
+      numBedrooms: numBedrooms,
+      numBathrooms: numBathrooms,
+      minSqft: minSqft,
+      maxSqft: maxSqft,
+      listedBy: listedBy,
+      sortBy: sortBy,
+    );
+  }
+
   void _toggleSave(int listingId) async {
     final result = await context.read<SearchCubit>().saveListing(listingId);
     if (result.state) {
@@ -264,6 +293,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                           onTap: () {
                             sortCubit.updateSort(option);
                             Navigator.pop(context);
+                            _applyCurrentFiltersWithSort(option.backendValue);
                           },
                         );
                       }).toList(),

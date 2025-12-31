@@ -272,6 +272,7 @@ class DummyListingRepository implements ListingRepository {
     double? minSqft,
     double? maxSqft,
     String? listedBy,
+    String? sortBy,
   }) async {
     // Simulate network delay
     await Future.delayed(const Duration(milliseconds: 800));

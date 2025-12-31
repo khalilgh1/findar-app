@@ -221,6 +221,7 @@ class RemoteListingRepository implements ListingRepository {
     double? minSqft,
     double? maxSqft,
     String? listedBy,
+    String? sortBy,
   }) async {
     print('🔍 Fetching filtered listings');
 
@@ -238,6 +239,7 @@ class RemoteListingRepository implements ListingRepository {
       if (minSqft != null) queryParams['min_sqft'] = minSqft.toString();
       if (maxSqft != null) queryParams['max_sqft'] = maxSqft.toString();
       if (listedBy != null) queryParams['listed_by'] = listedBy;
+      if (sortBy != null) queryParams['sort_by'] = sortBy;
 
       print('📤 Filter params: $queryParams');
 

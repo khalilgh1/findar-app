@@ -4,12 +4,31 @@ import 'package:findar/core/models/return_result.dart';
 import 'package:findar/core/repositories/abstract_listing_repo.dart';
 
 /// SearchCubit handles searching/filtering listings and saving a listing
-/// State shape: { data: List<PropertyListing>, state: 'initial|loading|done|error', message: '' }
+/// State shape: { data: List<PropertyListing>, state: 'initial|loading|done|error', message: '', filters: {...} }
 class SearchCubit extends Cubit<Map<String, dynamic>> {
   final ListingRepository repository;
 
   SearchCubit(this.repository)
-    : super({'data': <PropertyListing>[], 'state': 'initial', 'message': ''});
+      : super({
+          'data': <PropertyListing>[],
+          'state': 'initial',
+          'message': '',
+          'filters': <String, dynamic>{
+            'minPrice': 0.0,
+            'maxPrice': 250000000.0,
+            'listingType': 'Any',
+            'buildingType': 'Any',
+            'numBedrooms': 2,
+            'numBathrooms': 1,
+            'minSqft': null,
+            'maxSqft': null,
+            'listedBy': 'Any',
+          },
+        });
+
+  /// Get current filters
+  Map<String, dynamic> get currentFilters =>
+      (state['filters'] as Map<String, dynamic>?) ?? {};
 
   /// Fetch filtered listings using the abstract repository
   Future<void> getFilteredListings({
@@ -24,8 +43,23 @@ class SearchCubit extends Cubit<Map<String, dynamic>> {
     double? minSqft,
     double? maxSqft,
     String? listedBy,
+    String? sortBy,
   }) async {
-    emit({...state, 'state': 'loading', 'message': ''});
+    // Store the current filters
+    final filters = <String, dynamic>{
+      'minPrice': minPrice ?? 0.0,
+      'maxPrice': maxPrice ?? 250000000.0,
+      'listingType': listingType ?? 'Any',
+      'buildingType': buildingType ?? 'Any',
+      'numBedrooms': numBedrooms ?? 2,
+      'numBathrooms': numBathrooms ?? 1,
+      'minSqft': minSqft,
+      'maxSqft': maxSqft,
+      'listedBy': listedBy ?? 'Any',
+      'sortBy': sortBy ?? 'date_newest',
+    };
+
+    emit({...state, 'state': 'loading', 'message': '', 'filters': filters});
     try {
       final listings = await repository.getFilteredListings(
         latitude: latitude,
@@ -39,6 +73,7 @@ class SearchCubit extends Cubit<Map<String, dynamic>> {
         minSqft: minSqft,
         maxSqft: maxSqft,
         listedBy: listedBy,
+        sortBy: sortBy,
       );
 
       emit({

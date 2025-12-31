@@ -17,21 +17,59 @@ class _FilteringScreenState extends State<FilteringScreen> {
   final TextEditingController minSqftController = TextEditingController();
   final TextEditingController maxSqftController = TextEditingController();
 
-  RangeValues priceRange = const RangeValues(20000, 250000000);
+  RangeValues priceRange = const RangeValues(0, 250000000);
   String propertyType = 'Any';
   String buildingType = 'Any'; // Only one can be selected now
 
-  int bedrooms = 2;
+  int bedrooms = 1;
   int bathrooms = 1;
   String? listedBy = 'Any';
+
+  @override
+  void initState() {
+    super.initState();
+    // Load saved filters from SearchCubit
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadSavedFilters();
+    });
+  }
+
+  void _loadSavedFilters() {
+    final searchCubit = context.read<SearchCubit>();
+    final filters = searchCubit.currentFilters;
+
+    if (filters.isNotEmpty) {
+      setState(() {
+        final minPrice = (filters['minPrice'] as num?)?.toDouble() ?? 0.0;
+        final maxPrice =
+            (filters['maxPrice'] as num?)?.toDouble() ?? 250000000.0;
+        priceRange = RangeValues(minPrice, maxPrice);
+
+        propertyType = filters['listingType'] as String? ?? 'Any';
+        buildingType = filters['buildingType'] as String? ?? 'Any';
+        bedrooms = filters['numBedrooms'] as int? ?? 1;
+        bathrooms = filters['numBathrooms'] as int? ?? 1;
+        listedBy = filters['listedBy'] as String? ?? 'Any';
+
+        final minSqft = filters['minSqft'];
+        final maxSqft = filters['maxSqft'];
+        if (minSqft != null) {
+          minSqftController.text = minSqft.toString();
+        }
+        if (maxSqft != null) {
+          maxSqftController.text = maxSqft.toString();
+        }
+      });
+    }
+  }
 
   void resetFilters() {
     setState(() {
       locationController.clear();
-      priceRange = const RangeValues(100000, 5000000);
+      priceRange = const RangeValues(0, 250000000);
       propertyType = 'Any';
       buildingType = 'Any';
-      bedrooms = 2;
+      bedrooms = 1;
       bathrooms = 1;
       listedBy = 'Any';
       minSqftController.clear();
@@ -111,7 +149,7 @@ class _FilteringScreenState extends State<FilteringScreen> {
 
             RangeSlider(
               values: priceRange,
-              min: 20000,
+              min: 0,
               max: 250000000,
               divisions: 20,
               labels: RangeLabels(
@@ -178,12 +216,12 @@ class _FilteringScreenState extends State<FilteringScreen> {
               children: [
                 Wrap(
                   children: [
-                    _buildBuildingRadio('Any', l10n.any),
-                    _buildBuildingRadio('House', l10n.house),
-                    _buildBuildingRadio('Apartment', l10n.apartment),
-                    _buildBuildingRadio('Villa', l10n.villa),
-                    _buildBuildingRadio('Studio', l10n.studio),
-                    _buildBuildingRadio('Office', l10n.office),
+                    _buildBuildingRadio('Any'),
+                    _buildBuildingRadio('House'),
+                    _buildBuildingRadio('Apartment'),
+                    _buildBuildingRadio('Condo'),
+                    _buildBuildingRadio('Villa'),
+                    _buildBuildingRadio('Studio'),
                   ],
                 ),
               ],
@@ -354,7 +392,7 @@ class _FilteringScreenState extends State<FilteringScreen> {
     );
   }
 
-  Widget _buildBuildingRadio(String type, String label) {
+  Widget _buildBuildingRadio(String type) {
     final screenWidth = MediaQuery.of(context).size.width;
 
     // Constrain the width so the Wrap can position multiple radios horizontally.
@@ -362,7 +400,7 @@ class _FilteringScreenState extends State<FilteringScreen> {
     return SizedBox(
       width: screenWidth * 0.45,
       child: RadioListTile<String>(
-        title: Text(label),
+        title: Text(type),
         value: type,
         groupValue: buildingType,
         activeColor: Theme.of(context).colorScheme.primary,
