@@ -45,16 +45,12 @@ class Property {
         return l10n.house;
       case 'apartment':
         return l10n.apartment;
-      case 'condo':
-        return l10n.condo;
-      case 'townhouse':
-        return l10n.townhouse;
       case 'villa':
         return l10n.villa;
       case 'studio':
         return l10n.studio;
-      case 'commercial':
-        return l10n.commercial;
+      case 'office':
+        return l10n.office;
       default:
         return propertyType;
     }

@@ -111,9 +111,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get forRent => 'للإيجار';
 
   @override
-  String get commercial => 'تجاري';
-
-  @override
   String get newConstructions => 'مباني جديدة';
 
   @override
@@ -123,16 +120,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get apartment => 'شقة';
 
   @override
-  String get condo => 'شقة سكنية';
-
-  @override
-  String get townhouse => 'منزل متلاصق';
-
-  @override
   String get villa => 'فيلا';
 
   @override
   String get studio => 'استوديو';
+
+  @override
+  String get office => 'مكتب';
 
   @override
   String get any => 'الكل';
@@ -554,10 +548,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get passwordTooShort => 'يجب أن تكون كلمة المرور 6 أحرف على الأقل';
 
   @override
-  String get passwordMissingUppercase => 'يجب أن تحتوي كلمة المرور على حرف كبير واحد على الأقل';
+  String get passwordMissingUppercase =>
+      'يجب أن تحتوي كلمة المرور على حرف كبير واحد على الأقل';
 
   @override
-  String get passwordMissingNumber => 'يجب أن تحتوي كلمة المرور على رقم واحد على الأقل';
+  String get passwordMissingNumber =>
+      'يجب أن تحتوي كلمة المرور على رقم واحد على الأقل';
 
   @override
   String get phoneRequired => 'رقم الهاتف مطلوب';
@@ -704,13 +700,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get validateTitleEmpty => 'يرجى إدخال عنوان العقار';
 
   @override
-  String get validateTitleMinLength => 'يجب أن يكون العنوان بطول 5 أحرف على الأقل';
+  String get validateTitleMinLength =>
+      'يجب أن يكون العنوان بطول 5 أحرف على الأقل';
 
   @override
   String get validateDescriptionEmpty => 'يرجى إدخال وصف';
 
   @override
-  String get validateDescriptionMinLength => 'يجب أن يكون الوصف بطول 20 حرفًا على الأقل';
+  String get validateDescriptionMinLength =>
+      'يجب أن يكون الوصف بطول 20 حرفًا على الأقل';
 
   @override
   String get validatePriceEmpty => 'يرجى إدخال السعر';

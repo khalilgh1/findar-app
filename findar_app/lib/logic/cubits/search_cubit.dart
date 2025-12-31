@@ -26,7 +26,6 @@ class SearchCubit extends Cubit<Map<String, dynamic>> {
     String? listedBy,
   }) async {
     emit({...state, 'state': 'loading', 'message': ''});
-
     try {
       final listings = await repository.getFilteredListings(
         latitude: latitude,

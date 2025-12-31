@@ -229,7 +229,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
                                     color: theme.colorScheme.onSurface,
                                     fontWeight: FontWeight.w500,
                                   ),
-                                  items: ['Apartment', 'House', 'Villa', 'Condo']
+                                  items: ['Apartment', 'House', 'Villa', 'Studio', 'Office']
                                       .map(
                                         (String value) => DropdownMenuItem<String>(
                                           value: value,

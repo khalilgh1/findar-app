@@ -39,6 +39,7 @@ def recent_listings(request):
     # maybe we need pagination here
     #in the ui there is a search bar
     #also in the ui there is an option on the top to select the property type
+    print('request query params:' , request.query_params)
     q = request.query_params.get('q' , None)
     q = '' if q is None else q
     listing_type = request.query_params.get('listing_type' , None) # rent / sale
@@ -111,10 +112,12 @@ def advanced_search(request):
         posts = posts.filter(price__gte=float(min_price))
     if max_price:
         posts = posts.filter(price__lte=float(max_price))
-    if listing_type in ['rent' , 'sale']:
+    if listing_type and listing_type in ['rent' , 'sale']:
         posts = posts.filter(listing_type=listing_type)
-    if building_type in dict(BUILDING_TYPE_CHOICES).keys():
-        posts = posts.filter(building_type=building_type)
+    if building_type:
+        building_type = building_type.lower()
+        if building_type in dict(BUILDING_TYPE_CHOICES).keys():
+            posts = posts.filter(building_type=building_type)
     if num_bedrooms:
         posts = posts.filter(bedrooms__gte=int(num_bedrooms))
     if num_bathrooms:

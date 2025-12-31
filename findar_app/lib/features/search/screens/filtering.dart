@@ -72,7 +72,6 @@ class _FilteringScreenState extends State<FilteringScreen> {
         ),
         title: Text(l10n.advancedSearch),
         centerTitle: true,
-
         elevation: 0,
       ),
       body: Container(
@@ -179,11 +178,12 @@ class _FilteringScreenState extends State<FilteringScreen> {
               children: [
                 Wrap(
                   children: [
-                    _buildBuildingRadio('Any'),
-                    _buildBuildingRadio('House'),
-                    _buildBuildingRadio('Apartment'),
-                    _buildBuildingRadio('Condo'),
-                    _buildBuildingRadio('Townhouse'),
+                    _buildBuildingRadio('Any', l10n.any),
+                    _buildBuildingRadio('House', l10n.house),
+                    _buildBuildingRadio('Apartment', l10n.apartment),
+                    _buildBuildingRadio('Villa', l10n.villa),
+                    _buildBuildingRadio('Studio', l10n.studio),
+                    _buildBuildingRadio('Office', l10n.office),
                   ],
                 ),
               ],
@@ -354,7 +354,7 @@ class _FilteringScreenState extends State<FilteringScreen> {
     );
   }
 
-  Widget _buildBuildingRadio(String type) {
+  Widget _buildBuildingRadio(String type, String label) {
     final screenWidth = MediaQuery.of(context).size.width;
 
     // Constrain the width so the Wrap can position multiple radios horizontally.
@@ -362,7 +362,7 @@ class _FilteringScreenState extends State<FilteringScreen> {
     return SizedBox(
       width: screenWidth * 0.45,
       child: RadioListTile<String>(
-        title: Text(type),
+        title: Text(label),
         value: type,
         groupValue: buildingType,
         activeColor: Theme.of(context).colorScheme.primary,
@@ -390,7 +390,9 @@ class _FilteringScreenState extends State<FilteringScreen> {
         Builder(
           builder: (context) {
             final l10n = AppLocalizations.of(context)!;
-            final displayLabel = label == 'Bedrooms' ? l10n.bedrooms : (label == 'Bathrooms' ? l10n.bathrooms : label);
+            final displayLabel = label == 'Bedrooms'
+                ? l10n.bedrooms
+                : (label == 'Bathrooms' ? l10n.bathrooms : label);
             return Text(displayLabel);
           },
         ),
@@ -422,15 +424,12 @@ class _FilteringScreenState extends State<FilteringScreen> {
 
     final double? minSqft = double.tryParse(minSqftController.text.trim());
     final double? maxSqft = double.tryParse(maxSqftController.text.trim());
-    final String? listingTypeValue = propertyType == 'Any'
-        ? null
-        : propertyType;
-    final String? buildingTypeValue = (buildingType == 'Any')
-        ? null
-        : buildingType;
-    final String? listedByValue = (listedBy == null || listedBy == 'Any')
-        ? null
-        : listedBy;
+    final String? listingTypeValue =
+        propertyType == 'Any' ? null : propertyType;
+    final String? buildingTypeValue =
+        (buildingType == 'Any') ? null : buildingType;
+    final String? listedByValue =
+        (listedBy == null || listedBy == 'Any') ? null : listedBy;
 
     await searchCubit.getFilteredListings(
       minPrice: priceRange.start,

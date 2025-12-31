@@ -1,0 +1,30 @@
+meta {
+  name: advanced search empty
+  type: http
+  seq: 16
+}
+
+get {
+  url: http://127.0.0.1:8000/api/advanced-search/
+  body: none
+  auth: inherit
+}
+
+params:query {
+  ~latitude: 23.05
+  ~longitude: 12.1
+  ~min_price: 2000
+  ~max_price: 2500
+  ~listing_type: rent
+  ~building_type: house
+  ~num_bedrooms: 3
+  ~num_bathrooms: 2
+  ~min_sqft: 1600
+  ~max_sqft: 2000
+  ~listed_by: normal
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

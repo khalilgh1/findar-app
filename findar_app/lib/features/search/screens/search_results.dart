@@ -114,14 +114,6 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                     _showSortBottomSheet(context);
                   },
                 ),
-                SizedBox(width: screenWidth * 0.03),
-                FilterButton(
-                  text: l10n.filter,
-                  icon: Icons.tune,
-                  onPressed: () {
-                    _showFilterBottomSheet(context);
-                  },
-                ),
               ],
             ),
           ),
@@ -169,7 +161,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                 }
                 return ListView.separated(
                   padding: EdgeInsets.symmetric(
-                    horizontal: screenWidth * 0.04,
+                    horizontal: screenWidth * 0.01,
                     vertical: screenHeight * 0.02,
                   ),
                   itemCount: listings.length,
