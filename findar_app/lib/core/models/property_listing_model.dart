@@ -20,7 +20,12 @@ class PropertyListing {
 
   @JsonKey(name: 'building_type')
   final String propertyType;
+
+  @JsonKey(name: 'main_pic')
   final String image;
+
+  @JsonKey(name: 'pics')
+  final List<String>? additionalImages;
 
 
   @JsonKey(
@@ -59,6 +64,7 @@ class PropertyListing {
     required this.classification,
     required this.propertyType,
     required this.image,
+    this.additionalImages,
     this.isOnline = true,
     this.createdAt,
     this.isBoosted = false,
@@ -88,6 +94,7 @@ class PropertyListing {
     String? classification,
     String? propertyType,
     String? image,
+    List<String>? additionalImages,
     bool? isOnline,
     String? createdAt,
     bool? isBoosted,
@@ -108,6 +115,7 @@ class PropertyListing {
       classification: classification ?? this.classification,
       propertyType: propertyType ?? this.propertyType,
       image: image ?? this.image,
+      additionalImages: additionalImages ?? this.additionalImages,
       isOnline: isOnline ?? this.isOnline,
       createdAt: createdAt ?? this.createdAt,
       isBoosted: isBoosted ?? this.isBoosted,

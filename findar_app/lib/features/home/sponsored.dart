@@ -4,6 +4,16 @@ import 'package:findar/logic/cubits/home/sponsored_listings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:findar/features/home/property.dart';
 
+const String _kDefaultImageUrl =
+    'https://res.cloudinary.com/da5xjc4dx/image/upload/v1767273156/default_cxkkda.jpg';
+
+String _imageOrDefault(String? img) {
+  if (img == null) return _kDefaultImageUrl;
+  final s = img.trim();
+  if (s.isEmpty || s.toLowerCase() == 'null') return _kDefaultImageUrl;
+  return s;
+}
+
 class PropertyCard extends StatefulWidget {
   final Property property;
   const PropertyCard({super.key, required this.property});
@@ -14,7 +24,7 @@ class PropertyCard extends StatefulWidget {
 
 class _PropertyCardState extends State<PropertyCard> {
   late bool _bookmarked;
-
+  //print property image url
   @override
   void initState() {
     super.initState();
@@ -24,7 +34,7 @@ class _PropertyCardState extends State<PropertyCard> {
   void _toggleSave() {
     final cubit = context.read<SponsoredCubit>();
     print('Before toggle: _bookmarked=$_bookmarked, id=${widget.property.id}');
-    
+
     if (_bookmarked) {
       // Currently saved, so unsave it
       print('Unsaving listing ${widget.property.id}');
@@ -45,6 +55,7 @@ class _PropertyCardState extends State<PropertyCard> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final imageUrl = _imageOrDefault(widget.property.image);
     return Container(
       width: 250,
       margin: const EdgeInsets.fromLTRB(4, 0, 16, 4),
@@ -69,9 +80,9 @@ class _PropertyCardState extends State<PropertyCard> {
               fit: StackFit.expand,
               children: [
                 // Dynamic image loading based on URL
-                widget.property.image.startsWith('http')
+                imageUrl.startsWith('http')
                     ? Image.network(
-                        widget.property.image,
+                        imageUrl,
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) {
                           return Container(
@@ -96,7 +107,7 @@ class _PropertyCardState extends State<PropertyCard> {
                         },
                       )
                     : Image.asset(
-                        widget.property.image,
+                        imageUrl,
                         fit: BoxFit.cover,
                       ),
                 // Bookmark button overlay
@@ -140,7 +151,7 @@ class _PropertyCardState extends State<PropertyCard> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  widget.property.price.toString()+' DZD',
+                  '${widget.property.price} DZD',
                   style: theme.textTheme.headlineSmall?.copyWith(
                     color: theme.colorScheme.onSecondaryContainer,
                   ),

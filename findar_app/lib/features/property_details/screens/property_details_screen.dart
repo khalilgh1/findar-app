@@ -154,7 +154,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       PropertyImageCarousel(
-                        image: property['image'] ?? 'assets/default.png',
+                        image: property['image'] ?? 'https://res.cloudinary.com/da5xjc4dx/image/upload/v1767273156/default_cxkkda.jpg',
                       ),
                       const SizedBox(height: 16),
                       PropertyHeader(

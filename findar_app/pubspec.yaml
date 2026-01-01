@@ -33,6 +33,8 @@ dependencies:
   get_it: ^9.2.0
 
   json_annotation: ^4.9.0
+  cloudinary_flutter: ^1.3.0
+  cloudinary_url_gen: ^1.8.0
 
 dev_dependencies:
   flutter_test:

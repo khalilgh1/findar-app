@@ -159,21 +159,21 @@ class _HomeScreenState extends State<HomeScreen> {
                         );
                       }
 
-            final raw = state['data'];
-            final savedIds =
-              state['savedIds'] as Set<int>? ?? <int>{};
-            final l10n = AppLocalizations.of(context)!;
+                      final raw = state['data'];
+                      final savedIds =
+                          state['savedIds'] as Set<int>? ?? <int>{};
+                      final l10n = AppLocalizations.of(context)!;
 
                       final listings = raw is List
                           ? raw
-                                .map(
-                                  (e) => Property.convertListing(
-                                    e,
-                                    l10n,
-                                    bookmarked: savedIds.contains(e.id),
-                                  ),
-                                )
-                                .toList()
+                              .map(
+                                (e) => Property.convertListing(
+                                  e,
+                                  l10n,
+                                  bookmarked: savedIds.contains(e.id),
+                                ),
+                              )
+                              .toList()
                           : [];
 
                       final displayListings = listings;
@@ -199,7 +199,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       );
                     },
                   ),
-
                   SizedBox(height: 25),
                   Builder(
                     builder: (context) {
@@ -241,21 +240,21 @@ class _HomeScreenState extends State<HomeScreen> {
                         );
                       }
 
-            final recentraw = state['data'];
-            final savedIds =
-              state['savedIds'] as Set<int>? ?? <int>{};
-            final l10n = AppLocalizations.of(context)!;
+                      final recentraw = state['data'];
+                      final savedIds =
+                          state['savedIds'] as Set<int>? ?? <int>{};
+                      final l10n = AppLocalizations.of(context)!;
 
                       final recentlistings = recentraw is List
                           ? recentraw
-                                .map(
-                                  (e) => Property.convertListing(
-                                    e,
-                                    l10n,
-                                    bookmarked: savedIds.contains(e.id),
-                                  ),
-                                )
-                                .toList()
+                              .map(
+                                (e) => Property.convertListing(
+                                  e,
+                                  l10n,
+                                  bookmarked: savedIds.contains(e.id),
+                                ),
+                              )
+                              .toList()
                           : [];
 
                       final displayRecentListings = recentlistings;

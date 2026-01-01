@@ -1,5 +1,15 @@
 import 'package:flutter/material.dart';
 
+const String _kDefaultImageUrl =
+    'https://res.cloudinary.com/da5xjc4dx/image/upload/v1767273156/default_cxkkda.jpg';
+
+String _imageOrDefault(String? img) {
+  if (img == null) return _kDefaultImageUrl;
+  final s = img.trim();
+  if (s.isEmpty || s.toLowerCase() == 'null') return _kDefaultImageUrl;
+  return s;
+}
+
 class PropertyImageCarousel extends StatelessWidget {
   final String image;
 
@@ -11,6 +21,7 @@ class PropertyImageCarousel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final imageUrl = _imageOrDefault(image);
 
     return Container(
       height: 220,
@@ -18,17 +29,18 @@ class PropertyImageCarousel extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: colorScheme.outline.withOpacity(0.3)),
-        color: colorScheme.surfaceVariant,
+        color: colorScheme.surfaceContainerHighest,
       ),
       clipBehavior: Clip.antiAlias,
-      child: image.startsWith('http')
+      child: imageUrl.startsWith('http')
           ? Image.network(
-              image,
+              imageUrl,
               fit: BoxFit.cover,
               errorBuilder: (context, error, stackTrace) {
                 return Container(
                   color: Colors.grey[300],
-                  child: Icon(Icons.broken_image, size: 50, color: Colors.grey[600]),
+                  child: Icon(Icons.broken_image,
+                      size: 50, color: Colors.grey[600]),
                 );
               },
               loadingBuilder: (context, child, loadingProgress) {
@@ -37,7 +49,7 @@ class PropertyImageCarousel extends StatelessWidget {
               },
             )
           : Image.asset(
-              image,
+              imageUrl,
               fit: BoxFit.cover,
             ),
     );

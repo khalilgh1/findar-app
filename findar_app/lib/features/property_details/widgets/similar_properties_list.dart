@@ -1,6 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:findar/l10n/app_localizations.dart';
 
+const String _kDefaultImageUrl =
+    'https://res.cloudinary.com/da5xjc4dx/image/upload/v1767273156/default_cxkkda.jpg';
+
+String _imageOrDefault(String? img) {
+  if (img == null) return _kDefaultImageUrl;
+  final s = img.trim();
+  if (s.isEmpty || s.toLowerCase() == 'null') return _kDefaultImageUrl;
+  return s;
+}
+
 class SimilarPropertiesList extends StatelessWidget {
   final List<SimilarProperty> properties;
 
@@ -56,6 +66,7 @@ class SimilarPropertyCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final imageUrl = _imageOrDefault(property.image);
 
     return Container(
       width: 160,
@@ -76,9 +87,9 @@ class SimilarPropertyCard extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-            child: property.image.startsWith('http')
+            child: imageUrl.startsWith('http')
                 ? Image.network(
-                    property.image,
+                    imageUrl,
                     height: 100,
                     width: 160,
                     fit: BoxFit.cover,
@@ -87,12 +98,13 @@ class SimilarPropertyCard extends StatelessWidget {
                         height: 100,
                         width: 160,
                         color: Colors.grey[300],
-                        child: Icon(Icons.broken_image, color: Colors.grey[600]),
+                        child:
+                            Icon(Icons.broken_image, color: Colors.grey[600]),
                       );
                     },
                     loadingBuilder: (context, child, loadingProgress) {
                       if (loadingProgress == null) return child;
-                      return Container(
+                      return SizedBox(
                         height: 100,
                         width: 160,
                         child: Center(child: CircularProgressIndicator()),
@@ -100,7 +112,7 @@ class SimilarPropertyCard extends StatelessWidget {
                     },
                   )
                 : Image.asset(
-                    property.image,
+                    imageUrl,
                     height: 100,
                     width: 160,
                     fit: BoxFit.cover,
@@ -141,9 +153,8 @@ class SimilarPropertyCard extends StatelessWidget {
     }
 
     final hasDecimals = price % 1 != 0;
-    final value = hasDecimals
-        ? price.toStringAsFixed(2)
-        : price.toStringAsFixed(0);
+    final value =
+        hasDecimals ? price.toStringAsFixed(2) : price.toStringAsFixed(0);
     final parts = value.split('.');
     final whole = parts.first.replaceAll(RegExp(r'\B(?=(\d{3})+(?!\d))'), ',');
 

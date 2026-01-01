@@ -3,6 +3,16 @@ import 'package:findar/logic/cubits/home/recent_listings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:findar/features/home/property.dart';
 
+const String _kDefaultImageUrl =
+    'https://res.cloudinary.com/da5xjc4dx/image/upload/v1767273156/default_cxkkda.jpg';
+
+String _imageOrDefault(String? img) {
+  if (img == null) return _kDefaultImageUrl;
+  final s = img.trim();
+  if (s.isEmpty || s.toLowerCase() == 'null') return _kDefaultImageUrl;
+  return s;
+}
+
 class ListingTile extends StatefulWidget {
   final Property property;
   const ListingTile({super.key, required this.property});
@@ -45,6 +55,7 @@ class _ListingTileState extends State<ListingTile> {
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
+    final imageUrl = _imageOrDefault(widget.property.image);
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -60,16 +71,17 @@ class _ListingTileState extends State<ListingTile> {
             width: 90,
             child: ClipRRect(
               borderRadius: const BorderRadius.all(Radius.circular(12)),
-              child: widget.property.image.startsWith('http')
+              child: imageUrl.startsWith('http')
                   ? Image.network(
-                      widget.property.image,
+                      imageUrl,
                       width: 100,
                       height: 90,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
                         return Container(
                           color: Colors.grey[300],
-                          child: Icon(Icons.broken_image, color: Colors.grey[600]),
+                          child:
+                              Icon(Icons.broken_image, color: Colors.grey[600]),
                         );
                       },
                       loadingBuilder: (context, child, loadingProgress) {
@@ -85,7 +97,7 @@ class _ListingTileState extends State<ListingTile> {
                       },
                     )
                   : Image.asset(
-                      widget.property.image,
+                      imageUrl,
                       width: 100,
                       height: 90,
                       fit: BoxFit.cover,
@@ -100,7 +112,7 @@ class _ListingTileState extends State<ListingTile> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    widget.property.price.toString() + ' DZD',
+                    '${widget.property.price} DZD',
                     style: theme.textTheme.headlineSmall?.copyWith(
                       color: theme.colorScheme.onSurface,
                     ),

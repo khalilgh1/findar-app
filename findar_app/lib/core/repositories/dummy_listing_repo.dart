@@ -7,7 +7,7 @@ class DummyListingRepository implements ListingRepository {
   // In-memory storage for listings
   final List<PropertyListing> _listings = [];
   final Set<int> _savedListingIds = {}; // Track saved listing IDs
-  List<int> _myListingIds = []; // Track user's own listing IDs
+  final List<int> _myListingIds = []; // Track user's own listing IDs
   int _nextId = 1;
 
   DummyListingRepository() {
@@ -152,6 +152,7 @@ class DummyListingRepository implements ListingRepository {
     required String classification,
     required String propertyType,
     required String image,
+    List<String>? additionalImages,
     double? latitude,
     double? longitude,
     int? livingrooms,
@@ -290,8 +291,8 @@ class DummyListingRepository implements ListingRepository {
       filtered = filtered
           .where(
             (l) => l.classification.toLowerCase().contains(
-              listingType.toLowerCase(),
-            ),
+                  listingType.toLowerCase(),
+                ),
           )
           .toList();
     }
@@ -356,8 +357,8 @@ class DummyListingRepository implements ListingRepository {
       recent = recent
           .where(
             (l) => l.classification.toLowerCase().contains(
-              listingType.toLowerCase(),
-            ),
+                  listingType.toLowerCase(),
+                ),
           )
           .toList();
     }
@@ -464,7 +465,7 @@ class DummyListingRepository implements ListingRepository {
       final savedListings = _listings
           .where((listing) => _savedListingIds.contains(listing.id))
           .toList();
-      
+
       return savedListings;
     } catch (e) {
       return [];
@@ -475,7 +476,7 @@ class DummyListingRepository implements ListingRepository {
   Future<Set<int>> getSavedListingIds() async {
     // Simulate network delay
     await Future.delayed(const Duration(milliseconds: 100));
-    
+
     // Return the saved listing IDs without auto-initialization
     return Set.from(_savedListingIds);
   }

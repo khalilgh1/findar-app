@@ -1,6 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:findar/l10n/app_localizations.dart';
 
+const String _kDefaultImageUrl =
+    'https://res.cloudinary.com/da5xjc4dx/image/upload/v1767273156/default_cxkkda.jpg';
+
+String _imageOrDefault(String? img) {
+  if (img == null) return _kDefaultImageUrl;
+  final s = img.trim();
+  if (s.isEmpty || s.toLowerCase() == 'null') return _kDefaultImageUrl;
+  return s;
+}
+
 class ListingCard extends StatelessWidget {
   final String imagePath;
   final String title;
@@ -16,6 +26,7 @@ class ListingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final imageUrl = _imageOrDefault(imagePath);
 
     return Container(
       width: 235,
@@ -31,9 +42,9 @@ class ListingCard extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
-            child: imagePath.startsWith('http')
+            child: imageUrl.startsWith('http')
                 ? Image.network(
-                    imagePath,
+                    imageUrl,
                     height: 140,
                     width: double.infinity,
                     fit: BoxFit.cover,
@@ -41,12 +52,13 @@ class ListingCard extends StatelessWidget {
                       return Container(
                         height: 140,
                         color: Colors.grey[300],
-                        child: Icon(Icons.broken_image, color: Colors.grey[600]),
+                        child:
+                            Icon(Icons.broken_image, color: Colors.grey[600]),
                       );
                     },
                     loadingBuilder: (context, child, loadingProgress) {
                       if (loadingProgress == null) return child;
-                      return Container(
+                      return SizedBox(
                         height: 140,
                         child: Center(child: CircularProgressIndicator()),
                       );

@@ -9,7 +9,7 @@ class ApiConfig {
   // replace with your machine IP or pass `--dart-define`.
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://192.168.1.106:8000',
+    defaultValue: 'http://192.168.1.111:8000',
   );
 
   static String get apiBaseUrl => baseUrl;

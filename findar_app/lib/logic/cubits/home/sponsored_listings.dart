@@ -9,7 +9,6 @@ class SponsoredCubit extends Cubit<Map<String, dynamic>> {
 
   SponsoredCubit(this.repository)
     : super({'data': [], 'state': 'initial', 'message': '', 'savedIds': <int>{}});
-
   /// Fetch filtered listings using the abstract repository
   Future<void> getSponsoredListings({String? listingType}) async {
     emit({...state, 'state': 'loading', 'message': ''});

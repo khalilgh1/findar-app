@@ -1,16 +1,17 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:findar/core/repositories/abstract_listing_repo.dart';
+
 /// MyListingsCubit manages the current user's listings
 class MyListingsCubit extends Cubit<Map<String, dynamic>> {
   final ListingRepository repository;
 
   MyListingsCubit(this.repository)
-    : super({
-        'data': {'active': [], 'inactive': []},
-        'state': 'initial',
-        'message': '',
-      }) {
+      : super({
+          'data': {'active': [], 'inactive': []},
+          'state': 'initial',
+          'message': '',
+        }) {
     //for now use DummyListingRepository
   }
 
@@ -125,6 +126,7 @@ class MyListingsCubit extends Cubit<Map<String, dynamic>> {
     required String classification,
     required String propertyType,
     required String image,
+    List<String>? additionalImages,
     double? latitude,
     double? longitude,
     int? livingrooms,
@@ -142,6 +144,7 @@ class MyListingsCubit extends Cubit<Map<String, dynamic>> {
         classification: classification,
         propertyType: propertyType,
         image: image,
+        additionalImages: additionalImages,
         latitude: latitude,
         longitude: longitude,
         livingrooms: livingrooms,

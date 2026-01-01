@@ -17,7 +17,9 @@ PropertyListing _$PropertyListingFromJson(Map<String, dynamic> json) =>
       bathrooms: (json['bathrooms'] as num).toInt(),
       classification: json['listing_type'] as String,
       propertyType: json['building_type'] as String,
-      image: json['image'] as String,
+      image: json['main_pic'] as String,
+      additionalImages:
+          (json['pics'] as List<dynamic>?)?.map((e) => e as String).toList(),
       isOnline: json['is_online'] == null
           ? true
           : PropertyListing._boolFromInt((json['is_online'] as num).toInt()),
@@ -45,7 +47,8 @@ Map<String, dynamic> _$PropertyListingToJson(PropertyListing instance) =>
       'bathrooms': instance.bathrooms,
       'listing_type': instance.classification,
       'building_type': instance.propertyType,
-      'image': instance.image,
+      'main_pic': instance.image,
+      'pics': instance.additionalImages,
       'is_online': PropertyListing._boolToInt(instance.isOnline),
       'created_at': instance.createdAt,
       'is_boosted': PropertyListing._boolToInt(instance.isBoosted),

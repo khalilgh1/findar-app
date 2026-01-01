@@ -1,0 +1,21 @@
+meta {
+  name: cloudinary upload
+  type: http
+  seq: 16
+}
+
+post {
+  url: https://api.cloudinary.com/v1_1/da5xjc4dx/image/upload
+  body: multipartForm
+  auth: inherit
+}
+
+body:multipart-form {
+  file: @file(C:\Users\Hp\Downloads\doctor1.webp)
+  upload_preset: findar
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

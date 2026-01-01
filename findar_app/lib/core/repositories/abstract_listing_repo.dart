@@ -6,6 +6,8 @@ abstract class ListingRepository {
   /// Create a new listing
   ///
   /// Returns a [ReturnResult] indicating success or failure of the operation
+  /// [image] - Main image file path (will be uploaded to Cloudinary)
+  /// [additionalImages] - Optional list of additional image file paths
   Future<ReturnResult> createListing({
     required String title,
     required String description,
@@ -16,6 +18,7 @@ abstract class ListingRepository {
     required String classification,
     required String propertyType,
     required String image,
+    List<String>? additionalImages,
     double? latitude,
     double? longitude,
     int? livingrooms,

@@ -34,6 +34,7 @@ class LocalListingRepository implements ListingRepository {
     required String classification,
     required String propertyType,
     required String image,
+    List<String>? additionalImages,
     double? latitude,
     double? longitude,
     int? livingrooms,

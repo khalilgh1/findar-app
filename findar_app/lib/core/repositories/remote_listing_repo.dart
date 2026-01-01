@@ -2,12 +2,14 @@ import 'package:findar/core/models/return_result.dart';
 import 'package:findar/core/models/property_listing_model.dart';
 import 'package:findar/core/repositories/abstract_listing_repo.dart';
 import 'package:findar/core/services/findar_api_service.dart';
+import 'package:findar/core/services/cloudinary_service.dart';
 import 'package:findar/core/config/api_config.dart';
 
 class RemoteListingRepository implements ListingRepository {
   final FindarApiService apiService;
+  final CloudinaryService cloudinaryService;
 
-  RemoteListingRepository(this.apiService);
+  RemoteListingRepository(this.apiService, this.cloudinaryService);
 
   @override
   Future<ReturnResult> createListing({
@@ -20,6 +22,7 @@ class RemoteListingRepository implements ListingRepository {
     required String classification,
     required String propertyType,
     required String image,
+    List<String>? additionalImages,
     double? latitude,
     double? longitude,
     int? livingrooms,
@@ -28,6 +31,31 @@ class RemoteListingRepository implements ListingRepository {
     print('🔍 Creating listing: $title');
 
     try {
+      // Upload images to Cloudinary first (if not asset paths)
+      String? mainPicUrl;
+      List<String> picsUrls = [];
+
+      if (!image.startsWith('assets/')) {
+        print('📤 Uploading images to Cloudinary...');
+        
+        final uploadResult = await cloudinaryService.uploadListingImages(
+          mainImagePath: image,
+          additionalImagePaths: additionalImages,
+        );
+
+        if (!uploadResult.success) {
+          return ReturnResult(
+            state: false,
+            message: 'Failed to upload images: ${uploadResult.error}',
+          );
+        }
+
+        mainPicUrl = uploadResult.mainImageUrl;
+        picsUrls = uploadResult.additionalImageUrls;
+        
+        print('✅ Images uploaded - Main: $mainPicUrl, Additional: ${picsUrls.length}');
+      }
+
       // Map classification to backend values
       String listingType = classification.toLowerCase();
       if (listingType == 'for sale') listingType = 'sale';
@@ -47,9 +75,12 @@ class RemoteListingRepository implements ListingRepository {
         'building_type': buildingType,  // 'apartment', 'house', etc.
       };
 
-      // Don't send main_pic if it's an asset path
-      if (!image.startsWith('assets/')) {
-        body['main_pic'] = image;
+      // Add Cloudinary URLs if available
+      if (mainPicUrl != null) {
+        body['main_pic'] = mainPicUrl;
+      }
+      if (picsUrls.isNotEmpty) {
+        body['pics'] = picsUrls;
       }
 
       // Add optional fields if provided
