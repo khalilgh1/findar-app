@@ -111,7 +111,8 @@ class _ProgressButtonState extends State<ProgressButton> {
   @override
   Widget build(BuildContext context) {
     // Determine if button should be clickable
-    final canPress = !widget.isLoading && widget.isEnabled && !widget.isError && !_isInCooldown;
+    // Allow clicking even in error state so user can retry
+    final canPress = !widget.isLoading && widget.isEnabled && !_isInCooldown;
 
     // Determine button color
     final bgColor = widget.isError

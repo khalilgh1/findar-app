@@ -35,17 +35,31 @@ class _HomeScreenState extends State<HomeScreen> {
       listeners: [
         BlocListener<SponsoredCubit, Map<String, dynamic>>(
           listenWhen: (previous, current) {
-            return previous['message'] != current['message'];
+            // Only listen if message actually changed and is non-empty
+            return previous['message'] != current['message'] && 
+                   (current['message'] as String? ?? '').isNotEmpty;
           },
           listener: (context, state) {
             final message = state['message'] as String? ?? '';
-            if (message.isNotEmpty &&
-                (message.toLowerCase().contains('saved') ||
-                    message.toLowerCase().contains('removed'))) {
+            if (message.isEmpty) return;
+            
+            // Clear any existing snackbars first
+            ScaffoldMessenger.of(context).clearSnackBars();
+            
+            // Check if it's a success or error message
+            final isSuccess = message.toLowerCase().contains('successfully');
+            final isError = message.toLowerCase().contains('error') ||
+                            message.toLowerCase().contains('failed') ||
+                            message.toLowerCase().contains('cannot') ||
+                            message.toLowerCase().contains('can\'t') ||
+                            message.toLowerCase().contains('not saved');
+            
+            if (isSuccess || isError) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(message),
                   duration: const Duration(seconds: 2),
+                  backgroundColor: isSuccess ? Colors.green : Colors.red,
                 ),
               );
             }
@@ -53,17 +67,31 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         BlocListener<RecentCubit, Map<String, dynamic>>(
           listenWhen: (previous, current) {
-            return previous['message'] != current['message'];
+            // Only listen if message actually changed and is non-empty
+            return previous['message'] != current['message'] && 
+                   (current['message'] as String? ?? '').isNotEmpty;
           },
           listener: (context, state) {
             final message = state['message'] as String? ?? '';
-            if (message.isNotEmpty &&
-                (message.toLowerCase().contains('saved') ||
-                    message.toLowerCase().contains('removed'))) {
+            if (message.isEmpty) return;
+            
+            // Clear any existing snackbars first
+            ScaffoldMessenger.of(context).clearSnackBars();
+            
+            // Check if it's a success or error message
+            final isSuccess = message.toLowerCase().contains('successfully');
+            final isError = message.toLowerCase().contains('error') ||
+                            message.toLowerCase().contains('failed') ||
+                            message.toLowerCase().contains('cannot') ||
+                            message.toLowerCase().contains('can\'t') ||
+                            message.toLowerCase().contains('not saved');
+            
+            if (isSuccess || isError) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(message),
                   duration: const Duration(seconds: 2),
+                  backgroundColor: isSuccess ? Colors.green : Colors.red,
                 ),
               );
             }

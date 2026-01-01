@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:findar/core/repositories/auth_repository.dart';
+import 'package:findar/core/repositories/auth_repository.dart' show User;
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Simple local user cache backed by SharedPreferences.

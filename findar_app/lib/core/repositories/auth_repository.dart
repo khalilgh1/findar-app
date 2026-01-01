@@ -103,7 +103,7 @@ class AuthRepository {
       }
 
       final response = await apiService.post(
-        '/auth/register',
+        '/api/auth/register',
         body: {
           'username': name,
           'email': email,
@@ -167,7 +167,7 @@ class AuthRepository {
       }
 
       final response = await apiService.post(
-        '/auth/login',
+        '/api/auth/login',
         body: {
           'email': email,
           'password': password,

@@ -132,18 +132,33 @@ def advanced_search(request):
 
 ######## Save a listing VIEW#########
 
-@api_view(["GET"])
-# @permission_classes([IsAuthenticated])
+@api_view(["GET", "DELETE"])
+@permission_classes([IsAuthenticated])
 def save_listing(request , listing_id ):
     try:
         post = Post.objects.get(id=listing_id)
     except Post.DoesNotExist:
         return Response({'errors':"not found"} , status=status.HTTP_404_NOT_FOUND)
     
-    # Use default user ID 1 for testing
-    user_id = 1
+    # Get authenticated user ID
+    user_id = request.user.id
+    
+    # Handle DELETE request (unsave)
+    if request.method == "DELETE":
+        try:
+            saved_post = SavedPosts.objects.get(user=user_id, post=post)
+            saved_post.delete()
+            return Response({"message": "Listing unsaved successfully"}, status=status.HTTP_200_OK)
+        except SavedPosts.DoesNotExist:
+            return Response({"error": "Listing was not saved"}, status=status.HTTP_404_NOT_FOUND)
+    
+    # Handle GET request (save)
     if post.owner.id == user_id:
         return Response({"error" : "you cant save your posts"} , status=status.HTTP_400_BAD_REQUEST)
+    
+    # Check if already saved
+    if SavedPosts.objects.filter(user=user_id, post=post).exists():
+        return Response({"message": "Listing already saved"}, status=status.HTTP_200_OK)
     
     data = {
         "user": user_id,
@@ -156,16 +171,17 @@ def save_listing(request , listing_id ):
         return Response({"errors" : serializer.errors},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
     serializer.save()
-    return Response(status=status.HTTP_200_OK)
+    return Response({"message": "Listing saved successfully"}, status=status.HTTP_200_OK)
+
 
 
 ######## Saved listing VIEW#########
 
 @api_view(["GET"])
-# @permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def saved_listings(request):
-    # Use default user ID 1 for testing
-    user_id = 1
+    # Get authenticated user ID
+    user_id = request.user.id
     saved_posts = SavedPosts.objects.filter(user=user_id).select_related('post')
     # Extract the actual Post objects from SavedPosts
     posts = [saved.post for saved in saved_posts if saved.post.active]
@@ -195,14 +211,14 @@ def listing_details(request, listing_id):
 ######## My Listings VIEW#########
 
 @api_view(["GET"])
-# @permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def my_listings(request):
     """
     user can view his own listings
     in the ui there is an option to filter by online / offline listings
     """
-    # Use default user ID 1 for testing
-    user_id = 1
+    # Get authenticated user ID
+    user_id = request.user.id
     posts = Post.objects.filter(owner_id=user_id)
     active_posts   = posts.filter(active=True )
     inactive_posts = posts.filter(active=False)
@@ -218,17 +234,13 @@ def my_listings(request):
 ######## create Listing VIEW#########
 
 @api_view(['POST'])
-# @permission_classes([IsAuthenticated])  # Temporarily disabled for testing
+@permission_classes([IsAuthenticated])
 def create_listing(request):
     """
      get users location for post position or we will get it from frontend?
     """
-    # Use a default owner ID if not authenticated (for testing)
-    if hasattr(request, 'user') and request.user.is_authenticated:
-        request.data['owner'] = request.user.id
-    else:
-        # Use owner ID 1 for testing (make sure you have a user with ID 1)
-        request.data['owner'] = 1
+    # Use authenticated user as owner
+    request.data['owner'] = request.user.id
     
     serializer = PostSerializers(data=request.data)
     if serializer.is_valid():
@@ -239,15 +251,16 @@ def create_listing(request):
 
 ######## edit Listing VIEW#########
 @api_view(['PUT'])
-# @permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def edit_listing(request , listing_id):
     try:
         post = Post.objects.get(id=listing_id)
     except Post.DoesNotExist:
         return Response({'errors':"not found"} , status=status.HTTP_404_NOT_FOUND)
-    #TODO turn this on later after authentication is done
-    # if post.owner.id != request.user.id:
-    #     return Response({"error" : "dont have permission"} , status=status.HTTP_401_UNAUTHORIZED)
+    
+    # Check if user owns the listing
+    if post.owner.id != request.user.id:
+        return Response({"error" : "dont have permission"} , status=status.HTTP_401_UNAUTHORIZED)
     
     serializer = PostSerializers(post , data=request.data , partial=True)
     if serializer.is_valid():
@@ -259,86 +272,101 @@ def edit_listing(request , listing_id):
 ######## toggle active-unactive Listing VIEW#########
 
 @api_view(['POST'])
-# @permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def toggle_active_listing(request , listing_id):
     try:
         post = Post.objects.get(id=listing_id)
     except Post.DoesNotExist:
         return Response({'errors':"not found"} , status=status.HTTP_404_NOT_FOUND)
     
-    # Use default user ID 1 for testing
-    user_id = 1
+    # Get authenticated user ID
+    user_id = request.user.id
     if post.owner.id != user_id:
         return Response({"error" : "dont have permission"} , status=status.HTTP_401_UNAUTHORIZED)
     
+    print(f"DEBUG TOGGLE - Before: Post ID {post.id}, active={post.active}")
     post.active = not post.active
     post.save()
-    return Response(status=status.HTTP_200_OK)
+    print(f"DEBUG TOGGLE - After: Post ID {post.id}, active={post.active}")
+    return Response({"message": "Listing status updated", "active": post.active}, status=status.HTTP_200_OK)
 
-#########  AUTHENTICATION VIEWS  #########
+
+#########  Create User  #########
+
+@api_view(["POST"])
+def register(request):
+    serializer = RegisterSerializer(data=request.data)
+
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    user = serializer.save()
+    refresh = RefreshToken.for_user(user)
+    return Response({
+        "success": True,
+        "message": "User created",
+        "data": {
+            "refresh": str(refresh),
+            "access": str(refresh.access_token),
+            "user": {
+                "id": user.id,
+                "name": user.username,
+                "email": user.email,
+                "phone": user.phone,
+                "profile_pic": user.profile_pic.url if user.profile_pic else None,
+                "account_type": user.account_type,
+                "credits": int(user.credits),
+            }
+        }
+    }, status=status.HTTP_201_CREATED)
+
+#########  Login as User  #########
 
 @api_view(["POST"])
 def login(request):
     email = request.data.get("email")
     password = request.data.get("password")
+    
+    # Try to find user by email
+    try:
+        user_obj = CustomUser.objects.get(email=email)
+        username = user_obj.username
+    except CustomUser.DoesNotExist:
+        return Response({"error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
 
-    user = authenticate(request=request,email=email, password=password)
-    print( request.data  )
+    user = authenticate(username=username, password=password)
+
     if not user:
         return Response({"error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
 
     refresh = RefreshToken.for_user(user)
-    user = UserSerializers(user).data
 
-    response= Response({
-        "message":"login successful",
-        "success":True,
+    return Response({
+        "success": True,
+        "message": "Login successful",
         "data": {
-        "refresh": str(refresh),
-        "access": str(refresh.access_token),
-        "user": user
+            "refresh": str(refresh),
+            "access": str(refresh.access_token),
+            "user": {
+                "id": user.id,
+                "name": user.username,
+                "email": user.email,
+                "phone": user.phone,
+                "profile_pic": user.profile_pic.url if user.profile_pic else None,
+                "account_type": user.account_type,
+                "credits": int(user.credits),
+            }
         }
     })
 
-    return response 
-
-@api_view(["POST"])
-def register(request):
-
-    serializer = RegisterSerializer(data=request.data)
-    print( request.data )
-
-    if not serializer.is_valid():
-        print( serializer._errors )
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-    user = serializer.save()
-    
-    refresh = RefreshToken.for_user(user)
-    user = RegisterSerializer(user).data
-
-    response = Response({
-        "message":"registered successful",
-        "success":True,
-        "data": {
-        "refresh": str(refresh),
-        "access": str(refresh.access_token),
-        "user": user
-        }
-    })
-
-    return response
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def me(request):
-    
     user = request.user
-    user = UserSerializers(user).data
+    serializer = UserSerializers(user)
+    return Response(serializer.data, status=status.HTTP_200_OK)
 
-    response= Response({
-        "user": user
-    } , status=status.HTTP_200_OK )
 
-    return response
+
+
