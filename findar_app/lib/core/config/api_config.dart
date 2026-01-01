@@ -32,8 +32,8 @@ class ApiConfig {
   static const String advancedSearch = '/api/advanced-search/';
 
   // Auth
-  static const String loginEndpoint = '/api/login/';
-  static const String registerEndpoint = '/api/register/';
+  static const String loginEndpoint = '/api/auth/login/';
+  static const String registerEndpoint = '/api/auth/register/';
 
   // Notifications
   static const String notificationsRegisterDeviceEndpoint =

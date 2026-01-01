@@ -1,3 +1,4 @@
+import 'package:findar/core/config/api_config.dart';
 import 'package:findar/core/models/return_result.dart';
 import 'package:findar/core/services/findar_api_service.dart';
 import 'package:findar/core/services/auth_manager.dart';
@@ -103,7 +104,7 @@ class AuthRepository {
       }
 
       final response = await apiService.post(
-        '/auth/register',
+        ApiConfig.registerEndpoint,
         body: {
           'username': name,
           'email': email,
@@ -167,7 +168,7 @@ class AuthRepository {
       }
 
       final response = await apiService.post(
-        '/auth/login',
+        ApiConfig.loginEndpoint,
         body: {
           'email': email,
           'password': password,

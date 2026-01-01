@@ -9,8 +9,8 @@ from rest_framework_simplejwt.views import (
 urlpatterns = [
     path('get-listing/<int:listing_id>', get_listing, name='get-listing'),
     # authentication urls 
-    path('auth/login' , login , name="login"),
-    path('auth/register' , register, name="register"),
+    path('auth/login/' , login , name="login"),
+    path('auth/register/' , register, name="register"),
     path('auth/me' , me , name="me"),
     path('auth/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('auth/refresh', TokenRefreshView.as_view(), name='token_refresh'),
