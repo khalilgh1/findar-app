@@ -212,13 +212,11 @@ def listing_details(request, listing_id):
     """
     try:
         post = Post.objects.get(id=listing_id)
-        post_images  = Photos.objects.filter(post=post.id)
     except Post.DoesNotExist:
         return Response({'errors':"not found"} , status=status.HTTP_404_NOT_FOUND)
     
     post = PostSerializers(post).data
-    post_images = PhotosSerializers(post_images,many=True).data
-    return Response({'post' : post , 'images' : post_images} , status=status.HTTP_200_OK)
+    return Response(post , status=status.HTTP_200_OK)
     
 
 ######## My Listings VIEW#########

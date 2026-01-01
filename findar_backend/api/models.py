@@ -26,9 +26,8 @@ class CustomUser(AbstractUser):
     username = models.CharField(max_length=150,unique=False)    
     email = models.EmailField(unique=True)
     phone    = models.CharField(max_length=15 , unique=True)
-    profile_pic     = models.ImageField(upload_to="profiles/" , blank=True , null=True)
+    profile_pic     = models.URLField(max_length=500 , null=True , blank=True)
     account_type    = models.CharField(max_length=20, choices=ACCOUNT_CHOICES)
-
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username"]
     
@@ -60,7 +59,8 @@ class Post(models.Model):
     created_at   = models.DateTimeField(auto_now=True)
     active       = models.BooleanField(default=True)
     boosted      = models.BooleanField(default=False)
-    main_pic     = models.ImageField(upload_to="profiles/" , blank=True , null=True)
+    main_pic     = models.URLField(max_length=500 , null=True , blank=True)
+    pics = models.JSONField(null=True , blank=True, default=list)
     latitude     = models.FloatField(null = True)
     longitude    = models.FloatField(null = True)
     bedrooms     = models.IntegerField(default=0  , null=True)
@@ -72,14 +72,6 @@ class Post(models.Model):
 
     def __str__(self):
         return f"{self.owner} : {self.title}"
-
-################# Photos Model
-
-class Photos(models.Model):
-
-    post    = models.ForeignKey(Post, on_delete=models.CASCADE)    
-    picture = models.ImageField(upload_to="profiles/" , blank=True , null=True)
-
 
 ################# SavedPosts Model
 

@@ -3,7 +3,7 @@ from rest_framework.serializers import ValidationError
 import re
 
 from .models import (
-    CustomUser, Post, Photos, SavedPosts, Report, BoostingPlan, Boosting
+    CustomUser, Post, SavedPosts, Report, BoostingPlan, Boosting
 )
 
 class UserSerializers(serializers.ModelSerializer):
@@ -14,11 +14,6 @@ class UserSerializers(serializers.ModelSerializer):
 class PostSerializers(serializers.ModelSerializer):
     class Meta:
         model = Post
-        fields= "__all__"
-
-class PhotosSerializers(serializers.ModelSerializer):
-    class Meta:
-        model = Photos
         fields= "__all__"
 
 class SavedPostsSerializers(serializers.ModelSerializer):
