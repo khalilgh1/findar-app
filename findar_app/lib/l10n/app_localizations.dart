@@ -1150,13 +1150,13 @@ abstract class AppLocalizations {
   /// No description provided for @nameTooShort.
   ///
   /// In en, this message translates to:
-  /// **'Name must be at least 3 characters'**
+  /// **'Name must be at least 4 characters'**
   String get nameTooShort;
 
   /// No description provided for @passwordTooShort.
   ///
   /// In en, this message translates to:
-  /// **'Password must be at least 6 characters'**
+  /// **'Password must be at least 8 characters'**
   String get passwordTooShort;
 
   /// No description provided for @passwordMissingUppercase.
@@ -1164,6 +1164,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Password must contain at least one uppercase letter'**
   String get passwordMissingUppercase;
+
+  /// No description provided for @passwordMissingLowercase.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must contain at least one lowercase letter'**
+  String get passwordMissingLowercase;
 
   /// No description provided for @passwordMissingNumber.
   ///

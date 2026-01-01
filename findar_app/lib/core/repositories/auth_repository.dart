@@ -48,7 +48,6 @@ class User {
   }
 }
 
-
 /// Repository for authentication operations
 /// Handles user registration, login, and token management
 /// Currently uses mock data - will connect to real API when backend is complete
@@ -58,7 +57,7 @@ class User {
 class AuthRepository {
   final FindarApiService apiService;
   final LocalUserStore _userStore;
-  
+
   // Mock storage for current user session
   User? _currentUser;
 
@@ -66,7 +65,7 @@ class AuthRepository {
       : _userStore = userStore ?? LocalUserStore();
 
   /// Register a new user
-  /// 
+  ///
   /// Returns: ReturnResult with success state and message
   Future<ReturnResult> register({
     required String name,
@@ -77,10 +76,10 @@ class AuthRepository {
   }) async {
     try {
       // Validation
-      if (name.isEmpty || name.length < 2) {
+      if (name.isEmpty || name.length < 4) {
         return ReturnResult(
           state: false,
-          message: 'Name must be at least 2 characters',
+          message: 'Name must be at least 4 characters',
         );
       }
       if (email.isEmpty || !email.contains('@')) {
@@ -95,10 +94,10 @@ class AuthRepository {
           message: 'Phone number is required',
         );
       }
-      if (password.isEmpty || password.length < 6) {
+      if (password.isEmpty || password.length < 8) {
         return ReturnResult(
           state: false,
-          message: 'Password must be at least 6 characters',
+          message: 'Password must be at least 8 characters',
         );
       }
 
@@ -112,6 +111,11 @@ class AuthRepository {
           'account_type': accountType,
         },
       );
+
+      // Handle error response from API service
+      if (response is ReturnResult) {
+        return response;
+      }
 
       if (response['success'] != true) {
         return ReturnResult(
@@ -145,7 +149,7 @@ class AuthRepository {
   }
 
   /// Login user
-  /// 
+  ///
   /// Returns: ReturnResult with success state and message
   Future<ReturnResult> login({
     required String email,
@@ -173,6 +177,11 @@ class AuthRepository {
           'password': password,
         },
       );
+
+      // Handle error response from API service
+      if (response is ReturnResult) {
+        return response;
+      }
 
       if (response['success'] != true) {
         return ReturnResult(
@@ -212,7 +221,7 @@ class AuthRepository {
       await AuthManager().clear();
       _currentUser = null;
       await _userStore.clearUser();
-      
+
       return ReturnResult(
         state: true,
         message: 'Logout successful',
@@ -226,7 +235,7 @@ class AuthRepository {
   }
 
   /// Get current user profile
-  /// 
+  ///
   /// Returns: ReturnResult with user data if successful
   Future<ReturnResult> getProfile() async {
     try {
@@ -249,6 +258,11 @@ class AuthRepository {
 
       final response = await apiService.get('/users/profile');
 
+      // Handle error response from API service
+      if (response is ReturnResult) {
+        return response;
+      }
+
       if (response['success'] != true) {
         return ReturnResult(
           state: false,
@@ -258,7 +272,7 @@ class AuthRepository {
 
       _currentUser = User.fromJson(response['data']);
       await _userStore.saveUser(_currentUser!);
-      
+
       return ReturnResult(
         state: true,
         message: 'Profile loaded',
@@ -272,7 +286,7 @@ class AuthRepository {
   }
 
   /// Update user profile
-  /// 
+  ///
   /// Returns: ReturnResult with success state and message
   Future<ReturnResult> updateProfile({
     String? name,
@@ -290,7 +304,7 @@ class AuthRepository {
           );
         }
       }
-      
+
       final body = <String, dynamic>{};
       if (name != null) body['name'] = name;
       if (email != null) body['email'] = email;
@@ -309,6 +323,11 @@ class AuthRepository {
         body: body,
       );
 
+      // Handle error response from API service
+      if (response is ReturnResult) {
+        return response;
+      }
+
       if (response['success'] != true) {
         return ReturnResult(
           state: false,
@@ -318,7 +337,7 @@ class AuthRepository {
 
       _currentUser = User.fromJson(response['data']);
       await _userStore.saveUser(_currentUser!);
-      
+
       return ReturnResult(
         state: true,
         message: 'Profile updated successfully',

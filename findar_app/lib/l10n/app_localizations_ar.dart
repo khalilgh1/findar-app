@@ -542,13 +542,16 @@ class AppLocalizationsAr extends AppLocalizations {
   String get nameRequired => 'الاسم مطلوب';
 
   @override
-  String get nameTooShort => 'يجب أن يكون الاسم 3 أحرف على الأقل';
+  String get nameTooShort => 'يجب أن يكون الاسم 4 أحرف على الأقل';
 
   @override
-  String get passwordTooShort => 'يجب أن تكون كلمة المرور 6 أحرف على الأقل';
+  String get passwordTooShort => 'يجب أن تكون كلمة المرور 8 أحرف على الأقل';
 
   @override
   String get passwordMissingUppercase => 'يجب أن تحتوي كلمة المرور على حرف كبير واحد على الأقل';
+
+  @override
+  String get passwordMissingLowercase => 'يجب أن تحتوي كلمة المرور على حرف صغير واحد على الأقل';
 
   @override
   String get passwordMissingNumber => 'يجب أن تحتوي كلمة المرور على رقم واحد على الأقل';

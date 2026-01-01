@@ -542,13 +542,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nameRequired => 'Name is required';
 
   @override
-  String get nameTooShort => 'Name must be at least 3 characters';
+  String get nameTooShort => 'Name must be at least 4 characters';
 
   @override
-  String get passwordTooShort => 'Password must be at least 6 characters';
+  String get passwordTooShort => 'Password must be at least 8 characters';
 
   @override
   String get passwordMissingUppercase => 'Password must contain at least one uppercase letter';
+
+  @override
+  String get passwordMissingLowercase => 'Password must contain at least one lowercase letter';
 
   @override
   String get passwordMissingNumber => 'Password must contain at least one number';
