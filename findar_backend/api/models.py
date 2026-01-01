@@ -30,6 +30,7 @@ class CustomUser(AbstractUser):
     account_type    = models.CharField(max_length=20, choices=ACCOUNT_CHOICES)
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username"]
+    credits = models.IntegerField(default=0)
     
     def __str__(self):
         print(f"DEBUG - User ID: {self.id}, Username: {self.username}")
