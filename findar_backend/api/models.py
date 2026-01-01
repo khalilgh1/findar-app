@@ -32,6 +32,7 @@ class CustomUser(AbstractUser):
     REQUIRED_FIELDS = ["username"]
     
     def __str__(self):
+        print(f"DEBUG - User ID: {self.id}, Username: {self.username}")
         return self.username
     
     
@@ -71,6 +72,7 @@ class Post(models.Model):
     building_type = models.CharField(max_length=50 , choices=BUILDING_TYPE_CHOICES, null=True)  
 
     def __str__(self):
+        print(f"DEBUG POST - ID: {self.id}, Owner ID: {self.owner.id}, Owner Username: {self.owner.username}, Title: {self.title}")
         return f"{self.owner} : {self.title}"
 
 ################# SavedPosts Model

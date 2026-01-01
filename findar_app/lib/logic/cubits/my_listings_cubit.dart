@@ -64,6 +64,33 @@ class MyListingsCubit extends Cubit<Map<String, dynamic>> {
     }
   }
 
+  /// Toggle active status of a listing
+  Future<void> toggleActiveListing(int id) async {
+    emit({...state, 'state': 'loading', 'message': ''});
+
+    try {
+      final result = await repository.toggleActiveListing(id);
+
+      if (result.state) {
+        final listings = await repository.getUserListings();
+        emit({
+          ...state,
+          'data': listings,
+          'state': 'done',
+          'message': result.message,
+        });
+      } else {
+        emit({...state, 'state': 'error', 'message': result.message});
+      }
+    } catch (e) {
+      emit({
+        ...state,
+        'state': 'error',
+        'message': 'Failed to toggle status: ${e.toString()}',
+      });
+    }
+  }
+
   /// Edit a listing
   Future<void> editListing({
     required int id,

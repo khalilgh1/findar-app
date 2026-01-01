@@ -239,6 +239,43 @@ class RemoteListingRepository implements ListingRepository {
     }
   }
 
+  Future<ReturnResult> toggleActiveListing(int id) async {
+    print('🔍 Toggling active status for listing: $id');
+
+    try {
+      final response = await apiService.post(
+        ApiConfig.toggleActiveListing(id),
+        body: {}, // Empty body for toggle
+      );
+
+      print('📥 Toggle response: $response');
+
+      // Check if response is already a ReturnResult (error case)
+      if (response is ReturnResult) {
+        return response;
+      }
+
+      // Check if response is a Map with error
+      if (response is Map && response.containsKey('error')) {
+        return ReturnResult(
+          state: false,
+          message: response['error'] ?? 'Failed to toggle listing',
+        );
+      }
+
+      return ReturnResult(
+        state: true,
+        message: response['message'] ?? 'Listing status updated',
+      );
+    } catch (e) {
+      print('❌ Error toggling listing: $e');
+      return ReturnResult(
+        state: false,
+        message: 'Failed to toggle listing status: $e',
+      );
+    }
+  }
+
   @override
   Future<List<PropertyListing>> getFilteredListings({
     double? latitude,
@@ -472,6 +509,27 @@ class RemoteListingRepository implements ListingRepository {
 
       print('📥 Save listing response: $response');
 
+      // Check if response is a ReturnResult with error
+      if (response is ReturnResult) {
+        return response;
+      }
+
+      // Check if response is a Map with error field
+      if (response is Map && response.containsKey('error')) {
+        return ReturnResult(
+          state: false,
+          message: response['error'].toString(),
+        );
+      }
+
+      // Check if response is a Map with message field
+      if (response is Map && response.containsKey('message')) {
+        return ReturnResult(
+          state: true,
+          message: response['message'].toString(),
+        );
+      }
+
       return ReturnResult(
         state: true,
         message: 'Listing saved successfully',
@@ -490,10 +548,30 @@ class RemoteListingRepository implements ListingRepository {
     print('🔍 Unsaving listing: $listingId');
 
     try {
-      // TODO: Update with correct unsave endpoint when available
-      await apiService.delete(ApiConfig.saveListing(listingId));
+      final response = await apiService.delete(ApiConfig.saveListing(listingId));
 
-      print('📥 Unsave listing completed');
+      print('📥 Unsave listing response: $response');
+
+      // Check if response is a ReturnResult with error
+      if (response is ReturnResult) {
+        return response;
+      }
+
+      // Check if response is a Map with error field
+      if (response is Map && response.containsKey('error')) {
+        return ReturnResult(
+          state: false,
+          message: response['error'].toString(),
+        );
+      }
+
+      // Check if response is a Map with message field
+      if (response is Map && response.containsKey('message')) {
+        return ReturnResult(
+          state: true,
+          message: response['message'].toString(),
+        );
+      }
 
       return ReturnResult(
         state: true,

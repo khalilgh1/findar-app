@@ -49,6 +49,12 @@ abstract class ListingRepository {
   /// Returns a [ReturnResult] indicating success or failure of the operation
   Future<ReturnResult> deleteListing(int id);
 
+  /// Toggle active/inactive status of a listing
+  ///
+  /// Takes the listing [id] to toggle
+  /// Returns a [ReturnResult] indicating success or failure of the operation
+  Future<ReturnResult> toggleActiveListing(int id);
+
   /// Get filtered listings based on search criteria
   ///
   /// Supports filtering by location, price range, property type, building type,

@@ -242,10 +242,7 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
   // UPDATED: Toggle online/offline handler
   void _handleToggleStatus(PropertyListing listing) {
     final newStatus = listing.isOnline ? 'Offline' : 'Online';
-    context.read<MyListingsCubit>().editListing(
-      id: listing.id,
-      isOnline: !listing.isOnline,
-    );
+    context.read<MyListingsCubit>().toggleActiveListing(listing.id);
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text('Setting listing to $newStatus...')));

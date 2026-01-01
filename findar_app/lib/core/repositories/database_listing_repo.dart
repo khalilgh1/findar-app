@@ -121,6 +121,35 @@ class LocalListingRepository implements ListingRepository {
   }
 
   @override
+  Future<ReturnResult> toggleActiveListing(int id) async {
+    try {
+      // Get the current listing
+      final results = await db.query(table, where: 'id = ?', whereArgs: [id]);
+      if (results.isEmpty) {
+        return ReturnResult(state: false, message: "Listing not found.");
+      }
+
+      final listing = results.first;
+      // Toggle the is_online value
+      final currentStatus = listing['is_online'] == 1;
+      final newStatus = !currentStatus;
+
+      await db.update(table, {
+        'id': id,
+        'is_online': newStatus ? 1 : 0,
+        'updated_at': DateTime.now().toIso8601String(),
+      });
+
+      return ReturnResult(
+        state: true, 
+        message: "Listing status updated to ${newStatus ? 'online' : 'offline'}."
+      );
+    } catch (e) {
+      return ReturnResult(state: false, message: e.toString());
+    }
+  }
+
+  @override
   Future<List<PropertyListing>> getFilteredListings({
     double? latitude,
     double? longitude,

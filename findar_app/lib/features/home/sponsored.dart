@@ -31,24 +31,36 @@ class _PropertyCardState extends State<PropertyCard> {
     _bookmarked = widget.property.bookmarked; // initial value
   }
 
-  void _toggleSave() {
+  void _toggleSave() async {
     final cubit = context.read<SponsoredCubit>();
     print('Before toggle: _bookmarked=$_bookmarked, id=${widget.property.id}');
 
     if (_bookmarked) {
       // Currently saved, so unsave it
       print('Unsaving listing ${widget.property.id}');
-      setState(() {
-        _bookmarked = false;
-      });
-      cubit.unsaveListing(widget.property.id);
+      final result = await cubit.unsaveListing(widget.property.id);
+      
+      // Only update UI if successful
+      if (result.state) {
+        setState(() {
+          _bookmarked = false;
+        });
+      } else {
+        print('Failed to unsave: ${result.message}');
+      }
     } else {
       // Currently not saved, so save it
       print('Saving listing ${widget.property.id}');
-      setState(() {
-        _bookmarked = true;
-      });
-      cubit.saveListing(widget.property.id);
+      final result = await cubit.saveListing(widget.property.id);
+      
+      // Only update UI if successful
+      if (result.state) {
+        setState(() {
+          _bookmarked = true;
+        });
+      } else {
+        print('Failed to save: ${result.message}');
+      }
     }
   }
 

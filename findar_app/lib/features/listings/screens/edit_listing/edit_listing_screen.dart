@@ -42,7 +42,9 @@ class _EditListingScreenState extends State<EditListingScreen> {
     _bathroomsController = TextEditingController(text: widget.listing.bathrooms.toString());
     _locationController = TextEditingController(text: widget.listing.location);
     _classification = widget.listing.classification;
-    _propertyType = widget.listing.propertyType;
+    // Capitalize first letter to match dropdown items
+    _propertyType = widget.listing.propertyType.substring(0, 1).toUpperCase() + 
+                    widget.listing.propertyType.substring(1).toLowerCase();
   }
 
   @override
@@ -106,7 +108,7 @@ class _EditListingScreenState extends State<EditListingScreen> {
       bedrooms: bedrooms,
       bathrooms: bathrooms,
       classification: _classification,
-      propertyType: _propertyType,
+      propertyType: _propertyType.toLowerCase(), // Convert back to lowercase for backend
     );
 
     ScaffoldMessenger.of(context).showSnackBar(
