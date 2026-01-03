@@ -1,5 +1,4 @@
 import 'package:findar/core/models/return_result.dart';
-import 'package:findar/core/services/api_service.dart';
 import 'package:findar/core/repositories/auth_repository.dart';
 import 'package:findar/core/services/findar_api_service.dart';
 

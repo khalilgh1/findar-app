@@ -11,6 +11,7 @@ import 'package:findar/features/create_listing/widgets/custom_selector.dart';
 import 'package:findar/features/create_listing/widgets/price_field.dart';
 import 'package:findar/features/create_listing/widgets/numeric_field.dart';
 import 'package:findar/features/create_listing/widgets/location_field.dart';
+import 'package:findar/features/create_listing/widgets/location_autocomplete_field.dart';
 //package imports
 import 'package:findar/logic/cubits/my_listings_cubit.dart';
 
@@ -38,6 +39,10 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
   String _propertyType = 'Apartment';
   String _status = 'Online';
   final List<String> _photos = ["assets/default.png"];
+  
+  // Location coordinates
+  double? _latitude;
+  double? _longitude;
 
   String? _validateTitle(String? value) {
     final l10n = AppLocalizations.of(context)!;
@@ -305,10 +310,17 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
                 },
               ),
               const SizedBox(height: 12),
-              LocationField(
-                locationController: _locationController,
+              LocationAutocompleteField(
+                controller: _locationController,
                 theme: theme,
                 validator: _validateLocation,
+                onLocationSelected: (latitude, longitude) {
+                  setState(() {
+                    _latitude = latitude;
+                    _longitude = longitude;
+                  });
+                  print('Selected location: $latitude, $longitude'); // Debug print
+                },
               ),
               const SizedBox(height: 24),
 
@@ -491,6 +503,8 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
                         description: _descriptionController.text,
                         price: double.parse(_priceController.text),
                         location: _locationController.text,
+                        latitude: _latitude,
+                        longitude: _longitude,
                         bedrooms: int.parse(_bedroomsController.text),
                         bathrooms: 1,
                         classification: _classification,

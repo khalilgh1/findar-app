@@ -36,6 +36,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
       ),
       builder: (sheetContext) {
         return ReportBottomSheet(
+          propertyId: propertyId.toString(),
           onReasonSelected: (reason) {
             context.read<PropertyDetailsCubit>().reportListing(
               propertyId: propertyId,
