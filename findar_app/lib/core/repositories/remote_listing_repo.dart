@@ -66,14 +66,14 @@ class RemoteListingRepository implements ListingRepository {
         body['area'] = area;
       }
 
-      print('📤 Request body: $body');
+      print('Request body: $body');
 
       final response = await apiService.post(
         ApiConfig.createListing,
         body: body,
       );
 
-      print('📥 Create listing response: $response');
+      print('Create listing response: $response');
 
       // If the service returned an error wrapper
       if (response is ReturnResult) {
@@ -87,7 +87,7 @@ class RemoteListingRepository implements ListingRepository {
         
         // Check if it has an 'id' field (indicates successful creation)
         if (map.containsKey('id')) {
-          print('✅ Listing created successfully with ID: ${map['id']}');
+          print('Listing created successfully with ID: ${map['id']}');
           return ReturnResult(
             state: true,
             message: 'Listing created successfully',
@@ -102,7 +102,7 @@ class RemoteListingRepository implements ListingRepository {
         message: 'Unexpected response from server',
       );
     } catch (e) {
-      print('❌ Error creating listing: $e');
+      print('Error creating listing: $e');
       return ReturnResult(
         state: false,
         message: 'Failed to create listing: $e',
@@ -155,14 +155,14 @@ class RemoteListingRepository implements ListingRepository {
         body['main_pic'] = image;
       }
 
-      print('📤 Edit request body: $body');
+      print('Edit request body: $body');
 
       final response = await apiService.put(
         ApiConfig.editListing(id),
         body: body,
       );
 
-      print('📥 Edit listing response: $response');
+      print('Edit listing response: $response');
 
       if (response is ReturnResult) {
         return response;
@@ -180,7 +180,7 @@ class RemoteListingRepository implements ListingRepository {
         message: 'Unexpected response from server',
       );
     } catch (e) {
-      print('❌ Error editing listing: $e');
+      print('Error editing listing: $e');
       return ReturnResult(
         state: false,
         message: 'Failed to edit listing: $e',
@@ -200,7 +200,7 @@ class RemoteListingRepository implements ListingRepository {
         message: 'Listing deleted successfully',
       );
     } catch (e) {
-      print('❌ Error deleting listing: $e');
+      print('Error deleting listing: $e');
       return ReturnResult(
         state: false,
         message: 'Failed to delete listing: $e',
@@ -239,14 +239,14 @@ class RemoteListingRepository implements ListingRepository {
       if (maxSqft != null) queryParams['max_sqft'] = maxSqft.toString();
       if (listedBy != null) queryParams['listed_by'] = listedBy;
 
-      print('📤 Filter params: $queryParams');
+      print('Filter params: $queryParams');
 
       final response = await apiService.get(
         ApiConfig.advancedSearch,
         queryParams: queryParams.isNotEmpty ? queryParams : null,
       );
 
-      print('📥 Filtered listings response: $response');
+      print('Filtered listings response: $response');
 
       if (response is List) {
         return _parseListingList(response);
@@ -254,7 +254,7 @@ class RemoteListingRepository implements ListingRepository {
 
       return <PropertyListing>[];
     } catch (e) {
-      print('❌ Error fetching filtered listings: $e');
+      print('Error fetching filtered listings: $e');
       return <PropertyListing>[];
     }
   }
@@ -266,7 +266,7 @@ class RemoteListingRepository implements ListingRepository {
     try {
       final response = await apiService.get(ApiConfig.myListings);
 
-      print('📥 My listings response: $response');
+      print('My listings response: $response');
 
       // If the service returned an error wrapper
       if (response is ReturnResult) {
