@@ -342,3 +342,44 @@ def me(request):
     } , status=status.HTTP_200_OK )
 
     return response
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def report_property(request):
+    """
+    Report a property with issue description
+    """
+    property_id = request.data.get('property_id')
+    issue_description = request.data.get('issue_description')
+    reporter_email = request.data.get('reporter_email')
+    
+    if not property_id or not issue_description or not reporter_email:
+        return Response({
+            "error": "property_id, issue_description, and reporter_email are required"
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+    try:
+        # Check if property exists
+        property_post = Post.objects.get(id=property_id)
+        
+        # Create report entry
+        report = Report.objects.create(
+            post=property_post,
+            user=request.user,
+            reason=issue_description[:500],  # Limit to 500 characters
+        )
+        
+        return Response({
+            "message": "Property reported successfully",
+            "success": True,
+            "report_id": report.id
+        }, status=status.HTTP_201_CREATED)
+        
+    except Post.DoesNotExist:
+        return Response({
+            "error": "Property not found"
+        }, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({
+            "error": f"Failed to submit report: {str(e)}"
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
