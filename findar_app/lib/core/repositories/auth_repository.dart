@@ -114,10 +114,10 @@ class AuthRepository {
         },
       );
 
-      if (response['success'] != true) {
+      if (response is ReturnResult && response.state != true) {
         return ReturnResult(
           state: false,
-          message: response['message'] ?? 'Registration failed',
+          message: response.message ?? 'Registration failed',
         );
       }
 
@@ -175,10 +175,10 @@ class AuthRepository {
         },
       );
 
-      if (response['success'] != true) {
+      if (response is ReturnResult && response.state == false) {
         return ReturnResult(
           state: false,
-          message: response['message'] ?? 'Login failed',
+          message: response.message ?? 'Login failed',
         );
       }
 

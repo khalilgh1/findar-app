@@ -282,10 +282,22 @@ def login(request):
     email = request.data.get("email")
     password = request.data.get("password")
 
+
+    errors = ""
+    if email is None or email == "":
+        errors += "email should not be empty ,"
+    if password is None or password == "":
+        errors += "password should not be empty"
+
+    if errors != "":
+        return Response(errors , status=status.HTTP_400_BAD_REQUEST)
+    
+
     user = authenticate(request=request,email=email, password=password)
     print( request.data  )
+
     if not user:
-        return Response({"error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response("incorrect email or password", status=status.HTTP_400_BAD_REQUEST)
 
     refresh = RefreshToken.for_user(user)
     user = UserSerializers(user).data
@@ -309,9 +321,12 @@ def register(request):
     print( request.data )
 
     if not serializer.is_valid():
-        print( serializer._errors )
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        response = Response( 
+            serializer.errors
+        , status=status.HTTP_400_BAD_REQUEST)
+
+        return response
     
     user = serializer.save()
     
