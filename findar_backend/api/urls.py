@@ -1,3 +1,4 @@
+from django.contrib.auth import views as auth_views
 from django.urls import path
 from .views import *
 
@@ -9,8 +10,17 @@ from rest_framework_simplejwt.views import (
 urlpatterns = [
     path('get-listing/<int:listing_id>', get_listing, name='get-listing'),
     # authentication urls 
-    path('auth/login/' , login , name="login"),
-    path('auth/register/' , register, name="register"),
+    path('auth/login/', login, name="login"),
+    path('auth/register/', register, name="register"),
+    path('auth/password-reset/',
+        auth_views.PasswordResetView.as_view(
+            email_template_name="registration/password_reset_email.txt",
+            html_email_template_name="registration/password_reset_email.html",
+            subject_template_name="registration/password_reset_subject.txt",
+        ),
+        name="password_reset"
+    ),
+    
     path('auth/me' , me , name="me"),
     path('auth/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('auth/refresh', TokenRefreshView.as_view(), name='token_refresh'),
