@@ -36,6 +36,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
       ),
       builder: (sheetContext) {
         return ReportBottomSheet(
+          propertyId: propertyId.toString(),
           onReasonSelected: (reason) {
             context.read<PropertyDetailsCubit>().reportListing(
                   propertyId: propertyId,
@@ -50,16 +51,8 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
   void _handleReportStateChange(
       BuildContext context, Map<String, dynamic> state) {
     final reportState = state['reportState'];
-    final l10n = AppLocalizations.of(context);
 
-    if (reportState == 'success' && l10n != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(l10n.propertyReportedThankYou),
-          backgroundColor: Colors.green,
-        ),
-      );
-    } else if (reportState == 'error') {
+    if (reportState == 'error') {
       final message = state['message'] as String?;
       if (message != null) {
         ScaffoldMessenger.of(context).showSnackBar(

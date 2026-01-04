@@ -27,4 +27,5 @@ urlpatterns = [
     path('sponsored-listings/', sponsored_listings, name='sponsored-listings'),
     path('recent-listings/', recent_listings, name='recent-listings'),
     path('advanced-search/', advanced_search, name='advanced-search'),
+    path('report-property/', report_property, name='report-property'),
 ]

@@ -70,7 +70,7 @@ class FindarApiService {
 
     if (ApiConfig.enableApiLogging) {
       print('🟢 POST $url');
-      print('📤 ${jsonEncode(body)}');
+      print('Request body: ${jsonEncode(body)}');
     }
 
     try {
@@ -240,7 +240,7 @@ class FindarApiService {
     required Future<dynamic> Function() retryCallback,
   }) async {
     if (ApiConfig.enableApiLogging) {
-      print('📥 $method ${response.statusCode}: ${response.body}');
+      print('Response $method ${response.statusCode}: ${response.body}');
     }
 
     // SUCCESS

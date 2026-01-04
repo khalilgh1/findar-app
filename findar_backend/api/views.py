@@ -353,18 +353,23 @@ def register(request):
 def login(request):
     email = request.data.get("email")
     password = request.data.get("password")
-    
-    # Try to find user by email
-    try:
-        user_obj = CustomUser.objects.get(email=email)
-        username = user_obj.username
-    except CustomUser.DoesNotExist:
-        return Response({"error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
 
-    user = authenticate(username=username, password=password)
+
+    errors = ""
+    if email is None or email == "":
+        errors += "email should not be empty ,"
+    if password is None or password == "":
+        errors += "password should not be empty"
+
+    if errors != "":
+        return Response(errors , status=status.HTTP_400_BAD_REQUEST)
+    
+
+    user = authenticate(request=request,email=email, password=password)
+    print( request.data  )
 
     if not user:
-        return Response({"error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response("incorrect email or password", status=status.HTTP_400_BAD_REQUEST)
 
     refresh = RefreshToken.for_user(user)
 
@@ -372,17 +377,44 @@ def login(request):
         "success": True,
         "message": "Login successful",
         "data": {
-            "refresh": str(refresh),
-            "access": str(refresh.access_token),
-            "user": {
-                "id": user.id,
-                "name": user.username,
-                "email": user.email,
-                "phone": user.phone,
-                "profile_pic": user.profile_pic.url if user.profile_pic else None,
-                "account_type": user.account_type,
-                "credits": int(user.credits),
-            }
+        "refresh": str(refresh),
+        "access": str(refresh.access_token),
+        "user": user
+        }
+    })
+
+    return response 
+
+@api_view(["POST"])
+def register(request):
+
+    account_type = request.data.get("account_type")
+    if account_type:
+        request.data["account_type"] = account_type.lower()
+
+    serializer = RegisterSerializer(data=request.data)
+    print( request.data )
+
+    if not serializer.is_valid():
+
+        response = Response( 
+            serializer.errors
+        , status=status.HTTP_400_BAD_REQUEST)
+
+        return response
+    
+    user = serializer.save()
+    
+    refresh = RefreshToken.for_user(user)
+    user = RegisterSerializer(user).data
+
+    response = Response({
+        "message":"registered successful",
+        "success":True,
+        "data": {
+        "refresh": str(refresh),
+        "access": str(refresh.access_token),
+        "user": user
         }
     })
 
@@ -394,6 +426,45 @@ def me(request):
     serializer = UserSerializers(user)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
+    return response
 
-
-
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def report_property(request):
+    """
+    Report a property with issue description
+    """
+    property_id = request.data.get('property_id')
+    issue_description = request.data.get('issue_description')
+    reporter_email = request.data.get('reporter_email')
+    
+    if not property_id or not issue_description or not reporter_email:
+        return Response({
+            "error": "property_id, issue_description, and reporter_email are required"
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+    try:
+        # Check if property exists
+        property_post = Post.objects.get(id=property_id)
+        
+        # Create report entry
+        report = Report.objects.create(
+            post=property_post,
+            user=request.user,
+            reason=issue_description[:500],  # Limit to 500 characters
+        )
+        
+        return Response({
+            "message": "Property reported successfully",
+            "success": True,
+            "report_id": report.id
+        }, status=status.HTTP_201_CREATED)
+        
+    except Post.DoesNotExist:
+        return Response({
+            "error": "Property not found"
+        }, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({
+            "error": f"Failed to submit report: {str(e)}"
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

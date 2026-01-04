@@ -1,7 +1,6 @@
 import 'package:findar/core/models/property_listing_model.dart';
 import 'package:findar/core/repositories/abstract_listing_repo.dart';
 //import repository
-import 'package:findar/core/repositories/database_listing_repo.dart';
 import 'package:findar/logic/cubits/home/recent_listings.dart';
 import 'package:findar/logic/cubits/home/sponsored_listings.dart';
 import 'package:flutter/material.dart';
