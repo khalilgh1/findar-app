@@ -1,15 +1,23 @@
 from .models import *
 from .serializers import *
 from django.contrib.auth import authenticate
+from django.core.mail import EmailMessage
 from rest_framework import status
 from rest_framework.response import Response 
 from rest_framework.decorators import api_view , permission_classes
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.views import APIView
 from django.db.models import Q
 from django.db.models import F, FloatField
 from django.db.models.functions import ACos, Cos, Radians, Sin
 
+from django.contrib.auth.hashers import check_password
+import random
+from django.utils import timezone
+from django.contrib.auth.hashers import make_password
+from rest_framework.views import APIView
+from rest_framework.response import Response
 
 """
     for every view that needs a user ( authenticated user ) do 
@@ -440,3 +448,185 @@ def report_property(request):
         return Response({
             "error": f"Failed to submit report: {str(e)}"
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+############################# forget password feature
+
+def send_email(to, subject, body):
+    email = EmailMessage(
+        subject=subject,
+        body=body,
+        to=[to],
+    )
+    email.send(fail_silently=False)
+
+def send_reset_code_email(email, code):
+    subject = "Your FinDAR password reset code"
+    body = f"""
+Hi,
+
+Your FinDAR password reset code is:
+
+{code}
+
+This code will expire in 10 minutes.
+If you did not request this, ignore this email.
+
+— FinDAR Team
+"""
+    send_email(email, subject, body)
+
+class PasswordResetRequestAPI(APIView):
+    authentication_classes = []
+    permission_classes = []
+
+    def post(self, request):
+        email = request.data.get("email")
+
+        user = CustomUser.objects.filter(email=email).first()
+        if not user:
+            return Response({"message": "the email is not linked to an account" , "success" : True } , status=status.HTTP_200_OK)
+
+        code = f"{random.randint(0, 999999):06d}"
+
+        PasswordResetOTP.objects.create(
+            user=user,
+            code_hash=make_password(code)
+        )
+
+        send_reset_code_email(user.email, code)
+
+        return Response({"message": "code has been sent" , "success" : True } , status=status.HTTP_200_OK)
+
+
+class PasswordResetVerifyCodeAPI(APIView):
+    authentication_classes = []
+    permission_classes = []
+
+    def post(self, request):
+        email = request.data.get("email")
+        code = request.data.get("code")
+
+        user = CustomUser.objects.filter(email=email).first()
+        if not user:
+            return Response(
+                {"message": "Invalid code", "success": False},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        otp = (
+            PasswordResetOTP.objects
+            .filter(user=user, used=False)
+            .order_by("-created_at")
+            .first()
+        )
+
+        if not otp:
+            return Response(
+                {"message": "Invalid code", "success": False},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        if otp.is_expired():
+            otp.used = True 
+            otp.save()
+            return Response(
+                {"message": "Code expired", "success": False},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if otp.attempts >= 5:
+            return Response(
+                {"message": "Too many attempts", "success": False},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if not check_password(code, otp.code_hash):
+            otp.attempts += 1
+            otp.save()
+            return Response(
+                {"message": "Invalid code", "success": False},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+
+
+        return Response(
+            {"message": "Code is valid", "success": True},
+            status=status.HTTP_200_OK
+        )
+    
+class PasswordResetConfirmAPI(APIView):
+    authentication_classes = []
+    permission_classes = []
+
+    def post(self, request):
+        email = request.data.get("email")
+        code = request.data.get("code")
+        new_password = request.data.get("new_password")
+
+        user = CustomUser.objects.filter(email=email).first()
+        if not user:
+            return Response(
+                {"message": "Invalid request", "success": False},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        otp = (
+            PasswordResetOTP.objects
+            .filter(user=user, used=False)
+            .order_by("-created_at")
+            .first()
+        )
+
+        if not otp:
+            return Response(
+                {"message": "Invalid code", "success": False},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        if otp.is_expired():
+            otp.used = True 
+            otp.save()
+            return Response(
+                {"message": "Code expired", "success": False},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        if not check_password(code, otp.code_hash):
+            otp.attempts += 1
+            otp.save()
+            return Response(
+                {"message": "Invalid code", "success": False},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        password_checks = ""
+        if new_password is None:
+            return Response({"success":False , "message":"the new password field is empty"} , status=status.HTTP_400_BAD_REQUEST)
+
+        if len(new_password) < 8:
+            password_checks+="Password must be at least 8 characters long."
+
+        if not re.search(r'[A-Z]', new_password):
+            password_checks+="Password must contain at least one uppercase letter."
+
+        if not re.search(r'[a-z]', new_password):
+            password_checks+="Password must contain at least one lowercase letter."
+
+        if not re.search(r'\d', new_password):
+            password_checks+="Password must contain at least one digit."
+
+        if password_checks != "":
+            return Response({"success":False , "message":password_checks} , status=status.HTTP_400_BAD_REQUEST)
+
+        user.set_password(new_password)
+        user.save()
+
+        otp.used = True
+        otp.save()
+
+        return Response(
+            {"message": "Password updated", "success": True},
+            status=status.HTTP_200_OK
+        )

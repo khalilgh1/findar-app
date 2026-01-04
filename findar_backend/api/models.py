@@ -1,6 +1,9 @@
 from django.contrib.auth.models import AbstractUser
-
 from django.db import models
+from datetime import timedelta
+from django.utils import timezone
+
+OTP_EXPIRATION_MINUTES = 10
 
 # Create your models here.
 
@@ -130,3 +133,15 @@ class Boosting(models.Model):
     created_at      = models.DateTimeField(auto_now=True)
     expires_at      = models.DateTimeField()
 
+
+################# Password-reset Model
+
+class PasswordResetOTP(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    code_hash = models.CharField(max_length=128)
+    created_at = models.DateTimeField(auto_now_add=True)
+    attempts = models.PositiveSmallIntegerField(default=0)
+    used = models.BooleanField(default=False)
+
+    def is_expired(self):
+        return timezone.now() > self.created_at + timedelta(minutes=10)

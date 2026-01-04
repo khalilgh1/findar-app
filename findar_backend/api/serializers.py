@@ -77,7 +77,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         return value
 
 
-    def validate_phone_number(self,value):
+    def validate_phone(self,value):
         if value and not re.match(r'^\+?\d{9,15}$', value):
             raise ValidationError("Enter a valid phone number.")
         return value

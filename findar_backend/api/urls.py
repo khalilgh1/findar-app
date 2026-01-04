@@ -14,7 +14,10 @@ urlpatterns = [
     path('auth/me' , me , name="me"),
     path('auth/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('auth/refresh', TokenRefreshView.as_view(), name='token_refresh'),
-
+    path("auth/password-reset/request/", PasswordResetRequestAPI.as_view()),
+    path("auth/password-reset/verify/", PasswordResetVerifyCodeAPI.as_view()),
+    path("auth/password-reset/confirm/", PasswordResetConfirmAPI.as_view()),
+    
     path('create-listing/', create_listing, name='create-listing'),
     path('edit-listing/<int:listing_id>', edit_listing, name='edit-listing'),
     path('my_listings/', my_listings, name='listings'),
