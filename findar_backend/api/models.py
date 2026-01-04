@@ -1,6 +1,9 @@
 from django.contrib.auth.models import AbstractUser
-
 from django.db import models
+from datetime import timedelta
+from django.utils import timezone
+
+OTP_EXPIRATION_MINUTES = 10
 
 # Create your models here.
 
@@ -144,3 +147,6 @@ class PasswordResetOTP(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     attempts = models.PositiveSmallIntegerField(default=0)
     used = models.BooleanField(default=False)
+
+    def is_expired(self):
+        return timezone.now() > self.created_at + timedelta(minutes=10)

@@ -366,6 +366,8 @@ def me(request):
 
     return response
 
+############################# forget password feature
+
 def send_email(to, subject, body):
     email = EmailMessage(
         subject=subject,
@@ -399,7 +401,7 @@ class PasswordResetRequestAPI(APIView):
 
         user = CustomUser.objects.filter(email=email).first()
         if not user:
-            return Response({"detail": "If account exists, code sent"})
+            return Response({"message": "the email is not linked to an account" , "success" : True } , status=status.HTTP_200_OK)
 
         code = f"{random.randint(0, 999999):06d}"
 
@@ -410,8 +412,66 @@ class PasswordResetRequestAPI(APIView):
 
         send_reset_code_email(user.email, code)
 
-        return Response({"detail": "Reset code sent"})
+        return Response({"message": "code has been sent" , "success" : True } , status=status.HTTP_200_OK)
 
+
+class PasswordResetVerifyCodeAPI(APIView):
+    authentication_classes = []
+    permission_classes = []
+
+    def post(self, request):
+        email = request.data.get("email")
+        code = request.data.get("code")
+
+        user = CustomUser.objects.filter(email=email).first()
+        if not user:
+            return Response(
+                {"message": "Invalid code", "success": False},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        otp = (
+            PasswordResetOTP.objects
+            .filter(user=user, used=False)
+            .order_by("-created_at")
+            .first()
+        )
+
+        if not otp:
+            return Response(
+                {"message": "Invalid code", "success": False},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        if otp.is_expired():
+            otp.used = True 
+            otp.save()
+            return Response(
+                {"message": "Code expired", "success": False},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if otp.attempts >= 5:
+            return Response(
+                {"message": "Too many attempts", "success": False},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if not check_password(code, otp.code_hash):
+            otp.attempts += 1
+            otp.save()
+            return Response(
+                {"message": "Invalid code", "success": False},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+
+
+        return Response(
+            {"message": "Code is valid", "success": True},
+            status=status.HTTP_200_OK
+        )
+    
 class PasswordResetConfirmAPI(APIView):
     authentication_classes = []
     permission_classes = []
@@ -423,21 +483,58 @@ class PasswordResetConfirmAPI(APIView):
 
         user = CustomUser.objects.filter(email=email).first()
         if not user:
-            return Response({"detail": "Invalid code"}, status=400)
+            return Response(
+                {"message": "Invalid request", "success": False},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         otp = (
             PasswordResetOTP.objects
             .filter(user=user, used=False)
-            .latest("created_at")
+            .order_by("-created_at")
+            .first()
         )
 
-        if otp.attempts >= 5:
-            return Response({"detail": "Too many attempts"}, status=400)
-
+        if not otp:
+            return Response(
+                {"message": "Invalid code", "success": False},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        if otp.is_expired():
+            otp.used = True 
+            otp.save()
+            return Response(
+                {"message": "Code expired", "success": False},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
         if not check_password(code, otp.code_hash):
             otp.attempts += 1
             otp.save()
-            return Response({"detail": "Invalid code"}, status=400)
+            return Response(
+                {"message": "Invalid code", "success": False},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        password_checks = ""
+        if new_password is None:
+            return Response({"success":False , "message":"the new password field is empty"} , status=status.HTTP_400_BAD_REQUEST)
+
+        if len(new_password) < 8:
+            password_checks+="Password must be at least 8 characters long."
+
+        if not re.search(r'[A-Z]', new_password):
+            password_checks+="Password must contain at least one uppercase letter."
+
+        if not re.search(r'[a-z]', new_password):
+            password_checks+="Password must contain at least one lowercase letter."
+
+        if not re.search(r'\d', new_password):
+            password_checks+="Password must contain at least one digit."
+
+        if password_checks != "":
+            return Response({"success":False , "message":password_checks} , status=status.HTTP_400_BAD_REQUEST)
 
         user.set_password(new_password)
         user.save()
@@ -445,4 +542,7 @@ class PasswordResetConfirmAPI(APIView):
         otp.used = True
         otp.save()
 
-        return Response({"detail": "Password updated"})
+        return Response(
+            {"message": "Password updated", "success": True},
+            status=status.HTTP_200_OK
+        )
