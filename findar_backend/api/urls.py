@@ -12,19 +12,19 @@ urlpatterns = [
     # authentication urls 
     path('auth/login/', login, name="login"),
     path('auth/register/', register, name="register"),
-    path('auth/password-reset/',
-        auth_views.PasswordResetView.as_view(
-            email_template_name="registration/password_reset_email.txt",
-            html_email_template_name="registration/password_reset_email.html",
-            subject_template_name="registration/password_reset_subject.txt",
-        ),
-        name="password_reset"
-    ),
-    
     path('auth/me' , me , name="me"),
     path('auth/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('auth/refresh', TokenRefreshView.as_view(), name='token_refresh'),
-
+    path(
+        "auth/password-reset/request/",
+        PasswordResetRequestAPI.as_view(),
+        name="password_reset_request",
+    ),
+    path(
+        "auth/password-reset/confirm/",
+        PasswordResetConfirmAPI.as_view(),
+        name="password_reset_confirm",
+    ),
     path('create-listing/', create_listing, name='create-listing'),
     path('edit-listing/<int:listing_id>', edit_listing, name='edit-listing'),
     path('my_listings/', my_listings, name='listings'),
