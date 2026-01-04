@@ -4,6 +4,7 @@ import 'package:main_button/main_button.dart';
 
 import 'package:findar/logic/cubits/search_cubit.dart';
 import 'package:findar/l10n/app_localizations.dart';
+import 'package:findar/features/create_listing/widgets/location_autocomplete_field.dart';
 
 class FilteringScreen extends StatefulWidget {
   const FilteringScreen({super.key});
@@ -24,6 +25,10 @@ class _FilteringScreenState extends State<FilteringScreen> {
   int bedrooms = 1;
   int bathrooms = 1;
   String? listedBy = 'Any';
+
+  // Location coordinates
+  double? _latitude;
+  double? _longitude;
 
   @override
   void initState() {
@@ -74,6 +79,8 @@ class _FilteringScreenState extends State<FilteringScreen> {
       listedBy = 'Any';
       minSqftController.clear();
       maxSqftController.clear();
+      _latitude = null;
+      _longitude = null;
     });
   }
 
@@ -120,26 +127,16 @@ class _FilteringScreenState extends State<FilteringScreen> {
             // Location
             Text(l10n.location, style: theme.textTheme.headlineSmall),
             const SizedBox(height: 8),
-            TextField(
+            LocationAutocompleteField(
               controller: locationController,
-              decoration: InputDecoration(
-                enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: theme.colorScheme.secondary),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(
-                    color: theme.colorScheme.primary,
-                    width: 2,
-                  ),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                hintText: l10n.enterLocationHint,
-                prefixIcon: const Icon(Icons.location_on),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
+              theme: theme,
+              onLocationSelected: (latitude, longitude) {
+                setState(() {
+                  _latitude = latitude;
+                  _longitude = longitude;
+                });
+                print('Selected location: $latitude, $longitude');
+              },
             ),
 
             const SizedBox(height: 24),
@@ -470,6 +467,8 @@ class _FilteringScreenState extends State<FilteringScreen> {
         (listedBy == null || listedBy == 'Any') ? null : listedBy;
 
     await searchCubit.getFilteredListings(
+      latitude: _latitude,
+      longitude: _longitude,
       minPrice: priceRange.start,
       maxPrice: priceRange.end,
       listingType: listingTypeValue,

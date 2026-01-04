@@ -320,33 +320,6 @@ def toggle_active_listing(request , listing_id):
 
 #########  Create User  #########
 
-@api_view(["POST"])
-def register(request):
-    serializer = RegisterSerializer(data=request.data)
-
-    if not serializer.is_valid():
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-    user = serializer.save()
-    refresh = RefreshToken.for_user(user)
-    return Response({
-        "success": True,
-        "message": "User created",
-        "data": {
-            "refresh": str(refresh),
-            "access": str(refresh.access_token),
-            "user": {
-                "id": user.id,
-                "name": user.username,
-                "email": user.email,
-                "phone": user.phone,
-                "profile_pic": user.profile_pic.url if user.profile_pic else None,
-                "account_type": user.account_type,
-                "credits": int(user.credits),
-            }
-        }
-    }, status=status.HTTP_201_CREATED)
-
 #########  Login as User  #########
 
 @api_view(["POST"])
@@ -372,6 +345,8 @@ def login(request):
         return Response("incorrect email or password", status=status.HTTP_400_BAD_REQUEST)
 
     refresh = RefreshToken.for_user(user)
+    #serialize user
+    user = RegisterSerializer(user).data
 
     return Response({
         "success": True,
@@ -382,8 +357,6 @@ def login(request):
         "user": user
         }
     })
-
-    return response 
 
 @api_view(["POST"])
 def register(request):
@@ -417,6 +390,7 @@ def register(request):
         "user": user
         }
     })
+    return response
 
 
 @api_view(['POST'])
@@ -425,8 +399,6 @@ def me(request):
     user = request.user
     serializer = UserSerializers(user)
     return Response(serializer.data, status=status.HTTP_200_OK)
-
-    return response
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
