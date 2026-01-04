@@ -317,6 +317,8 @@ def login(request):
 @api_view(["POST"])
 def register(request):
 
+    request.data.get("account_type") = request.data.get("account_type").lower()
+
     serializer = RegisterSerializer(data=request.data)
     print( request.data )
 
