@@ -163,11 +163,22 @@ class _PropertyCardState extends State<PropertyCard> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
+                  widget.property.title,
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    color: theme.colorScheme.onSecondaryContainer,
+                  ),
+                ),
+
+                const SizedBox(height: 4),
+
+                Text(
                   '${widget.property.price} DZD',
                   style: theme.textTheme.headlineSmall?.copyWith(
                     color: theme.colorScheme.onSecondaryContainer,
                   ),
                 ),
+
+                
                 const SizedBox(height: 2),
                 Text(
                   widget.property.address,

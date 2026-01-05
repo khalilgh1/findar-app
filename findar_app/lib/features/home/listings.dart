@@ -124,6 +124,14 @@ class _ListingTileState extends State<ListingTile> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
+                    widget.property.title,
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      color: theme.colorScheme.onSurface,
+                      fontWeight: FontWeight.bold
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
                     '${widget.property.price} DZD',
                     style: theme.textTheme.headlineSmall?.copyWith(
                       color: theme.colorScheme.onSurface,
