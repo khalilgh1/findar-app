@@ -246,7 +246,7 @@ class AuthRepository {
         );
       }
 
-      final response = await apiService.get('/users/profile');
+      final response = await apiService.get('/api/users/profile');
 
       // Handle error response from API service
       if (response is ReturnResult) {
@@ -309,7 +309,7 @@ class AuthRepository {
       }
 
       final response = await apiService.put(
-        '/users/profile',
+        '/api/users/profile',
         body: body,
       );
 

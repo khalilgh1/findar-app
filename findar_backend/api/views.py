@@ -326,7 +326,38 @@ def toggle_active_listing(request , listing_id):
     return Response({"message": "Listing status updated", "active": post.active}, status=status.HTTP_200_OK)
 
 
-#########  Create User  #########
+#########  Update Profile  #########
+
+@api_view(["PUT"])
+@permission_classes([IsAuthenticated])
+def update_profile(request):
+
+    full_name = request.data.get("full_name")
+    phone_number = request.data.get("phone")
+    email = request.data.get("email")
+    profile_pic = request.data.get("profile_pic")
+    user = CustomUser.objects.get(id=request.user.id)
+
+    if email is not None and email != request.user.email:
+        return Response( {"success":False , "message":"cant change email"} , status=status.HTTP_400_BAD_REQUEST )
+    
+    if phone_number is not None:
+        try:
+            validated_phone = RegisterSerializer.validate_phone(phone_number)
+            
+        except ValidationError as e:
+            return Response( {"success":False , "message":e.detail } , status=status.HTTP_400_BAD_REQUEST )
+        
+    if full_name is not None:
+        try:
+            validated_username = RegisterSerializer.validate_username(phone_number)
+        except ValidationError as e:
+            return Response( {"success":False , "message":e.detail } , status=status.HTTP_400_BAD_REQUEST )        
+    
+    user = UserSerializers(user).data
+
+    return Response( {"success":True , "message":"updated successfully" , "data":user } , status=status.HTTP_201_CREATED )
+
 
 #########  Login as User  #########
 

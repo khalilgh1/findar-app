@@ -19,6 +19,7 @@ urlpatterns = [
     path("auth/password-reset/confirm/", PasswordResetConfirmAPI.as_view()),
     
     path('create-listing/', create_listing, name='create-listing'),
+    path('users/profile', update_profile, name='update_profile'),
     path('edit-listing/<int:listing_id>', edit_listing, name='edit-listing'),
     path('my_listings/', my_listings, name='listings'),
     path('toggle_active_listing/<int:listing_id>', toggle_active_listing, name='toggle_active_listing'),
