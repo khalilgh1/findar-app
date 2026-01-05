@@ -40,7 +40,7 @@ class AuthService {
     if (_auth.refreshToken == null) return false;
 
     final res = await _client.post(
-      Uri.parse(ApiConfig.getUrl('/auth/refresh')),
+      Uri.parse(ApiConfig.getUrl('/api/auth/refresh')),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'refresh': _auth.refreshToken}),
     );

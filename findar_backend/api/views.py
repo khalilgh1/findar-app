@@ -32,7 +32,7 @@ from rest_framework.response import Response
 
 
 @api_view(['GET'])
-# @permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def sponsored_listings(request):
     sponsored_posts = Post.objects.filter(boosted=True , active=True)
     serialized_posts = PostSerializers(sponsored_posts , many=True).data
@@ -42,7 +42,7 @@ def sponsored_listings(request):
 
 
 @api_view(['GET'])
-# @permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def recent_listings(request):
     # maybe we need pagination here
     #in the ui there is a search bar
@@ -63,7 +63,7 @@ def recent_listings(request):
 
 #########get listing VIEW#########
 @api_view(['GET'])
-# @permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def get_listing(request , listing_id):
     try:
         post = Post.objects.get(id=listing_id , active=True)
@@ -77,7 +77,7 @@ def get_listing(request , listing_id):
 #########Advanced Search VIEW#########
 
 @api_view(['GET'])
-# @permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def advanced_search(request):
     """
     this will be used after submitting the advanced search screen to go the search results screen
@@ -229,7 +229,7 @@ def saved_listings(request):
 ######## Listing details VIEW#########
 
 @api_view(["GET"])
-# @permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def listing_details(request, listing_id):
     """
     user can view the details of a specific listing
