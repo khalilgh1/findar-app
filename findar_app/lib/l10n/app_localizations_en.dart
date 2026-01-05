@@ -319,6 +319,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get camera => 'Camera';
 
   @override
+  String get tapToChangePhoto => 'Tap to change photo';
+
+  @override
   String errorPickingImage(String error) {
     return 'Error picking image: $error';
   }

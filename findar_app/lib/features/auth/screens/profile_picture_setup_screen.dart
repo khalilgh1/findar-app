@@ -135,12 +135,15 @@ class _ProfilePictureSetupScreenState extends State<ProfilePictureSetupScreen>
         // Only trigger when uploadComplete changes from false to true
         return !previous.uploadComplete && current.uploadComplete;
       },
-      listener: (context, state) {
-        // Save the profile picture URL to AuthCubit if available
+      listener: (context, state) async {
+        // Save the profile picture URL to backend via AuthCubit
         if (state.uploadedImageUrl != null) {
-          context.read<AuthCubit>().updateProfilePicture(state.uploadedImageUrl!);
+          await context.read<AuthCubit>().updateProfile(
+                profilePic: state.uploadedImageUrl,
+              );
         }
         // Navigate to home after upload or skip
+        if (!mounted) return;
         Navigator.pushReplacementNamed(context, '/home');
       },
       child: Scaffold(
@@ -225,16 +228,28 @@ class _ProfilePictureSetupScreenState extends State<ProfilePictureSetupScreen>
                           height: 50,
                           child: ElevatedButton(
                             onPressed: (state.hasImage && !state.isUploading)
-                                ? () {
-                                    context
-                                        .read<ProfilePictureSetupCubit>()
-                                        .uploadProfilePicture();
+                                ? () async {
+                                    final cubit = context
+                                        .read<ProfilePictureSetupCubit>();
+                                    final url =
+                                        await cubit.uploadProfilePicture();
+
+                                    if (url == null && mounted) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                              'Failed to upload image. Please try again.'),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                    }
                                   }
                                 : null,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: theme.colorScheme.primary,
-                              disabledBackgroundColor: theme.colorScheme.primary
-                                  .withOpacity(0.3),
+                              disabledBackgroundColor:
+                                  theme.colorScheme.primary.withOpacity(0.3),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
                               ),

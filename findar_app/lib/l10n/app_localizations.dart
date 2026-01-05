@@ -709,6 +709,12 @@ abstract class AppLocalizations {
   /// **'Camera'**
   String get camera;
 
+  /// No description provided for @tapToChangePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to change photo'**
+  String get tapToChangePhoto;
+
   /// No description provided for @errorPickingImage.
   ///
   /// In en, this message translates to:

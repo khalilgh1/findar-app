@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:io';
 import 'dart:typed_data';
-import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:findar/logic/cubits/auth_cubit.dart';
+import 'package:findar/core/services/cloudinary_service.dart';
 
 class ProfileAvatar extends StatefulWidget {
   const ProfileAvatar({super.key});
@@ -20,6 +20,7 @@ class _ProfileAvatarState extends State<ProfileAvatar>
   Uint8List? _webImageBytes; // For web platform
   bool _isUploading = false;
   late AnimationController _progressController;
+  final CloudinaryService _cloudinaryService = CloudinaryService();
 
   @override
   void initState() {
@@ -44,23 +45,14 @@ class _ProfileAvatarState extends State<ProfileAvatar>
       return FileImage(_selectedImage!);
     }
 
-    // Then check if user has a saved profile picture in AuthCubit
+    // Then check if user has a saved profile picture from backend
     final userData = authState['data'];
     if (userData != null && userData.profilePic != null) {
       final profilePic = userData.profilePic as String;
-      // If it's a data URL (base64), parse it
-      if (profilePic.startsWith('data:image')) {
-        // Extract base64 data using Uri.parse
-        final bytes = Uri.parse(profilePic).data?.contentAsBytes();
-        if (bytes != null) {
-          return MemoryImage(bytes);
-        }
-      } else if (profilePic.startsWith('http')) {
-        // If it's a URL, use NetworkImage
+
+      // If it's a URL from Cloudinary, use NetworkImage
+      if (profilePic.startsWith('http')) {
         return NetworkImage(profilePic);
-      } else {
-        // If it's a file path (mobile)
-        return FileImage(File(profilePic));
       }
     }
 
@@ -169,38 +161,44 @@ class _ProfileAvatarState extends State<ProfileAvatar>
           });
         }
 
-        // Simulate upload progress animation (like Facebook)
+        // Animate upload progress
         _progressController.forward();
 
-        // Simulate upload delay (remove when implementing real API)
-        await Future.delayed(const Duration(milliseconds: 2000));
+        // Upload to Cloudinary
+        if (_selectedImage != null) {
+          final result = await _cloudinaryService.uploadProfilePicture(
+            _selectedImage!.path,
+          );
+
+          if (result.success && result.url != null && mounted) {
+            // Update profile with Cloudinary URL
+            await context.read<AuthCubit>().updateProfile(
+                  profilePic: result.url,
+                );
+
+            if (!mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Profile picture updated successfully'),
+                backgroundColor: Colors.green,
+                duration: Duration(seconds: 2),
+              ),
+            );
+          } else {
+            if (!mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content:
+                    Text('Upload failed: ${result.error ?? "Unknown error"}'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        }
 
         setState(() {
           _isUploading = false;
         });
-
-        // Save profile picture to AuthCubit for persistence
-        String? profilePicUrl;
-        if (_webImageBytes != null) {
-          // For web, create a data URL with base64 encoding
-          final base64String = base64Encode(_webImageBytes!);
-          profilePicUrl = 'data:image/png;base64,$base64String';
-        } else if (_selectedImage != null) {
-          // For mobile, use file path
-          profilePicUrl = _selectedImage!.path;
-        }
-
-        if (profilePicUrl != null && mounted) {
-          context.read<AuthCubit>().updateProfilePicture(profilePicUrl);
-        }
-
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Profile picture updated successfully'),
-            duration: Duration(seconds: 2),
-          ),
-        );
       }
     } catch (e) {
       setState(() {

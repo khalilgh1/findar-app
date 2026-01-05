@@ -336,6 +336,7 @@ def update_profile(request):
     phone_number = request.data.get("phone")
     email = request.data.get("email")
     profile_pic = request.data.get("profile_pic")
+
     user = CustomUser.objects.get(id=request.user.id)
 
     if email is not None and email != request.user.email:
@@ -353,7 +354,13 @@ def update_profile(request):
             validated_username = RegisterSerializer.validate_username(phone_number)
         except ValidationError as e:
             return Response( {"success":False , "message":e.detail } , status=status.HTTP_400_BAD_REQUEST )        
+        
+
+    if profile_pic is not None:
+        print("profile pic url:" , profile_pic)
+        user.profile_pic = profile_pic
     
+    user.save()
     user = UserSerializers(user).data
 
     return Response( {"success":True , "message":"updated successfully" , "data":user } , status=status.HTTP_201_CREATED )

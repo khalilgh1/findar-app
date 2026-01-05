@@ -282,7 +282,8 @@ class _SplashScreenState extends State<SplashScreen>
       ),
       child: TextButton(
         onPressed: () {
-          Navigator.pushNamed(context, '/login');
+          //since we don't go back to splash screen we use pushReplacement
+          Navigator.pushReplacementNamed(context, '/login');
         },
         style: TextButton.styleFrom(
           shape: RoundedRectangleBorder(

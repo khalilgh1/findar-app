@@ -1,9 +1,11 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:io';
 import 'dart:typed_data';
-import 'dart:convert';
+import 'package:findar/core/services/cloudinary_service.dart';
 
 class ProfilePictureSetupCubit extends Cubit<ProfilePictureSetupState> {
+  final CloudinaryService _cloudinaryService = CloudinaryService();
+
   ProfilePictureSetupCubit() : super(ProfilePictureSetupState());
 
   void setImage({File? imageFile, Uint8List? imageBytes}) {
@@ -24,36 +26,45 @@ class ProfilePictureSetupCubit extends Cubit<ProfilePictureSetupState> {
     emit(state.copyWith(isUploading: isUploading));
   }
 
-  // This would be called when user clicks "Upload" button
+  /// Upload profile picture to Cloudinary and return the URL
   Future<String?> uploadProfilePicture() async {
-    emit(state.copyWith(isUploading: true));
-
-    // TODO: Implement actual API upload here
-    // For now, simulate upload delay and return a mock URL or base64 string
-    await Future.delayed(const Duration(seconds: 2));
-
-    // If we have imageBytes (from web), convert to base64 or URL
-    // If we have imageFile (from mobile), upload to server and get URL
-    String? profilePicUrl;
-    if (state.imageBytes != null) {
-      // For web: convert bytes to base64 and create data URL
-      final base64String = base64Encode(state.imageBytes!);
-      profilePicUrl = 'data:image/png;base64,$base64String';
-    } else if (state.imageFile != null) {
-      // For mobile: upload file to server and get URL back
-      profilePicUrl = state.imageFile!.path; // Temporary - use actual uploaded URL
+    if (state.imageFile == null) {
+      return null;
     }
 
-    emit(state.copyWith(
-      isUploading: false, 
-      uploadComplete: true,
-      uploadedImageUrl: profilePicUrl,
-    ));
-    
-    return profilePicUrl;
+    emit(state.copyWith(isUploading: true));
+
+    try {
+      // Upload to Cloudinary
+      final result = await _cloudinaryService.uploadProfilePicture(
+        state.imageFile!.path,
+      );
+
+      if (result.success && result.url != null) {
+        emit(state.copyWith(
+          isUploading: false,
+          uploadComplete: true,
+          uploadedImageUrl: result.url,
+        ));
+        return result.url;
+      } else {
+        emit(state.copyWith(
+          isUploading: false,
+          uploadComplete: false,
+        ));
+        return null;
+      }
+    } catch (e) {
+      print('Error uploading profile picture: $e');
+      emit(state.copyWith(
+        isUploading: false,
+        uploadComplete: false,
+      ));
+      return null;
+    }
   }
 
-  // This would be called when user clicks "Ignore" button
+  /// Skip profile picture setup
   void skipProfilePicture() {
     emit(
       state.copyWith(
