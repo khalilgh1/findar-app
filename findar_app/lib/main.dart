@@ -5,6 +5,7 @@ import 'package:findar/logic/cubits/home/recent_listings.dart';
 import 'package:findar/logic/cubits/home/sponsored_listings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 
@@ -51,11 +52,30 @@ import 'package:findar/logic/cubits/search_cubit.dart';
 import 'package:findar/logic/cubits/settings_cubit.dart';
 import 'package:findar/logic/cubits/sort_cubit.dart';
 import 'package:findar/core/di/service_locator.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
+import 'package:findar/utils/firebase.dart';
+import 'firebase_options.dart';
+
+FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+   FlutterLocalNotificationsPlugin();
+   
 void main() async {
   SetupRepositories();
   WidgetsFlutterBinding.ensureInitialized();
   await AuthManager().init();
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  await initFirebaseMessaging();
+
+  FirebaseMessaging.onBackgroundMessage(
+    firebaseMessagingBackgroundHandler,
+  );
+
   runApp(const MainApp());
 }
 
