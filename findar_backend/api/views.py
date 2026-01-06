@@ -337,6 +337,10 @@ def update_profile(request):
     email = request.data.get("email")
     profile_pic = request.data.get("profile_pic")
 
+    serializer = RegisterSerializer(
+            data={"phone": phone_number , "username" : full_name},
+            partial=True
+        )
     user = CustomUser.objects.get(id=request.user.id)
 
     if email is not None and email != request.user.email:
@@ -344,14 +348,16 @@ def update_profile(request):
     
     if phone_number is not None:
         try:
-            validated_phone = RegisterSerializer.validate_phone(phone_number)
+            validated_phone = serializer.validate_phone(value=phone_number)
+            user.phone = phone_number
             
         except ValidationError as e:
             return Response( {"success":False , "message":e.detail } , status=status.HTTP_400_BAD_REQUEST )
         
     if full_name is not None:
         try:
-            validated_username = RegisterSerializer.validate_username(phone_number)
+            validated_username = serializer.validate_username(value=full_name)
+            user.username = full_name 
         except ValidationError as e:
             return Response( {"success":False , "message":e.detail } , status=status.HTTP_400_BAD_REQUEST )        
         
@@ -362,6 +368,7 @@ def update_profile(request):
     
     user.save()
     user = UserSerializers(user).data
+    print( user )
 
     return Response( {"success":True , "message":"updated successfully" , "data":user } , status=status.HTTP_201_CREATED )
 
