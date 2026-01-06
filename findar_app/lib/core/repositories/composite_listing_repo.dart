@@ -304,8 +304,8 @@ class CompositeListingRepository implements ListingRepository {
       // Offline: check if this is user's own listing or a saved listing
       final savedIds = await _databaseRepo.getSavedListingIds();
       final userListings = await _databaseRepo.getUserListings();
-      final activeListings = userListings['active'] as List<PropertyListing>? ?? [];
-      final inactiveListings = userListings['inactive'] as List<PropertyListing>? ?? [];
+      final activeListings = userListings['active'] ?? [];
+      final inactiveListings = userListings['inactive'] ?? [];
       final myListingIds = [
         ...activeListings.map((l) => l.id),
         ...inactiveListings.map((l) => l.id),
