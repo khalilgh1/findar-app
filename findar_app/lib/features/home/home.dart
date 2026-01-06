@@ -4,6 +4,7 @@ import 'package:findar/logic/cubits/home/recent_listings.dart';
 import 'package:findar/logic/cubits/home/sponsored_listings.dart';
 import 'package:findar/logic/cubits/property_details_cubit.dart';
 import 'package:findar/core/widgets/progress_button.dart';
+import 'package:findar/core/widgets/no_internet_widget.dart';
 import 'package:findar/features/home/search_bar.dart';
 import 'package:findar/features/home/categories.dart';
 import 'package:findar/features/home/property.dart';
@@ -11,6 +12,16 @@ import 'package:findar/features/home/listings.dart';
 import 'package:findar/features/home/sponsored.dart';
 import '../../../core/widgets/build_bottom_bar.dart';
 import 'package:findar/l10n/app_localizations.dart';
+
+/// Helper function to check if an error message indicates a network issue
+bool _isNetworkError(String? message) {
+  if (message == null) return false;
+  final lowerMessage = message.toLowerCase();
+  return lowerMessage.contains('internet') ||
+      lowerMessage.contains('offline') ||
+      lowerMessage.contains('network') ||
+      lowerMessage.contains('connection');
+}
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -36,24 +47,24 @@ class _HomeScreenState extends State<HomeScreen> {
         BlocListener<SponsoredCubit, Map<String, dynamic>>(
           listenWhen: (previous, current) {
             // Only listen if message actually changed and is non-empty
-            return previous['message'] != current['message'] && 
-                   (current['message'] as String? ?? '').isNotEmpty;
+            return previous['message'] != current['message'] &&
+                (current['message'] as String? ?? '').isNotEmpty;
           },
           listener: (context, state) {
             final message = state['message'] as String? ?? '';
             if (message.isEmpty) return;
-            
+
             // Clear any existing snackbars first
             ScaffoldMessenger.of(context).clearSnackBars();
-            
+
             // Check if it's a success or error message
             final isSuccess = message.toLowerCase().contains('successfully');
             final isError = message.toLowerCase().contains('error') ||
-                            message.toLowerCase().contains('failed') ||
-                            message.toLowerCase().contains('cannot') ||
-                            message.toLowerCase().contains('can\'t') ||
-                            message.toLowerCase().contains('not saved');
-            
+                message.toLowerCase().contains('failed') ||
+                message.toLowerCase().contains('cannot') ||
+                message.toLowerCase().contains('can\'t') ||
+                message.toLowerCase().contains('not saved');
+
             if (isSuccess || isError) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
@@ -68,24 +79,24 @@ class _HomeScreenState extends State<HomeScreen> {
         BlocListener<RecentCubit, Map<String, dynamic>>(
           listenWhen: (previous, current) {
             // Only listen if message actually changed and is non-empty
-            return previous['message'] != current['message'] && 
-                   (current['message'] as String? ?? '').isNotEmpty;
+            return previous['message'] != current['message'] &&
+                (current['message'] as String? ?? '').isNotEmpty;
           },
           listener: (context, state) {
             final message = state['message'] as String? ?? '';
             if (message.isEmpty) return;
-            
+
             // Clear any existing snackbars first
             ScaffoldMessenger.of(context).clearSnackBars();
-            
+
             // Check if it's a success or error message
             final isSuccess = message.toLowerCase().contains('successfully');
             final isError = message.toLowerCase().contains('error') ||
-                            message.toLowerCase().contains('failed') ||
-                            message.toLowerCase().contains('cannot') ||
-                            message.toLowerCase().contains('can\'t') ||
-                            message.toLowerCase().contains('not saved');
-            
+                message.toLowerCase().contains('failed') ||
+                message.toLowerCase().contains('cannot') ||
+                message.toLowerCase().contains('can\'t') ||
+                message.toLowerCase().contains('not saved');
+
             if (isSuccess || isError) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
@@ -160,11 +171,25 @@ class _HomeScreenState extends State<HomeScreen> {
                         return const Center(child: CircularProgressIndicator());
                       }
                       if (state['state'] == 'error') {
+                        final errorMessage = state['message'] as String?;
+
+                        // Check if it's a network error
+                        if (_isNetworkError(errorMessage)) {
+                          return NoInternetBanner(
+                            message: 'Sponsored listings unavailable offline',
+                            onRetry: () {
+                              context
+                                  .read<SponsoredCubit>()
+                                  .getSponsoredListings();
+                            },
+                          );
+                        }
+
                         return Center(
                           child: Column(
                             children: [
                               Text(
-                                'Error: ${state['message'] ?? 'Unknown error'}',
+                                'Error: ${errorMessage ?? 'Unknown error'}',
                               ),
                               SizedBox(height: 16),
                               Builder(
@@ -246,11 +271,25 @@ class _HomeScreenState extends State<HomeScreen> {
                         return const Center(child: CircularProgressIndicator());
                       }
                       if (state['state'] == 'error') {
+                        final errorMessage = state['message'] as String?;
+
+                        // Check if it's a network error
+                        if (_isNetworkError(errorMessage)) {
+                          return NoInternetWidget(
+                            title: 'No Internet Connection',
+                            message:
+                                'Recent listings are not available offline. Please connect to the internet to browse listings.',
+                            onRetry: () {
+                              context.read<RecentCubit>().getRecentListings();
+                            },
+                          );
+                        }
+
                         return Center(
                           child: Column(
                             children: [
                               Text(
-                                'Error: ${state['message'] ?? 'Unknown error'}',
+                                'Error: ${errorMessage ?? 'Unknown error'}',
                               ),
                               SizedBox(height: 16),
                               ProgressButton(

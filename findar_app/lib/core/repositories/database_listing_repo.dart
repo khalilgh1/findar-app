@@ -23,6 +23,22 @@ class LocalListingRepository implements ListingRepository {
     _myListingIdsCache ??= await _userStore.loadMyListingIds();
   }
 
+  /// Converts database row field names to the API field names expected by PropertyListing.fromJson
+  /// Database uses: classification, property_type, image
+  /// API/Model expects: listing_type, building_type, main_pic
+  Map<String, dynamic> _mapDbRowToApiFormat(Map<String, dynamic> row) {
+    return {
+      ...row,
+      'listing_type': row['classification'] ?? row['listing_type'] ?? 'sale',
+      'building_type': row['property_type'] ?? row['building_type'] ?? 'apartment',
+      'main_pic': row['image'] ?? row['main_pic'] ?? '',
+      'location': row['location'] ?? 'Unknown',
+      'owner_name': row['ownerName'] ?? row['owner_name'],
+      'owner_image': row['ownerImage'] ?? row['owner_image'],
+      'owner_phone': row['ownerPhone'] ?? row['owner_phone'],
+    };
+  }
+
   @override
   Future<ReturnResult> createListing({
     required String title,
@@ -198,7 +214,7 @@ class LocalListingRepository implements ListingRepository {
     }
 
     final rows = await db.query(table, where: where, whereArgs: args);
-    return rows.map((r) => PropertyListing.fromJson(r)).toList();
+    return rows.map((r) => PropertyListing.fromJson(_mapDbRowToApiFormat(r))).toList();
   }
 
   @override
@@ -218,7 +234,7 @@ class LocalListingRepository implements ListingRepository {
       where: "id IN ($placeholders)",
       whereArgs: myIds.toList(),
     );
-    final list = rows.map((r) => PropertyListing.fromJson(r)).toList();
+    final list = rows.map((r) => PropertyListing.fromJson(_mapDbRowToApiFormat(r))).toList();
 
     return {
       "active": list.where((e) => e.isOnline).toList(),
@@ -252,14 +268,14 @@ class LocalListingRepository implements ListingRepository {
       LIMIT 20
     """, args);
 
-    return rows.map((r) => PropertyListing.fromJson(r)).toList();
+    return rows.map((r) => PropertyListing.fromJson(_mapDbRowToApiFormat(r))).toList();
   }
 
   @override
   Future<List<PropertyListing>> getSponsoredListings() async {
     final rows = await db.query(table, where: "is_boosted = ?", whereArgs: [1]);
 
-    return rows.map((r) => PropertyListing.fromJson(r)).toList();
+    return rows.map((r) => PropertyListing.fromJson(_mapDbRowToApiFormat(r))).toList();
   }
 
   // ----------------------------------------------------------------
@@ -279,7 +295,7 @@ class LocalListingRepository implements ListingRepository {
       whereArgs: savedIds.toList(),
     );
 
-    return rows.map((r) => PropertyListing.fromJson(r)).toList();
+    return rows.map((r) => PropertyListing.fromJson(_mapDbRowToApiFormat(r))).toList();
   }
 
   @override
@@ -308,7 +324,7 @@ class LocalListingRepository implements ListingRepository {
   Future<PropertyListing?> getListingById(int id) async {
     final rows = await db.query(table, where: "id = ?", whereArgs: [id]);
     if (rows.isNotEmpty) {
-      return PropertyListing.fromJson(rows.first);
+      return PropertyListing.fromJson(_mapDbRowToApiFormat(rows.first));
     }
     return null;
   }

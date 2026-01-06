@@ -481,6 +481,13 @@ class DummyListingRepository implements ListingRepository {
     return Set.from(_savedListingIds);
   }
 
+  @override
+  Future<ReturnResult> toggleActiveListing(int id) async {
+    throw UnimplementedError();
+  }
+  
+  
+
   /// Reset to initial dummy data
   void resetToInitialData() {
     _listings.clear();

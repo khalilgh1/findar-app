@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:findar/logic/cubits/property_details_cubit.dart';
 import 'package:findar/core/widgets/progress_button.dart';
+import 'package:findar/core/widgets/no_internet_widget.dart';
 import 'package:findar/features/property_details/widgets/property_image_carousel.dart';
 import 'package:findar/features/property_details/widgets/property_header.dart';
 import 'package:findar/features/property_details/widgets/property_features.dart';
@@ -10,6 +11,16 @@ import 'package:findar/features/property_details/widgets/agent_card.dart';
 import 'package:findar/features/property_details/widgets/similar_properties_list.dart';
 import 'package:findar/features/property_details/widgets/report_bottom_sheet.dart';
 import 'package:findar/l10n/app_localizations.dart';
+
+/// Helper function to check if an error message indicates a network issue
+bool _isNetworkError(String? message) {
+  if (message == null) return false;
+  final lowerMessage = message.toLowerCase();
+  return lowerMessage.contains('internet') ||
+      lowerMessage.contains('offline') ||
+      lowerMessage.contains('network') ||
+      lowerMessage.contains('connection');
+}
 
 class PropertyDetailsScreen extends StatefulWidget {
   const PropertyDetailsScreen({super.key});
@@ -110,11 +121,26 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
             }
 
             if (state['state'] == 'error') {
+              final errorMessage = state['message'] as String?;
+
+              // Check if it's a network error
+              if (_isNetworkError(errorMessage)) {
+                return NoInternetWidget(
+                  title: 'Property Unavailable Offline',
+                  message:
+                      'This property is not available offline. You can only view your own listings and saved properties when offline.',
+                  onRetry: () {
+                    Navigator.pop(context);
+                  },
+                  showRetryButton: true,
+                );
+              }
+
               return Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text('Error: ${state['message'] ?? 'Unknown error'}'),
+                    Text('Error: ${errorMessage ?? 'Unknown error'}'),
                     SizedBox(height: 16),
                     Builder(
                       builder: (context) {
