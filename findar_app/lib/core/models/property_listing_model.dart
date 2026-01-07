@@ -9,7 +9,7 @@ class PropertyListing {
   final String description;
   final double price;
 
-  @JsonKey(defaultValue: 'Unknown')
+  @JsonKey(name: 'address', defaultValue: 'Unknown')
   final String location;
 
   final int bedrooms;

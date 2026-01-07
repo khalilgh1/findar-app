@@ -84,6 +84,9 @@ class RemoteListingRepository implements ListingRepository {
       }
 
       // Add optional fields if provided
+      if (location.isNotEmpty) {
+        body['address'] = location;
+      }
       if (latitude != null) {
         body['latitude'] = latitude;
       }

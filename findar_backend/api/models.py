@@ -61,6 +61,7 @@ class Post(models.Model):
     title        = models.CharField(max_length=255)
     price        = models.FloatField()
     description  = models.TextField(max_length=1000) 
+    address      = models.CharField(max_length=500, null=True, blank=True)
     created_at   = models.DateTimeField(auto_now=True)
     active       = models.BooleanField(default=True)
     boosted      = models.BooleanField(default=False)
