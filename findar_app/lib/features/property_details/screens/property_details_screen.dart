@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:findar/logic/cubits/property_details_cubit.dart';
 import 'package:findar/core/widgets/progress_button.dart';
+import 'package:findar/core/widgets/shimmer_loading.dart';
 import 'package:findar/features/property_details/widgets/property_image_carousel.dart';
 import 'package:findar/features/property_details/widgets/property_header.dart';
 import 'package:findar/features/property_details/widgets/property_features.dart';
@@ -106,7 +107,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
         body: BlocBuilder<PropertyDetailsCubit, Map<String, dynamic>>(
           builder: (context, state) {
             if (state['state'] == 'loading') {
-              return const Center(child: CircularProgressIndicator());
+              return const PropertyDetailsSkeleton();
             }
 
             if (state['state'] == 'error') {

@@ -5,6 +5,7 @@ import 'package:findar/features/profile/screens/user_profile_screen/user_profile
 import 'package:findar/features/profile/screens/profile_screen/listings.dart';
 import 'package:findar/features/profile/screens/profile_screen/profile_info.dart';
 import 'package:findar/core/widgets/progress_button.dart';
+import 'package:findar/core/widgets/shimmer_loading.dart';
 
 class UserProfileScreen extends StatefulWidget {
   final String userId;
@@ -53,7 +54,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       body: BlocBuilder<ProfileCubit, Map<String, dynamic>>(
         builder: (context, state) {
           if (state['state'] == 'loading') {
-            return const Center(child: CircularProgressIndicator());
+            return const UserProfileSkeleton();
           }
 
           if (state['state'] == 'error') {

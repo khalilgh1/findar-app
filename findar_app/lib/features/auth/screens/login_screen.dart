@@ -172,6 +172,11 @@ class _LoginScreenState extends State<LoginScreen> {
                           content: Text(l10n.success),
                           backgroundColor: Colors.green,
                           duration: const Duration(seconds: 2),
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          margin: const EdgeInsets.all(16),
                         ),
                       );
                       Navigator.pop(context);
@@ -182,7 +187,12 @@ class _LoginScreenState extends State<LoginScreen> {
                         SnackBar(
                           content: Text(state['message'] as String),
                           backgroundColor: Colors.red,
-                          duration: const Duration(seconds: 3),
+                          duration: const Duration(seconds: 2),
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          margin: const EdgeInsets.all(16),
                         ),
                       );
                       // Clear error state after showing message
@@ -213,18 +223,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   },
                 ),
                 const SizedBox(height: 12),
-                BlocConsumer<AuthCubit, Map<String, dynamic>>(
-                  listener: (context, state) {
-                    if (state['state'] == 'done' && state['data'] != null) {
-                      Navigator.pop(context);
-                      Navigator.pushNamed(context, '/home');
-                    }
-                    if (state['state'] == 'error' && state['message'] != null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(state['message'] as String)),
-                      );
-                    }
-                  },
+                BlocBuilder<AuthCubit, Map<String, dynamic>>(
                   builder: (context, state) {
                     final isLoading = state['state'] == 'loading';
                     return ProgressButton(
