@@ -1,4 +1,5 @@
 import 'package:findar/core/services/findar_api_service.dart';
+import 'package:findar/core/config/api_config.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:findar/core/repositories/auth_repository.dart';
 
@@ -94,6 +95,60 @@ class ProfileCubit extends Cubit<Map<String, dynamic>> {
       'accountType': user.accountType,
       'credits': user.credits,
     };
+  }
+
+  /// Fetch user profile by ID (for viewing other users' profiles)
+  Future<void> fetchUserById(int userId) async {
+    emit({...state, 'state': 'loading', 'message': ''});
+
+    try {
+      // Use ApiConfig helper to build the endpoint
+      final response = await FindarApiService().get(ApiConfig.getUserProfile(userId));
+
+      if (response is Map && response['success'] == true) {
+        final user = response['user'] ?? {};
+        final listings = (response['listings'] as List?) ?? [];
+
+        // Map listings to the shape expected by the UI (imagePath, title, price)
+        final mappedListings = listings.map<Map<String, dynamic>>((listing) {
+          final l = listing as Map<String, dynamic>;
+          return {
+            'imagePath': l['main_pic'] ?? l['image'] ?? '',
+            'title': l['title'] ?? '',
+            'price': l['price'] ?? 0.0,
+            'id': l['id'],
+          };
+        }).toList();
+
+        emit({
+          ...state,
+          'data': {
+            'id': user['id'],
+            'name': user['username'] ?? user['name'] ?? '',
+            'email': user['email'] ?? '',
+            'phone': user['phone'] ?? '',
+            'profileImage': user['profile_pic'],
+            'accountType': user['account_type'] ?? user['accountType'],
+            'credits': user['credits'] ?? 0,
+            'listings': mappedListings,
+          },
+          'state': 'done',
+          'message': 'User profile loaded',
+        });
+      } else {
+        emit({
+          ...state,
+          'state': 'error',
+          'message': response['message'] ?? 'Failed to load user profile',
+        });
+      }
+    } catch (e) {
+      emit({
+        ...state,
+        'state': 'error',
+        'message': 'Error fetching user profile: ${e.toString()}',
+      });
+    }
   }
 
   /// Update user profile

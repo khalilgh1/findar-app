@@ -50,7 +50,9 @@ class AgentCard extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 30,
-                  backgroundImage: AssetImage(agentImage),
+                  backgroundImage: agentImage.startsWith('http')
+                      ? NetworkImage(agentImage)
+                      : AssetImage(agentImage) as ImageProvider,
                 ),
                 const SizedBox(width: 12),
                 Expanded(

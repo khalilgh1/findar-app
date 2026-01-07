@@ -35,6 +35,7 @@ class ApiConfig {
   static const String loginEndpoint = '/api/auth/login';
   static const String registerEndpoint = '/api/auth/register';
   static const String UpdateprofileEndpoint = '/api/users/profile/';
+  static String getUserProfile(int userId) => '/api/users/$userId/profile/';
 
   // Notifications
   static const String notificationsRegisterDeviceEndpoint =

@@ -19,9 +19,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   @override
   void initState() {
     super.initState();
-    // TODO: Fetch user profile by userId
-    // For now, using the same cubit but in production you'd want a separate cubit
-    context.read<ProfileCubit>().fetchProfile();
+    // Fetch the specific user's profile by their ID
+    context.read<ProfileCubit>().fetchUserById(int.parse(widget.userId));
   }
 
   @override
@@ -69,7 +68,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                     backgroundColor: Theme.of(context).colorScheme.primary,
                     textColor: Theme.of(context).colorScheme.onPrimary,
                     onPressed: () {
-                      context.read<ProfileCubit>().fetchProfile();
+                      context.read<ProfileCubit>().fetchUserById(int.parse(widget.userId));
                     },
                   ),
                 ],

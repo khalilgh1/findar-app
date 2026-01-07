@@ -46,6 +46,9 @@ class PropertyListing {
   final String? ownerName;
   final String? ownerImage;
   final String? ownerPhone;
+  final int? ownerId;
+  final String? ownerEmail;
+  final String? ownerAccountType;
 
   //sqlite stores bool as int 0/1, so we need to convert
   @JsonKey(
@@ -73,6 +76,9 @@ class PropertyListing {
     this.ownerName,
     this.ownerImage,
     this.ownerPhone,
+    this.ownerId,
+    this.ownerEmail,
+    this.ownerAccountType,
   });
 
   factory PropertyListing.fromJson(Map<String, dynamic> json) => 
@@ -103,6 +109,9 @@ class PropertyListing {
     String? ownerName,
     String? ownerImage,
     String? ownerPhone,
+    int? ownerId,
+    String? ownerEmail,
+    String? ownerAccountType,
   }) {
     return PropertyListing(
       id: id ?? this.id,
@@ -124,6 +133,9 @@ class PropertyListing {
       ownerName: ownerName ?? this.ownerName,
       ownerImage: ownerImage ?? this.ownerImage,
       ownerPhone: ownerPhone ?? this.ownerPhone,
+      ownerId: ownerId ?? this.ownerId,
+      ownerEmail: ownerEmail ?? this.ownerEmail,
+      ownerAccountType: ownerAccountType ?? this.ownerAccountType,
     );
   }
 }

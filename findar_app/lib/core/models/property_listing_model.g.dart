@@ -34,6 +34,9 @@ PropertyListing _$PropertyListingFromJson(Map<String, dynamic> json) =>
       ownerName: json['owner_name'] as String?,
       ownerImage: json['owner_image'] as String?,
       ownerPhone: json['owner_phone'] as String?,
+      ownerId: (json['owner_id'] as num?)?.toInt(),
+      ownerEmail: json['owner_email'] as String?,
+      ownerAccountType: json['owner_account_type'] as String?,
     );
 
 Map<String, dynamic> _$PropertyListingToJson(PropertyListing instance) =>
@@ -57,4 +60,7 @@ Map<String, dynamic> _$PropertyListingToJson(PropertyListing instance) =>
       'owner_name': instance.ownerName,
       'owner_image': instance.ownerImage,
       'owner_phone': instance.ownerPhone,
+      'owner_id': instance.ownerId,
+      'owner_email': instance.ownerEmail,
+      'owner_account_type': instance.ownerAccountType,
     };

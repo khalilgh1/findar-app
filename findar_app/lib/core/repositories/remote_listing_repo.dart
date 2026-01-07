@@ -607,6 +607,17 @@ class RemoteListingRepository implements ListingRepository {
           data['location'] = data['city'] ?? 'Unknown';
         }
 
+        // Map owner_details to owner fields (use snake_case for json_serializable)
+        if (data['owner_details'] != null) {
+          final ownerDetails = data['owner_details'] as Map<String, dynamic>;
+          data['owner_id'] = ownerDetails['id'];
+          data['owner_name'] = ownerDetails['username'];
+          data['owner_email'] = ownerDetails['email'];
+          data['owner_phone'] = ownerDetails['phone'];
+          data['owner_image'] = ownerDetails['profile_pic'];
+          data['owner_account_type'] = ownerDetails['account_type'];
+        }
+
         return PropertyListing.fromJson(data);
       }
 

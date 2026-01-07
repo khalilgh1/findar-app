@@ -12,9 +12,23 @@ class UserSerializers(serializers.ModelSerializer):
         exclude = ('id',"password" , "is_superuser" , "is_staff" , "is_active" , "groups" , "user_permissions")
 
 class PostSerializers(serializers.ModelSerializer):
+    owner_details = serializers.SerializerMethodField()
+    
     class Meta:
         model = Post
         fields= "__all__"
+    
+    def get_owner_details(self, obj):
+        """Return owner user details"""
+        owner = obj.owner
+        return {
+            'id': owner.id,
+            'username': owner.username,
+            'email': owner.email,
+            'phone': owner.phone,
+            'profile_pic': owner.profile_pic.url if owner.profile_pic else None,
+            'account_type': owner.account_type,
+        }
 
 class SavedPostsSerializers(serializers.ModelSerializer):
     class Meta:

@@ -171,6 +171,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         SnackBar(
                           content: Text(l10n.success),
                           backgroundColor: Colors.green,
+                          duration: const Duration(seconds: 2),
                         ),
                       );
                       Navigator.pop(context);
@@ -178,14 +179,22 @@ class _LoginScreenState extends State<LoginScreen> {
                     }
                     if (state['state'] == 'error' && state['message'] != null) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(state['message'] as String)),
+                        SnackBar(
+                          content: Text(state['message'] as String),
+                          backgroundColor: Colors.red,
+                          duration: const Duration(seconds: 3),
+                        ),
                       );
+                      // Clear error state after showing message
+                      Future.delayed(const Duration(milliseconds: 100), () {
+                        if (context.mounted) {
+                          context.read<AuthCubit>().clearError();
+                        }
+                      });
                     }
                   },
                   builder: (context, state) {
                     final isLoading = state['state'] == 'loading';
-                    final isError = state['state'] == 'error';
-                    final errorMessage = isError ? (state['message'] as String?) : null;
 
                     return ProgressButton(
                       onPressed: () {
@@ -198,8 +207,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       },
                       label: l10n.login,
                       isLoading: isLoading,
-                      isError: isError,
-                      errorMessage: errorMessage,
                       backgroundColor: theme.colorScheme.primary,
                       textColor: Colors.white,
                     );
