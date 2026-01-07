@@ -77,6 +77,7 @@ class LocalListingRepository implements ListingRepository {
       await _ensureCachesLoaded();
       _myListingIdsCache!.add(newId);
       await _userStore.saveMyListingIds(_myListingIdsCache!);
+      print("New listing created with ID: $newId");
       return ReturnResult(state: true, message: "Listing created.");
     } catch (e) {
       return ReturnResult(state: false, message: e.toString());
@@ -327,5 +328,10 @@ class LocalListingRepository implements ListingRepository {
       return PropertyListing.fromJson(_mapDbRowToApiFormat(rows.first));
     }
     return null;
+  }
+
+  //a method to clear all cached listings from the local database
+  Future<void> clearCachedListings() async {
+    await db.clearCachedListings();
   }
 }

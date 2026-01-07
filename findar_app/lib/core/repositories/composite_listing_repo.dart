@@ -136,36 +136,43 @@ class CompositeListingRepository implements ListingRepository {
     String? query,
     String? listingType,
   }) async {
-    if (!await _hasConnection()) {
-      throw NetworkException.featureUnavailable('Recent listings');
-    }
+    if (await _hasConnection()) {
+      print("Fetching recent listings from remote repository...");
+      final listings = await _remoteRepo.getRecentListings(
+        query: query,
+        listingType: listingType,
+      );
 
-    final listings = await _remoteRepo.getRecentListings(
+      //first clear old cached listings
+      await _databaseRepo.clearCachedListings();
+
+      // Cache listings to local database for future offline viewing
+      for (final listing in listings) {
+        print("Caching listing ID ${listing.id} to local database...");
+        try {
+          await _databaseRepo.createListing(
+            title: listing.title,
+            description: listing.description,
+            price: listing.price,
+            location: listing.location,
+            bedrooms: listing.bedrooms,
+            bathrooms: listing.bathrooms,
+            classification: listing.classification,
+            propertyType: listing.propertyType,
+            image: listing.image,
+          );
+        } catch (e) {
+          print("Error caching listing ID ${listing.id}: $e");
+        }
+      }
+      return listings;
+    }
+    //otherwise, fetch from local database
+    print("Fetching recent listings from local database repository...");
+    return await _databaseRepo.getRecentListings(
       query: query,
       listingType: listingType,
     );
-
-    // Cache listings to local database for future offline viewing
-    // (if user saves them later)
-    for (final listing in listings) {
-      try {
-        await _databaseRepo.createListing(
-          title: listing.title,
-          description: listing.description,
-          price: listing.price,
-          location: listing.location,
-          bedrooms: listing.bedrooms,
-          bathrooms: listing.bathrooms,
-          classification: listing.classification,
-          propertyType: listing.propertyType,
-          image: listing.image,
-        );
-      } catch (_) {
-        // Ignore caching errors - listing might already exist
-      }
-    }
-
-    return listings;
   }
 
   @override
@@ -212,82 +219,36 @@ class CompositeListingRepository implements ListingRepository {
     );
   }
 
-  // ============================================================
-  // User's own listings - Available offline from local cache
-  // ============================================================
-
   @override
   Future<Map<String, List<PropertyListing>>> getUserListings() async {
-    if (await _hasConnection()) {
-      // Online: fetch from remote and cache locally
-      final listings = await _remoteRepo.getUserListings();
-
-      // Cache to local storage for offline access
-      // Note: In a production app, you'd want to sync properly
-      return listings;
-    } else {
-      // Offline: return from local database
-      return await _databaseRepo.getUserListings();
-    }
+    await _requireConnection('Get user listings');
+    return await _remoteRepo.getUserListings();
   }
-
-  // ============================================================
-  // Saved listings - Available offline from local cache
-  // ============================================================
 
   @override
   Future<List<PropertyListing>> getSavedListings() async {
-    if (await _hasConnection()) {
-      // Online: fetch from remote
-      final listings = await _remoteRepo.getSavedListings();
-
-      // Update local saved IDs cache
-      final savedIds = listings.map((l) => l.id).toSet();
-      for (final id in savedIds) {
-        await _databaseRepo.saveListing(id);
-      }
-
-      return listings;
-    } else {
-      // Offline: return from local database
-      return await _databaseRepo.getSavedListings();
-    }
+    await _requireConnection('Get saved listings');
+    return await _remoteRepo.getSavedListings();
   }
 
   @override
   Future<Set<int>> getSavedListingIds() async {
     if (await _hasConnection()) {
       return await _remoteRepo.getSavedListingIds();
-    } else {
-      return await _databaseRepo.getSavedListingIds();
     }
+    return await _databaseRepo.getSavedListingIds();
   }
 
   @override
   Future<ReturnResult> saveListing(int listingId) async {
     await _requireConnection('Save listing');
-
-    final result = await _remoteRepo.saveListing(listingId);
-
-    if (result.state) {
-      // Also save locally for offline access
-      await _databaseRepo.saveListing(listingId);
-    }
-
-    return result;
+    return await _remoteRepo.saveListing(listingId);
   }
 
   @override
   Future<ReturnResult> unsaveListing(int listingId) async {
     await _requireConnection('Unsave listing');
-
     final result = await _remoteRepo.unsaveListing(listingId);
-
-    if (result.state) {
-      // Also remove from local
-      await _databaseRepo.unsaveListing(listingId);
-    }
-
     return result;
   }
 
@@ -301,22 +262,8 @@ class CompositeListingRepository implements ListingRepository {
       // Online: fetch from remote
       return await _remoteRepo.getListingById(id);
     } else {
-      // Offline: check if this is user's own listing or a saved listing
-      final savedIds = await _databaseRepo.getSavedListingIds();
-      final userListings = await _databaseRepo.getUserListings();
-      final activeListings = userListings['active'] ?? [];
-      final inactiveListings = userListings['inactive'] ?? [];
-      final myListingIds = [
-        ...activeListings.map((l) => l.id),
-        ...inactiveListings.map((l) => l.id),
-      ];
-
-      if (savedIds.contains(id) || myListingIds.contains(id)) {
-        return await _databaseRepo.getListingById(id);
-      } else {
-        // This listing is not available offline
-        throw NetworkException.featureUnavailable('View this listing');
-      }
+      // Offline: fetch from local database
+      return await _databaseRepo.getListingById(id);
     }
   }
 }
