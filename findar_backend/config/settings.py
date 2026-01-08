@@ -47,9 +47,9 @@ INSTALLED_APPS = [
     'django_crontab',
 ]
 
-CRONJOBS = [
-    ('* * * * *', 'api.cron.engagement_reminder'),
-]
+# CRONJOBS = [
+#     ('* * * * *', 'api.cron.engagement_reminder'),
+# ]
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
