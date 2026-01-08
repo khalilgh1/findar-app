@@ -171,6 +171,12 @@ class _LoginScreenState extends State<LoginScreen> {
                         SnackBar(
                           content: Text(l10n.success),
                           backgroundColor: Colors.green,
+                          duration: const Duration(seconds: 2),
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          margin: const EdgeInsets.all(16),
                         ),
                       );
                       Navigator.pop(context);
@@ -178,14 +184,27 @@ class _LoginScreenState extends State<LoginScreen> {
                     }
                     if (state['state'] == 'error' && state['message'] != null) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(state['message'] as String)),
+                        SnackBar(
+                          content: Text(state['message'] as String),
+                          backgroundColor: Colors.red,
+                          duration: const Duration(seconds: 2),
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          margin: const EdgeInsets.all(16),
+                        ),
                       );
+                      // Clear error state after showing message
+                      Future.delayed(const Duration(milliseconds: 100), () {
+                        if (context.mounted) {
+                          context.read<AuthCubit>().clearError();
+                        }
+                      });
                     }
                   },
                   builder: (context, state) {
                     final isLoading = state['state'] == 'loading';
-                    final isError = state['state'] == 'error';
-                    final errorMessage = isError ? (state['message'] as String?) : null;
 
                     return ProgressButton(
                       onPressed: () {
@@ -198,26 +217,13 @@ class _LoginScreenState extends State<LoginScreen> {
                       },
                       label: l10n.login,
                       isLoading: isLoading,
-                      isError: isError,
-                      errorMessage: errorMessage,
                       backgroundColor: theme.colorScheme.primary,
                       textColor: Colors.white,
                     );
                   },
                 ),
                 const SizedBox(height: 12),
-                BlocConsumer<AuthCubit, Map<String, dynamic>>(
-                  listener: (context, state) {
-                    if (state['state'] == 'done' && state['data'] != null) {
-                      Navigator.pop(context);
-                      Navigator.pushNamed(context, '/home');
-                    }
-                    if (state['state'] == 'error' && state['message'] != null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(state['message'] as String)),
-                      );
-                    }
-                  },
+                BlocBuilder<AuthCubit, Map<String, dynamic>>(
                   builder: (context, state) {
                     final isLoading = state['state'] == 'loading';
                     return ProgressButton(

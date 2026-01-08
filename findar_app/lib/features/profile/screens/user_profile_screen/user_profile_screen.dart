@@ -5,6 +5,7 @@ import 'package:findar/features/profile/screens/user_profile_screen/user_profile
 import 'package:findar/features/profile/screens/profile_screen/listings.dart';
 import 'package:findar/features/profile/screens/profile_screen/profile_info.dart';
 import 'package:findar/core/widgets/progress_button.dart';
+import 'package:findar/core/widgets/shimmer_loading.dart';
 
 class UserProfileScreen extends StatefulWidget {
   final String userId;
@@ -19,9 +20,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   @override
   void initState() {
     super.initState();
-    // TODO: Fetch user profile by userId
-    // For now, using the same cubit but in production you'd want a separate cubit
-    context.read<ProfileCubit>().fetchProfile();
+    // Fetch the specific user's profile by their ID
+    context.read<ProfileCubit>().fetchUserById(int.parse(widget.userId));
   }
 
   @override
@@ -54,7 +54,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       body: BlocBuilder<ProfileCubit, Map<String, dynamic>>(
         builder: (context, state) {
           if (state['state'] == 'loading') {
-            return const Center(child: CircularProgressIndicator());
+            return const UserProfileSkeleton();
           }
 
           if (state['state'] == 'error') {
@@ -69,7 +69,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                     backgroundColor: Theme.of(context).colorScheme.primary,
                     textColor: Theme.of(context).colorScheme.onPrimary,
                     onPressed: () {
-                      context.read<ProfileCubit>().fetchProfile();
+                      context.read<ProfileCubit>().fetchUserById(int.parse(widget.userId));
                     },
                   ),
                 ],

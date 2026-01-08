@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:findar/logic/cubits/property_details_cubit.dart';
 import 'package:findar/core/widgets/progress_button.dart';
 import 'package:findar/core/widgets/no_internet_widget.dart';
+import 'package:findar/core/widgets/shimmer_loading.dart';
 import 'package:findar/features/property_details/widgets/property_image_carousel.dart';
 import 'package:findar/features/property_details/widgets/property_header.dart';
 import 'package:findar/features/property_details/widgets/property_features.dart';
@@ -117,7 +118,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
         body: BlocBuilder<PropertyDetailsCubit, Map<String, dynamic>>(
           builder: (context, state) {
             if (state['state'] == 'loading') {
-              return const Center(child: CircularProgressIndicator());
+              return const PropertyDetailsSkeleton();
             }
 
             if (state['state'] == 'error') {
@@ -216,13 +217,10 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                         ),
                         const SizedBox(height: 24),
                         AgentCard(
-                          agentName: property['agentName'] ?? 'Ishak Dib',
-                          agentCompany:
-                              property['agentCompany'] ?? 'Prestige Realty',
-                          agentImage:
-                              property['agentImage'] ?? 'assets/profile.png',
-                          agentId:
-                              property['agentId'] as String? ?? 'test-user-123',
+                          agentName: property['owner_name'] ?? 'Owner',
+                          agentCompany: property['owner_account_type'] ?? 'Individual',
+                          agentImage: property['owner_image'] ?? 'assets/profile.png',
+                          agentId: property['owner_id']?.toString() ?? '',
                         ),
                         const SizedBox(height: 24),
                         if (similarProperties.isNotEmpty)

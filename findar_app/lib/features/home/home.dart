@@ -4,6 +4,7 @@ import 'package:findar/logic/cubits/home/recent_listings.dart';
 import 'package:findar/logic/cubits/home/sponsored_listings.dart';
 import 'package:findar/logic/cubits/property_details_cubit.dart';
 import 'package:findar/core/widgets/progress_button.dart';
+import 'package:findar/core/widgets/shimmer_loading.dart';
 import 'package:findar/core/widgets/no_internet_widget.dart';
 import 'package:findar/features/home/search_bar.dart';
 import 'package:findar/features/home/categories.dart';
@@ -141,10 +142,18 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         body: SafeArea(
           bottom: false,
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(14.0),
-              child: Column(
+          child: RefreshIndicator(
+            onRefresh: () async {
+              // Refresh both sponsored and recent listings
+              await Future.wait([
+                context.read<SponsoredCubit>().getSponsoredListings(),
+                context.read<RecentCubit>().getRecentListings(),
+              ]);
+            },
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(14.0),
+                child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -168,7 +177,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   BlocBuilder<SponsoredCubit, Map<String, dynamic>>(
                     builder: (context, state) {
                       if (state['state'] == 'loading') {
-                        return const Center(child: CircularProgressIndicator());
+                        return SizedBox(
+                          height: 250,
+                          child: ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: 3,
+                            itemBuilder: (context, index) => const PropertyCardSkeleton(),
+                          ),
+                        );
                       }
                       if (state['state'] == 'error') {
                         final errorMessage = state['message'] as String?;
@@ -268,7 +284,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   BlocBuilder<RecentCubit, Map<String, dynamic>>(
                     builder: (context, state) {
                       if (state['state'] == 'loading') {
-                        return const Center(child: CircularProgressIndicator());
+                        return Column(
+                          children: List.generate(
+                            5,
+                            (index) => const ListingTileSkeleton(),
+                          ),
+                        );
                       }
                       if (state['state'] == 'error') {
                         final errorMessage = state['message'] as String?;
@@ -353,6 +374,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
+        ),
         ),
         bottomNavigationBar: BuildBottomNavBar(index: 0),
       ),

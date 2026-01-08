@@ -9,6 +9,7 @@ import 'package:findar/core/widgets/progress_button.dart';
 import 'package:findar/core/widgets/no_internet_widget.dart';
 import 'package:findar/core/theme/theme_provider.dart';
 import 'package:findar/core/widgets/build_bottom_bar.dart';
+import 'package:findar/core/widgets/shimmer_loading.dart';
 import 'package:findar/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 
@@ -129,7 +130,14 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
       body: BlocBuilder<SavedListingsCubit, Map<String, dynamic>>(
         builder: (context, state) {
           if (state['state'] == 'loading') {
-            return const Center(child: CircularProgressIndicator());
+            return ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: 4,
+              itemBuilder: (context, index) => Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: const PropertyGridCardSkeleton(),
+              ),
+            );
           }
 
           if (state['state'] == 'error') {

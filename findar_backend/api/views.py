@@ -373,6 +373,38 @@ def update_profile(request):
     return Response( {"success":True , "message":"updated successfully" , "data":user } , status=status.HTTP_201_CREATED )
 
 
+#########  Get User Profile by ID  #########
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_user_profile(request, user_id):
+    """Get user profile by ID with their listings"""
+    try:
+        user = CustomUser.objects.get(id=user_id)
+        user_data = UserSerializers(user).data
+        
+        # Get user's listings
+        listings = Post.objects.filter(owner=user_id, active=True).order_by('-created_at')
+        listings_data = PostSerializers(listings, many=True).data
+        
+        return Response({
+            "success": True,
+            "user": user_data,
+            "listings": listings_data
+        }, status=status.HTTP_200_OK)
+        
+    except CustomUser.DoesNotExist:
+        return Response({
+            "success": False,
+            "message": "User not found"
+        }, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({
+            "success": False,
+            "message": str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 #########  Login as User  #########
 
 @api_view(["POST"])

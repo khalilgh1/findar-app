@@ -305,4 +305,15 @@ class AuthCubit extends Cubit<Map<String, dynamic>> {
   Future<void> updateProfilePicture(String profilePicUrl) async {
     await updateProfile(profilePic: profilePicUrl);
   }
+
+  /// Clear error state (useful after showing error in snackbar)
+  void clearError() {
+    if (state['state'] == 'error') {
+      emit({
+        ...state,
+        'state': 'initial',
+        'message': '',
+      });
+    }
+  }
 }
