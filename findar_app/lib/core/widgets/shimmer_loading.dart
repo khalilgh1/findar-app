@@ -1,13 +1,40 @@
 import 'package:flutter/material.dart';
 
+/// Helper class to get shimmer colors based on theme
+class ShimmerColors {
+  /// Base color for shimmer placeholders (the main skeleton color)
+  static Color baseColor(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return isDark ? Colors.grey.shade800 : Colors.grey.shade300;
+  }
+
+  /// Highlight color for shimmer animation (the moving shine)
+  static Color highlightColor(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return isDark ? Colors.grey.shade700 : Colors.grey.shade100;
+  }
+
+  /// Container background color
+  static Color containerColor(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return colorScheme.surface;
+  }
+
+  /// Border color for containers
+  static Color borderColor(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return isDark ? Colors.grey.shade700 : Colors.grey.shade300;
+  }
+}
+
 /// Shimmer effect for loading states
 class ShimmerLoading extends StatefulWidget {
   final Widget child;
-  
+
   const ShimmerLoading({
-    Key? key,
+    super.key,
     required this.child,
-  }) : super(key: key);
+  });
 
   @override
   State<ShimmerLoading> createState() => _ShimmerLoadingState();
@@ -25,7 +52,7 @@ class _ShimmerLoadingState extends State<ShimmerLoading>
       vsync: this,
       duration: const Duration(milliseconds: 1500),
     )..repeat();
-    
+
     _animation = Tween<double>(begin: -2, end: 2).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOutSine),
     );
@@ -39,6 +66,10 @@ class _ShimmerLoadingState extends State<ShimmerLoading>
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final baseColor = isDark ? Colors.grey.shade800 : Colors.grey.shade200;
+    final highlightColor = isDark ? Colors.grey.shade600 : Colors.white;
+
     return AnimatedBuilder(
       animation: _animation,
       builder: (context, child) {
@@ -48,11 +79,11 @@ class _ShimmerLoadingState extends State<ShimmerLoading>
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                Colors.grey.shade200,
-                Colors.white,
-                Colors.grey.shade200,
+                baseColor,
+                highlightColor,
+                baseColor,
               ],
-              stops: [
+              stops: const [
                 0.0,
                 0.5,
                 1.0,
@@ -81,7 +112,7 @@ class _SlidingGradientTransform extends GradientTransform {
 
 /// Skeleton for property card loading (Sponsored Listings)
 class PropertyCardSkeleton extends StatelessWidget {
-  const PropertyCardSkeleton({Key? key}) : super(key: key);
+  const PropertyCardSkeleton({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -89,7 +120,7 @@ class PropertyCardSkeleton extends StatelessWidget {
       width: 250,
       margin: const EdgeInsets.only(right: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: ShimmerColors.containerColor(context),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -100,7 +131,7 @@ class PropertyCardSkeleton extends StatelessWidget {
             child: Container(
               height: 140,
               decoration: BoxDecoration(
-                color: Colors.grey.shade300,
+                color: ShimmerColors.baseColor(context),
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(16),
                 ),
@@ -120,7 +151,7 @@ class PropertyCardSkeleton extends StatelessWidget {
                         child: Container(
                           height: 14,
                           decoration: BoxDecoration(
-                            color: Colors.grey.shade300,
+                            color: ShimmerColors.baseColor(context),
                             borderRadius: BorderRadius.circular(4),
                           ),
                         ),
@@ -137,7 +168,7 @@ class PropertyCardSkeleton extends StatelessWidget {
                         height: 12,
                         width: 160,
                         decoration: BoxDecoration(
-                          color: Colors.grey.shade300,
+                          color: ShimmerColors.baseColor(context),
                           borderRadius: BorderRadius.circular(4),
                         ),
                       ),
@@ -153,7 +184,7 @@ class PropertyCardSkeleton extends StatelessWidget {
                         height: 12,
                         width: 100,
                         decoration: BoxDecoration(
-                          color: Colors.grey.shade300,
+                          color: ShimmerColors.baseColor(context),
                           borderRadius: BorderRadius.circular(4),
                         ),
                       ),
@@ -171,7 +202,7 @@ class PropertyCardSkeleton extends StatelessWidget {
 
 /// Skeleton for listing tile loading (Recent Listings)
 class ListingTileSkeleton extends StatelessWidget {
-  const ListingTileSkeleton({Key? key}) : super(key: key);
+  const ListingTileSkeleton({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -179,7 +210,7 @@ class ListingTileSkeleton extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: ShimmerColors.containerColor(context),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -190,7 +221,7 @@ class ListingTileSkeleton extends StatelessWidget {
               width: 100,
               height: 100,
               decoration: BoxDecoration(
-                color: Colors.grey.shade300,
+                color: ShimmerColors.baseColor(context),
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
@@ -209,7 +240,7 @@ class ListingTileSkeleton extends StatelessWidget {
                         child: Container(
                           height: 16,
                           decoration: BoxDecoration(
-                            color: Colors.grey.shade300,
+                            color: ShimmerColors.baseColor(context),
                             borderRadius: BorderRadius.circular(4),
                           ),
                         ),
@@ -226,7 +257,7 @@ class ListingTileSkeleton extends StatelessWidget {
                         height: 14,
                         width: 150,
                         decoration: BoxDecoration(
-                          color: Colors.grey.shade300,
+                          color: ShimmerColors.baseColor(context),
                           borderRadius: BorderRadius.circular(4),
                         ),
                       ),
@@ -242,7 +273,7 @@ class ListingTileSkeleton extends StatelessWidget {
                         height: 14,
                         width: 100,
                         decoration: BoxDecoration(
-                          color: Colors.grey.shade300,
+                          color: ShimmerColors.baseColor(context),
                           borderRadius: BorderRadius.circular(4),
                         ),
                       ),
@@ -260,13 +291,13 @@ class ListingTileSkeleton extends StatelessWidget {
 
 /// Skeleton for grid property card (Saved Listings / My Listings)
 class PropertyGridCardSkeleton extends StatelessWidget {
-  const PropertyGridCardSkeleton({Key? key}) : super(key: key);
+  const PropertyGridCardSkeleton({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: ShimmerColors.containerColor(context),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -277,7 +308,7 @@ class PropertyGridCardSkeleton extends StatelessWidget {
             child: Container(
               height: 240,
               decoration: BoxDecoration(
-                color: Colors.grey.shade300,
+                color: ShimmerColors.baseColor(context),
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(16),
                 ),
@@ -295,7 +326,7 @@ class PropertyGridCardSkeleton extends StatelessWidget {
                     height: 18,
                     width: double.infinity,
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
+                      color: ShimmerColors.baseColor(context),
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
@@ -307,7 +338,7 @@ class PropertyGridCardSkeleton extends StatelessWidget {
                     height: 20,
                     width: 120,
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
+                      color: ShimmerColors.baseColor(context),
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
@@ -319,7 +350,7 @@ class PropertyGridCardSkeleton extends StatelessWidget {
                     height: 14,
                     width: 140,
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
+                      color: ShimmerColors.baseColor(context),
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
@@ -333,7 +364,7 @@ class PropertyGridCardSkeleton extends StatelessWidget {
                         height: 14,
                         width: 80,
                         decoration: BoxDecoration(
-                          color: Colors.grey.shade300,
+                          color: ShimmerColors.baseColor(context),
                           borderRadius: BorderRadius.circular(4),
                         ),
                       ),
@@ -342,7 +373,7 @@ class PropertyGridCardSkeleton extends StatelessWidget {
                         height: 14,
                         width: 90,
                         decoration: BoxDecoration(
-                          color: Colors.grey.shade300,
+                          color: ShimmerColors.baseColor(context),
                           borderRadius: BorderRadius.circular(4),
                         ),
                       ),
@@ -360,7 +391,7 @@ class PropertyGridCardSkeleton extends StatelessWidget {
 
 /// Skeleton for property details screen loading
 class PropertyDetailsSkeleton extends StatelessWidget {
-  const PropertyDetailsSkeleton({Key? key}) : super(key: key);
+  const PropertyDetailsSkeleton({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -375,7 +406,7 @@ class PropertyDetailsSkeleton extends StatelessWidget {
               height: 300,
               width: double.infinity,
               decoration: BoxDecoration(
-                color: Colors.grey.shade300,
+                color: ShimmerColors.baseColor(context),
                 borderRadius: BorderRadius.circular(16),
               ),
             ),
@@ -385,7 +416,7 @@ class PropertyDetailsSkeleton extends StatelessWidget {
               height: 24,
               width: double.infinity,
               decoration: BoxDecoration(
-                color: Colors.grey.shade300,
+                color: ShimmerColors.baseColor(context),
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
@@ -395,7 +426,7 @@ class PropertyDetailsSkeleton extends StatelessWidget {
               height: 16,
               width: 200,
               decoration: BoxDecoration(
-                color: Colors.grey.shade300,
+                color: ShimmerColors.baseColor(context),
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
@@ -405,7 +436,7 @@ class PropertyDetailsSkeleton extends StatelessWidget {
               height: 32,
               width: 150,
               decoration: BoxDecoration(
-                color: Colors.grey.shade300,
+                color: ShimmerColors.baseColor(context),
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
@@ -421,7 +452,7 @@ class PropertyDetailsSkeleton extends StatelessWidget {
                       height: 40,
                       width: 40,
                       decoration: BoxDecoration(
-                        color: Colors.grey.shade300,
+                        color: ShimmerColors.baseColor(context),
                         shape: BoxShape.circle,
                       ),
                     ),
@@ -430,7 +461,7 @@ class PropertyDetailsSkeleton extends StatelessWidget {
                       height: 12,
                       width: 60,
                       decoration: BoxDecoration(
-                        color: Colors.grey.shade300,
+                        color: ShimmerColors.baseColor(context),
                         borderRadius: BorderRadius.circular(4),
                       ),
                     ),
@@ -444,7 +475,7 @@ class PropertyDetailsSkeleton extends StatelessWidget {
               height: 20,
               width: 120,
               decoration: BoxDecoration(
-                color: Colors.grey.shade300,
+                color: ShimmerColors.baseColor(context),
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
@@ -458,7 +489,7 @@ class PropertyDetailsSkeleton extends StatelessWidget {
                   height: 14,
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
+                    color: ShimmerColors.baseColor(context),
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -469,9 +500,9 @@ class PropertyDetailsSkeleton extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: ShimmerColors.containerColor(context),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey.shade300),
+                border: Border.all(color: ShimmerColors.borderColor(context)),
               ),
               child: Row(
                 children: [
@@ -479,7 +510,7 @@ class PropertyDetailsSkeleton extends StatelessWidget {
                     height: 60,
                     width: 60,
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
+                      color: ShimmerColors.baseColor(context),
                       shape: BoxShape.circle,
                     ),
                   ),
@@ -492,7 +523,7 @@ class PropertyDetailsSkeleton extends StatelessWidget {
                           height: 16,
                           width: 120,
                           decoration: BoxDecoration(
-                            color: Colors.grey.shade300,
+                            color: ShimmerColors.baseColor(context),
                             borderRadius: BorderRadius.circular(4),
                           ),
                         ),
@@ -501,7 +532,7 @@ class PropertyDetailsSkeleton extends StatelessWidget {
                           height: 14,
                           width: 80,
                           decoration: BoxDecoration(
-                            color: Colors.grey.shade300,
+                            color: ShimmerColors.baseColor(context),
                             borderRadius: BorderRadius.circular(4),
                           ),
                         ),
@@ -520,7 +551,7 @@ class PropertyDetailsSkeleton extends StatelessWidget {
 
 /// Skeleton for user profile screen loading
 class UserProfileSkeleton extends StatelessWidget {
-  const UserProfileSkeleton({Key? key}) : super(key: key);
+  const UserProfileSkeleton({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -536,7 +567,7 @@ class UserProfileSkeleton extends StatelessWidget {
               height: 100,
               width: 100,
               decoration: BoxDecoration(
-                color: Colors.grey.shade300,
+                color: ShimmerColors.baseColor(context),
                 shape: BoxShape.circle,
               ),
             ),
@@ -546,7 +577,7 @@ class UserProfileSkeleton extends StatelessWidget {
               height: 20,
               width: 150,
               decoration: BoxDecoration(
-                color: Colors.grey.shade300,
+                color: ShimmerColors.baseColor(context),
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
@@ -556,7 +587,7 @@ class UserProfileSkeleton extends StatelessWidget {
               height: 16,
               width: 200,
               decoration: BoxDecoration(
-                color: Colors.grey.shade300,
+                color: ShimmerColors.baseColor(context),
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
@@ -565,9 +596,9 @@ class UserProfileSkeleton extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: ShimmerColors.containerColor(context),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey.shade300),
+                border: Border.all(color: ShimmerColors.borderColor(context)),
               ),
               child: Column(
                 children: [
@@ -577,7 +608,7 @@ class UserProfileSkeleton extends StatelessWidget {
                         height: 16,
                         width: 80,
                         decoration: BoxDecoration(
-                          color: Colors.grey.shade300,
+                          color: ShimmerColors.baseColor(context),
                           borderRadius: BorderRadius.circular(4),
                         ),
                       ),
@@ -586,7 +617,7 @@ class UserProfileSkeleton extends StatelessWidget {
                         height: 16,
                         width: 120,
                         decoration: BoxDecoration(
-                          color: Colors.grey.shade300,
+                          color: ShimmerColors.baseColor(context),
                           borderRadius: BorderRadius.circular(4),
                         ),
                       ),
@@ -599,7 +630,7 @@ class UserProfileSkeleton extends StatelessWidget {
                         height: 16,
                         width: 80,
                         decoration: BoxDecoration(
-                          color: Colors.grey.shade300,
+                          color: ShimmerColors.baseColor(context),
                           borderRadius: BorderRadius.circular(4),
                         ),
                       ),
@@ -608,7 +639,7 @@ class UserProfileSkeleton extends StatelessWidget {
                         height: 16,
                         width: 150,
                         decoration: BoxDecoration(
-                          color: Colors.grey.shade300,
+                          color: ShimmerColors.baseColor(context),
                           borderRadius: BorderRadius.circular(4),
                         ),
                       ),
@@ -625,7 +656,7 @@ class UserProfileSkeleton extends StatelessWidget {
                 height: 18,
                 width: 100,
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
+                  color: ShimmerColors.baseColor(context),
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),
@@ -641,7 +672,7 @@ class UserProfileSkeleton extends StatelessWidget {
                   width: 200,
                   margin: const EdgeInsets.only(right: 12),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: ShimmerColors.containerColor(context),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Column(
@@ -651,7 +682,7 @@ class UserProfileSkeleton extends StatelessWidget {
                       Container(
                         height: 150,
                         decoration: BoxDecoration(
-                          color: Colors.grey.shade300,
+                          color: ShimmerColors.baseColor(context),
                           borderRadius: const BorderRadius.vertical(
                             top: Radius.circular(12),
                           ),
@@ -666,7 +697,7 @@ class UserProfileSkeleton extends StatelessWidget {
                               height: 16,
                               width: double.infinity,
                               decoration: BoxDecoration(
-                                color: Colors.grey.shade300,
+                                color: ShimmerColors.baseColor(context),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                             ),
@@ -675,7 +706,7 @@ class UserProfileSkeleton extends StatelessWidget {
                               height: 20,
                               width: 100,
                               decoration: BoxDecoration(
-                                color: Colors.grey.shade300,
+                                color: ShimmerColors.baseColor(context),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                             ),
