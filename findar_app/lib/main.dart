@@ -55,6 +55,7 @@ import 'package:findar/core/di/service_locator.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
+import 'package:findar/core/services/notification_service.dart';
 import 'package:findar/utils/firebase.dart';
 import 'firebase_options.dart';
 
@@ -70,7 +71,8 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  await initFirebaseMessaging();
+  // Initialize notification service with all listeners and handlers
+  await NotificationService.initialize();
 
   FirebaseMessaging.onBackgroundMessage(
     firebaseMessagingBackgroundHandler,

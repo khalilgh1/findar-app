@@ -2,6 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from datetime import timedelta
 from django.utils import timezone
+from .services import new_agency_boosting_plans_notification, new_individual_boosting_plans_notification
 
 OTP_EXPIRATION_MINUTES = 10
 
@@ -33,6 +34,7 @@ class CustomUser(AbstractUser):
     account_type    = models.CharField(max_length=20, choices=ACCOUNT_CHOICES)
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username"]
+    last_active = models.DateTimeField(auto_now=True)
     credits = models.IntegerField(default=0)
     
     def __str__(self):
@@ -94,6 +96,7 @@ class SavedPosts(models.Model):
         return f"{self.user} : {self.post}"
     
 ################# Report Model
+
 class Report(models.Model):
 
     reporter_user    = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='reporter_user')
@@ -107,6 +110,7 @@ class Report(models.Model):
     
 
 ################# Business Plan Model
+
 BOOSTING_PLAN_CHOICES = [
     ('basic'   , 'Basic'),
     ('premium' , 'Premium'),
@@ -123,6 +127,13 @@ class BoostingPlan(models.Model):
     credit_cost         = models.FloatField(default=0.0)
     duration            = models.IntegerField() #not sure if in days, hours or seconds
 
+    def save(self, *args, **kwargs):
+        
+        if self.target_audience == 'agencies':
+            new_agency_boosting_plans_notification()
+        elif self.target_audience == 'individuals':
+            new_individual_boosting_plans_notification()
+        super().save(*args, **kwargs)
     
 ################# Boosting Model
 
@@ -132,6 +143,7 @@ class Boosting(models.Model):
     post            = models.ForeignKey(Post, on_delete=models.CASCADE)
     created_at      = models.DateTimeField(auto_now=True)
     expires_at      = models.DateTimeField()
+    notified      = models.BooleanField(default=False)
 
 
 ################# Password-reset Model
@@ -145,3 +157,16 @@ class PasswordResetOTP(models.Model):
 
     def is_expired(self):
         return timezone.now() > self.created_at + timedelta(minutes=10)
+
+
+################### Notification tokens 
+
+class DeviceToken(models.Model):
+    user = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name="devices"
+    )
+    token = models.CharField(max_length=255, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_seen = models.DateTimeField(auto_now=True)

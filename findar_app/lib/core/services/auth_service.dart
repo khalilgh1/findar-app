@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:findar/core/services/notification_service.dart';
 import 'package:http/http.dart' as http;
 import 'package:findar/core/config/api_config.dart';
 import 'auth_manager.dart';
@@ -58,7 +59,18 @@ class AuthService {
   }
 
   Future<void> logout() async {
+
+    final token = NotificationService.getFCMToken();
+    final res = await _client.post(
+      Uri.parse(ApiConfig.getUrl('/api/auth/logout/')),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'device_token': token , "refresh":_auth.refreshToken}),
+    ); 
+    if (res.statusCode != 200) {
+      throw Exception('Logout failed');
+    }
     await _auth.clear();
+    
   }
 
   /// SEND RESET CODE

@@ -88,6 +88,8 @@ Future<bool> initFirebaseMessaging() async {
 
   // Token
   final token = await FirebaseMessaging.instance.getToken();
+  FirebaseMessaging.instance.subscribeToTopic("all_users");
+
   print("Firebase token is: $token");
 
   return true;

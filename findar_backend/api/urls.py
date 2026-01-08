@@ -10,6 +10,7 @@ urlpatterns = [
     path('get-listing/<int:listing_id>', get_listing, name='get-listing'),
     # authentication urls 
     path('auth/login' , login , name="login"),
+    path('auth/logout' , logout , name="logout"),
     path('auth/register' , register, name="register"),
     path('auth/me' , me , name="me"),
     path('auth/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
@@ -17,6 +18,7 @@ urlpatterns = [
     path("auth/password-reset/request/", PasswordResetRequestAPI.as_view()),
     path("auth/password-reset/verify/", PasswordResetVerifyCodeAPI.as_view()),
     path("auth/password-reset/confirm/", PasswordResetConfirmAPI.as_view()),
+    path("notifications/register-device/", register_device_token),
     
     path('create-listing/', create_listing, name='create-listing'),
     path('users/profile/', update_profile, name='update_profile'),

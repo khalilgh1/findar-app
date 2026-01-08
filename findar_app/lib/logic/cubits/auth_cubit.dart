@@ -1,6 +1,8 @@
 import 'package:findar/core/services/findar_api_service.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:findar/core/repositories/auth_repository.dart';
+import 'package:findar/core/services/notification_service.dart';
 
 /// AuthCubit handles all authentication operations
 /// 
@@ -70,6 +72,10 @@ class AuthCubit extends Cubit<Map<String, dynamic>> {
       if (result.state) {
         // Success: get current user from repository
         final user = authRepository.getCurrentUser();
+
+        await NotificationService.registerDeviceAfterLogin();
+        await FirebaseMessaging.instance.subscribeToTopic(user!.accountType == 'agency' ? 'agency' : 'individual');
+     
         emit({
           ...state,
           'data': user,
@@ -118,6 +124,10 @@ class AuthCubit extends Cubit<Map<String, dynamic>> {
       if (result.state) {
         // Success
         final user = authRepository.getCurrentUser();
+        
+        // Register device token for notifications after successful login
+        await NotificationService.registerDeviceAfterLogin();
+        await FirebaseMessaging.instance.subscribeToTopic(user!.accountType == 'agency' ? 'agency' : 'individual');
         emit({
           ...state,
           'data': user,

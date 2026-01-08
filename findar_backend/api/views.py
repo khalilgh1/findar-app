@@ -1,7 +1,6 @@
 from .models import *
 from .serializers import *
 from django.contrib.auth import authenticate
-from django.core.mail import EmailMessage
 from rest_framework import status
 from rest_framework.response import Response 
 from rest_framework.decorators import api_view , permission_classes
@@ -19,6 +18,7 @@ from django.contrib.auth.hashers import make_password
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
+from .services import *
 """
     for every view that needs a user ( authenticated user ) do 
     @api_view(['GET'])
@@ -30,16 +30,12 @@ from rest_framework.response import Response
 
 #########Home VIEWS#########
 
-
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def sponsored_listings(request):
     sponsored_posts = Post.objects.filter(boosted=True , active=True)
     serialized_posts = PostSerializers(sponsored_posts , many=True).data
     return Response(serialized_posts , status=status.HTTP_200_OK)
-
-    
-
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -62,6 +58,7 @@ def recent_listings(request):
 
 
 #########get listing VIEW#########
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_listing(request , listing_id):
@@ -166,7 +163,6 @@ def advanced_search(request):
     return Response(serialized_posts , status=status.HTTP_200_OK)
 
     
-
 ######## Save a listing VIEW#########
 
 @api_view(["GET", "DELETE"])
@@ -209,7 +205,6 @@ def save_listing(request , listing_id ):
     
     serializer.save()
     return Response({"message": "Listing saved successfully"}, status=status.HTTP_200_OK)
-
 
 
 ######## Saved listing VIEW#########
@@ -285,6 +280,7 @@ def create_listing(request):
 
 
 ######## edit Listing VIEW#########
+
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
 def edit_listing(request , listing_id):
@@ -380,7 +376,6 @@ def login(request):
     email = request.data.get("email")
     password = request.data.get("password")
 
-
     errors = ""
     if email is None or email == "":
         errors += "email should not be empty ,"
@@ -410,6 +405,28 @@ def login(request):
         "user": user
         }
     })
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def logout(request):
+    """
+    Logout the user by blacklisting their refresh token
+    """
+    refresh_token = request.data.get("refresh")
+    device_token = request.data.get("device_token")
+
+    if not refresh_token:
+        return Response({"error": "Refresh token is required"}, status=status.HTTP_400_BAD_REQUEST)
+    
+    try:
+        token = RefreshToken(refresh_token)
+        # Remove device token from backend
+        if device_token:
+            DeviceToken.objects.filter(user=request.user, token=device_token).delete()
+        token.blacklist()
+        return Response({"message": "Logout successful"}, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({"error": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(["POST"])
 def register(request):
@@ -444,7 +461,6 @@ def register(request):
         }
     })
     return response
-
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -494,32 +510,39 @@ def report_property(request):
             "error": f"Failed to submit report: {str(e)}"
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def register_device_token(request):
+    """
+    Register a device token for push notifications
+    """
+    token = request.data.get('token')
+    if not token:
+        return Response({
+            "error": "Device token is required"
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+    # Check if token already exists for the user
+    existing_token = DeviceToken.objects.filter(user=request.user, token=token).first()
+    if existing_token:
+        return Response({
+            "message": "Device token already registered",
+            "success": True
+        }, status=status.HTTP_200_OK)
+    
+    # Create new device token entry
+    DeviceToken.objects.create(
+        user=request.user,
+        token=token
+    )
+    
+    return Response({
+        "message": "Device token registered successfully",
+        "success": True
+    }, status=status.HTTP_201_CREATED)
+
 
 ############################# forget password feature
-
-def send_email(to, subject, body):
-    email = EmailMessage(
-        subject=subject,
-        body=body,
-        to=[to],
-    )
-    email.send(fail_silently=False)
-
-def send_reset_code_email(email, code):
-    subject = "Your FinDAR password reset code"
-    body = f"""
-Hi,
-
-Your FinDAR password reset code is:
-
-{code}
-
-This code will expire in 10 minutes.
-If you did not request this, ignore this email.
-
-— FinDAR Team
-"""
-    send_email(email, subject, body)
 
 class PasswordResetRequestAPI(APIView):
     authentication_classes = []
@@ -542,7 +565,6 @@ class PasswordResetRequestAPI(APIView):
         send_reset_code_email(user.email, code)
 
         return Response({"message": "code has been sent" , "success" : True } , status=status.HTTP_200_OK)
-
 
 class PasswordResetVerifyCodeAPI(APIView):
     authentication_classes = []
