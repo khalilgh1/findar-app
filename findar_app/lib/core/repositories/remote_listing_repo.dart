@@ -37,7 +37,7 @@ class RemoteListingRepository implements ListingRepository {
 
       if (!image.startsWith('assets/')) {
         print('📤 Uploading images to Cloudinary...');
-        
+
         final uploadResult = await cloudinaryService.uploadListingImages(
           mainImagePath: image,
           additionalImagePaths: additionalImages,
@@ -52,8 +52,9 @@ class RemoteListingRepository implements ListingRepository {
 
         mainPicUrl = uploadResult.mainImageUrl;
         picsUrls = uploadResult.additionalImageUrls;
-        
-        print('✅ Images uploaded - Main: $mainPicUrl, Additional: ${picsUrls.length}');
+
+        print(
+            '✅ Images uploaded - Main: $mainPicUrl, Additional: ${picsUrls.length}');
       }
 
       // Map classification to backend values
@@ -72,7 +73,7 @@ class RemoteListingRepository implements ListingRepository {
         'bedrooms': bedrooms,
         'bathrooms': bathrooms,
         'listing_type': listingType, // 'rent' or 'sale'
-        'building_type': buildingType,  // 'apartment', 'house', etc.
+        'building_type': buildingType, // 'apartment', 'house', etc.
       };
 
       // Add Cloudinary URLs if available
@@ -118,7 +119,7 @@ class RemoteListingRepository implements ListingRepository {
       // Success case - backend returns the created listing object
       if (response is Map) {
         final map = Map<String, dynamic>.from(response);
-        
+
         // Check if it has an 'id' field (indicates successful creation)
         if (map.containsKey('id')) {
           print('Listing created successfully with ID: ${map['id']}');
@@ -305,8 +306,10 @@ class RemoteListingRepository implements ListingRepository {
       if (maxPrice != null) queryParams['max_price'] = maxPrice.toString();
       if (listingType != null) queryParams['listing_type'] = listingType;
       if (buildingType != null) queryParams['building_type'] = buildingType;
-      if (numBedrooms != null) queryParams['num_bedrooms'] = numBedrooms.toString();
-      if (numBathrooms != null) queryParams['num_bathrooms'] = numBathrooms.toString();
+      if (numBedrooms != null)
+        queryParams['num_bedrooms'] = numBedrooms.toString();
+      if (numBathrooms != null)
+        queryParams['num_bathrooms'] = numBathrooms.toString();
       if (minSqft != null) queryParams['min_sqft'] = minSqft.toString();
       if (maxSqft != null) queryParams['max_sqft'] = maxSqft.toString();
       if (listedBy != null) queryParams['listed_by'] = listedBy;
@@ -351,8 +354,10 @@ class RemoteListingRepository implements ListingRepository {
       if (response is Map) {
         final map = Map<String, dynamic>.from(response);
 
-        final activeList = map['active'] is List ? List.from(map['active']) : [];
-        final inactiveList = map['inactive'] is List ? List.from(map['inactive']) : [];
+        final activeList =
+            map['active'] is List ? List.from(map['active']) : [];
+        final inactiveList =
+            map['inactive'] is List ? List.from(map['inactive']) : [];
 
         return {
           'active': _parseListingList(activeList),
@@ -551,7 +556,8 @@ class RemoteListingRepository implements ListingRepository {
     print('🔍 Unsaving listing: $listingId');
 
     try {
-      final response = await apiService.delete(ApiConfig.saveListing(listingId));
+      final response =
+          await apiService.delete(ApiConfig.saveListing(listingId));
 
       print('📥 Unsave listing response: $response');
 
@@ -600,7 +606,7 @@ class RemoteListingRepository implements ListingRepository {
 
       if (response is Map) {
         final data = Map<String, dynamic>.from(response);
-        
+
         // Map backend field names to model field names
         data['image'] = data['main_pic'] ?? data['image'] ?? '';
         data['isOnline'] = data['active'] ?? data['isOnline'] ?? true;

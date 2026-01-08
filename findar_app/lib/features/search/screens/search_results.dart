@@ -7,7 +7,18 @@ import '../../../../core/widgets/appbar_title.dart';
 import '../../../../core/widgets/property_card.dart';
 import '../../../../core/widgets/sort_and_filter.dart';
 import '../../../../core/widgets/progress_button.dart';
+import '../../../../core/widgets/no_internet_widget.dart';
 import 'package:findar/l10n/app_localizations.dart';
+
+/// Helper function to check if an error message indicates a network issue
+bool _isNetworkError(String? message) {
+  if (message == null) return false;
+  final lowerMessage = message.toLowerCase();
+  return lowerMessage.contains('internet') ||
+      lowerMessage.contains('offline') ||
+      lowerMessage.contains('network') ||
+      lowerMessage.contains('connection');
+}
 
 class SearchResultsScreen extends StatefulWidget {
   const SearchResultsScreen({super.key});
@@ -22,18 +33,21 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    
+
     // Get the search query from route arguments and perform search once
     if (!_hasSearched) {
       final rawQuery = ModalRoute.of(context)?.settings.arguments;
       print('🔍 Raw search query from arguments: $rawQuery');
       // Handle string "null" or actual null by converting to empty string
-      final query = (rawQuery == null || rawQuery.toString() == 'null' || rawQuery.toString().isEmpty) 
-          ? '' 
+      final query = (rawQuery == null ||
+              rawQuery.toString() == 'null' ||
+              rawQuery.toString().isEmpty)
+          ? ''
           : rawQuery.toString();
-      
+
       print('🔍 Search query received: "$query"');
-      print('🔍 Calling getrecentListings with query: "${query.isEmpty ? "(empty - show all)" : query}"');
+      print(
+          '🔍 Calling getrecentListings with query: "${query.isEmpty ? "(empty - show all)" : query}"');
       context.read<SearchCubit>().getrecentListings(query);
       _hasSearched = true;
     }
@@ -48,14 +62,20 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
 
     // Extract filter values, converting 'Any' to null for the API
     final double minPrice = (filters['minPrice'] as num?)?.toDouble() ?? 0.0;
-    final double maxPrice = (filters['maxPrice'] as num?)?.toDouble() ?? 250000000.0;
-    final String? listingType = filters['listingType'] == 'Any' ? null : filters['listingType'] as String?;
-    final String? buildingType = filters['buildingType'] == 'Any' ? null : filters['buildingType'] as String?;
+    final double maxPrice =
+        (filters['maxPrice'] as num?)?.toDouble() ?? 250000000.0;
+    final String? listingType = filters['listingType'] == 'Any'
+        ? null
+        : filters['listingType'] as String?;
+    final String? buildingType = filters['buildingType'] == 'Any'
+        ? null
+        : filters['buildingType'] as String?;
     final int? numBedrooms = filters['numBedrooms'] as int?;
     final int? numBathrooms = filters['numBathrooms'] as int?;
     final double? minSqft = (filters['minSqft'] as num?)?.toDouble();
     final double? maxSqft = (filters['maxSqft'] as num?)?.toDouble();
-    final String? listedBy = filters['listedBy'] == 'Any' ? null : filters['listedBy'] as String?;
+    final String? listedBy =
+        filters['listedBy'] == 'Any' ? null : filters['listedBy'] as String?;
 
     searchCubit.getFilteredListings(
       minPrice: minPrice,
@@ -112,7 +132,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: AppbarTitle(title: l10n.searchResults),
-            actions: [
+        actions: [
           IconButton(
             icon: Icon(
               Icons.filter_alt_rounded,
@@ -156,12 +176,29 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                 }
 
                 if (searchState['state'] == 'error') {
+                  final errorMessage = searchState['message'] as String?;
+
+                  // Check if it's a network error
+                  if (_isNetworkError(errorMessage)) {
+                    return NoInternetWidget(
+                      title: 'Search Unavailable Offline',
+                      message:
+                          'Searching for properties requires an internet connection. Please connect to the internet and try again.',
+                      onRetry: () {
+                        context.read<SearchCubit>().getFilteredListings(
+                              minPrice: 0,
+                              maxPrice: double.infinity,
+                            );
+                      },
+                    );
+                  }
+
                   return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          'Error: ${searchState['message'] ?? 'Unknown error'}',
+                          'Error: ${errorMessage ?? 'Unknown error'}',
                         ),
                         SizedBox(height: 16),
                         ProgressButton(
@@ -172,9 +209,9 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                           textColor: Theme.of(context).colorScheme.onPrimary,
                           onPressed: () {
                             context.read<SearchCubit>().getFilteredListings(
-                              minPrice: 0,
-                              maxPrice: double.infinity,
-                            );
+                                  minPrice: 0,
+                                  maxPrice: double.infinity,
+                                );
                           },
                         ),
                       ],
@@ -326,8 +363,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
       trailing: isSelected
           ? Icon(Icons.check, color: Theme.of(context).colorScheme.primary)
           : null,
-      onTap:
-          onTap ??
+      onTap: onTap ??
           () {
             Navigator.pop(context);
             // Apply sort

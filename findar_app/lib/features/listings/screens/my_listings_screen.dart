@@ -9,6 +9,17 @@ import 'package:findar/core/widgets/segment_control.dart';
 import 'package:findar/core/widgets/progress_button.dart';
 import 'package:findar/core/widgets/build_bottom_bar.dart';
 import 'package:findar/core/widgets/confirmation_dialog.dart';
+import 'package:findar/core/widgets/no_internet_widget.dart';
+
+/// Helper function to check if an error message indicates a network issue
+bool _isNetworkError(String? message) {
+  if (message == null) return false;
+  final lowerMessage = message.toLowerCase();
+  return lowerMessage.contains('internet') ||
+      lowerMessage.contains('offline') ||
+      lowerMessage.contains('network') ||
+      lowerMessage.contains('connection');
+}
 
 class MyListingsScreen extends StatefulWidget {
   const MyListingsScreen({super.key});
@@ -103,6 +114,21 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
                 }
 
                 if (state['state'] == 'error') {
+                  final errorMessage = state['message'] as String?;
+
+                  // My listings should work offline from local cache
+                  // But if there's a network error, show appropriate message
+                  if (_isNetworkError(errorMessage)) {
+                    return NoInternetWidget(
+                      title: 'Your Listings Available Offline',
+                      message:
+                          'Viewing your listings from local storage. Some actions may be unavailable until you reconnect.',
+                      onRetry: () {
+                        context.read<MyListingsCubit>().fetchMyListings();
+                      },
+                    );
+                  }
+
                   return Builder(
                     builder: (context) {
                       final l10n = AppLocalizations.of(context)!;
@@ -110,14 +136,18 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text('Error: ${state['message'] ?? 'Unknown error'}'),
+                            Text('Error: ${errorMessage ?? 'Unknown error'}'),
                             SizedBox(height: 16),
                             ProgressButton(
                               label: l10n.retry,
-                              backgroundColor: Theme.of(context).colorScheme.primary,
-                              textColor: Theme.of(context).colorScheme.onPrimary,
+                              backgroundColor:
+                                  Theme.of(context).colorScheme.primary,
+                              textColor:
+                                  Theme.of(context).colorScheme.onPrimary,
                               onPressed: () {
-                                context.read<MyListingsCubit>().fetchMyListings();
+                                context
+                                    .read<MyListingsCubit>()
+                                    .fetchMyListings();
                               },
                             ),
                           ],
@@ -188,9 +218,11 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
                       showBoostButton: true,
                       onBoost: () => _handleBoost(listing),
                       onTap: () {
-                        context.read<PropertyDetailsCubit>().fetchPropertyDetails(
-                          listing.id,
-                        );
+                        context
+                            .read<PropertyDetailsCubit>()
+                            .fetchPropertyDetails(
+                              listing.id,
+                            );
                         Navigator.pushNamed(context, '/property-details');
                       },
                     );

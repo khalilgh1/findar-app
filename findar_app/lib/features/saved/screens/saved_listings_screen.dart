@@ -6,10 +6,21 @@ import 'package:findar/logic/cubits/property_details_cubit.dart';
 import 'package:findar/core/widgets/appbar_title.dart';
 import 'package:findar/core/widgets/property_card.dart';
 import 'package:findar/core/widgets/progress_button.dart';
+import 'package:findar/core/widgets/no_internet_widget.dart';
 import 'package:findar/core/theme/theme_provider.dart';
 import 'package:findar/core/widgets/build_bottom_bar.dart';
 import 'package:findar/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
+
+/// Helper function to check if an error message indicates a network issue
+bool _isNetworkError(String? message) {
+  if (message == null) return false;
+  final lowerMessage = message.toLowerCase();
+  return lowerMessage.contains('internet') ||
+      lowerMessage.contains('offline') ||
+      lowerMessage.contains('network') ||
+      lowerMessage.contains('connection');
+}
 
 class SavedListingsScreen extends StatefulWidget {
   const SavedListingsScreen({super.key});
@@ -122,6 +133,21 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
           }
 
           if (state['state'] == 'error') {
+            final errorMessage = state['message'] as String?;
+
+            // Note: Saved listings should work offline, but if there's still a network error
+            // (e.g., during save/unsave), show appropriate message
+            if (_isNetworkError(errorMessage)) {
+              return NoInternetWidget(
+                title: 'Connection Issue',
+                message:
+                    'Your saved listings are being loaded from local storage. Some features may be limited.',
+                onRetry: () {
+                  context.read<SavedListingsCubit>().fetchSavedListings();
+                },
+              );
+            }
+
             return Builder(
               builder: (context) {
                 var l10n = AppLocalizations.of(context)!;
@@ -129,14 +155,16 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text('Error: ${state['message'] ?? 'Unknown error'}'),
+                      Text('Error: ${errorMessage ?? 'Unknown error'}'),
                       SizedBox(height: 16),
                       ProgressButton(
                         label: l10n.retry,
                         backgroundColor: Theme.of(context).colorScheme.primary,
                         textColor: Theme.of(context).colorScheme.onPrimary,
                         onPressed: () {
-                          context.read<SavedListingsCubit>().fetchSavedListings();
+                          context
+                              .read<SavedListingsCubit>()
+                              .fetchSavedListings();
                         },
                       ),
                     ],
@@ -144,7 +172,8 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
                 );
               },
             );
-          }          final listings = state['data'] as List<dynamic>? ?? [];
+          }
+          final listings = state['data'] as List<dynamic>? ?? [];
 
           return listings.isEmpty
               ? _buildEmptyState()
@@ -186,8 +215,8 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
           onSaveToggle: () => _toggleSave(listing.id),
           onTap: () {
             context.read<PropertyDetailsCubit>().fetchPropertyDetails(
-              listing.id,
-            );
+                  listing.id,
+                );
             Navigator.pushNamed(context, '/property-details');
           },
         );
