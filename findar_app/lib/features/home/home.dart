@@ -326,23 +326,26 @@ class _HomeScreenState extends State<HomeScreen> {
 
                       final displayRecentListings = recentlistings;
 
-                      return Column(
-                        children: displayRecentListings
-                            .map(
-                              (p) => GestureDetector(
-                                onTap: () => {
-                                  context
-                                      .read<PropertyDetailsCubit>()
-                                      .fetchPropertyDetails(p.id),
-                                  Navigator.pushNamed(
-                                    context,
-                                    '/property-details',
-                                  ),
-                                },
-                                child: ListingTile(property: p),
+                      return ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: displayRecentListings.length,
+                        itemBuilder: (context, index) {
+                          print('building recent listing index $index');
+                          final p = displayRecentListings[index];
+                          return GestureDetector(
+                            onTap: () => {
+                              context
+                                  .read<PropertyDetailsCubit>()
+                                  .fetchPropertyDetails(p.id),
+                              Navigator.pushNamed(
+                                context,
+                                '/property-details',
                               ),
-                            )
-                            .toList(),
+                            },
+                            child: ListingTile(property: p),
+                          );
+                        },
                       );
                     },
                   ),
