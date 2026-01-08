@@ -29,7 +29,7 @@ class CustomUser(AbstractUser):
 
     username = models.CharField(max_length=150,unique=False)    
     email = models.EmailField(unique=True)
-    phone    = models.CharField(max_length=15 , unique=True)
+    phone    = models.CharField(max_length=15 )
     profile_pic     = models.URLField(max_length=500 , null=True , blank=True)
     account_type    = models.CharField(max_length=20, choices=ACCOUNT_CHOICES)
     USERNAME_FIELD = "email"

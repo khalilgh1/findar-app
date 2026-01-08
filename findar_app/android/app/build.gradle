@@ -52,4 +52,5 @@ flutter {
 dependencies {
     // Required for core library desugaring (provides java.time and other APIs on older devices)
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'
+    implementation 'com.google.android.gms:play-services-auth:20.5.0'
 }

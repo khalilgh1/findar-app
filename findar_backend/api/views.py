@@ -17,6 +17,8 @@ from django.utils import timezone
 from django.contrib.auth.hashers import make_password
 from rest_framework.views import APIView
 from rest_framework.response import Response
+import firebase_admin
+from firebase_admin import credentials, auth as firebase_auth
 
 from .services import *
 """
@@ -324,49 +326,54 @@ def toggle_active_listing(request , listing_id):
 
 #########  Update Profile  #########
 
-@api_view(["PUT"])
-@permission_classes([IsAuthenticated])
-def update_profile(request):
-
-    full_name = request.data.get("full_name")
-    phone_number = request.data.get("phone")
-    email = request.data.get("email")
-    profile_pic = request.data.get("profile_pic")
-
-    serializer = RegisterSerializer(
-            data={"phone": phone_number , "username" : full_name},
-            partial=True
-        )
-    user = CustomUser.objects.get(id=request.user.id)
-
-    if email is not None and email != request.user.email:
-        return Response( {"success":False , "message":"cant change email"} , status=status.HTTP_400_BAD_REQUEST )
+class Profile(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        user = request.user
+        serializer = UserSerializers(user)
+        serializer.data['name'] = user.username
+        return Response(serializer.data, status=status.HTTP_200_OK)
     
-    if phone_number is not None:
-        try:
-            validated_phone = serializer.validate_phone(value=phone_number)
-            user.phone = phone_number
-            
-        except ValidationError as e:
-            return Response( {"success":False , "message":e.detail } , status=status.HTTP_400_BAD_REQUEST )
-        
-    if full_name is not None:
-        try:
-            validated_username = serializer.validate_username(value=full_name)
-            user.username = full_name 
-        except ValidationError as e:
-            return Response( {"success":False , "message":e.detail } , status=status.HTTP_400_BAD_REQUEST )        
-        
+    def put(self, request):
+        full_name = request.data.get("name")
+        phone_number = request.data.get("phone")
+        email = request.data.get("email")
+        profile_pic = request.data.get("profile_pic")
 
-    if profile_pic is not None:
-        print("profile pic url:" , profile_pic)
-        user.profile_pic = profile_pic
-    
-    user.save()
-    user = UserSerializers(user).data
-    print( user )
+        serializer = RegisterSerializer(
+                data={"phone": phone_number , "username" : full_name},
+                partial=True
+            )
+        user = CustomUser.objects.get(id=request.user.id)
 
-    return Response( {"success":True , "message":"updated successfully" , "data":user } , status=status.HTTP_201_CREATED )
+        if email is not None and email != request.user.email:
+            return Response( {"success":False , "message":"cant change email"} , status=status.HTTP_400_BAD_REQUEST )
+
+        if phone_number is not None:
+            try:
+                validated_phone = serializer.validate_phone(value=phone_number)
+                user.phone = phone_number
+
+            except ValidationError as e:
+                return Response( {"success":False , "message":e.detail } , status=status.HTTP_400_BAD_REQUEST )
+
+        if full_name is not None:
+            try:
+                validated_username = serializer.validate_username(value=full_name)
+                user.username = full_name 
+            except ValidationError as e:
+                return Response( {"success":False , "message":e.detail } , status=status.HTTP_400_BAD_REQUEST )        
+
+
+        if profile_pic is not None:
+            print("profile pic url:" , profile_pic)
+            user.profile_pic = profile_pic
+
+        user.save()
+        user = UserSerializers(user).data
+        print( user )
+
+        return Response( {"success":True , "message":"updated successfully" , "data":user } , status=status.HTTP_201_CREATED )
 
 
 #########  Login as User  #########
@@ -405,6 +412,88 @@ def login(request):
         "user": user
         }
     })
+
+
+@api_view(["POST"])
+def oauth(request):
+    print("OAuth request received")
+    # print(f"Request data: {request.data}")
+    """
+    OAuth authentication endpoint for Firebase providers (Google, Facebook, Apple)
+    Expects:
+        - id_token: Firebase ID token from the client
+        - provider: 'google', 
+        - email: User email (optional, from Firebase)
+    """
+    id_token = request.data.get("id_token")
+    provider = request.data.get("provider")
+    email = request.data.get("email")
+
+    # Validate inputs
+    if not id_token:
+        return Response(
+            {"error": "id_token is required"}, 
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    if not provider or provider not in ['google']:
+        return Response(
+            {"error": "Invalid or missing provider"}, 
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    try:
+        # Verify Firebase ID token
+        decoded_token = firebase_auth.verify_id_token(id_token)
+        print(f"Decoded Firebase token: {decoded_token}")
+        firebase_uid = decoded_token.get('uid')
+        firebase_email = decoded_token.get('email') or email
+        firebase_name = decoded_token.get('name')
+        firebase_phone = "0000000000"
+        
+        if not firebase_email:
+            return Response(
+                {"error": "Email not provided or found in token"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Try to get existing user or create new one
+
+        user = CustomUser.objects.get(email=firebase_email)
+
+        if not user:
+            user = CustomUser.objects.create(
+                    email=firebase_email,
+                    username=firebase_name,
+                    phone=firebase_phone,
+                    password=make_password('oauth_user'),
+                    account_type='individual',
+            )
+
+        # Generate JWT tokens
+        refresh = RefreshToken.for_user(user)
+        user_data = RegisterSerializer(user).data
+        print(user_data)
+
+        return Response({
+            "success": True,
+            "message": "OAuth login successful",
+            "data": {
+                "refresh": str(refresh),
+                "access": str(refresh.access_token),
+                "user": user_data,
+            }
+        }, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return Response(
+            {"error": "Firebase authentication failed"},
+            status=status.HTTP_401_UNAUTHORIZED
+        )
+
+
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])

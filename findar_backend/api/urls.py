@@ -10,6 +10,7 @@ urlpatterns = [
     path('get-listing/<int:listing_id>', get_listing, name='get-listing'),
     # authentication urls 
     path('auth/login' , login , name="login"),
+    path('auth/oauth/' , oauth , name="oauth"),
     path('auth/logout' , logout , name="logout"),
     path('auth/register' , register, name="register"),
     path('auth/me' , me , name="me"),
@@ -21,7 +22,8 @@ urlpatterns = [
     path("notifications/register-device/", register_device_token),
     
     path('create-listing/', create_listing, name='create-listing'),
-    path('users/profile/', update_profile, name='update_profile'),
+    path('users/profile', Profile.as_view(), name='update_profile'),
+    path('users/profile/', Profile.as_view(), name='update_profile'),
     path('edit-listing/<int:listing_id>', edit_listing, name='edit-listing'),
     path('my_listings/', my_listings, name='listings'),
     path('toggle_active_listing/<int:listing_id>', toggle_active_listing, name='toggle_active_listing'),

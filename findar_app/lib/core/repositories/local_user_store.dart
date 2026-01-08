@@ -64,7 +64,7 @@ class LocalUserStore {
 
     final user = User(
       id: id,
-      name: name,
+      username: name,
       email: email,
       phone: phone,
       profilePic: profilePic,

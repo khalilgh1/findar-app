@@ -12,7 +12,20 @@
           "package_name": "com.example.findar"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "470241887742-na3nfv13ihe6cfj3tqrvgvdvvkv80lqs.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.findar",
+            "certificate_hash": "f622e67b857422d5742e883e801b5f7daa6bce98"
+          }
+        },
+        {
+          "client_id": "470241887742-ibqql9ok9n9jqoegsgeruf3in1eroisl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDPYzrgHsGzszzrpL0dnRUlPIWpkqvQtdE"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "470241887742-ibqql9ok9n9jqoegsgeruf3in1eroisl.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "470241887742-tfbb8atfn60k2m15mao8tvbf62kf7e7k.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.findarApp"
+              }
+            }
+          ]
         }
       }
     }
