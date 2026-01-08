@@ -60,4 +60,60 @@ class AuthService {
   Future<void> logout() async {
     await _auth.clear();
   }
+
+  /// SEND RESET CODE
+  Future<Map<String, dynamic>> sendResetCode(String email) async {
+    final res = await _client.post(
+      Uri.parse(ApiConfig.getUrl('/api/auth/password-reset/request/')),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': email}),
+    );
+
+    if (res.statusCode != 200) {
+      throw Exception('Failed to send reset code');
+    }
+
+    return jsonDecode(res.body);
+  }
+
+  /// CHECK RESET CODE
+  Future<Map<String, dynamic>> checkResetCode(String email, String code) async {
+    final res = await _client.post(
+      Uri.parse(ApiConfig.getUrl('/api/auth/password-reset/verify/')),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'email': email,
+        'code': code,
+      }),
+    );
+
+    if (res.statusCode != 200) {
+      throw Exception('Invalid verification code');
+    }
+
+    return jsonDecode(res.body);
+  }
+
+  /// RESET PASSWORD / SET NEW PASSWORD
+  Future<Map<String, dynamic>> resetPassword(
+    String email,
+    String code,
+    String newPassword,
+  ) async {
+    final res = await _client.post(
+      Uri.parse(ApiConfig.getUrl('/api/auth/password-reset/confirm/')),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'email': email,
+        'code': code,
+        'new_password': newPassword,
+      }),
+    );
+
+    if (res.statusCode != 200) {
+      throw Exception('Failed to reset password');
+    }
+
+    return jsonDecode(res.body);
+  }
 }

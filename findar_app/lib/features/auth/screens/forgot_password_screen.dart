@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:findar/core/widgets/progress_button.dart';
 import 'package:findar/l10n/app_localizations.dart';
+import 'package:findar/core/services/auth_service.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -13,8 +14,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _codeController = TextEditingController();
+  final AuthService _authService = AuthService();
   bool _isLoading = false;
   bool _codeSent = false;
+  String? _errorMessage;
 
   String? _validateEmail(String? email) {
     if (email == null || email.isEmpty) {
@@ -46,14 +49,27 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
     setState(() {
       _isLoading = true;
+      _errorMessage = null;
     });
 
-    await Future.delayed(const Duration(seconds: 2));
-
-    setState(() {
-      _isLoading = false;
-      _codeSent = true;
-    });
+    try {
+      await _authService.sendResetCode(_emailController.text);
+      setState(() {
+        _isLoading = false;
+        _codeSent = true;
+        _errorMessage = null;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        _errorMessage = e.toString().replaceFirst('Exception: ', '');
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(_errorMessage ?? 'Failed to send code')),
+        );
+      }
+    }
   }
 
   void _handleVerifyCode() async {
@@ -63,20 +79,36 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
     setState(() {
       _isLoading = true;
+      _errorMessage = null;
     });
 
-    await Future.delayed(const Duration(seconds: 1));
+    try {
+      await _authService.checkResetCode(_emailController.text, _codeController.text);
+      
+      setState(() {
+        _isLoading = false;
+      });
 
-    setState(() {
-      _isLoading = false;
-    });
-
-    if (mounted) {
-      Navigator.pushNamed(
-        context,
-        '/reset-password',
-        arguments: {'email': _emailController.text},
-      );
+      if (mounted) {
+        Navigator.pushNamed(
+          context,
+          '/reset-password',
+          arguments: {
+            'email': _emailController.text,
+            'code': _codeController.text,
+          },
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        _errorMessage = e.toString().replaceFirst('Exception: ', '');
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(_errorMessage ?? 'Failed to verify code')),
+        );
+      }
     }
   }
 
