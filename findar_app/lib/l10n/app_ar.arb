@@ -329,5 +329,11 @@
   "fraudulentListing": "إعلان احتيالي",
   "inappropriateContent": "محتوى غير لائق",
   "propertyNotAvailable": "العقار غير متوفر",
-  "propertyReportedThankYou": "تم الإبلاغ عن العقار، شكراً لك!"
+  "propertyReportedThankYou": "تم الإبلاغ عن العقار، شكراً لك!",
+  "helpMaintainQuality": "ساعدنا في الحفاظ على جودة القوائم من خلال الإبلاغ عن المشاكل.",
+  "quickSuggestions": "اقتراحات سريعة:",
+  "describeIssue": "وصف المشكلة:",
+  "provideDetails": "يرجى تقديم تفاصيل حول المشكلة...",
+  "sendReport": "إرسال التقرير",
+  "pleaseSelectOrDescribe": "يرجى اختيار أو وصف المشكلة قبل الإرسال."
 }

@@ -319,9 +319,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get camera => 'Caméra';
 
   @override
-  String get tapToChangePhoto => 'Appuyez pour changer la photo';
-
-  @override
   String errorPickingImage(String error) {
     return 'Erreur lors de la sélection de l\'image : $error';
   }
@@ -747,4 +744,52 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get propertyReportedThankYou => 'Propriété signalée, merci !';
+
+  @override
+  String get helpMaintainQuality => 'Aidez-nous à maintenir la qualité des annonces en signalant les problèmes.';
+
+  @override
+  String get quickSuggestions => 'Suggestions rapides :';
+
+  @override
+  String get describeIssue => 'Décrivez le problème :';
+
+  @override
+  String get provideDetails => 'Veuillez fournir des détails sur le problème...';
+
+  @override
+  String get sendReport => 'Envoyer le rapport';
+
+  @override
+  String get sendReportManually => 'Envoyer le rapport manuellement';
+
+  @override
+  String get pleaseSelectOrDescribe => 'Veuillez sélectionner ou décrire le problème avant de soumettre.';
+
+  @override
+  String get emailAppOpened => 'Application de messagerie ouverte';
+
+  @override
+  String get emailNotFilledAutomatically => 'Une application de messagerie devrait s\'être ouverte. Si les détails ne sont pas remplis automatiquement, veuillez copier ces informations :';
+
+  @override
+  String get sendReportManuallyInstructions => 'Veuillez envoyer ce rapport manuellement en utilisant votre application de messagerie préférée :';
+
+  @override
+  String get gotIt => 'Compris';
+
+  @override
+  String get reportError => 'Erreur de rapport';
+
+  @override
+  String get to => 'À :';
+
+  @override
+  String get subject => 'Objet :';
+
+  @override
+  String get message => 'Message :';
+
+  @override
+  String get manualEmailSteps => 'Étapes :\n1. Ouvrez Gmail ou votre application de messagerie\n2. Composez un nouveau courriel\n3. Copiez les détails ci-dessus\n4. Envoyez le courriel';
 }

@@ -329,5 +329,11 @@
   "fraudulentListing": "Annonce frauduleuse",
   "inappropriateContent": "Contenu inapproprié",
   "propertyNotAvailable": "Propriété non disponible",
-  "propertyReportedThankYou": "Propriété signalée, merci !"
+  "propertyReportedThankYou": "Propriété signalée, merci !",
+  "helpMaintainQuality": "Aidez-nous à maintenir la qualité des annonces en signalant les problèmes.",
+  "quickSuggestions": "Suggestions rapides :",
+  "describeIssue": "Décrivez le problème :",
+  "provideDetails": "Veuillez fournir des détails sur le problème...",
+  "sendReport": "Envoyer le rapport",
+  "pleaseSelectOrDescribe": "Veuillez sélectionner ou décrire le problème avant de soumettre."
 }

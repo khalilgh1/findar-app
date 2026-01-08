@@ -56,10 +56,11 @@ class _ReportBottomSheetState extends State<ReportBottomSheet> {
   }
 
   Future<void> _submitReport() async {
+    final l10n = AppLocalizations.of(context)!;
     final reportText = _controller.text.trim();
     
     if (reportText.isEmpty) {
-      _showErrorDialog('Please select or describe the issue before submitting.');
+      _showErrorDialog(l10n.pleaseSelectOrDescribe);
       return;
     }
     
@@ -326,7 +327,7 @@ This report was submitted through the Findar mobile app.''';
             ),
             SizedBox(height: screenHeight * 0.015),
             Text(
-              'Help us maintain quality listings by reporting issues.',
+              l10n.helpMaintainQuality,
               style: TextStyle(
                 fontSize: screenWidth * 0.035,
                 color: Colors.grey[600],
@@ -336,7 +337,7 @@ This report was submitted through the Findar mobile app.''';
             
             // Quick suggestions
             Text(
-              'Quick suggestions:',
+              l10n.quickSuggestions,
               style: TextStyle(
                 fontSize: screenWidth * 0.04,
                 fontWeight: FontWeight.w500,
@@ -411,7 +412,7 @@ This report was submitted through the Findar mobile app.''';
             
             // Description field
             Text(
-              'Describe the issue:',
+              l10n.describeIssue,
               style: TextStyle(
                 fontSize: screenWidth * 0.04,
                 fontWeight: FontWeight.w500,
@@ -423,7 +424,7 @@ This report was submitted through the Findar mobile app.''';
               controller: _controller,
               maxLines: 4,
               decoration: InputDecoration(
-                hintText: 'Please provide details about the issue...',
+                hintText: l10n.provideDetails,
                 hintStyle: TextStyle(
                   color: Colors.grey[500],
                   fontSize: screenWidth * 0.035,
@@ -465,7 +466,7 @@ This report was submitted through the Findar mobile app.''';
                   ),
                 ),
                 child: Text(
-                  'Send Report',
+                  l10n.sendReport,
                   style: TextStyle(
                     fontSize: screenWidth * 0.04,
                     fontWeight: FontWeight.w600,

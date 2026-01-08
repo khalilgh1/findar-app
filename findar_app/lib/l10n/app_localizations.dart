@@ -709,12 +709,6 @@ abstract class AppLocalizations {
   /// **'Camera'**
   String get camera;
 
-  /// No description provided for @tapToChangePhoto.
-  ///
-  /// In en, this message translates to:
-  /// **'Tap to change photo'**
-  String get tapToChangePhoto;
-
   /// No description provided for @errorPickingImage.
   ///
   /// In en, this message translates to:
@@ -1548,6 +1542,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Property reported, thank you!'**
   String get propertyReportedThankYou;
+
+  /// No description provided for @helpMaintainQuality.
+  ///
+  /// In en, this message translates to:
+  /// **'Help us maintain quality listings by reporting issues.'**
+  String get helpMaintainQuality;
+
+  /// No description provided for @quickSuggestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick suggestions:'**
+  String get quickSuggestions;
+
+  /// No description provided for @describeIssue.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe the issue:'**
+  String get describeIssue;
+
+  /// No description provided for @provideDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Please provide details about the issue...'**
+  String get provideDetails;
+
+  /// No description provided for @sendReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Report'**
+  String get sendReport;
+
+  /// No description provided for @sendReportManually.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Report Manually'**
+  String get sendReportManually;
+
+  /// No description provided for @pleaseSelectOrDescribe.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select or describe the issue before submitting.'**
+  String get pleaseSelectOrDescribe;
+
+  /// No description provided for @emailAppOpened.
+  ///
+  /// In en, this message translates to:
+  /// **'Email App Opened'**
+  String get emailAppOpened;
+
+  /// No description provided for @emailNotFilledAutomatically.
+  ///
+  /// In en, this message translates to:
+  /// **'An email app should have opened. If the details aren\'t filled automatically, please copy this information:'**
+  String get emailNotFilledAutomatically;
+
+  /// No description provided for @sendReportManuallyInstructions.
+  ///
+  /// In en, this message translates to:
+  /// **'Please send this report manually using your preferred email app:'**
+  String get sendReportManuallyInstructions;
+
+  /// No description provided for @gotIt.
+  ///
+  /// In en, this message translates to:
+  /// **'Got it'**
+  String get gotIt;
+
+  /// No description provided for @reportError.
+  ///
+  /// In en, this message translates to:
+  /// **'Report Error'**
+  String get reportError;
+
+  /// No description provided for @to.
+  ///
+  /// In en, this message translates to:
+  /// **'To:'**
+  String get to;
+
+  /// No description provided for @subject.
+  ///
+  /// In en, this message translates to:
+  /// **'Subject:'**
+  String get subject;
+
+  /// No description provided for @message.
+  ///
+  /// In en, this message translates to:
+  /// **'Message:'**
+  String get message;
+
+  /// No description provided for @manualEmailSteps.
+  ///
+  /// In en, this message translates to:
+  /// **'Steps:\n1. Open Gmail or your email app\n2. Compose new email\n3. Copy the details above\n4. Send the email'**
+  String get manualEmailSteps;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

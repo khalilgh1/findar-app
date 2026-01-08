@@ -319,9 +319,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get camera => 'الكاميرا';
 
   @override
-  String get tapToChangePhoto => 'اضغط لتغيير الصورة';
-
-  @override
   String errorPickingImage(String error) {
     return 'خطأ أثناء اختيار الصورة: $error';
   }
@@ -500,7 +497,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get no => 'لا';
 
   @override
-  String get ok => 'حسنًا';
+  String get ok => 'موافق';
 
   @override
   String get error => 'خطأ';
@@ -747,4 +744,52 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get propertyReportedThankYou => 'تم الإبلاغ عن العقار، شكراً لك!';
+
+  @override
+  String get helpMaintainQuality => 'ساعدنا في الحفاظ على جودة القوائم من خلال الإبلاغ عن المشاكل.';
+
+  @override
+  String get quickSuggestions => 'اقتراحات سريعة:';
+
+  @override
+  String get describeIssue => 'وصف المشكلة:';
+
+  @override
+  String get provideDetails => 'يرجى تقديم تفاصيل حول المشكلة...';
+
+  @override
+  String get sendReport => 'إرسال التقرير';
+
+  @override
+  String get sendReportManually => 'إرسال التقرير يدوياً';
+
+  @override
+  String get pleaseSelectOrDescribe => 'يرجى اختيار أو وصف المشكلة قبل الإرسال.';
+
+  @override
+  String get emailAppOpened => 'تم فتح تطبيق البريد الإلكتروني';
+
+  @override
+  String get emailNotFilledAutomatically => 'يجب أن يكون تطبيق البريد الإلكتروني قد تم فتحه. إذا لم يتم ملء التفاصيل تلقائياً، يرجى نسخ هذه المعلومات:';
+
+  @override
+  String get sendReportManuallyInstructions => 'يرجى إرسال هذا التقرير يدوياً باستخدام تطبيق البريد الإلكتروني المفضل لديك:';
+
+  @override
+  String get gotIt => 'حسناً';
+
+  @override
+  String get reportError => 'خطأ في التقرير';
+
+  @override
+  String get to => 'إلى:';
+
+  @override
+  String get subject => 'الموضوع:';
+
+  @override
+  String get message => 'الرسالة:';
+
+  @override
+  String get manualEmailSteps => 'الخطوات:\n1. افتح Gmail أو تطبيق البريد الإلكتروني\n2. إنشاء بريد إلكتروني جديد\n3. نسخ التفاصيل أعلاه\n4. إرسال البريد الإلكتروني';
 }

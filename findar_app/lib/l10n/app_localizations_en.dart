@@ -319,9 +319,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get camera => 'Camera';
 
   @override
-  String get tapToChangePhoto => 'Tap to change photo';
-
-  @override
   String errorPickingImage(String error) {
     return 'Error picking image: $error';
   }
@@ -747,4 +744,52 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get propertyReportedThankYou => 'Property reported, thank you!';
+
+  @override
+  String get helpMaintainQuality => 'Help us maintain quality listings by reporting issues.';
+
+  @override
+  String get quickSuggestions => 'Quick suggestions:';
+
+  @override
+  String get describeIssue => 'Describe the issue:';
+
+  @override
+  String get provideDetails => 'Please provide details about the issue...';
+
+  @override
+  String get sendReport => 'Send Report';
+
+  @override
+  String get sendReportManually => 'Send Report Manually';
+
+  @override
+  String get pleaseSelectOrDescribe => 'Please select or describe the issue before submitting.';
+
+  @override
+  String get emailAppOpened => 'Email App Opened';
+
+  @override
+  String get emailNotFilledAutomatically => 'An email app should have opened. If the details aren\'t filled automatically, please copy this information:';
+
+  @override
+  String get sendReportManuallyInstructions => 'Please send this report manually using your preferred email app:';
+
+  @override
+  String get gotIt => 'Got it';
+
+  @override
+  String get reportError => 'Report Error';
+
+  @override
+  String get to => 'To:';
+
+  @override
+  String get subject => 'Subject:';
+
+  @override
+  String get message => 'Message:';
+
+  @override
+  String get manualEmailSteps => 'Steps:\n1. Open Gmail or your email app\n2. Compose new email\n3. Copy the details above\n4. Send the email';
 }
