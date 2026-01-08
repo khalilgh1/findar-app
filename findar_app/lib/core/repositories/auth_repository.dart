@@ -7,7 +7,7 @@ import 'package:findar/core/config/api_config.dart';
 /// User model for authentication
 class User {
   final int id;
-  final String name;
+  final String username;
   final String email;
   final String phone;
   final String? profilePic;
@@ -16,7 +16,7 @@ class User {
 
   const User({
     required this.id,
-    required this.name,
+    required this.username,
     required this.email,
     required this.phone,
     this.profilePic,
@@ -27,7 +27,7 @@ class User {
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       id: json['id'] ?? 0,
-      name: json['name'] ?? '',
+      username: json['username'] ?? '',
       email: json['email'] ?? '',
       phone: json['phone'] ?? '',
       profilePic: json['profile_pic'] ?? "",
@@ -39,7 +39,7 @@ class User {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'name': name,
+      'username': username,
       'email': email,
       'phone': phone,
       'profile_pic': profilePic,
@@ -254,14 +254,38 @@ class AuthRepository {
         return response;
       }
 
-      if (response['success'] != true) {
+      // Backend returns different shapes depending on endpoint:
+      // - Wrapped: { success: true, data: { ...user... } }
+      // - Raw user object: { id:..., email:..., ... }
+      Map<String, dynamic> userJson;
+      if (response is Map<String, dynamic> && response.containsKey('success')) {
+        if (response['success'] != true) {
+          return ReturnResult(
+            state: false,
+            message: response['message'] ?? 'Failed to fetch profile',
+          );
+        }
+
+        final inner = response['data'];
+        if (inner is Map<String, dynamic>) {
+          userJson = inner;
+        } else {
+          return ReturnResult(
+            state: false,
+            message: 'Unexpected profile response format',
+          );
+        }
+      } else if (response is Map<String, dynamic>) {
+        // Assume response is the raw serialized user
+        userJson = response;
+      } else {
         return ReturnResult(
           state: false,
-          message: response['message'] ?? 'Failed to fetch profile',
+          message: 'Failed to fetch profile',
         );
       }
 
-      _currentUser = User.fromJson(response['data']);
+      _currentUser = User.fromJson(userJson);
       await _userStore.saveUser(_currentUser!);
 
       return ReturnResult(
@@ -297,7 +321,7 @@ class AuthRepository {
       }
 
       final body = <String, dynamic>{};
-      if (name != null) body['name'] = name;
+      if (name != null) body['username'] = name;
       if (email != null) body['email'] = email;
       if (phone != null) body['phone'] = phone;
       if (profilePic != null) body['profile_pic'] = profilePic;

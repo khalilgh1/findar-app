@@ -96,7 +96,7 @@ class UserProfile {
   factory UserProfile.fromUser(User user) {
     return UserProfile(
       id: user.id,
-      name: user.name,
+      name: user.username,
       email: user.email,
       phone: user.phone,
       profilePic: user.profilePic,
