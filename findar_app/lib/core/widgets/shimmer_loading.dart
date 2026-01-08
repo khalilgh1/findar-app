@@ -48,9 +48,9 @@ class _ShimmerLoadingState extends State<ShimmerLoading>
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                Colors.grey.shade300,
-                Colors.grey.shade100,
-                Colors.grey.shade300,
+                Colors.grey.shade200,
+                Colors.white,
+                Colors.grey.shade200,
               ],
               stops: [
                 0.0,
@@ -79,26 +79,26 @@ class _SlidingGradientTransform extends GradientTransform {
   }
 }
 
-/// Skeleton for property card loading
+/// Skeleton for property card loading (Sponsored Listings)
 class PropertyCardSkeleton extends StatelessWidget {
   const PropertyCardSkeleton({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return ShimmerLoading(
-      child: Container(
-        width: 250,
-        margin: const EdgeInsets.only(right: 16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Image placeholder
-            Container(
-              height: 150,
+    return Container(
+      width: 250,
+      margin: const EdgeInsets.only(right: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Image placeholder
+          ShimmerLoading(
+            child: Container(
+              height: 140,
               decoration: BoxDecoration(
                 color: Colors.grey.shade300,
                 borderRadius: const BorderRadius.vertical(
@@ -106,68 +106,87 @@ class PropertyCardSkeleton extends StatelessWidget {
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Title placeholder
-                  Container(
-                    height: 16,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Line 1
+                ShimmerLoading(
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          height: 14,
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade300,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 8),
-                  // Subtitle placeholder
-                  Container(
-                    height: 14,
-                    width: 150,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
+                ),
+                const SizedBox(height: 8),
+                // Line 2
+                ShimmerLoading(
+                  child: Row(
+                    children: [
+                      Container(
+                        height: 12,
+                        width: 160,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade300,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 12),
-                  // Price placeholder
-                  Container(
-                    height: 18,
-                    width: 100,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
+                ),
+                const SizedBox(height: 8),
+                // Line 3
+                ShimmerLoading(
+                  child: Row(
+                    children: [
+                      Container(
+                        height: 12,
+                        width: 100,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade300,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 }
 
-/// Skeleton for listing tile loading
+/// Skeleton for listing tile loading (Recent Listings)
 class ListingTileSkeleton extends StatelessWidget {
   const ListingTileSkeleton({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return ShimmerLoading(
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          children: [
-            // Image placeholder
-            Container(
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          // Image placeholder
+          ShimmerLoading(
+            child: Container(
               width: 100,
               height: 100,
               decoration: BoxDecoration(
@@ -175,45 +194,165 @@ class ListingTileSkeleton extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Title placeholder
-                  Container(
-                    height: 16,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Line 1
+                ShimmerLoading(
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          height: 16,
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade300,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 10),
+                // Line 2
+                ShimmerLoading(
+                  child: Row(
+                    children: [
+                      Container(
+                        height: 14,
+                        width: 150,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade300,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 10),
+                // Line 3
+                ShimmerLoading(
+                  child: Row(
+                    children: [
+                      Container(
+                        height: 14,
+                        width: 100,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade300,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Skeleton for grid property card (Saved Listings / My Listings)
+class PropertyGridCardSkeleton extends StatelessWidget {
+  const PropertyGridCardSkeleton({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Image placeholder
+          ShimmerLoading(
+            child: Container(
+              height: 240,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(16),
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Title line
+                ShimmerLoading(
+                  child: Container(
+                    height: 18,
                     width: double.infinity,
                     decoration: BoxDecoration(
                       color: Colors.grey.shade300,
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  // Subtitle placeholder
-                  Container(
-                    height: 14,
+                ),
+                const SizedBox(height: 14),
+                // Price line
+                ShimmerLoading(
+                  child: Container(
+                    height: 20,
                     width: 120,
                     decoration: BoxDecoration(
                       color: Colors.grey.shade300,
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  // Price placeholder
-                  Container(
-                    height: 18,
-                    width: 80,
+                ),
+                const SizedBox(height: 14),
+                // Location line
+                ShimmerLoading(
+                  child: Container(
+                    height: 14,
+                    width: 140,
                     decoration: BoxDecoration(
                       color: Colors.grey.shade300,
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(height: 14),
+                // Property details row
+                ShimmerLoading(
+                  child: Row(
+                    children: [
+                      Container(
+                        height: 14,
+                        width: 80,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade300,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Container(
+                        height: 14,
+                        width: 90,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade300,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

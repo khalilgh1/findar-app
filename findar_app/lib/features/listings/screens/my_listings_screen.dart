@@ -9,6 +9,7 @@ import 'package:findar/core/widgets/segment_control.dart';
 import 'package:findar/core/widgets/progress_button.dart';
 import 'package:findar/core/widgets/build_bottom_bar.dart';
 import 'package:findar/core/widgets/confirmation_dialog.dart';
+import 'package:findar/core/widgets/shimmer_loading.dart';
 
 class MyListingsScreen extends StatefulWidget {
   const MyListingsScreen({super.key});
@@ -99,7 +100,14 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
             child: BlocBuilder<MyListingsCubit, Map<String, dynamic>>(
               builder: (context, state) {
                 if (state['state'] == 'loading') {
-                  return const Center(child: CircularProgressIndicator());
+                  return ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: 4,
+                    itemBuilder: (context, index) => Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: const PropertyGridCardSkeleton(),
+                    ),
+                  );
                 }
 
                 if (state['state'] == 'error') {
