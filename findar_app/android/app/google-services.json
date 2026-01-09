@@ -1,26 +1,51 @@
 {
   "project_info": {
-    "project_number": "286561675288",
-    "project_id": "findar-4a43c",
-    "storage_bucket": "findar-4a43c.firebasestorage.app"
+    "project_number": "470241887742",
+    "project_id": "findar-87214",
+    "storage_bucket": "findar-87214.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:286561675288:android:71c2f15bf519ddb2673b6d",
+        "mobilesdk_app_id": "1:470241887742:android:69d6e92e3e74d69ecbecaf",
         "android_client_info": {
           "package_name": "com.example.findar"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "470241887742-na3nfv13ihe6cfj3tqrvgvdvvkv80lqs.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.findar",
+            "certificate_hash": "f622e67b857422d5742e883e801b5f7daa6bce98"
+          }
+        },
+        {
+          "client_id": "470241887742-ibqql9ok9n9jqoegsgeruf3in1eroisl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
-          "current_key": "AIzaSyAhXoz6xqM1hDvv5gywfK-_wgmykvgsZCA"
+          "current_key": "AIzaSyDPYzrgHsGzszzrpL0dnRUlPIWpkqvQtdE"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "470241887742-ibqql9ok9n9jqoegsgeruf3in1eroisl.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "470241887742-tfbb8atfn60k2m15mao8tvbf62kf7e7k.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.findarApp"
+              }
+            }
+          ]
         }
       }
     }

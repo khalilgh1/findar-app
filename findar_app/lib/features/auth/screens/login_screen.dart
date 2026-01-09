@@ -4,6 +4,7 @@ import 'package:findar/logic/cubits/auth_cubit.dart';
 import 'package:findar/core/widgets/progress_button.dart';
 import 'package:findar/l10n/app_localizations.dart';
 import 'package:findar/core/repositories/local_user_store.dart';
+import 'package:findar/core/services/firebase_oauth_service.dart';
 
 
 class LoginScreen extends StatefulWidget {
@@ -223,7 +224,51 @@ class _LoginScreenState extends State<LoginScreen> {
                   },
                 ),
                 const SizedBox(height: 12),
-                BlocBuilder<AuthCubit, Map<String, dynamic>>(
+                // Google Sign-In Button
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () async {
+                      try {
+                        await FirebaseOAuthService().signInWithGoogle();
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(l10n.success),
+                              backgroundColor: Colors.green,
+                            ),
+                          );
+                          Navigator.pushNamed(context, '/home');
+                        }
+                      } catch (e) {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Google sign-in failed: $e')),
+                          );
+                        }
+                      }
+                    },
+                    icon: const Icon(Icons.login),
+                    label: Text('Sign in with Google'),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      side: BorderSide(color: theme.colorScheme.primary),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                BlocConsumer<AuthCubit, Map<String, dynamic>>(
+                  listener: (context, state) {
+                    if (state['state'] == 'done' && state['data'] != null) {
+                      Navigator.pop(context);
+                      Navigator.pushNamed(context, '/home');
+                    }
+                    if (state['state'] == 'error' && state['message'] != null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(state['message'] as String)),
+                      );
+                    }
+                  },
                   builder: (context, state) {
                     final isLoading = state['state'] == 'loading';
                     return ProgressButton(

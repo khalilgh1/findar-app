@@ -95,7 +95,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
           final data = state['data'];
           final user = data is Map ? Map<String, dynamic>.from(data) : <String, dynamic>{};
-          final username = user['name'] ?? 'null null';
+          final username = user['name'] ?? user['username'] ??  'null null';
           final email = user['email'] ?? 'null@null.com';
           final phone = user['phone'] ?? 'N/A';
           final myListings = (user['listings'] as List?)?.cast<Map<String, dynamic>>() ??

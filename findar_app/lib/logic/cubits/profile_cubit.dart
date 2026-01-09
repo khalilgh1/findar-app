@@ -88,7 +88,7 @@ class ProfileCubit extends Cubit<Map<String, dynamic>> {
   Map<String, dynamic> _mapUser(User user) {
     return {
       'id': user.id,
-      'name': user.name,
+      'username': user.username,
       'email': user.email,
       'phone': user.phone,
       'profilePic': user.profilePic,
