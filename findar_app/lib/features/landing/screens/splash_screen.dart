@@ -79,12 +79,22 @@ class _SplashScreenState extends State<SplashScreen>
                           children: [
                             const Spacer(flex: 2),
                             
-                            // Animated FinDAR text with slide
-                            SlideTransition(
-                              position: _animationController.textSlideAnimation,
-                              child: Directionality(
-                                textDirection: TextDirection.ltr,
-                                child: _buildFinDARText(),
+                            
+                            Directionality(
+                              textDirection: TextDirection.ltr,
+                              child: _buildFinDARText(),
+                            ),
+                            
+                            const SizedBox(height: 24),
+                            
+                            
+                            FadeTransition(
+                              opacity: _animationController.subtitleFadeAnimation,
+                              child: Image.asset(
+                                'assets/Findar.png',
+                                width: MediaQuery.of(context).size.width * 0.32,
+                                height: MediaQuery.of(context).size.width * 0.32,
+                                fit: BoxFit.contain,
                               ),
                             ),
                             
@@ -185,6 +195,8 @@ class _SplashScreenState extends State<SplashScreen>
   Widget _buildContent(AppLocalizations l10n) {
     return Column(
       children: [
+        const SizedBox(height: 24),
+        
         // Welcome heading
         FadeTransition(
           opacity: _animationController.welcomeFadeAnimation,
