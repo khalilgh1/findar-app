@@ -78,6 +78,8 @@ void main() async {
     firebaseMessagingBackgroundHandler,
   );
 
+  initFirebaseMessaging();
+
   runApp(const MainApp());
 }
 

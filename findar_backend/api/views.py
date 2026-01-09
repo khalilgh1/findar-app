@@ -11,6 +11,9 @@ from django.db.models import Q
 from django.db.models import F, FloatField
 from django.db.models.functions import ACos, Cos, Radians, Sin
 
+from rest_framework_simplejwt.views import TokenRefreshView
+from rest_framework_simplejwt.serializers import TokenRefreshSerializer
+
 from django.contrib.auth.hashers import check_password
 import random
 from django.utils import timezone
@@ -635,6 +638,7 @@ def report_property(request):
             "error": f"Failed to submit report: {str(e)}"
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def register_device_token(request):
@@ -642,31 +646,39 @@ def register_device_token(request):
     Register a device token for push notifications
     """
     token = request.data.get('token')
+
     if not token:
-        return Response({
-            "error": "Device token is required"
-        }, status=status.HTTP_400_BAD_REQUEST)
-    
-    # Check if token already exists for the user
-    existing_token = DeviceToken.objects.filter(user=request.user, token=token).first()
-    if existing_token:
-        return Response({
-            "message": "Device token already registered",
-            "success": True
-        }, status=status.HTTP_200_OK)
-    
-    # Create new device token entry
+        return Response(
+            {"error": "Device token is required"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # 1️⃣ If token already registered for THIS user → OK
+    if DeviceToken.objects.filter(user=request.user, token=token).exists():
+        return Response(
+            {
+                "message": "Device token already registered",
+                "success": True
+            },
+            status=status.HTTP_200_OK
+        )
+
+    # 2️⃣ If token exists for ANOTHER user → remove it
+    DeviceToken.objects.filter(token=token).exclude(user=request.user).delete()
+
+    # 3️⃣ Create token for current user
     DeviceToken.objects.create(
         user=request.user,
         token=token
     )
-    
-    return Response({
-        "message": "Device token registered successfully",
-        "success": True
-    }, status=status.HTTP_201_CREATED)
 
-
+    return Response(
+        {
+            "message": "Device token registered successfully",
+            "success": True
+        },
+        status=status.HTTP_201_CREATED
+    )
 ############################# forget password feature
 
 class PasswordResetRequestAPI(APIView):
@@ -740,8 +752,6 @@ class PasswordResetVerifyCodeAPI(APIView):
                 {"message": "Invalid code", "success": False},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
-
 
         return Response(
             {"message": "Code is valid", "success": True},
@@ -822,3 +832,22 @@ class PasswordResetConfirmAPI(APIView):
             {"message": "Password updated", "success": True},
             status=status.HTTP_200_OK
         )
+
+class CustomTokenRefreshSerializer(TokenRefreshSerializer):
+    def validate(self, attrs):
+        data = super().validate(attrs)
+
+        # Decode refresh token
+        refresh = self.token_class(attrs['refresh'])
+        user_id = refresh['user_id']
+
+        # Update last access
+        CustomUser.objects.filter(id=user_id).update(
+            last_active=timezone.now()
+        )
+
+        return data
+
+
+class CustomTokenRefreshView(TokenRefreshView):
+    serializer_class = CustomTokenRefreshSerializer

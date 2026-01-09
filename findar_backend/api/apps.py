@@ -13,7 +13,7 @@ class ApiConfig(AppConfig):
     def ready(self):
         if not firebase_admin._apps:
             # Load service account key from environment variable
-            service_account_json = config('SERVICEACCOUNTKEY')
-            service_account_dict = json.loads(service_account_json)
-            cred = credentials.Certificate(service_account_dict)
+            cred = credentials.Certificate(
+                settings.FIREBASE_SERVICE_ACCOUNT
+            )
             firebase_admin.initialize_app(cred)

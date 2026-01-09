@@ -3,7 +3,6 @@ from .views import *
 
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
-    TokenRefreshView,
 )
 
 urlpatterns = [
@@ -15,7 +14,7 @@ urlpatterns = [
     path('auth/register' , register, name="register"),
     path('auth/me' , me , name="me"),
     path('auth/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('auth/refresh', TokenRefreshView.as_view(), name='token_refresh'),
+    path('auth/refresh', CustomTokenRefreshView.as_view(), name='token_refresh'),
     path("auth/password-reset/request/", PasswordResetRequestAPI.as_view()),
     path("auth/password-reset/verify/", PasswordResetVerifyCodeAPI.as_view()),
     path("auth/password-reset/confirm/", PasswordResetConfirmAPI.as_view()),

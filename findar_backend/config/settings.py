@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import json
 from pathlib import Path
 import os
 from datetime import timedelta
@@ -47,9 +48,10 @@ INSTALLED_APPS = [
     'django_crontab',
 ]
 
-# CRONJOBS = [
-#     ('* * * * *', 'api.cron.engagement_reminder'),
-# ]
+CRONJOBS = [
+    ('* * * * *', 'api.cron.engagement_reminder'),
+    ('* * * * *', 'api.cron.subscription_renewal'),
+]
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -179,6 +181,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
-# add your email and app code for testing 
-# EMAIL_HOST_USER = 
-# EMAIL_HOST_PASSWORD = 
+EMAIL_HOST_USER = config('EMAIL', default='')
+EMAIL_HOST_PASSWORD = config('APP_PASSWORD', default='')
+
+FIREBASE_SERVICE_ACCOUNT_JSON = config('FIREBASE_SERVICE_ACCOUNT_JSON', default='')
+FIREBASE_SERVICE_ACCOUNT = json.loads(FIREBASE_SERVICE_ACCOUNT_JSON)

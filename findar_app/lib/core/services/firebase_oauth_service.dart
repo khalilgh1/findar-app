@@ -145,8 +145,8 @@ class FirebaseOAuthService {
         ),
       );
 
-      await NotificationService.registerDeviceAfterLogin();
-      await FirebaseMessaging.instance.subscribeToTopic(currentUser!.accountType == 'agency' ? 'agency' : 'individual');
+      NotificationService.registerDeviceAfterLogin();
+      FirebaseMessaging.instance.subscribeToTopic(currentUser!.accountType == 'agency' ? 'agency' : 'individual');
 
 
       return ReturnResult(

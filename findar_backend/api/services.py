@@ -7,11 +7,10 @@ import os
 
 
 def send_topic_notification(topic: str, title: str, body: str, data=None):
-
+    from config import settings
         
     if not firebase_admin._apps:
-        cred_path = os.path.join(os.path.dirname(__file__), 'serviceAccountKey.json')
-        cred = credentials.Certificate(cred_path)
+        cred = credentials.Certificate(settings.FIREBASE_SERVICE_ACCOUNT)
         firebase_admin.initialize_app(cred)
 
     message = messaging.Message(
@@ -27,10 +26,10 @@ def send_topic_notification(topic: str, title: str, body: str, data=None):
     return response
 
 def send_user_notification(token: str, title: str, body: str, data=None):
+    from config import settings
 
     if not firebase_admin._apps:
-        cred_path = os.path.join(os.path.dirname(__file__), 'serviceAccountKey.json')
-        cred = credentials.Certificate(cred_path)
+        cred = credentials.Certificate(settings.FIREBASE_SERVICE_ACCOUNT)
         firebase_admin.initialize_app(cred)
 
     message = messaging.Message(
@@ -42,6 +41,7 @@ def send_user_notification(token: str, title: str, body: str, data=None):
         token=token,
     )
 
+    response = None
     try:
         response = messaging.send(message)
     except UnregisteredError:
