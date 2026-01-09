@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class LocationResult {
   final String address;
@@ -17,7 +18,7 @@ class LocationResult {
 }
 
 class TomTomService {
-  static const String _apiKey = 'T2rF8bW6YArgxfvKiYIsbkgfmlOkvqEQ';
+  static final String _apiKey = dotenv.env['TOMTOM_API_KEY'] ?? '';
   static const String _baseUrl = 'https://api.tomtom.com/search/2/search';
 
   static Future<List<LocationResult>> autocomplete(String query) async {

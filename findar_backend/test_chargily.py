@@ -3,10 +3,11 @@ Test Chargily API directly without UI
 """
 from chargily_pay import ChargilyClient
 from chargily_pay.entity import Checkout
+from decouple import config
 
-# Your credentials from settings
-API_KEY = 'test_pk_WvZLGkvnwGalNHyeLNmMep2BOJ7TKkNQGt7E9Laq'
-SECRET_KEY = 'test_sk_PwHu4DE3lDTm3UUgkcP2V01tT9ZBf5zhLAc7Ylmi'
+# Your credentials from .env
+API_KEY = config('CHARGILY_API_KEY')
+SECRET_KEY = config('CHARGILY_SECRET_KEY')
 
 print("=" * 60)
 print("Testing Chargily API")
