@@ -490,17 +490,19 @@ def oauth(request):
             )
 
         # Try to get existing user or create new one
-
-        user = CustomUser.objects.get(email=firebase_email)
-
-        if not user:
-            user = CustomUser.objects.create(
-                    email=firebase_email,
-                    username=firebase_name,
-                    phone=firebase_phone,
-                    password=make_password('oauth_user'),
-                    account_type='individual',
-            )
+        user = None
+        try:
+            user = CustomUser.objects.get(email=firebase_email)
+            print(f"Existing user found: {user.email}")
+        except CustomUser.DoesNotExist:
+            if not user:
+                user = CustomUser.objects.create(
+                        email=firebase_email,
+                        username=firebase_name,
+                        phone=firebase_phone,
+                        password=make_password('oauth_user'),
+                        account_type='individual',
+                )
 
         # Generate JWT tokens
         refresh = RefreshToken.for_user(user)
