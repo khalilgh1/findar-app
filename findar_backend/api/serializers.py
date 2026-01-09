@@ -9,7 +9,7 @@ from .models import (
 class UserSerializers(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        exclude = ('id',"password" , "is_superuser" , "is_staff" , "is_active" , "groups" , "user_permissions")
+        exclude = ("password" , "is_superuser" , "is_staff" , "is_active" , "groups" , "user_permissions")
 
 class PostSerializers(serializers.ModelSerializer):
     owner_details = serializers.SerializerMethodField()

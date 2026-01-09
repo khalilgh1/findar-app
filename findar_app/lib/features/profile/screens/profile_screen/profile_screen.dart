@@ -119,7 +119,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
             final data = state['data'];
             final user = data is Map ? Map<String, dynamic>.from(data) : <String, dynamic>{};
-            final username = user['name'] ?? 'null null';
+            final username = user['username'] ?? user['name'] ?? 'null null';
             final email = user['email'] ?? 'null@null.com';
             final phone = user['phone'] ?? 'N/A';
 

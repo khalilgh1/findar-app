@@ -331,8 +331,10 @@ class Profile(APIView):
     def get(self, request):
         user = request.user
         serializer = UserSerializers(user)
-        serializer.data['name'] = user.username
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        listings = Post.objects.filter(owner=request.user.id, active=True).order_by('-created_at')
+        listings_data = PostSerializers(listings, many=True).data
+        print(serializer.data['username'])
+        return Response({"message":"way" , "success":True , "data": {**serializer.data ,"listings":listings_data} , "listings":listings_data}, status=status.HTTP_200_OK)
     
     def put(self, request):
         full_name = request.data.get("name")
