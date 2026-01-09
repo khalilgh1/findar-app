@@ -297,7 +297,7 @@ class NotificationService {
           'action': 'remove',
         },
       );
-
+      FirebaseMessaging.instance.deleteToken();
       if (response is bool && response == true) {
         _log('Token removed from backend successfully');
         return true;

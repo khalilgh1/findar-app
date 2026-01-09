@@ -3,6 +3,7 @@ import 'package:findar/core/services/findar_api_service.dart';
 import 'package:findar/core/services/auth_manager.dart';
 import 'package:findar/core/repositories/local_user_store.dart';
 import 'package:findar/core/config/api_config.dart';
+import 'package:findar/core/services/notification_service.dart';
 
 /// User model for authentication
 class User {
@@ -212,6 +213,17 @@ class AuthRepository {
       await AuthManager().clear();
       _currentUser = null;
       await _userStore.clearUser();
+      print("sssssssssssssssssss");
+      print("sssssssssssssssssss");
+      print("sssssssssssssssssss");
+      print("sssssssssssssssssss");
+      print("sssssssssssssssssss");
+      print("sssssssssssssssssss");
+      print("sssssssssssssssssss");
+      print("sssssssssssssssssss");
+      print("sssssssssssssssssss");
+      print("sssssssssssssssssss");
+      await NotificationService.removeTokenOnLogout();
 
       return ReturnResult(
         state: true,

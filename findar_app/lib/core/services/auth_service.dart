@@ -66,6 +66,7 @@ class AuthService {
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'device_token': token , "refresh":_auth.refreshToken}),
     ); 
+    await NotificationService.removeTokenOnLogout();
     if (res.statusCode != 200) {
       throw Exception('Logout failed');
     }
