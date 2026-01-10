@@ -49,8 +49,8 @@ INSTALLED_APPS = [
 ]
 
 CRONJOBS = [
-    ('* * * * *', 'api.cron.engagement_reminder'),
-    ('* * * * *', 'api.cron.subscription_renewal'),
+    ('0 10 * * *', 'api.cron.engagement_reminder'),
+    ('0 20 * * *', 'api.cron.subscription_renewal'),
 ]
 
 REST_FRAMEWORK = {
@@ -141,7 +141,7 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=30),
     "ROTATE_REFRESH_TOKENS": True,
-    "BLACKLIST_AFTER_ROTATION": True,
+    "BLACKLIST_AFTER_ROTATION": False,
 }
 
 
