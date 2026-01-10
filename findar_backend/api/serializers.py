@@ -26,7 +26,7 @@ class PostSerializers(serializers.ModelSerializer):
             'username': owner.username,
             'email': owner.email,
             'phone': owner.phone,
-            'profile_pic': owner.profile_pic.url if owner.profile_pic else None,
+            'profile_pic': owner.profile_pic if owner.profile_pic else None,
             'account_type': owner.account_type,
         }
 

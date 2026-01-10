@@ -80,14 +80,7 @@ class _PropertyCardState extends State<PropertyCard> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            margin: const EdgeInsets.only(left: 10, right: 10, top: 10),
-            height: 125,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            clipBehavior: Clip.hardEdge,
+          Expanded(
             child: Stack(
               fit: StackFit.expand,
               children: [

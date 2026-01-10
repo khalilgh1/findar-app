@@ -27,6 +27,7 @@ urlpatterns = [
     path('edit-listing/<int:listing_id>', edit_listing, name='edit-listing'),
     path('my_listings/', my_listings, name='listings'),
     path('toggle_active_listing/<int:listing_id>', toggle_active_listing, name='toggle_active_listing'),
+    path('boost-listing/<int:listing_id>', boost_listing, name='boost_listing'),
     path('login/', login, name='login'),
     path('save_listing/<int:listing_id>', save_listing, name='save_listing'),
     path('saved-listings/', saved_listings, name='saved-listings'),

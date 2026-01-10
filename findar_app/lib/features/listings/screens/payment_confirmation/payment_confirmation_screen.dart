@@ -84,6 +84,10 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
         listingId: widget.listing.id,
         planId: widget.plan.id,
         durationMonths: widget.plan.durationMonths,
+        cardNumber: _cardNumberController.text,
+        cardHolder: _cardholderNameController.text,
+        expiryDate: _expiryDateController.text,
+        cvv: _cvvController.text,
       );
     }
   }

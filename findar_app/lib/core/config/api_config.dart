@@ -24,6 +24,7 @@ class ApiConfig {
   static String editListing(int id) => '/api/edit-listing/$id';
   static const String myListings = '/api/my_listings/';
   static String toggleActiveListing(int id) => '/api/toggle_active_listing/$id';
+  static String boostListing(int id) => '/api/boost-listing/$id';
   static String saveListing(int id) => '/api/save_listing/$id';
   static const String savedListings = '/api/saved-listings/';
   static String listingDetails(int id) => '/api/listing-details/$id';

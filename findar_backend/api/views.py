@@ -42,6 +42,7 @@ def sponsored_listings(request):
     serialized_posts = PostSerializers(sponsored_posts , many=True).data
     return Response(serialized_posts , status=status.HTTP_200_OK)
 
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def recent_listings(request):
@@ -325,6 +326,49 @@ def toggle_active_listing(request , listing_id):
     post.save()
     print(f"DEBUG TOGGLE - After: Post ID {post.id}, active={post.active}")
     return Response({"message": "Listing status updated", "active": post.active}, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def boost_listing(request, listing_id):
+    """
+    Boost a listing after card information is submitted.
+    Requires authentication and card details in request body.
+    """
+    try:
+        post = Post.objects.get(id=listing_id)
+    except Post.DoesNotExist:
+        return Response({'error': "Listing not found"}, status=status.HTTP_404_NOT_FOUND)
+    
+    # Verify the user owns the listing
+    if post.owner.id != request.user.id:
+        return Response({"error": "You don't have permission to boost this listing"}, status=status.HTTP_403_FORBIDDEN)
+    
+    # Get card information from request body
+    card_number = request.data.get('card_number')
+    card_holder = request.data.get('card_holder')
+    expiry_date = request.data.get('expiry_date')
+    cvv = request.data.get('cvv')
+    
+    # Validate card information is provided
+    if not all([card_number, card_holder, expiry_date, cvv]):
+        return Response({
+            'error': "Card information is required",
+            'required_fields': ['card_number', 'card_holder', 'expiry_date', 'cvv']
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+    # No actual payment verification - just accept the card info
+    # In production, you would integrate with a payment gateway here
+    
+    # Set listing as boosted
+    post.boosted = True
+    post.save()
+    
+    return Response({
+        "message": "Listing boosted successfully",
+        "listing_id": post.id,
+        "boosted": post.boosted
+    }, status=status.HTTP_200_OK)
 
 
 #########  Update Profile  #########
