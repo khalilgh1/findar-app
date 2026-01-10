@@ -136,7 +136,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       username,
                       style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
                     ),
-                    Text(email, style: const TextStyle(color: Colors.grey)),
+                    Text(
+                      email,
+                      style: const TextStyle(color: Colors.grey),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
                     const SizedBox(height: 25),
                     ProfileInfoCard(
                       phone: phone,

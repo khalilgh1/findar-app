@@ -38,9 +38,13 @@ class ProfileInfoCard extends StatelessWidget {
               return ListTile(
                 leading: _iconBox(Icons.email_outlined, theme),
                 title: Text(l10n?.email ?? 'Email', style: TextStyle(fontSize: 14)),
-                trailing: Text(
-                  email,
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w300),
+                trailing: Flexible(
+                  child: Text(
+                    email,
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w300),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
                 ),
               );
             },
