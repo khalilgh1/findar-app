@@ -263,11 +263,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       Navigator.pop(context);
                       Navigator.pushNamed(context, '/home');
                     }
-                    if (state['state'] == 'error' && state['message'] != null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(state['message'] as String)),
-                      );
-                    }
                   },
                   builder: (context, state) {
                     final isLoading = state['state'] == 'loading';
