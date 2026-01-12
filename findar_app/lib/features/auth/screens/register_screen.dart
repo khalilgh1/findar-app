@@ -10,14 +10,12 @@ class RegisterData {
   final String phone;
   final String password;
   final String accountType;
-  final String pin;
   RegisterData({
     required this.name,
     required this.email,
     required this.phone,
     required this.password,
     required this.accountType,
-    required this.pin,
   });
 }
 
@@ -31,12 +29,19 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool isChecked = false;
+  bool unique_email = true;
   String? _selectedAccountType;
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phonenumberController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _obscurePassword = true;
+
+  _emailChanged(String value) {
+    setState(() {
+      unique_email = true;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -88,6 +93,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
           RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
       if (!emailRegex.hasMatch(email)) {
         return l10n.invalidEmail;
+      }
+      if (!unique_email) {
+        return l10n.uniqueEmailError;
       }
       return null;
     }
@@ -234,6 +242,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   const SizedBox(height: 6),
                   TextFormField(
                     controller: _emailController,
+                    onChanged: _emailChanged,
                     validator: validateEmail,
                     decoration: InputDecoration(
                       hintText: l10n.enterEmail,
@@ -339,15 +348,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   BlocConsumer<AuthCubit, Map<String, dynamic>>(
                     listener: (context, state) {
                       if (state['state'] == 'done') {
-                        // Registration successful
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                                state['message'] ?? 'Registration successful'),
-                            backgroundColor: Colors.green,
-                          ),
-                        );
-                        Navigator.pushNamed(context, '/profile-picture-setup');
+                        Navigator.pushNamed(
+                        context,
+                        '/verify-email',
+                        arguments: RegisterData(
+                          name: _nameController.text,
+                          email: _emailController.text,
+                          phone: _phonenumberController.text,
+                          password: _passwordController.text,
+                          accountType: _selectedAccountType!,
+                        ),
+                      );
                       }
                     },
                     builder: (context, state) {
@@ -355,6 +366,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       final isError = state['state'] == 'error';
                       final errorMessage =
                           isError ? (state['message'] as String?) : null;
+                      if (errorMessage is String) {
+                        String error = errorMessage;
+                        if (error.contains("email")){
+                          unique_email = false;
+                        } else {
+                          unique_email = true;
+                        }
+                      }
 
                       return ProgressButton(
                         onPressed: () {

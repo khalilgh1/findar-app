@@ -23,6 +23,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
 
     final RegisterData registerData =
         ModalRoute.of(context)!.settings.arguments as RegisterData;
+        // RegisterData(email: "youcef.chouki@gmail.com", name: "fdqfqf", phone: "89149891", password: "dqs8dq9sd79" , accountType: 'user');
 
     String? validateOtp(String? value) {
       if (value == null || value.isEmpty) {

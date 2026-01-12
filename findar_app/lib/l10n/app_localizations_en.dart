@@ -24,6 +24,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountIndividual => 'Individual';
 
   @override
+  String get uniqueEmailError => 'This email address is already in use. Please use a different one.';
+
+  @override
   String get accountAgency => 'Agency';
 
   @override

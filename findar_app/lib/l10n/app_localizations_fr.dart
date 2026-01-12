@@ -54,6 +54,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get forgotPassword => 'Mot de pass oublié ?';
 
   @override
+  String get uniqueEmailError => 'Cette adresse e-mail est déjà utilisée. Veuillez en utiliser une autre.';
+
+  @override
   String get ninLabel => 'Numéro d\'identification national (NIN)';
 
   @override
