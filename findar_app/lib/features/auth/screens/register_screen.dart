@@ -1,23 +1,12 @@
+import 'dart:convert';
+
+import 'package:findar/models/register_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:findar/logic/cubits/auth_cubit.dart';
 import 'package:findar/core/widgets/progress_button.dart';
 import 'package:findar/l10n/app_localizations.dart';
 
-class RegisterData {
-  final String name;
-  final String email;
-  final String phone;
-  final String password;
-  final String accountType;
-  RegisterData({
-    required this.name,
-    required this.email,
-    required this.phone,
-    required this.password,
-    required this.accountType,
-  });
-}
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -40,6 +29,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
   _emailChanged(String value) {
     setState(() {
       unique_email = true;
+    });
+  }
+
+  _email_not_unique() {
+    setState(() {
+      unique_email = false;
     });
   }
 
@@ -244,6 +239,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     controller: _emailController,
                     onChanged: _emailChanged,
                     validator: validateEmail,
+                    forceErrorText:
+                        unique_email ? null : l10n.uniqueEmailError,
                     decoration: InputDecoration(
                       hintText: l10n.enterEmail,
                       border: OutlineInputBorder(
@@ -360,30 +357,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                       );
                       }
+                      if (state['state'] == 'error') {
+                        final errorMessage =
+                          (state['message'] as String?);
+                      if (errorMessage != null) {
+                        if (errorMessage.contains("email")){
+                          _email_not_unique();
+                          
+                        } 
+                      }
+                      }
                     },
                     builder: (context, state) {
                       final isLoading = state['state'] == 'loading';
                       final isError = state['state'] == 'error';
                       final errorMessage =
                           isError ? (state['message'] as String?) : null;
-                      if (errorMessage is String) {
-                        String error = errorMessage;
-                        if (error.contains("email")){
-                          unique_email = false;
-                        } else {
-                          unique_email = true;
-                        }
-                      }
 
                       return ProgressButton(
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
-                            context.read<AuthCubit>().register(
-                                  name: _nameController.text,
+                            context.read<AuthCubit>().sendRegisterOtp(
                                   email: _emailController.text,
-                                  phone: _phonenumberController.text,
-                                  password: _passwordController.text,
-                                  accountType: _selectedAccountType!,
                                 );
                           }
                         },

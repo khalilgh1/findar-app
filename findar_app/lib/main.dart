@@ -1,5 +1,6 @@
 import 'package:findar/core/models/property_listing_model.dart';
 import 'package:findar/core/repositories/abstract_listing_repo.dart';
+import 'package:findar/features/auth/screens/VerifyEmailscreen.dart';
 //import repository
 import 'package:findar/logic/cubits/home/recent_listings.dart';
 import 'package:findar/logic/cubits/home/sponsored_listings.dart';
@@ -66,7 +67,6 @@ FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
 void main() async {
   SetupRepositories();
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: ".env");
   await AuthManager().init();
 
   await Firebase.initializeApp(
@@ -133,7 +133,7 @@ class MainApp extends StatelessWidget {
                     Locale('ar'),
                     Locale('fr'),
                   ],
-                  initialRoute: '/landing',
+                  initialRoute: '/register',
                   onGenerateRoute: (settings) {
                     // Handle edit listing route with arguments
                     if (settings.name == '/edit-listing') {
@@ -170,6 +170,7 @@ class MainApp extends StatelessWidget {
                     }
                     // Default routes
                     final routes = {
+                      '/verify-email': (context) => const VerifyEmailScreen(),
                       '/landing': (context) => const SplashScreen(),
                       '/login': (context) => const LoginScreen(),
                       '/register': (context) => RegisterScreen(),

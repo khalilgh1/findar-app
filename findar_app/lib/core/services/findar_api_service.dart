@@ -210,7 +210,9 @@ class FindarApiService {
     return e.contains('/login') ||
         e.contains('/register') ||
         e.contains('/refresh') ||
-        e.contains('/logout');
+        e.contains('/logout') ||
+        e.contains('/send') ||
+        e.contains('/verify');
   }
 
   Future<bool> _refreshToken() async {

@@ -211,16 +211,6 @@ class AuthRepository {
       await AuthManager().clear();
       _currentUser = null;
       await _userStore.clearUser();
-      print("sssssssssssssssssss");
-      print("sssssssssssssssssss");
-      print("sssssssssssssssssss");
-      print("sssssssssssssssssss");
-      print("sssssssssssssssssss");
-      print("sssssssssssssssssss");
-      print("sssssssssssssssssss");
-      print("sssssssssssssssssss");
-      print("sssssssssssssssssss");
-      print("sssssssssssssssssss");
       await NotificationService.removeTokenOnLogout();
 
       return ReturnResult(
@@ -390,15 +380,33 @@ class AuthRepository {
   Future<ReturnResult> sendRegisterOtp({required String email}) async {
     try {
       final response = await apiService.post(
-        '${ApiConfig.baseUrl}/auth/send-register-otp/',
+        '/api/auth/send-register-otp/',
         body: {
           'email': email,
         },
       );
 
       // Handle error response from API service
-      if (response is ReturnResult) {
-        return response;
+      if (response is ReturnResult && response.state != true) {
+        print('crashed');
+        print('crashed');
+        print('crashed');
+        print('crashed');
+        if (response.message != null && response.message!.contains("email")) {
+          print ("didnt crash");    
+          print ("didnt crash");    
+          print ("didnt crash");    
+          print ("didnt crash");    
+          return ReturnResult(
+            state: false,
+            message: "email already exists",
+          );
+        }
+        final new_response = ReturnResult(
+          state: response.state,
+          message: "email already exists",
+        );
+        return new_response;
       }
 
       if (response['success'] != true) {
@@ -431,7 +439,7 @@ class AuthRepository {
   }) async {
     try {
       final response = await apiService.post(
-        '${ApiConfig.baseUrl}/auth/verify-register-otp/',
+        '/api/auth/verify-register-otp/',
         body: {
           'username': name,
           'email': email,
@@ -458,15 +466,12 @@ class AuthRepository {
       final user = User.fromJson(response['data']);
       _currentUser = user;
 
-      if (response['tokens'] != null) {
-        final tokens = response['tokens'] as Map<String, dynamic>;
-        await AuthManager().setTokens(
-          AuthTokens(
-            accessToken: response['data']['access'],
-            refreshToken: response['data']['refresh'],
-          ),
-        );
-      }
+      await AuthManager().setTokens(
+        AuthTokens(
+          accessToken: response['data']['access'],
+          refreshToken: response['data']['refresh'],
+        ),
+      );
 
       await _userStore.saveUser(user);
 

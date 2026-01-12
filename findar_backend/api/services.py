@@ -96,3 +96,19 @@ If you did not request this, ignore this email.
 — FinDAR Team
 """
     send_email(email, subject, body)
+
+def send_register_otp_email(email, code):
+    subject = "Your FinDAR registration OTP code"
+    body = f"""
+Hi,
+
+Your FinDAR registration OTP code is:
+
+{code}
+
+This code will expire in 10 minutes.
+If you did not request this, ignore this email.
+
+— FinDAR Team
+"""
+    send_email(email, subject, body)
