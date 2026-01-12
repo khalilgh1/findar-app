@@ -171,3 +171,18 @@ class DeviceToken(models.Model):
     token = models.CharField(max_length=255, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     last_seen = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.user.email} - {self.token}"
+    
+#################### Register OTP Model
+
+class RegisterOTP(models.Model):
+    email = models.EmailField(unique=True)
+    code_hash = models.CharField(max_length=128)
+    used = models.BooleanField(default=False)
+    attempts = models.PositiveSmallIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def is_expired(self):
+        return timezone.now() > self.created_at + timedelta(minutes=OTP_EXPIRATION_MINUTES)

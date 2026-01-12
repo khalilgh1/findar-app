@@ -877,6 +877,95 @@ class PasswordResetConfirmAPI(APIView):
             status=status.HTTP_200_OK
         )
 
+@api_view(['POST'])
+def send_register_otp(request):
+    email = request.data.get("email")
+
+    existing_user = CustomUser.objects.filter(email=email).first()
+    if existing_user:
+        return Response(
+            {"message": "email is already registered", "success": False},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    code = f"{random.randint(0, 999999):06d}"
+
+    RegisterOTP.objects.create(
+        email=email,
+        code_hash=make_password(code)
+    )
+
+    send_register_otp_email(email, code)
+
+    return Response(
+        {"message": "OTP has been sent", "success": True},
+        status=status.HTTP_200_OK
+    )
+
+@api_view(["POST"])
+def verify_register_otp(request):
+    email = request.data.get("email")
+    code = request.data.get("code")
+
+    otp = (
+        RegisterOTP.objects.filter(email=email, used=False)
+        .order_by("-created_at")
+        .first()
+    )
+
+    if not otp:
+        return Response(
+            {"message": "Invalid code", "success": False},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    if otp.is_expired():
+        otp.used = True
+        otp.save()
+        return Response(
+            {"message": "Code expired", "success": False},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    if otp.attempts >= 5:
+        return Response(
+            {"message": "Too many attempts", "success": False},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    if not check_password(code, otp.code_hash):
+        otp.attempts += 1
+        otp.save()
+        return Response(
+            {"message": "Invalid code", "success": False},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    user = CustomUser.objects.create(
+        email=email,
+        username=request.data.get("username", "User"),
+        phone=request.data.get("phone", "0000000000"),
+        password=make_password(request.data.get("password", "defaultpassword")),
+        account_type=request.data.get("account_type", "individual").lower(),
+    )
+    otp.used = True
+    otp.save()
+    refresh = RefreshToken.for_user(user)
+    user = RegisterSerializer(user).data
+
+    return Response(
+        {
+            "message": "Registration completed",
+            "success": True,
+            "data": {
+                "refresh": str(refresh),
+                "access": str(refresh.access_token),
+                "user": user,
+            },
+        },
+        status=status.HTTP_200_OK,
+    )
+
 class CustomTokenRefreshSerializer(TokenRefreshSerializer):
     def validate(self, attrs):
         data = super().validate(attrs)

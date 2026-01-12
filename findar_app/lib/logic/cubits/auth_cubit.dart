@@ -340,7 +340,6 @@ class AuthCubit extends Cubit<Map<String, dynamic>> {
     try {
       // Call repository to send OTP
       final result = await authRepository.sendRegisterOtp(email: email);
-
       if (result.state) {
         emit({
           ...state,
