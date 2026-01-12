@@ -1638,6 +1638,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Steps:\n1. Open Gmail or your email app\n2. Compose new email\n3. Copy the details above\n4. Send the email'**
   String get manualEmailSteps;
+
+  /// No description provided for @verifyEmail.
+  String get verifyEmail;
+
+  /// No description provided for @enterVerificationCode.
+  String get enterVerificationCode;
+
+  /// No description provided for @codeRequired.
+  String get codeRequired;
+
+  /// No description provided for @codeInvalid.
+  String get codeInvalid;
+
+  /// No description provided for @codeSentTo.
+  String codeSentTo(String email);
+
+  /// No description provided for @registrationSuccessful.
+  String get registrationSuccessful;
+
+  /// No description provided for @verifyAndCreateAccount.
+  String get verifyAndCreateAccount;
+
+  /// No description provided for @resendCode.
+  String get resendCode;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

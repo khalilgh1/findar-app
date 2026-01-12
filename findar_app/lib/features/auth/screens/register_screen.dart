@@ -4,6 +4,23 @@ import 'package:findar/logic/cubits/auth_cubit.dart';
 import 'package:findar/core/widgets/progress_button.dart';
 import 'package:findar/l10n/app_localizations.dart';
 
+class RegisterData {
+  final String name;
+  final String email;
+  final String phone;
+  final String password;
+  final String accountType;
+  final String pin;
+  RegisterData({
+    required this.name,
+    required this.email,
+    required this.phone,
+    required this.password,
+    required this.accountType,
+    required this.pin,
+  });
+}
+
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 

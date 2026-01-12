@@ -792,4 +792,28 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get manualEmailSteps => 'الخطوات:\n1. افتح Gmail أو تطبيق البريد الإلكتروني\n2. إنشاء بريد إلكتروني جديد\n3. نسخ التفاصيل أعلاه\n4. إرسال البريد الإلكتروني';
+
+  @override
+  String get verifyEmail => 'تحقق من البريد الإلكتروني';
+
+  @override
+  String get enterVerificationCode => 'أدخل رمز التحقق';
+
+  @override
+  String get codeRequired => 'رمز التحقق مطلوب';
+
+  @override
+  String get codeInvalid => 'رمز التحقق غير صالح';
+
+  @override
+  String codeSentTo(String email) => 'تم إرسال رمز التحقق إلى $email';
+
+  @override
+  String get registrationSuccessful => 'تم التسجيل بنجاح!';
+
+  @override
+  String get verifyAndCreateAccount => 'تحقق وإنشاء حساب';
+
+  @override
+  String get resendCode => 'إعادة إرسال الرمز';
 }
