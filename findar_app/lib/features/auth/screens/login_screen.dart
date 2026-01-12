@@ -257,33 +257,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                BlocConsumer<AuthCubit, Map<String, dynamic>>(
-                  listener: (context, state) {
-                    if (state['state'] == 'done' && state['data'] != null) {
-                      Navigator.pop(context);
-                      Navigator.pushNamed(context, '/home');
-                    }
-                  },
-                  builder: (context, state) {
-                    final isLoading = state['state'] == 'loading';
-                    return ProgressButton(
-                      onPressed: isLoading
-                          ? null
-                          : () {
-                // Seed a debug cached user into SharedPreferences, then load it
-                final cubit = context.read<AuthCubit>();
-                LocalUserStore()
-                  .seedDebugUser()
-                  .then((_) => cubit.loadCachedUser());
-                            },
-                      label: 'Access cached user',
-                      isLoading: isLoading,
-                      backgroundColor: theme.colorScheme.secondary,
-                      textColor: theme.colorScheme.onSecondary,
-                    );
-                  },
-                ),
-                const SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
