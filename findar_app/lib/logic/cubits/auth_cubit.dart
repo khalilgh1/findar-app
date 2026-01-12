@@ -100,6 +100,8 @@ class AuthCubit extends Cubit<Map<String, dynamic>> {
     }
   }
 
+  
+
   /// Login user
   /// 
   /// Validates email/password, calls repository, emits states
@@ -323,6 +325,91 @@ class AuthCubit extends Cubit<Map<String, dynamic>> {
         ...state,
         'state': 'initial',
         'message': '',
+      });
+    }
+  }
+
+  /// Send OTP/PIN to email for registration verification
+  Future<void> sendRegisterOtp({required String email}) async {
+    emit({
+      ...state,
+      'state': 'loading',
+      'message': '',
+    });
+
+    try {
+      // Call repository to send OTP
+      final result = await authRepository.sendRegisterOtp(email: email);
+
+      if (result.state) {
+        emit({
+          ...state,
+          'state': 'done',
+          'message': result.message,
+        });
+      } else {
+        emit({
+          ...state,
+          'state': 'error',
+          'message': result.message,
+        });
+      }
+    } catch (e) {
+      emit({
+        ...state,
+        'state': 'error',
+        'message': 'Failed to send OTP: ${e.toString()}',
+      });
+    }
+  }
+
+  /// Complete registration by verifying OTP
+  Future<void> completeRegister({
+    required dynamic data,
+    required String otp,
+  }) async {
+    emit({
+      ...state,
+      'state': 'loading',
+      'message': '',
+    });
+
+    try {
+      // Call repository to complete registration with OTP verification
+      final result = await authRepository.completeRegisterWithOtp(
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        password: data.password,
+        accountType: data.accountType,
+        otp: otp,
+      );
+
+      if (result.state) {
+        // Success: get current user from repository
+        final user = authRepository.getCurrentUser();
+
+        await NotificationService.registerDeviceAfterLogin();
+        await FirebaseMessaging.instance.subscribeToTopic(user!.accountType == 'agency' ? 'agency' : 'individual');
+
+        emit({
+          ...state,
+          'data': user,
+          'state': 'done',
+          'message': result.message,
+        });
+      } else {
+        emit({
+          ...state,
+          'state': 'error',
+          'message': result.message,
+        });
+      }
+    } catch (e) {
+      emit({
+        ...state,
+        'state': 'error',
+        'message': 'Registration completion error: ${e.toString()}',
       });
     }
   }

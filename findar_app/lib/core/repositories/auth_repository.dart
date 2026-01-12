@@ -387,4 +387,100 @@ class AuthRepository {
     _currentUser = await _userStore.loadUser();
     return _currentUser;
   }
+
+  /// Send OTP to email for registration verification
+  Future<ReturnResult> sendRegisterOtp({required String email}) async {
+    try {
+      final response = await apiService.post(
+        '${ApiConfig.baseUrl}/auth/send-register-otp/',
+        body: {
+          'email': email,
+        },
+      );
+
+      // Handle error response from API service
+      if (response is ReturnResult) {
+        return response;
+      }
+
+      if (response['success'] != true) {
+        return ReturnResult(
+          state: false,
+          message: response['message'] ?? 'Failed to send OTP',
+        );
+      }
+
+      return ReturnResult(
+        state: true,
+        message: response['message'] ?? 'OTP sent successfully',
+      );
+    } catch (e) {
+      return ReturnResult(
+        state: false,
+        message: 'Send OTP error: ${e.toString()}',
+      );
+    }
+  }
+
+  /// Complete registration with OTP verification
+  Future<ReturnResult> completeRegisterWithOtp({
+    required String name,
+    required String email,
+    required String phone,
+    required String password,
+    required String accountType,
+    required String otp,
+  }) async {
+    try {
+      final response = await apiService.post(
+        '${ApiConfig.baseUrl}/auth/verify-register-otp/',
+        body: {
+          'username': name,
+          'email': email,
+          'phone': phone,
+          'password': password,
+          'account_type': accountType,
+          'otp': otp,
+        },
+      );
+
+      // Handle error response from API service
+      if (response is ReturnResult) {
+        return response;
+      }
+
+      if (response['success'] != true) {
+        return ReturnResult(
+          state: false,
+          message: response['message'] ?? 'Registration verification failed',
+        );
+      }
+
+      // Cache user and tokens
+      final user = User.fromJson(response['data']);
+      _currentUser = user;
+
+      if (response['tokens'] != null) {
+        final tokens = response['tokens'] as Map<String, dynamic>;
+        await AuthManager().setTokens(
+          AuthTokens(
+            accessToken: response['data']['access'],
+            refreshToken: response['data']['refresh'],
+          ),
+        );
+      }
+
+      await _userStore.saveUser(user);
+
+      return ReturnResult(
+        state: true,
+        message: response['message'] ?? 'Registration successful',
+      );
+    } catch (e) {
+      return ReturnResult(
+        state: false,
+        message: 'Registration verification error: ${e.toString()}',
+      );
+    }
+  }
 }

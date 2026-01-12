@@ -19,6 +19,9 @@ urlpatterns = [
     path("auth/password-reset/verify/", PasswordResetVerifyCodeAPI.as_view()),
     path("auth/password-reset/confirm/", PasswordResetConfirmAPI.as_view()),
     path("notifications/register-device/", register_device_token),
+
+    # path("auth/verify-register-otp/", verify_register_otp, name="verify_register_otp"),
+    
     
     path('create-listing/', create_listing, name='create-listing'),
     path('users/<int:user_id>/profile/', get_user_profile, name='get_user_profile'),

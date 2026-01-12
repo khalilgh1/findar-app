@@ -792,4 +792,28 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get manualEmailSteps => 'Étapes :\n1. Ouvrez Gmail ou votre application de messagerie\n2. Composez un nouveau courriel\n3. Copiez les détails ci-dessus\n4. Envoyez le courriel';
+
+  @override
+  String get verifyEmail => 'Vérifier l\'e-mail';
+
+  @override
+  String get enterVerificationCode => 'Entrez le code de vérification';
+
+  @override
+  String get codeRequired => 'Le code de vérification est requis';
+
+  @override
+  String get codeInvalid => 'Code de vérification invalide';
+
+  @override
+  String codeSentTo(String email) => 'Un code de vérification a été envoyé à $email';
+
+  @override
+  String get registrationSuccessful => 'Inscription réussie !';
+
+  @override
+  String get verifyAndCreateAccount => 'Vérifier et créer un compte';
+
+  @override
+  String get resendCode => 'Renvoyer le code';
 }
