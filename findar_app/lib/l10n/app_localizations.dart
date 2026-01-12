@@ -1117,6 +1117,9 @@ abstract class AppLocalizations {
   /// **'Please enter a valid email'**
   String get invalidEmail;
 
+
+  String get uniqueEmailError;
+
   /// No description provided for @invalidPassword.
   ///
   /// In en, this message translates to:

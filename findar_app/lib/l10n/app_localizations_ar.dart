@@ -27,6 +27,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get accountAgency => 'وكالة';
 
   @override
+  String get uniqueEmailError => 'عنوان البريد الإلكتروني هذا مستخدم بالفعل. يرجى استخدام عنوان مختلف.';
+
+  @override
   String get fullName => 'الاسم الكامل';
 
   @override
