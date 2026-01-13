@@ -1,3 +1,5 @@
+import 'package:findar/core/repositories/auth_repository.dart' as a;
+import 'package:findar/core/repositories/local_user_store.dart';
 import 'package:findar/core/services/findar_api_service.dart';
 import 'package:findar/core/services/notification_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -69,7 +71,7 @@ class FirebaseOAuthService {
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       
       if (googleUser == null) {
-        throw Exception('Google sign-in cancelled');
+        throw 'Google sign-in cancelled';
       }
 
       final GoogleSignInAuthentication googleAuth =
@@ -90,7 +92,7 @@ class FirebaseOAuthService {
       }
     } catch (e) {
       print(e);
-      throw Exception('Google sign-in failed: $e');
+      throw '$e';
     }
   }
 
@@ -101,7 +103,7 @@ class FirebaseOAuthService {
     String? email,
   ) async {
     if (idToken == null) {
-      throw Exception('No ID token received');
+      throw 'No ID token received';
     }
 
     try {
@@ -115,8 +117,12 @@ class FirebaseOAuthService {
         }),
       );
 
+      if (res.statusCode == 401) {
+        throw 'Firebase authentication failed';
+      }
+
       if (res.statusCode != 200) {
-        throw Exception('Backend authentication failed');
+        throw 'Backend authentication failed';
       }
 
       final json = jsonDecode(res.body);
@@ -125,7 +131,7 @@ class FirebaseOAuthService {
       );
 
     } catch (e) {
-      throw Exception('Backend authentication error: $e');
+      throw '$e';
     }
   }
 
@@ -144,7 +150,6 @@ class FirebaseOAuthService {
           refreshToken: response['data']['refresh'],
         ),
       );
-
       NotificationService.registerDeviceAfterLogin();
       FirebaseMessaging.instance.subscribeToTopic(currentUser!.accountType == 'agency' ? 'agency' : 'individual');
 

@@ -9,7 +9,7 @@ class ApiConfig {
   // replace with your machine IP or pass `--dart-define`.
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://10.118.183.228:8000',
+    defaultValue: 'https://findar-app.onrender.com',
   );
 
   static String get apiBaseUrl => baseUrl;

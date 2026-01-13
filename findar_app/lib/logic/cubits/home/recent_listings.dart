@@ -6,25 +6,48 @@ import 'package:findar/core/repositories/abstract_listing_repo.dart';
 /// State shape: { data: List<PropertyListing>, state: 'initial|loading|done|error', message: '', savedIds: Set<int> }
 class RecentCubit extends Cubit<Map<String, dynamic>> {
   final ListingRepository repository;
+  bool _hasFetched = false;
 
   RecentCubit(this.repository)
-    : super({'data': [], 'state': 'initial', 'message': '', 'savedIds': <int>{}});
+      : super({
+          'data': [],
+          'state': 'initial',
+          'message': '',
+          'savedIds': <int>{}
+        });
 
   /// Fetch filtered listings using the abstract repository
-  Future<void> getRecentListings({String? listingType}) async {
+  Future<void> getRecentListings(
+      {String? listingType, bool forceRefresh = false}) async {
+    // Skip fetch if already fetched and not forcing refresh
+    if (_hasFetched && !forceRefresh) {
+      return;
+    }
+
     emit({...state, 'state': 'loading', 'message': ''});
 
     try {
+      // Load saved listing IDs first
+      final savedIds = await repository.getSavedListingIds();
+
       final recentListings = await repository.getRecentListings(
-        listingType: listingType, 
+        listingType: listingType,
+        onUpdate: (listings) {
+          // Called first with local data, then with remote data
+          emit({
+            ...state,
+            'data': listings,
+            'savedIds': savedIds,
+            'state': 'done',
+            'message': 'Listings loaded',
+          });
+        },
       );
       print('🔴🔴🔴');
       print('Fetched recent listings: $recentListings');
-      
-      // Load saved listing IDs
-      final savedIds = await repository.getSavedListingIds();
       print('Loaded saved listing IDs: $savedIds');
 
+      _hasFetched = true;
       emit({
         ...state,
         'data': recentListings,
@@ -50,7 +73,8 @@ class RecentCubit extends Cubit<Map<String, dynamic>> {
         // Update savedIds in state
         final currentSavedIds = Set<int>.from(state['savedIds'] as Set<int>);
         currentSavedIds.add(listingId);
-        emit({...state, 'message': result.message, 'savedIds': currentSavedIds});
+        emit(
+            {...state, 'message': result.message, 'savedIds': currentSavedIds});
       } else {
         emit({...state, 'message': result.message});
       }
@@ -75,7 +99,8 @@ class RecentCubit extends Cubit<Map<String, dynamic>> {
         // Update savedIds in state
         final currentSavedIds = Set<int>.from(state['savedIds'] as Set<int>);
         currentSavedIds.remove(listingId);
-        emit({...state, 'message': result.message, 'savedIds': currentSavedIds});
+        emit(
+            {...state, 'message': result.message, 'savedIds': currentSavedIds});
       } else {
         emit({...state, 'message': result.message});
       }

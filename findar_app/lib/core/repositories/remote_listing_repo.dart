@@ -243,6 +243,7 @@ class RemoteListingRepository implements ListingRepository {
     }
   }
 
+  @override
   Future<ReturnResult> toggleActiveListing(int id) async {
     print('🔍 Toggling active status for listing: $id');
 
@@ -294,6 +295,7 @@ class RemoteListingRepository implements ListingRepository {
     double? maxSqft,
     String? listedBy,
     String? sortBy,
+    OnDataUpdate<List<PropertyListing>>? onUpdate,
   }) async {
     print('🔍 Fetching filtered listings');
 
@@ -336,7 +338,9 @@ class RemoteListingRepository implements ListingRepository {
   }
 
   @override
-  Future<Map<String, List<PropertyListing>>> getUserListings() async {
+  Future<Map<String, List<PropertyListing>>> getUserListings({
+    OnDataUpdate<Map<String, List<PropertyListing>>>? onUpdate,
+  }) async {
     print('🔍 Fetching user listings');
 
     try {
@@ -400,6 +404,7 @@ class RemoteListingRepository implements ListingRepository {
   Future<List<PropertyListing>> getRecentListings({
     String? query,
     String? listingType,
+    OnDataUpdate<List<PropertyListing>>? onUpdate,
   }) async {
     try {
       final queryParams = <String, dynamic>{};
@@ -456,7 +461,9 @@ class RemoteListingRepository implements ListingRepository {
   }
 
   @override
-  Future<List<PropertyListing>> getSponsoredListings() async {
+  Future<List<PropertyListing>> getSponsoredListings({
+    OnDataUpdate<List<PropertyListing>>? onUpdate,
+  }) async {
     print('🔍 Fetching sponsored listings');
 
     try {
@@ -476,7 +483,9 @@ class RemoteListingRepository implements ListingRepository {
   }
 
   @override
-  Future<List<PropertyListing>> getSavedListings() async {
+  Future<List<PropertyListing>> getSavedListings({
+    OnDataUpdate<List<PropertyListing>>? onUpdate,
+  }) async {
     print('🔍 Fetching saved listings');
 
     try {

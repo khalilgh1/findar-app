@@ -166,7 +166,6 @@ class AuthRepository {
           message: 'Password is required',
         );
       }
-
       final response = await apiService.post(
         '/api/auth/login',
         body: {
@@ -174,7 +173,6 @@ class AuthRepository {
           'password': password,
         },
       );
-
       if (response is ReturnResult && response.state == false) {
         return ReturnResult(
           state: false,
@@ -372,6 +370,16 @@ class AuthRepository {
     return _currentUser;
   }
 
+  Future<void> fetchCurrentUser() async {
+    final response = await apiService.post('/api/auth/me' , body: {});
+
+    if( response is ReturnResult) {
+      throw 'Failed to fetch user';
+    }
+    
+    _currentUser = User.fromJson(response['data']);
+    await _userStore.saveUser(_currentUser!);
+  }
   /// Load cached user without touching the network
   Future<User?> loadCachedUser() async {
     _currentUser = await _userStore.loadUser();
@@ -389,26 +397,11 @@ class AuthRepository {
       );
 
       // Handle error response from API service
-      if (response is ReturnResult && response.state != true) {
-        print('crashed');
-        print('crashed');
-        print('crashed');
-        print('crashed');
-        if (response.message != null && response.message!.contains("email")) {
-          print ("didnt crash");    
-          print ("didnt crash");    
-          print ("didnt crash");    
-          print ("didnt crash");    
-          return ReturnResult(
-            state: false,
-            message: "email already exists",
-          );
-        }
-        final new_response = ReturnResult(
-          state: response.state,
-          message: "email already exists",
+      if (response is ReturnResult && response.state == false) {
+        return ReturnResult(
+          state: false,
+          message: response.message ?? 'uknown error',
         );
-        return new_response;
       }
 
       if (response['success'] != true) {
@@ -465,7 +458,7 @@ class AuthRepository {
       }
 
       // Cache user and tokens
-      final user = User.fromJson(response['data']);
+      final user = User.fromJson(response['data']['user']);
       _currentUser = user;
 
       await AuthManager().setTokens(

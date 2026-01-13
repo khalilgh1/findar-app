@@ -42,7 +42,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       final userData = profileState['data'] as Map<String, dynamic>?;
 
       if (userData != null) {
-        _nameController.text = userData['name'] ?? '';
+        _nameController.text = userData['username'] ?? '';
         _emailController.text = userData['email'] ?? '';
         _phoneController.text = userData['phone'] ?? '';
       }
@@ -319,6 +319,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 // Email Field
                 ProfileTextField(
                   label: l10n.emailAddress,
+                  enabled: false,
                   controller: _emailController,
                   validator: ProfileValidators.validateEmail,
                   keyboardType: TextInputType.emailAddress,

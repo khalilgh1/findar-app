@@ -1,6 +1,10 @@
 import 'package:findar/core/models/property_listing_model.dart';
 import 'package:findar/core/models/return_result.dart';
 
+/// Callback type for offline-first data updates
+/// Used by cubits to receive data updates as they become available
+typedef OnDataUpdate<T> = void Function(T data);
+
 /// Abstract repository defining all possible listing operations in the app
 abstract class ListingRepository {
   /// Create a new listing
@@ -59,6 +63,7 @@ abstract class ListingRepository {
   ///
   /// Supports filtering by location, price range, property type, building type,
   /// number of bedrooms/bathrooms, area, and sorting
+  /// [onUpdate] - Optional callback for offline-first updates (called with local data first, then remote)
   Future<List<PropertyListing>> getFilteredListings({
     double? latitude,
     double? longitude,
@@ -72,31 +77,43 @@ abstract class ListingRepository {
     double? maxSqft,
     String? listedBy,
     String? sortBy,
+    OnDataUpdate<List<PropertyListing>>? onUpdate,
   });
 
   /// Get listings created by the current user
   ///
   /// Returns both active and inactive listings
-  Future<Map<String, List<PropertyListing>>> getUserListings();
+  /// [onUpdate] - Optional callback for offline-first updates
+  Future<Map<String, List<PropertyListing>>> getUserListings({
+    OnDataUpdate<Map<String, List<PropertyListing>>>? onUpdate,
+  });
 
   /// Get recent listings
   ///
   /// Optionally filter by [query] string and [listingType] (rent/sale)
   /// Returns up to 20 most recent active listings
+  /// [onUpdate] - Optional callback for offline-first updates
   Future<List<PropertyListing>> getRecentListings({
     String? query,
     String? listingType,
+    OnDataUpdate<List<PropertyListing>>? onUpdate,
   });
 
   /// Get sponsored/boosted listings
   ///
   /// Returns listings that are marked as boosted/sponsored
-  Future<List<PropertyListing>> getSponsoredListings();
+  /// [onUpdate] - Optional callback for offline-first updates
+  Future<List<PropertyListing>> getSponsoredListings({
+    OnDataUpdate<List<PropertyListing>>? onUpdate,
+  });
 
   /// Get saved/favorite listings for the current user
   ///
   /// Returns all listings that the user has saved/favorited
-  Future<List<PropertyListing>> getSavedListings();
+  /// [onUpdate] - Optional callback for offline-first updates
+  Future<List<PropertyListing>> getSavedListings({
+    OnDataUpdate<List<PropertyListing>>? onUpdate,
+  });
 
   /// Get IDs of saved/favorite listings for the current user
   ///

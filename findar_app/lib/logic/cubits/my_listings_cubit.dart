@@ -5,6 +5,7 @@ import 'package:findar/core/repositories/abstract_listing_repo.dart';
 /// MyListingsCubit manages the current user's listings
 class MyListingsCubit extends Cubit<Map<String, dynamic>> {
   final ListingRepository repository;
+  bool _hasFetched = false;
 
   MyListingsCubit(this.repository)
       : super({
@@ -16,12 +17,28 @@ class MyListingsCubit extends Cubit<Map<String, dynamic>> {
   }
 
   /// Fetch user's listings
-  Future<void> fetchMyListings() async {
+  Future<void> fetchMyListings({bool forceRefresh = false}) async {
+    // Skip fetch if already fetched and not forcing refresh
+    if (_hasFetched && !forceRefresh) {
+      return;
+    }
+
     emit({...state, 'state': 'loading', 'message': ''});
 
     try {
-      final listings = await repository.getUserListings();
+      final listings = await repository.getUserListings(
+        onUpdate: (data) {
+          // Called first with local data, then with remote data
+          emit({
+            ...state,
+            'data': data,
+            'state': 'done',
+            'message': 'Listings loaded',
+          });
+        },
+      );
 
+      _hasFetched = true;
       emit({
         ...state,
         'data': listings,

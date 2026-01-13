@@ -27,14 +27,12 @@ class PropertyListing {
   @JsonKey(name: 'pics')
   final List<String>? additionalImages;
 
-
   @JsonKey(
     fromJson: _boolFromInt,
     toJson: _boolToInt,
   )
   final bool isOnline;
   final String? createdAt;
-
 
   @JsonKey(
     fromJson: _boolFromInt,
@@ -49,12 +47,6 @@ class PropertyListing {
   final int? ownerId;
   final String? ownerEmail;
   final String? ownerAccountType;
-
-  //sqlite stores bool as int 0/1, so we need to convert
-  @JsonKey(
-    fromJson: _boolFromInt,
-    toJson: _boolToInt,
-  )
 
   const PropertyListing({
     required this.id,
@@ -81,12 +73,18 @@ class PropertyListing {
     this.ownerAccountType,
   });
 
-  factory PropertyListing.fromJson(Map<String, dynamic> json) => 
+  factory PropertyListing.fromJson(Map<String, dynamic> json) =>
       _$PropertyListingFromJson(json);
 
   Map<String, dynamic> toJson() => _$PropertyListingToJson(this);
 
-  static bool _boolFromInt(int value) => value == 1;
+  /// Converts int or bool value to bool (SQLite stores bools as int 0/1)
+  static bool _boolFromInt(dynamic value) {
+    if (value is bool) return value;
+    if (value is int) return value == 1;
+    return false;
+  }
+
   static int _boolToInt(bool value) => value ? 1 : 0;
 
   PropertyListing copyWith({

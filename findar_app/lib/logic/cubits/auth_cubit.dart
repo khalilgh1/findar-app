@@ -1,3 +1,4 @@
+import 'package:findar/core/services/auth_service.dart';
 import 'package:findar/core/services/findar_api_service.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -5,7 +6,7 @@ import 'package:findar/core/repositories/auth_repository.dart';
 import 'package:findar/core/services/notification_service.dart';
 
 /// AuthCubit handles all authentication operations
-/// 
+///
 /// State structure:
 /// {
 ///   'data': User | null,          // Current logged-in user
@@ -15,11 +16,7 @@ import 'package:findar/core/services/notification_service.dart';
 class AuthCubit extends Cubit<Map<String, dynamic>> {
   late final AuthRepository authRepository;
 
-  AuthCubit() : super({
-    'data': null,
-    'state': 'initial',
-    'message': ''
-  }) {
+  AuthCubit() : super({'data': null, 'state': 'initial', 'message': ''}) {
     // Initialize repository with ApiService
     authRepository = AuthRepository(apiService: FindarApiService());
   }
@@ -30,17 +27,26 @@ class AuthCubit extends Cubit<Map<String, dynamic>> {
     try {
       final cached = await authRepository.loadCachedUser();
       if (cached != null) {
-        emit({...state, 'data': cached, 'state': 'done', 'message': 'Loaded cached user'});
+        emit({
+          ...state,
+          'data': cached,
+          'state': 'done',
+          'message': 'Loaded cached user'
+        });
       } else {
         emit({...state, 'state': 'initial', 'message': ''});
       }
     } catch (e) {
-      emit({...state, 'state': 'error', 'message': 'Failed to load cached user: ${e.toString()}'});
+      emit({
+        ...state,
+        'state': 'error',
+        'message': 'Failed to load cached user: ${e.toString()}'
+      });
     }
   }
 
   /// Register new user
-  /// 
+  ///
   /// Validates input, calls repository, emits states
   /// - Loading state shown to UI
   /// - Success/error states with messages
@@ -52,11 +58,7 @@ class AuthCubit extends Cubit<Map<String, dynamic>> {
     required String accountType,
   }) async {
     // 1. Show loading state
-    emit({
-      ...state,
-      'state': 'loading',
-      'message': ''
-    });
+    emit({...state, 'state': 'loading', 'message': ''});
 
     try {
       // 2. Call repository method (returns ReturnResult)
@@ -74,20 +76,21 @@ class AuthCubit extends Cubit<Map<String, dynamic>> {
         final user = authRepository.getCurrentUser();
 
         await NotificationService.registerDeviceAfterLogin();
-        await FirebaseMessaging.instance.subscribeToTopic(user!.accountType == 'agency' ? 'agency' : 'individual');
-     
+        await FirebaseMessaging.instance.subscribeToTopic(
+            user!.accountType == 'agency' ? 'agency' : 'individual');
+
         emit({
           ...state,
           'data': user,
           'state': 'done',
-          'message': result.message,  // "Registration successful"
+          'message': result.message, // "Registration successful"
         });
       } else {
         // Failure: show error message
         emit({
           ...state,
           'state': 'error',
-          'message': result.message,  // Validation or API error
+          'message': result.message, // Validation or API error
         });
       }
     } catch (e) {
@@ -100,21 +103,15 @@ class AuthCubit extends Cubit<Map<String, dynamic>> {
     }
   }
 
-  
-
   /// Login user
-  /// 
+  ///
   /// Validates email/password, calls repository, emits states
   Future<void> login({
     required String email,
     required String password,
   }) async {
     // 1. Show loading state
-    emit({
-      ...state,
-      'state': 'loading',
-      'message': ''
-    });
+    emit({...state, 'state': 'loading', 'message': ''});
 
     try {
       // 2. Call repository method
@@ -126,15 +123,16 @@ class AuthCubit extends Cubit<Map<String, dynamic>> {
       if (result.state) {
         // Success
         final user = authRepository.getCurrentUser();
-        
+
         // Register device token for notifications after successful login
         await NotificationService.registerDeviceAfterLogin();
-        await FirebaseMessaging.instance.subscribeToTopic(user!.accountType == 'agency' ? 'agency' : 'individual');
+        await FirebaseMessaging.instance.subscribeToTopic(
+            user!.accountType == 'agency' ? 'agency' : 'individual');
         emit({
           ...state,
           'data': user,
           'state': 'done',
-          'message': result.message,  // "Login successful"
+          'message': result.message, // "Login successful"
         });
       } else {
         // Failure
@@ -156,11 +154,7 @@ class AuthCubit extends Cubit<Map<String, dynamic>> {
   /// Logout user
   /// Clears user data and token
   Future<void> logout() async {
-    emit({
-      ...state,
-      'state': 'loading',
-      'message': ''
-    });
+    emit({...state, 'state': 'loading', 'message': ''});
 
     try {
       final result = await authRepository.logout();
@@ -190,11 +184,7 @@ class AuthCubit extends Cubit<Map<String, dynamic>> {
   /// Get user profile
   /// Fetches current logged-in user profile
   Future<void> getProfile() async {
-    emit({
-      ...state,
-      'state': 'loading',
-      'message': ''
-    });
+    emit({...state, 'state': 'loading', 'message': ''});
 
     try {
       final result = await authRepository.getProfile();
@@ -224,18 +214,14 @@ class AuthCubit extends Cubit<Map<String, dynamic>> {
   }
 
   /// Update user profile
-  /// 
+  ///
   /// Parameters are optional - only provided fields will be updated
   Future<void> updateProfile({
     String? name,
     String? phone,
     String? profilePic,
   }) async {
-    emit({
-      ...state,
-      'state': 'loading',
-      'message': ''
-    });
+    emit({...state, 'state': 'loading', 'message': ''});
 
     try {
       final result = await authRepository.updateProfile(
@@ -363,6 +349,11 @@ class AuthCubit extends Cubit<Map<String, dynamic>> {
   }
 
   /// Complete registration by verifying OTP
+
+  Future<void> fetchCurrentUser() async {
+    await authRepository.fetchCurrentUser();
+  }
+
   Future<void> completeRegister({
     required dynamic data,
     required String otp,
@@ -388,8 +379,12 @@ class AuthCubit extends Cubit<Map<String, dynamic>> {
         // Success: get current user from repository
         final user = authRepository.getCurrentUser();
 
+        print("here 1 ");
         await NotificationService.registerDeviceAfterLogin();
-        await FirebaseMessaging.instance.subscribeToTopic(user!.accountType == 'agency' ? 'agency' : 'individual');
+        print("here 2 ");
+        await FirebaseMessaging.instance.subscribeToTopic(
+            user!.accountType == 'agency' ? 'agency' : 'individual');
+        print("here 3 ");
 
         emit({
           ...state,

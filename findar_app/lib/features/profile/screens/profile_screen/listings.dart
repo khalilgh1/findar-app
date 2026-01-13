@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:findar/l10n/app_localizations.dart';
 
@@ -42,34 +43,7 @@ class ListingCard extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
-            child: imageUrl.startsWith('http')
-                ? Image.network(
-                    imageUrl,
-                    height: 140,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        height: 140,
-                        color: Colors.grey[300],
-                        child:
-                            Icon(Icons.broken_image, color: Colors.grey[600]),
-                      );
-                    },
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) return child;
-                      return SizedBox(
-                        height: 140,
-                        child: Center(child: CircularProgressIndicator()),
-                      );
-                    },
-                  )
-                : Image.asset(
-                    imagePath,
-                    height: 140,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                  ),
+            child: _buildListingImage(imageUrl),
           ),
           Padding(
             padding: const EdgeInsets.all(10.0),
@@ -128,5 +102,53 @@ class ListingCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Widget _buildListingImage(String imageUrl) {
+    if (imageUrl.startsWith('http')) {
+      return Image.network(
+        imageUrl,
+        height: 140,
+        width: double.infinity,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            height: 140,
+            color: Colors.grey[300],
+            child: Icon(Icons.broken_image, color: Colors.grey[600]),
+          );
+        },
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return SizedBox(
+            height: 140,
+            child: Center(child: CircularProgressIndicator()),
+          );
+        },
+      );
+    } else if (imageUrl.startsWith('/') || imageUrl.contains('\\')) {
+      // Local file path
+      final file = File(imageUrl);
+      return Image.file(
+        file,
+        height: 140,
+        width: double.infinity,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            height: 140,
+            color: Colors.grey[300],
+            child: Icon(Icons.broken_image, color: Colors.grey[600]),
+          );
+        },
+      );
+    } else {
+      return Image.asset(
+        imageUrl,
+        height: 140,
+        width: double.infinity,
+        fit: BoxFit.cover,
+      );
+    }
   }
 }

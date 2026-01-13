@@ -12,6 +12,7 @@ import 'package:findar/core/services/auth_manager.dart';
 /// Handles all HTTP-level errors and response parsing
 /// Automatically refreshes tokens when they expire
 class FindarApiService {
+  // Create client with followRedirects enabled
   final http.Client _client = http.Client();
   final AuthService _authService = AuthService();
 
@@ -249,6 +250,15 @@ class FindarApiService {
     if (response.statusCode >= 200 && response.statusCode < 300) {
       if (response.body.isEmpty) return true; // ✅ FIX
       return jsonDecode(response.body);
+    }
+
+    // REDIRECT (3xx) - http.Client should follow these automatically
+    // If we reach here with 3xx, it means max redirects were exceeded
+    if (response.statusCode >= 300 && response.statusCode < 400) {
+      return ReturnResult(
+        state: false,
+        message: 'Too many redirects (${response.statusCode})',
+      );
     }
 
     // 401
