@@ -274,6 +274,7 @@ class DummyListingRepository implements ListingRepository {
     double? maxSqft,
     String? listedBy,
     String? sortBy,
+    OnDataUpdate<List<PropertyListing>>? onUpdate,
   }) async {
     // Simulate network delay
     await Future.delayed(const Duration(milliseconds: 800));
@@ -314,7 +315,9 @@ class DummyListingRepository implements ListingRepository {
   }
 
   @override
-  Future<Map<String, List<PropertyListing>>> getUserListings() async {
+  Future<Map<String, List<PropertyListing>>> getUserListings({
+    OnDataUpdate<Map<String, List<PropertyListing>>>? onUpdate,
+  }) async {
     // Simulate network delay
     await Future.delayed(const Duration(milliseconds: 600));
 
@@ -333,6 +336,7 @@ class DummyListingRepository implements ListingRepository {
   Future<List<PropertyListing>> getRecentListings({
     String? query,
     String? listingType,
+    OnDataUpdate<List<PropertyListing>>? onUpdate,
   }) async {
     // Simulate network delay
     await Future.delayed(const Duration(milliseconds: 600));
@@ -374,7 +378,9 @@ class DummyListingRepository implements ListingRepository {
   }
 
   @override
-  Future<List<PropertyListing>> getSponsoredListings() async {
+  Future<List<PropertyListing>> getSponsoredListings({
+    OnDataUpdate<List<PropertyListing>>? onUpdate,
+  }) async {
     // Simulate network delay
     await Future.delayed(const Duration(milliseconds: 600));
 
@@ -456,7 +462,9 @@ class DummyListingRepository implements ListingRepository {
   }
 
   @override
-  Future<List<PropertyListing>> getSavedListings() async {
+  Future<List<PropertyListing>> getSavedListings({
+    OnDataUpdate<List<PropertyListing>>? onUpdate,
+  }) async {
     // Simulate network delay
     await Future.delayed(const Duration(milliseconds: 500));
 
@@ -485,8 +493,6 @@ class DummyListingRepository implements ListingRepository {
   Future<ReturnResult> toggleActiveListing(int id) async {
     throw UnimplementedError();
   }
-  
-  
 
   /// Reset to initial dummy data
   void resetToInitialData() {

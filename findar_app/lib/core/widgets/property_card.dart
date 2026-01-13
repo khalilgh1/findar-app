@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -133,8 +135,8 @@ class PropertyListingCard extends StatelessWidget {
                   Positioned(
                     top: screenHeight * 0.015,
                     right: screenWidth * 0.03,
-            child:
-              _buildMenuButton(context, screenWidth, colorScheme, l10n),
+                    child: _buildMenuButton(
+                        context, screenWidth, colorScheme, l10n),
                   )
                 else
                   // Save/Bookmark Button (only show when menu is not shown)
@@ -411,21 +413,68 @@ class PropertyListingCard extends StatelessWidget {
     return SizedBox(
       height: height,
       width: width,
-      child: Image.network(
-        listing.image,
+      child: _buildImageWidget(
+          listing.image, height, width, colorScheme, screenWidth),
+    );
+  }
+
+  /// Build the appropriate image widget based on the image path
+  Widget _buildImageWidget(String imagePath, double height, double width,
+      ColorScheme colorScheme, double screenWidth) {
+    // Check if it's a network URL
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+      return Image.network(
+        imagePath,
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) {
-          return Container(
-            color: colorScheme.secondary.withOpacity(0.3),
-            child: Center(
-              child: Icon(
-                Icons.home,
-                size: screenWidth * 0.12,
-                color: colorScheme.onSecondary,
-              ),
-            ),
-          );
+          return _buildPlaceholder(colorScheme, screenWidth);
         },
+      );
+    }
+
+    // Check if it's a local file path
+    if (imagePath.isNotEmpty && !imagePath.startsWith('assets/')) {
+      final file = File(imagePath);
+      return FutureBuilder<bool>(
+        future: file.exists(),
+        builder: (context, snapshot) {
+          if (snapshot.data == true) {
+            return Image.file(
+              file,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return _buildPlaceholder(colorScheme, screenWidth);
+              },
+            );
+          }
+          return _buildPlaceholder(colorScheme, screenWidth);
+        },
+      );
+    }
+
+    // Asset image or fallback to placeholder
+    if (imagePath.startsWith('assets/')) {
+      return Image.asset(
+        imagePath,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return _buildPlaceholder(colorScheme, screenWidth);
+        },
+      );
+    }
+
+    return _buildPlaceholder(colorScheme, screenWidth);
+  }
+
+  Widget _buildPlaceholder(ColorScheme colorScheme, double screenWidth) {
+    return Container(
+      color: colorScheme.secondary.withOpacity(0.3),
+      child: Center(
+        child: Icon(
+          Icons.home,
+          size: screenWidth * 0.12,
+          color: colorScheme.onSecondary,
+        ),
       ),
     );
   }
@@ -436,9 +485,8 @@ class PropertyListingCard extends StatelessWidget {
     }
 
     final hasDecimals = price % 1 != 0;
-    final value = hasDecimals
-        ? price.toStringAsFixed(2)
-        : price.toStringAsFixed(0);
+    final value =
+        hasDecimals ? price.toStringAsFixed(2) : price.toStringAsFixed(0);
     final parts = value.split('.');
     final whole = parts.first.replaceAll(RegExp(r'\B(?=(\d{3})+(?!\d))'), ',');
 

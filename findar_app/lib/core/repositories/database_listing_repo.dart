@@ -1,8 +1,13 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:findar/data/dbhelper.dart';
 import 'package:findar/core/models/property_listing_model.dart';
 import 'package:findar/core/models/return_result.dart';
 import 'package:findar/core/repositories/abstract_listing_repo.dart';
 import 'package:findar/core/repositories/local_user_store.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as p;
 
 class LocalListingRepository implements ListingRepository {
   final db = DatabaseHelper.instance;
@@ -10,33 +15,102 @@ class LocalListingRepository implements ListingRepository {
 
   final LocalUserStore _userStore;
 
-  // Dummy in-memory saved listing IDs
-  // kahlil thala fiha
+  // Cached saved listing IDs
   Set<int>? _savedIdsCache;
-  Set<int>? _myListingIdsCache;
 
   LocalListingRepository({LocalUserStore? userStore})
       : _userStore = userStore ?? LocalUserStore();
 
   Future<void> _ensureCachesLoaded() async {
     _savedIdsCache ??= await _userStore.loadSavedIds();
-    _myListingIdsCache ??= await _userStore.loadMyListingIds();
   }
 
-  /// Converts database row field names to the API field names expected by PropertyListing.fromJson
-  /// Database uses: classification, property_type, image
-  /// API/Model expects: listing_type, building_type, main_pic
-  Map<String, dynamic> _mapDbRowToApiFormat(Map<String, dynamic> row) {
-    return {
-      ...row,
-      'listing_type': row['classification'] ?? row['listing_type'] ?? 'sale',
-      'building_type': row['property_type'] ?? row['building_type'] ?? 'apartment',
-      'main_pic': row['image'] ?? row['main_pic'] ?? '',
-      'location': row['location'] ?? 'Unknown',
-      'owner_name': row['ownerName'] ?? row['owner_name'],
-      'owner_image': row['ownerImage'] ?? row['owner_image'],
-      'owner_phone': row['ownerPhone'] ?? row['owner_phone'],
-    };
+  /// Get current user ID from SharedPreferences
+  /// If no user exists, seeds a debug user for local testing
+  Future<int> _getCurrentUserId() async {
+    var user = await _userStore.loadUser();
+    if (user == null) {
+      // Seed a debug user for local testing
+      user = await _userStore.seedDebugUser(savedIds: {});
+      // Also save the user to the local database
+      await db.insertOrUpdateUser({
+        'id': user.id,
+        'username': user.username,
+        'email': user.email,
+        'phone': user.phone,
+        'profile_pic': user.profilePic,
+        'account_type': user.accountType,
+        'credits': user.credits,
+      });
+    }
+    return user.id;
+  }
+
+  /// Copy an image file to the app's local storage directory
+  /// Returns the new local path
+  Future<String> _saveImageLocally(String sourcePath) async {
+    // If already a local app path, return as-is
+    if (sourcePath.contains('app_flutter') ||
+        sourcePath.startsWith('assets/')) {
+      return sourcePath;
+    }
+
+    try {
+      final appDir = await getApplicationDocumentsDirectory();
+      final imagesDir = Directory('${appDir.path}/listing_images');
+      if (!await imagesDir.exists()) {
+        await imagesDir.create(recursive: true);
+      }
+
+      final fileName =
+          '${DateTime.now().millisecondsSinceEpoch}_${p.basename(sourcePath)}';
+      final newPath = '${imagesDir.path}/$fileName';
+
+      final sourceFile = File(sourcePath);
+      if (await sourceFile.exists()) {
+        await sourceFile.copy(newPath);
+        return newPath;
+      }
+    } catch (e) {
+      print('Error saving image locally: $e');
+    }
+    return sourcePath;
+  }
+
+  /// Converts database row to include owner information from users table
+  Future<Map<String, dynamic>> _enrichWithOwnerInfo(
+      Map<String, dynamic> row) async {
+    final enriched = Map<String, dynamic>.from(row);
+
+    // Convert SQLite integer booleans to proper format for PropertyListing.fromJson
+    // The model expects 'is_online' and 'is_boosted' as integers (0 or 1)
+    enriched['is_online'] = row['active'] ?? 1;
+    enriched['is_boosted'] = row['boosted'] ?? 0;
+
+    // Parse pics JSON array if present
+    if (row['pics'] != null && row['pics'] is String) {
+      try {
+        enriched['pics'] = jsonDecode(row['pics'] as String);
+      } catch (_) {
+        enriched['pics'] = <String>[];
+      }
+    }
+
+    // Fetch owner information if owner_id is present
+    final ownerId = row['owner_id'];
+    if (ownerId != null) {
+      final owner = await db.getUserById(ownerId as int);
+      if (owner != null) {
+        enriched['owner_id'] = owner['id'];
+        enriched['owner_name'] = owner['username'];
+        enriched['owner_email'] = owner['email'];
+        enriched['owner_phone'] = owner['phone'];
+        enriched['owner_image'] = owner['profile_pic'];
+        enriched['owner_account_type'] = owner['account_type'];
+      }
+    }
+
+    return enriched;
   }
 
   @override
@@ -57,29 +131,52 @@ class LocalListingRepository implements ListingRepository {
     double? area,
   }) async {
     try {
+      // Get current user ID for owner_id (will auto-seed if needed)
+      final ownerId = await _getCurrentUserId();
+
+      // Map classification to backend values
+      String listingType = classification.toLowerCase();
+      if (listingType == 'for sale') listingType = 'sale';
+      if (listingType == 'for rent') listingType = 'rent';
+
+      // Save images locally
+      final localMainImage = await _saveImageLocally(image);
+      List<String>? localAdditionalImages;
+      if (additionalImages != null && additionalImages.isNotEmpty) {
+        localAdditionalImages = [];
+        for (final img in additionalImages) {
+          localAdditionalImages.add(await _saveImageLocally(img));
+        }
+      }
+
       final row = {
         "title": title,
         "description": description,
         "price": price,
-        "location": location,
+        "address": location,
         "bedrooms": bedrooms,
         "bathrooms": bathrooms,
-        "classification": classification,
-        "property_type": propertyType,
-        "image": image,
-        "is_online": 1,
-        "is_boosted": 0,
+        "livingrooms": livingrooms,
+        "area": area,
+        "listing_type": listingType,
+        "building_type": propertyType.toLowerCase(),
+        "main_pic": localMainImage,
+        "pics": localAdditionalImages != null
+            ? jsonEncode(localAdditionalImages)
+            : null,
+        "active": 1,
+        "boosted": 0,
         "created_at": DateTime.now().toIso8601String(),
+        "latitude": latitude,
+        "longitude": longitude,
+        "owner_id": ownerId,
       };
 
       final newId = await db.insert(table, row);
-
-      await _ensureCachesLoaded();
-      _myListingIdsCache!.add(newId);
-      await _userStore.saveMyListingIds(_myListingIdsCache!);
-      print("New listing created with ID: $newId");
+      print("New listing created with ID: $newId, owner_id: $ownerId");
       return ReturnResult(state: true, message: "Listing created.");
     } catch (e) {
+      print("Error creating listing: $e");
       return ReturnResult(state: false, message: e.toString());
     }
   }
@@ -99,19 +196,26 @@ class LocalListingRepository implements ListingRepository {
     bool? isOnline,
   }) async {
     try {
+      // Map classification to backend values if provided
+      String? listingType;
+      if (classification != null) {
+        listingType = classification.toLowerCase();
+        if (listingType == 'for sale') listingType = 'sale';
+        if (listingType == 'for rent') listingType = 'rent';
+      }
+
       final row = {
         "id": id,
         if (title != null) "title": title,
         if (description != null) "description": description,
         if (price != null) "price": price,
-        if (location != null) "location": location,
+        if (location != null) "address": location,
         if (bedrooms != null) "bedrooms": bedrooms,
         if (bathrooms != null) "bathrooms": bathrooms,
-        if (classification != null) "classification": classification,
-        if (propertyType != null) "property_type": propertyType,
-        if (image != null) "image": image,
-        if (isOnline != null) "is_online": isOnline ? 1 : 0,
-        "updated_at": DateTime.now().toIso8601String(),
+        if (listingType != null) "listing_type": listingType,
+        if (propertyType != null) "building_type": propertyType.toLowerCase(),
+        if (image != null) "main_pic": image,
+        if (isOnline != null) "active": isOnline ? 1 : 0,
       };
 
       await db.update(table, row);
@@ -125,9 +229,7 @@ class LocalListingRepository implements ListingRepository {
   Future<ReturnResult> deleteListing(int id) async {
     try {
       await _ensureCachesLoaded();
-      _myListingIdsCache!.remove(id);
       _savedIdsCache!.remove(id);
-      await _userStore.saveMyListingIds(_myListingIdsCache!);
       await _userStore.saveSavedIds(_savedIdsCache!);
 
       await db.delete(table, id);
@@ -147,20 +249,19 @@ class LocalListingRepository implements ListingRepository {
       }
 
       final listing = results.first;
-      // Toggle the is_online value
-      final currentStatus = listing['is_online'] == 1;
+      // Toggle the active value (uses 'active' column now)
+      final currentStatus = listing['active'] == 1;
       final newStatus = !currentStatus;
 
       await db.update(table, {
         'id': id,
-        'is_online': newStatus ? 1 : 0,
-        'updated_at': DateTime.now().toIso8601String(),
+        'active': newStatus ? 1 : 0,
       });
 
       return ReturnResult(
-        state: true, 
-        message: "Listing status updated to ${newStatus ? 'online' : 'offline'}."
-      );
+          state: true,
+          message:
+              "Listing status updated to ${newStatus ? 'active' : 'inactive'}.");
     } catch (e) {
       return ReturnResult(state: false, message: e.toString());
     }
@@ -180,8 +281,9 @@ class LocalListingRepository implements ListingRepository {
     double? maxSqft,
     String? listedBy,
     String? sortBy,
+    OnDataUpdate<List<PropertyListing>>? onUpdate,
   }) async {
-    String where = "1=1";
+    String where = "active = 1";
     List<Object?> args = [];
 
     if (minPrice != null) {
@@ -195,13 +297,13 @@ class LocalListingRepository implements ListingRepository {
     }
 
     if (listingType != null) {
-      where += " AND classification = ?";
-      args.add(listingType);
+      where += " AND listing_type = ?";
+      args.add(listingType.toLowerCase());
     }
 
     if (buildingType != null) {
-      where += " AND property_type = ?";
-      args.add(buildingType);
+      where += " AND building_type = ?";
+      args.add(buildingType.toLowerCase());
     }
 
     if (numBedrooms != null) {
@@ -214,32 +316,52 @@ class LocalListingRepository implements ListingRepository {
       args.add(numBathrooms);
     }
 
+    if (minSqft != null) {
+      where += " AND area >= ?";
+      args.add(minSqft);
+    }
+
+    if (maxSqft != null) {
+      where += " AND area <= ?";
+      args.add(maxSqft);
+    }
+
     final rows = await db.query(table, where: where, whereArgs: args);
-    return rows.map((r) => PropertyListing.fromJson(_mapDbRowToApiFormat(r))).toList();
+
+    final listings = <PropertyListing>[];
+    for (final row in rows) {
+      final enriched = await _enrichWithOwnerInfo(row);
+      listings.add(PropertyListing.fromJson(enriched));
+    }
+    return listings;
   }
 
   @override
-  Future<Map<String, List<PropertyListing>>> getUserListings() async {
-    await _ensureCachesLoaded();
-    final myIds = _myListingIdsCache!;
-    if (myIds.isEmpty) {
-      return {
-        "active": const [],
-        "inactive": const [],
-      };
-    }
+  Future<Map<String, List<PropertyListing>>> getUserListings({
+    OnDataUpdate<Map<String, List<PropertyListing>>>? onUpdate,
+  }) async {
+    // Get current user's ID (will auto-seed if needed)
+    final ownerId = await _getCurrentUserId();
 
-    final placeholders = List.filled(myIds.length, '?').join(',');
+    // Query listings where owner_id matches current user
     final rows = await db.query(
       table,
-      where: "id IN ($placeholders)",
-      whereArgs: myIds.toList(),
+      where: "owner_id = ?",
+      whereArgs: [ownerId],
     );
-    final list = rows.map((r) => PropertyListing.fromJson(_mapDbRowToApiFormat(r))).toList();
+
+    print(
+        "getUserListings: Found ${rows.length} listings for owner_id: $ownerId");
+
+    final listings = <PropertyListing>[];
+    for (final row in rows) {
+      final enriched = await _enrichWithOwnerInfo(row);
+      listings.add(PropertyListing.fromJson(enriched));
+    }
 
     return {
-      "active": list.where((e) => e.isOnline).toList(),
-      "inactive": list.where((e) => !e.isOnline).toList(),
+      "active": listings.where((e) => e.isOnline).toList(),
+      "inactive": listings.where((e) => !e.isOnline).toList(),
     };
   }
 
@@ -247,8 +369,9 @@ class LocalListingRepository implements ListingRepository {
   Future<List<PropertyListing>> getRecentListings({
     String? query,
     String? listingType,
+    OnDataUpdate<List<PropertyListing>>? onUpdate,
   }) async {
-    String where = "1=1";
+    String where = "active = 1";
     List<Object?> args = [];
 
     if (query != null && query.isNotEmpty) {
@@ -256,11 +379,9 @@ class LocalListingRepository implements ListingRepository {
       args.add("%$query%");
     }
     if (listingType != null) {
-      where += " AND classification = ?";
-      args.add(listingType);
+      where += " AND listing_type = ?";
+      args.add(listingType.toLowerCase());
     }
-
-    where += " AND is_online = 1";
 
     final rows = await db.rawQuery("""
       SELECT * FROM $table 
@@ -269,22 +390,37 @@ class LocalListingRepository implements ListingRepository {
       LIMIT 20
     """, args);
 
-    return rows.map((r) => PropertyListing.fromJson(_mapDbRowToApiFormat(r))).toList();
+    final listings = <PropertyListing>[];
+    for (final row in rows) {
+      final enriched = await _enrichWithOwnerInfo(row);
+      listings.add(PropertyListing.fromJson(enriched));
+    }
+    return listings;
   }
 
   @override
-  Future<List<PropertyListing>> getSponsoredListings() async {
-    final rows = await db.query(table, where: "is_boosted = ?", whereArgs: [1]);
+  Future<List<PropertyListing>> getSponsoredListings({
+    OnDataUpdate<List<PropertyListing>>? onUpdate,
+  }) async {
+    final rows = await db
+        .query(table, where: "boosted = ? AND active = ?", whereArgs: [1, 1]);
 
-    return rows.map((r) => PropertyListing.fromJson(_mapDbRowToApiFormat(r))).toList();
+    final listings = <PropertyListing>[];
+    for (final row in rows) {
+      final enriched = await _enrichWithOwnerInfo(row);
+      listings.add(PropertyListing.fromJson(enriched));
+    }
+    return listings;
   }
 
   // ----------------------------------------------------------------
-  // SAVED LISTINGS — dummy list ONLY (as requested)
+  // SAVED LISTINGS — stored in SharedPreferences
   // ----------------------------------------------------------------
 
   @override
-  Future<List<PropertyListing>> getSavedListings() async {
+  Future<List<PropertyListing>> getSavedListings({
+    OnDataUpdate<List<PropertyListing>>? onUpdate,
+  }) async {
     await _ensureCachesLoaded();
     final savedIds = _savedIdsCache!;
     if (savedIds.isEmpty) return [];
@@ -296,7 +432,12 @@ class LocalListingRepository implements ListingRepository {
       whereArgs: savedIds.toList(),
     );
 
-    return rows.map((r) => PropertyListing.fromJson(_mapDbRowToApiFormat(r))).toList();
+    final listings = <PropertyListing>[];
+    for (final row in rows) {
+      final enriched = await _enrichWithOwnerInfo(row);
+      listings.add(PropertyListing.fromJson(enriched));
+    }
+    return listings;
   }
 
   @override
@@ -307,6 +448,15 @@ class LocalListingRepository implements ListingRepository {
 
   @override
   Future<ReturnResult> saveListing(int listingId) async {
+    // Check if this is the user's own listing
+    final ownerId = await _getCurrentUserId();
+    final listing =
+        await db.query(table, where: "id = ?", whereArgs: [listingId]);
+    if (listing.isNotEmpty && listing.first['owner_id'] == ownerId) {
+      return ReturnResult(
+          state: false, message: "You cannot save your own listing.");
+    }
+
     await _ensureCachesLoaded();
     _savedIdsCache!.add(listingId);
     await _userStore.saveSavedIds(_savedIdsCache!);
@@ -325,9 +475,24 @@ class LocalListingRepository implements ListingRepository {
   Future<PropertyListing?> getListingById(int id) async {
     final rows = await db.query(table, where: "id = ?", whereArgs: [id]);
     if (rows.isNotEmpty) {
-      return PropertyListing.fromJson(_mapDbRowToApiFormat(rows.first));
+      final enriched = await _enrichWithOwnerInfo(rows.first);
+      return PropertyListing.fromJson(enriched);
     }
     return null;
+  }
+
+  /// Save a user to the local database
+  Future<void> saveUserToDb(Map<String, dynamic> userData) async {
+    await db.insertOrUpdateUser({
+      'id': userData['id'],
+      'username': userData['username'] ?? userData['name'] ?? '',
+      'email': userData['email'] ?? '',
+      'phone': userData['phone'] ?? '',
+      'profile_pic': userData['profile_pic'] ?? userData['profilePic'],
+      'account_type':
+          userData['account_type'] ?? userData['accountType'] ?? 'normal',
+      'credits': userData['credits'] ?? 0,
+    });
   }
 
   //a method to clear all cached listings from the local database

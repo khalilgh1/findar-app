@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:findar/l10n/app_localizations.dart';
 
@@ -87,36 +88,7 @@ class SimilarPropertyCard extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-            child: imageUrl.startsWith('http')
-                ? Image.network(
-                    imageUrl,
-                    height: 100,
-                    width: 160,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        height: 100,
-                        width: 160,
-                        color: Colors.grey[300],
-                        child:
-                            Icon(Icons.broken_image, color: Colors.grey[600]),
-                      );
-                    },
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) return child;
-                      return SizedBox(
-                        height: 100,
-                        width: 160,
-                        child: Center(child: CircularProgressIndicator()),
-                      );
-                    },
-                  )
-                : Image.asset(
-                    imageUrl,
-                    height: 100,
-                    width: 160,
-                    fit: BoxFit.cover,
-                  ),
+            child: _buildSimilarPropertyImage(imageUrl),
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -163,6 +135,57 @@ class SimilarPropertyCard extends StatelessWidget {
     }
 
     return '$whole DZD';
+  }
+
+  Widget _buildSimilarPropertyImage(String imageUrl) {
+    if (imageUrl.startsWith('http')) {
+      return Image.network(
+        imageUrl,
+        height: 100,
+        width: 160,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            height: 100,
+            width: 160,
+            color: Colors.grey[300],
+            child: Icon(Icons.broken_image, color: Colors.grey[600]),
+          );
+        },
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return SizedBox(
+            height: 100,
+            width: 160,
+            child: Center(child: CircularProgressIndicator()),
+          );
+        },
+      );
+    } else if (imageUrl.startsWith('/') || imageUrl.contains('\\')) {
+      // Local file path
+      final file = File(imageUrl);
+      return Image.file(
+        file,
+        height: 100,
+        width: 160,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            height: 100,
+            width: 160,
+            color: Colors.grey[300],
+            child: Icon(Icons.broken_image, color: Colors.grey[600]),
+          );
+        },
+      );
+    } else {
+      return Image.asset(
+        imageUrl,
+        height: 100,
+        width: 160,
+        fit: BoxFit.cover,
+      );
+    }
   }
 }
 

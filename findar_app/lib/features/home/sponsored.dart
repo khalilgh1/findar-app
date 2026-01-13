@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'package:findar/logic/cubits/home/sponsored_listings.dart';
@@ -39,7 +40,7 @@ class _PropertyCardState extends State<PropertyCard> {
       // Currently saved, so unsave it
       print('Unsaving listing ${widget.property.id}');
       final result = await cubit.unsaveListing(widget.property.id);
-      
+
       // Only update UI if successful
       if (result.state) {
         setState(() {
@@ -52,7 +53,7 @@ class _PropertyCardState extends State<PropertyCard> {
       // Currently not saved, so save it
       print('Saving listing ${widget.property.id}');
       final result = await cubit.saveListing(widget.property.id);
-      
+
       // Only update UI if successful
       if (result.state) {
         setState(() {
@@ -85,36 +86,7 @@ class _PropertyCardState extends State<PropertyCard> {
               fit: StackFit.expand,
               children: [
                 // Dynamic image loading based on URL
-                imageUrl.startsWith('http')
-                    ? Image.network(
-                        imageUrl,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            color: Colors.grey[300],
-                            child: const Icon(
-                              Icons.broken_image,
-                              size: 50,
-                              color: Colors.grey,
-                            ),
-                          );
-                        },
-                        loadingBuilder: (context, child, loadingProgress) {
-                          if (loadingProgress == null) return child;
-                          return Center(
-                            child: CircularProgressIndicator(
-                              value: loadingProgress.expectedTotalBytes != null
-                                  ? loadingProgress.cumulativeBytesLoaded /
-                                      loadingProgress.expectedTotalBytes!
-                                  : null,
-                            ),
-                          );
-                        },
-                      )
-                    : Image.asset(
-                        imageUrl,
-                        fit: BoxFit.cover,
-                      ),
+                _buildSponsoredImage(imageUrl),
                 // Bookmark button overlay
                 Positioned(
                   right: 8,
@@ -161,17 +133,13 @@ class _PropertyCardState extends State<PropertyCard> {
                     color: theme.colorScheme.onSecondaryContainer,
                   ),
                 ),
-
                 const SizedBox(height: 4),
-
                 Text(
                   '${widget.property.price} DZD',
                   style: theme.textTheme.headlineSmall?.copyWith(
                     color: theme.colorScheme.onSecondaryContainer,
                   ),
                 ),
-
-                
                 const SizedBox(height: 2),
                 Text(
                   widget.property.address,
@@ -193,5 +161,57 @@ class _PropertyCardState extends State<PropertyCard> {
         ],
       ),
     );
+  }
+
+  Widget _buildSponsoredImage(String imageUrl) {
+    if (imageUrl.startsWith('http')) {
+      return Image.network(
+        imageUrl,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            color: Colors.grey[300],
+            child: const Icon(
+              Icons.broken_image,
+              size: 50,
+              color: Colors.grey,
+            ),
+          );
+        },
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return Center(
+            child: CircularProgressIndicator(
+              value: loadingProgress.expectedTotalBytes != null
+                  ? loadingProgress.cumulativeBytesLoaded /
+                      loadingProgress.expectedTotalBytes!
+                  : null,
+            ),
+          );
+        },
+      );
+    } else if (imageUrl.startsWith('/') || imageUrl.contains('\\')) {
+      // Local file path
+      final file = File(imageUrl);
+      return Image.file(
+        file,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            color: Colors.grey[300],
+            child: const Icon(
+              Icons.broken_image,
+              size: 50,
+              color: Colors.grey,
+            ),
+          );
+        },
+      );
+    } else {
+      return Image.asset(
+        imageUrl,
+        fit: BoxFit.cover,
+      );
+    }
   }
 }

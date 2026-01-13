@@ -74,6 +74,15 @@ class SearchCubit extends Cubit<Map<String, dynamic>> {
         maxSqft: maxSqft,
         listedBy: listedBy,
         sortBy: sortBy,
+        onUpdate: (data) {
+          // Called first with local data, then with remote data
+          emit({
+            ...state,
+            'data': data,
+            'state': 'done',
+            'message': 'Listings loaded',
+          });
+        },
       );
 
       emit({
@@ -96,7 +105,18 @@ class SearchCubit extends Cubit<Map<String, dynamic>> {
     emit({...state, 'state': 'loading', 'message': ''});
 
     try {
-      final recentListings = await repository.getRecentListings(query: query);
+      final recentListings = await repository.getRecentListings(
+        query: query,
+        onUpdate: (data) {
+          // Called first with local data, then with remote data
+          emit({
+            ...state,
+            'data': data,
+            'state': 'done',
+            'message': 'Listings loaded',
+          });
+        },
+      );
       emit({
         ...state,
         'data': recentListings,

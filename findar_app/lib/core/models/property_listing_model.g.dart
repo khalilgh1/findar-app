@@ -22,11 +22,11 @@ PropertyListing _$PropertyListingFromJson(Map<String, dynamic> json) =>
           (json['pics'] as List<dynamic>?)?.map((e) => e as String).toList(),
       isOnline: json['is_online'] == null
           ? true
-          : PropertyListing._boolFromInt((json['is_online'] as num).toInt()),
+          : PropertyListing._boolFromInt(json['is_online']),
       createdAt: json['created_at'] as String?,
       isBoosted: json['is_boosted'] == null
           ? false
-          : PropertyListing._boolFromInt((json['is_boosted'] as num).toInt()),
+          : PropertyListing._boolFromInt(json['is_boosted']),
       boostExpiryDate: json['boost_expiry_date'] == null
           ? null
           : DateTime.parse(json['boost_expiry_date'] as String),

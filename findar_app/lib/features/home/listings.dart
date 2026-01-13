@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:findar/logic/cubits/home/recent_listings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -11,6 +13,88 @@ String _imageOrDefault(String? img) {
   final s = img.trim();
   if (s.isEmpty || s.toLowerCase() == 'null') return _kDefaultImageUrl;
   return s;
+}
+
+/// Build the appropriate image widget based on the image path
+Widget _buildListingImage(String imagePath,
+    {double? width, double? height, BoxFit fit = BoxFit.cover}) {
+  // Check if it's a network URL
+  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+    return Image.network(
+      imagePath,
+      width: width,
+      height: height,
+      fit: fit,
+      errorBuilder: (context, error, stackTrace) {
+        return Container(
+          width: width,
+          height: height,
+          color: Colors.grey[300],
+          child: Icon(Icons.broken_image, color: Colors.grey[600]),
+        );
+      },
+      loadingBuilder: (context, child, loadingProgress) {
+        if (loadingProgress == null) return child;
+        return Center(
+          child: CircularProgressIndicator(
+            value: loadingProgress.expectedTotalBytes != null
+                ? loadingProgress.cumulativeBytesLoaded /
+                    loadingProgress.expectedTotalBytes!
+                : null,
+          ),
+        );
+      },
+    );
+  }
+
+  // Check if it's a local file path
+  if (imagePath.isNotEmpty && !imagePath.startsWith('assets/')) {
+    final file = File(imagePath);
+    return FutureBuilder<bool>(
+      future: file.exists(),
+      builder: (context, snapshot) {
+        if (snapshot.data == true) {
+          return Image.file(
+            file,
+            width: width,
+            height: height,
+            fit: fit,
+            errorBuilder: (context, error, stackTrace) {
+              return Container(
+                width: width,
+                height: height,
+                color: Colors.grey[300],
+                child: Icon(Icons.broken_image, color: Colors.grey[600]),
+              );
+            },
+          );
+        }
+        return Container(
+          width: width,
+          height: height,
+          color: Colors.grey[300],
+          child: Icon(Icons.image, color: Colors.grey[600]),
+        );
+      },
+    );
+  }
+
+  // Asset image
+  if (imagePath.startsWith('assets/')) {
+    return Image.asset(
+      imagePath,
+      width: width,
+      height: height,
+      fit: fit,
+    );
+  }
+
+  return Container(
+    width: width,
+    height: height,
+    color: Colors.grey[300],
+    child: Icon(Icons.image, color: Colors.grey[600]),
+  );
 }
 
 class ListingTile extends StatefulWidget {
@@ -39,7 +123,7 @@ class _ListingTileState extends State<ListingTile> {
       // Currently saved, so unsave it
       print('Unsaving listing ${widget.property.id}');
       final result = await cubit.unsaveListing(widget.property.id);
-      
+
       // Only update UI if successful
       if (result.state) {
         setState(() {
@@ -52,7 +136,7 @@ class _ListingTileState extends State<ListingTile> {
       // Currently not saved, so save it
       print('Saving listing ${widget.property.id}');
       final result = await cubit.saveListing(widget.property.id);
-      
+
       // Only update UI if successful
       if (result.state) {
         setState(() {
@@ -83,37 +167,7 @@ class _ListingTileState extends State<ListingTile> {
             width: 90,
             child: ClipRRect(
               borderRadius: const BorderRadius.all(Radius.circular(12)),
-              child: imageUrl.startsWith('http')
-                  ? Image.network(
-                      imageUrl,
-                      width: 100,
-                      height: 90,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          color: Colors.grey[300],
-                          child:
-                              Icon(Icons.broken_image, color: Colors.grey[600]),
-                        );
-                      },
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return Center(
-                          child: CircularProgressIndicator(
-                            value: loadingProgress.expectedTotalBytes != null
-                                ? loadingProgress.cumulativeBytesLoaded /
-                                    loadingProgress.expectedTotalBytes!
-                                : null,
-                          ),
-                        );
-                      },
-                    )
-                  : Image.asset(
-                      imageUrl,
-                      width: 100,
-                      height: 90,
-                      fit: BoxFit.cover,
-                    ),
+              child: _buildListingImage(imageUrl, width: 100, height: 90),
             ),
           ),
           Expanded(
@@ -126,9 +180,8 @@ class _ListingTileState extends State<ListingTile> {
                   Text(
                     widget.property.title,
                     style: theme.textTheme.headlineSmall?.copyWith(
-                      color: theme.colorScheme.onSurface,
-                      fontWeight: FontWeight.bold
-                    ),
+                        color: theme.colorScheme.onSurface,
+                        fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 4),
                   Text(

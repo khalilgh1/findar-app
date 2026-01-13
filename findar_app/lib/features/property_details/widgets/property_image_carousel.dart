@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 const String _kDefaultImageUrl =
@@ -222,6 +224,21 @@ class _PropertyImageCarouselState extends State<PropertyImageCarousel> {
           return Center(child: CircularProgressIndicator());
         },
       );
+    } else if (imageUrl.startsWith('/') || imageUrl.contains('\\')) {
+      // Local file path
+      final file = File(imageUrl);
+      return Image.file(
+        file,
+        fit: BoxFit.cover,
+        width: double.infinity,
+        height: double.infinity,
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            color: Colors.grey[300],
+            child: Icon(Icons.broken_image, size: 50, color: Colors.grey[600]),
+          );
+        },
+      );
     } else {
       return Image.asset(
         imageUrl,
@@ -305,32 +322,50 @@ class _FullScreenImageViewerState extends State<FullScreenImageViewer> {
             minScale: 0.5,
             maxScale: 4.0,
             child: Center(
-              child: imageUrl.startsWith('http')
-                  ? Image.network(
-                      imageUrl,
-                      fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          color: Colors.grey[900],
-                          child: Icon(Icons.broken_image,
-                              size: 50, color: Colors.grey[600]),
-                        );
-                      },
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return const Center(
-                          child: CircularProgressIndicator(color: Colors.white),
-                        );
-                      },
-                    )
-                  : Image.asset(
-                      imageUrl,
-                      fit: BoxFit.contain,
-                    ),
+              child: _buildFullScreenImage(imageUrl),
             ),
           );
         },
       ),
     );
+  }
+
+  Widget _buildFullScreenImage(String imageUrl) {
+    if (imageUrl.startsWith('http')) {
+      return Image.network(
+        imageUrl,
+        fit: BoxFit.contain,
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            color: Colors.grey[900],
+            child: Icon(Icons.broken_image, size: 50, color: Colors.grey[600]),
+          );
+        },
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return const Center(
+            child: CircularProgressIndicator(color: Colors.white),
+          );
+        },
+      );
+    } else if (imageUrl.startsWith('/') || imageUrl.contains('\\')) {
+      // Local file path
+      final file = File(imageUrl);
+      return Image.file(
+        file,
+        fit: BoxFit.contain,
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            color: Colors.grey[900],
+            child: Icon(Icons.broken_image, size: 50, color: Colors.grey[600]),
+          );
+        },
+      );
+    } else {
+      return Image.asset(
+        imageUrl,
+        fit: BoxFit.contain,
+      );
+    }
   }
 }

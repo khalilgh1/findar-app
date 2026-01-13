@@ -5,6 +5,7 @@ import 'package:findar/core/repositories/abstract_listing_repo.dart';
 /// State: {data: [], state: 'loading|done|error', message: '', count: 0}
 class SavedListingsCubit extends Cubit<Map<String, dynamic>> {
   final ListingRepository listingRepository;
+  bool _hasFetched = false;
 
   SavedListingsCubit(this.listingRepository)
       : super({
@@ -15,13 +16,30 @@ class SavedListingsCubit extends Cubit<Map<String, dynamic>> {
         });
 
   /// Fetch all saved listings for current user
-  Future<void> fetchSavedListings() async {
+  Future<void> fetchSavedListings({bool forceRefresh = false}) async {
+    // Skip fetch if already fetched and not forcing refresh
+    if (_hasFetched && !forceRefresh) {
+      return;
+    }
+
     emit({...state, 'state': 'loading', 'message': ''});
 
     try {
-      // Get saved listings from repository
-      final listings = await listingRepository.getSavedListings();
+      // Get saved listings from repository with onUpdate callback
+      final listings = await listingRepository.getSavedListings(
+        onUpdate: (data) {
+          // Called first with local data, then with remote data
+          emit({
+            ...state,
+            'data': data,
+            'state': 'done',
+            'message': 'Saved listings fetched successfully',
+            'count': data.length,
+          });
+        },
+      );
 
+      _hasFetched = true;
       emit({
         ...state,
         'data': listings,
@@ -44,9 +62,10 @@ class SavedListingsCubit extends Cubit<Map<String, dynamic>> {
       final result = await listingRepository.saveListing(listingId);
 
       if (result.state) {
-        // Refetch to update the list
-        await fetchSavedListings();
-        
+        // Reset _hasFetched to force refetch
+        _hasFetched = false;
+        await fetchSavedListings(forceRefresh: true);
+
         emit({
           ...state,
           'message': result.message,
@@ -70,12 +89,13 @@ class SavedListingsCubit extends Cubit<Map<String, dynamic>> {
     try {
       // Call repository to unsave the listing
       final result = await listingRepository.unsaveListing(listingId);
-      
+
       if (result.state) {
         // Remove from local state
         final currentData = state['data'] as List;
-        final updatedData = currentData.where((listing) => listing.id != listingId).toList();
-        
+        final updatedData =
+            currentData.where((listing) => listing.id != listingId).toList();
+
         emit({
           ...state,
           'data': updatedData,

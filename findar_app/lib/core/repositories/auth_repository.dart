@@ -166,7 +166,6 @@ class AuthRepository {
           message: 'Password is required',
         );
       }
-
       final response = await apiService.post(
         '/api/auth/login',
         body: {
@@ -174,7 +173,6 @@ class AuthRepository {
           'password': password,
         },
       );
-
       if (response is ReturnResult && response.state == false) {
         return ReturnResult(
           state: false,

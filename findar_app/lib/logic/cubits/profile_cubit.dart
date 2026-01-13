@@ -2,11 +2,13 @@ import 'package:findar/core/services/findar_api_service.dart';
 import 'package:findar/core/config/api_config.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:findar/core/repositories/auth_repository.dart';
+import 'package:findar/core/repositories/local_user_store.dart';
 
 /// ProfileCubit handles user profile operations
 /// State: {data: {}, state: 'loading|done|error', message: ''}
 class ProfileCubit extends Cubit<Map<String, dynamic>> {
   late final AuthRepository authRepository;
+  final LocalUserStore _userStore = LocalUserStore();
 
   ProfileCubit()
       : super({
@@ -35,7 +37,7 @@ class ProfileCubit extends Cubit<Map<String, dynamic>> {
       }
 
       // Try cached user first (offline support)
-      final cached = await authRepository.loadCachedUser();
+      var cached = await authRepository.loadCachedUser();
       if (cached != null) {
         emit({
           ...state,
@@ -46,36 +48,25 @@ class ProfileCubit extends Cubit<Map<String, dynamic>> {
         return;
       }
 
-      final result = await authRepository.getProfile();
-
-      if (result.state) {
-        // Get user data from repository
-        final user = authRepository.getCurrentUser();
-
-        emit({
-          ...state,
-          'data': user != null ? _mapUser(user) : {},
-          'state': 'done',
-          'message': result.message,
-        });
-      } else {
-        emit({
-          ...state,
-          'state': 'error',
-          'message': result.message,
-        });
-      }
+      // Try to seed a debug user for local testing
+      cached = await _userStore.seedDebugUser(savedIds: {});
+      emit({
+        ...state,
+        'data': _mapUser(cached),
+        'state': 'done',
+        'message': 'Profile loaded (debug user)',
+      });
     } catch (e) {
-      // On error, last attempt: try cached user to at least show something
-      final cached = await authRepository.loadCachedUser();
-      if (cached != null) {
+      // On error, try to seed debug user for local testing
+      try {
+        final debugUser = await _userStore.seedDebugUser(savedIds: {});
         emit({
           ...state,
-          'data': _mapUser(cached),
+          'data': _mapUser(debugUser),
           'state': 'done',
-          'message': 'Profile loaded (cached)',
+          'message': 'Profile loaded (debug user)',
         });
-      } else {
+      } catch (_) {
         emit({
           ...state,
           'state': 'error',
@@ -103,7 +94,8 @@ class ProfileCubit extends Cubit<Map<String, dynamic>> {
 
     try {
       // Use ApiConfig helper to build the endpoint
-      final response = await FindarApiService().get(ApiConfig.getUserProfile(userId));
+      final response =
+          await FindarApiService().get(ApiConfig.getUserProfile(userId));
 
       if (response is Map && response['success'] == true) {
         final user = response['user'] ?? {};
