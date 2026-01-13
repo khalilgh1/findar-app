@@ -384,7 +384,8 @@ class Profile(APIView):
         return Response({"message":"way" , "success":True , "data": {**serializer.data ,"listings":listings_data} , "listings":listings_data}, status=status.HTTP_200_OK)
     
     def put(self, request):
-        full_name = request.data.get("name")
+        print(request.data)
+        full_name = request.data.get("username")
         phone_number = request.data.get("phone")
         email = request.data.get("email")
         profile_pic = request.data.get("profile_pic")
