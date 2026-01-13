@@ -32,6 +32,37 @@ class AuthService {
     );
   }
 
+  Future<void> sendOtpcode(String email) async {
+    final res = await _client.post(
+      Uri.parse(ApiConfig.getUrl('/api/auth/send-register-otp/')),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': email}),
+    );
+
+    if (res.statusCode != 200) {
+      throw Exception('Failed to send OTP code');
+    }
+  }
+
+  Future<void> confirmEmailOtp(String email,String username , String phone , String password , String account_type String otp) async {
+    final res = await _client.post(
+      Uri.parse(ApiConfig.getUrl('/api/auth/verify-register-otp/')),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'email': email,
+        'username':username,
+        'phine' : phone,
+        'password':password,
+        "account_type":account_type,
+        'otp': otp,
+      }),
+    );
+
+    if (res.statusCode != 200) {
+      throw Exception('Invalid OTP code');
+    }
+  }
+
   Future<String?> getAccessToken() async {
     return _auth.accessToken;
   }

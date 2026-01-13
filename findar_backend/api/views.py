@@ -874,7 +874,7 @@ class PasswordResetConfirmAPI(APIView):
         otp.save()
 
         return Response(
-            {"message": "Password updated", "success": True},
+            "Password updated",
             status=status.HTTP_200_OK
         )
 
@@ -885,11 +885,14 @@ def send_register_otp(request):
     existing_user = CustomUser.objects.filter(email=email).first()
     if existing_user:
         return Response(
-            {"message": "email is already registered", "success": False},
+            "email is already registered",
             status=status.HTTP_400_BAD_REQUEST
         )
 
     code = f"{random.randint(0, 999999):06d}"
+
+    if RegisterOTP.objects.filter(email=email).exists():
+        RegisterOTP.objects.filter(email=email).delete()
 
     RegisterOTP.objects.create(
         email=email,
@@ -906,7 +909,8 @@ def send_register_otp(request):
 @api_view(["POST"])
 def verify_register_otp(request):
     email = request.data.get("email")
-    code = request.data.get("code")
+    code = request.data.get("otp")
+    print("Verifying registration OTP for email:", request.data)
 
     otp = (
         RegisterOTP.objects.filter(email=email, used=False)
@@ -916,7 +920,7 @@ def verify_register_otp(request):
 
     if not otp:
         return Response(
-            {"message": "Invalid code", "success": False},
+            "Invalid code",
             status=status.HTTP_400_BAD_REQUEST,
         )
 
@@ -924,13 +928,13 @@ def verify_register_otp(request):
         otp.used = True
         otp.save()
         return Response(
-            {"message": "Code expired", "success": False},
+            "Code expired", 
             status=status.HTTP_400_BAD_REQUEST,
         )
 
     if otp.attempts >= 5:
         return Response(
-            {"message": "Too many attempts", "success": False},
+            "Too many attempts",
             status=status.HTTP_400_BAD_REQUEST,
         )
 
@@ -938,7 +942,7 @@ def verify_register_otp(request):
         otp.attempts += 1
         otp.save()
         return Response(
-            {"message": "Invalid code", "success": False},
+            "Invalid code",
             status=status.HTTP_400_BAD_REQUEST,
         )
 

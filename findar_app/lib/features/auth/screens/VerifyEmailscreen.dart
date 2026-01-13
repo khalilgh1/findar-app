@@ -23,7 +23,6 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
 
     final RegisterData registerData =
         ModalRoute.of(context)!.settings.arguments as RegisterData;
-        // RegisterData(email: "youcef.chouki@gmail.com", name: "fdqfqf", phone: "89149891", password: "dqs8dq9sd79" , accountType: 'user');
 
     String? validateOtp(String? value) {
       if (value == null || value.isEmpty) {
@@ -98,7 +97,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
               /// VERIFY BUTTON
               BlocConsumer<AuthCubit, Map<String, dynamic>>(
                 listener: (context, state) {
-                  if (state['state'] == 'done') {
+                  if (state['state'] == true) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(
@@ -115,6 +114,12 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                       (_) => false,
                     );
                   }
+                  else {
+                    print( state );
+                    print( state['message'] );
+                    print( state['state'] );
+                  }
+
                 },
                 builder: (context, state) {
                   return ProgressButton(

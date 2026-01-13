@@ -363,7 +363,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       if (errorMessage != null) {
                         if (errorMessage.contains("email")){
                           _email_not_unique();
-                          
                         } 
                       }
                       }

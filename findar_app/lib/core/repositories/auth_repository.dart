@@ -387,26 +387,11 @@ class AuthRepository {
       );
 
       // Handle error response from API service
-      if (response is ReturnResult && response.state != true) {
-        print('crashed');
-        print('crashed');
-        print('crashed');
-        print('crashed');
-        if (response.message != null && response.message!.contains("email")) {
-          print ("didnt crash");    
-          print ("didnt crash");    
-          print ("didnt crash");    
-          print ("didnt crash");    
-          return ReturnResult(
-            state: false,
-            message: "email already exists",
-          );
-        }
-        final new_response = ReturnResult(
-          state: response.state,
-          message: "email already exists",
+      if (response is ReturnResult && response.state == false) {
+        return ReturnResult(
+          state: false,
+          message: response.message ?? 'uknown error',
         );
-        return new_response;
       }
 
       if (response['success'] != true) {
@@ -463,7 +448,7 @@ class AuthRepository {
       }
 
       // Cache user and tokens
-      final user = User.fromJson(response['data']);
+      final user = User.fromJson(response['data']['user']);
       _currentUser = user;
 
       await AuthManager().setTokens(
