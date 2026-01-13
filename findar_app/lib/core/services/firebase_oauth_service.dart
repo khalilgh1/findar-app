@@ -69,7 +69,7 @@ class FirebaseOAuthService {
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       
       if (googleUser == null) {
-        throw Exception('Google sign-in cancelled');
+        throw 'Google sign-in cancelled';
       }
 
       final GoogleSignInAuthentication googleAuth =
@@ -90,7 +90,7 @@ class FirebaseOAuthService {
       }
     } catch (e) {
       print(e);
-      throw Exception('Google sign-in failed: $e');
+      throw '$e';
     }
   }
 
@@ -101,7 +101,7 @@ class FirebaseOAuthService {
     String? email,
   ) async {
     if (idToken == null) {
-      throw Exception('No ID token received');
+      throw 'No ID token received';
     }
 
     try {
@@ -115,8 +115,12 @@ class FirebaseOAuthService {
         }),
       );
 
+      if (res.statusCode == 401) {
+        throw 'Firebase authentication failed';
+      }
+
       if (res.statusCode != 200) {
-        throw Exception('Backend authentication failed');
+        throw 'Backend authentication failed';
       }
 
       final json = jsonDecode(res.body);
@@ -125,7 +129,7 @@ class FirebaseOAuthService {
       );
 
     } catch (e) {
-      throw Exception('Backend authentication error: $e');
+      throw '$e';
     }
   }
 

@@ -44,7 +44,7 @@ class AuthService {
     }
   }
 
-  Future<void> confirmEmailOtp(String email,String username , String phone , String password , String account_type String otp) async {
+  Future<void> confirmEmailOtp(String email,String username , String phone , String password , String account_type, String otp) async {
     final res = await _client.post(
       Uri.parse(ApiConfig.getUrl('/api/auth/verify-register-otp/')),
       headers: {'Content-Type': 'application/json'},

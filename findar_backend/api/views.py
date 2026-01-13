@@ -71,7 +71,7 @@ def get_listing(request , listing_id):
     try:
         post = Post.objects.get(id=listing_id , active=True)
     except Post.DoesNotExist:
-        return Response({'errors':"not found"} , status=status.HTTP_404_NOT_FOUND)
+        return Response("not found" , status=status.HTTP_404_NOT_FOUND)
     
     serialized_post = PostSerializers(post).data
     return Response(serialized_post , status=status.HTTP_200_OK)
@@ -507,6 +507,7 @@ def oauth(request):
         - provider: 'google', 
         - email: User email (optional, from Firebase)
     """
+
     id_token = request.data.get("id_token")
     provider = request.data.get("provider")
     email = request.data.get("email")
@@ -514,13 +515,13 @@ def oauth(request):
     # Validate inputs
     if not id_token:
         return Response(
-            {"error": "id_token is required"}, 
+            "id_token is required", 
             status=status.HTTP_400_BAD_REQUEST
         )
     
     if not provider or provider not in ['google']:
         return Response(
-            {"error": "Invalid or missing provider"}, 
+            "Invalid or missing provider", 
             status=status.HTTP_400_BAD_REQUEST
         )
 
@@ -535,7 +536,7 @@ def oauth(request):
         
         if not firebase_email:
             return Response(
-                {"error": "Email not provided or found in token"}, 
+                "Email not provided or found in token", 
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -573,7 +574,7 @@ def oauth(request):
         import traceback
         traceback.print_exc()
         return Response(
-            {"error": "Firebase authentication failed"},
+            "Firebase authentication failed",
             status=status.HTTP_401_UNAUTHORIZED
         )
 
@@ -694,7 +695,7 @@ def register_device_token(request):
 
     if not token:
         return Response(
-            {"error": "Device token is required"},
+           "Device token is required",
             status=status.HTTP_400_BAD_REQUEST
         )
 
@@ -759,7 +760,7 @@ class PasswordResetVerifyCodeAPI(APIView):
         user = CustomUser.objects.filter(email=email).first()
         if not user:
             return Response(
-                {"message": "Invalid code", "success": False},
+                "Invalid code",
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -772,7 +773,7 @@ class PasswordResetVerifyCodeAPI(APIView):
 
         if not otp:
             return Response(
-                {"message": "Invalid code", "success": False},
+                "Invalid code",
                 status=status.HTTP_400_BAD_REQUEST
             )
         
@@ -780,13 +781,13 @@ class PasswordResetVerifyCodeAPI(APIView):
             otp.used = True 
             otp.save()
             return Response(
-                {"message": "Code expired", "success": False},
+                "Code expired",
                 status=status.HTTP_400_BAD_REQUEST
             )
 
         if otp.attempts >= 5:
             return Response(
-                {"message": "Too many attempts", "success": False},
+                "Too many attempts",
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -794,7 +795,7 @@ class PasswordResetVerifyCodeAPI(APIView):
             otp.attempts += 1
             otp.save()
             return Response(
-                {"message": "Invalid code", "success": False},
+                "Invalid code",
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -865,7 +866,7 @@ class PasswordResetConfirmAPI(APIView):
             password_checks+="Password must contain at least one digit."
 
         if password_checks != "":
-            return Response({"success":False , "message":password_checks} , status=status.HTTP_400_BAD_REQUEST)
+            return Response(password_checks , status=status.HTTP_400_BAD_REQUEST)
 
         user.set_password(new_password)
         user.save()
@@ -913,12 +914,11 @@ def verify_register_otp(request):
     print("Verifying registration OTP for email:", request.data)
 
     otp = (
-        RegisterOTP.objects.filter(email=email, used=False)
-        .order_by("-created_at")
-        .first()
+        RegisterOTP.objects.get(email=email, used=False)
     )
 
     if not otp:
+        print( "OTP not found for email:", email )
         return Response(
             "Invalid code",
             status=status.HTTP_400_BAD_REQUEST,

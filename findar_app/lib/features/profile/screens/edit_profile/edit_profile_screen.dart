@@ -42,7 +42,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       final userData = profileState['data'] as Map<String, dynamic>?;
 
       if (userData != null) {
-        _nameController.text = userData['name'] ?? '';
+        _nameController.text = userData['username'] ?? '';
         _emailController.text = userData['email'] ?? '';
         _phoneController.text = userData['phone'] ?? '';
       }

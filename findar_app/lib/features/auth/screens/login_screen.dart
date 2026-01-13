@@ -272,13 +272,20 @@ class _LoginScreenState extends State<LoginScreen> {
                                   Navigator.pushNamed(context, '/home');
                                 }
                               } catch (e) {
+                                
                                 if (mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                          'Google sign-in failed: $e'),
-                                    ),
-                                  );
+                          SnackBar(
+                            content: Text('Google sign-in failed : $e'),
+                            backgroundColor: Colors.red,
+                            duration: const Duration(seconds: 2),
+                            behavior: SnackBarBehavior.floating,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            margin: const EdgeInsets.all(16),
+                          ),
+                        );
                                 }
                               } finally {
                                 if (mounted) {

@@ -133,7 +133,7 @@ class MainApp extends StatelessWidget {
                     Locale('ar'),
                     Locale('fr'),
                   ],
-                  initialRoute: '/register',
+                  initialRoute: '/landing',
                   onGenerateRoute: (settings) {
                     // Handle edit listing route with arguments
                     if (settings.name == '/edit-listing') {

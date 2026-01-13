@@ -97,7 +97,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
               /// VERIFY BUTTON
               BlocConsumer<AuthCubit, Map<String, dynamic>>(
                 listener: (context, state) {
-                  if (state['state'] == true) {
+                  if (state['state'] == 'done') {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(
@@ -114,12 +114,6 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                       (_) => false,
                     );
                   }
-                  else {
-                    print( state );
-                    print( state['message'] );
-                    print( state['state'] );
-                  }
-
                 },
                 builder: (context, state) {
                   return ProgressButton(
