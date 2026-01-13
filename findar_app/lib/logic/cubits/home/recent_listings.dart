@@ -7,6 +7,7 @@ import 'package:findar/core/repositories/abstract_listing_repo.dart';
 class RecentCubit extends Cubit<Map<String, dynamic>> {
   final ListingRepository repository;
   bool _hasFetched = false;
+  bool _isFetching = false;
 
   RecentCubit(this.repository)
       : super({
@@ -24,16 +25,26 @@ class RecentCubit extends Cubit<Map<String, dynamic>> {
       return;
     }
 
+    // Prevent concurrent fetches
+    if (_isFetching) {
+      return;
+    }
+
+    // Set flags immediately to prevent duplicate calls
+    _isFetching = true;
+    _hasFetched = true;
+
     emit({...state, 'state': 'loading', 'message': ''});
 
     try {
       // Load saved listing IDs first
       final savedIds = await repository.getSavedListingIds();
 
-      final recentListings = await repository.getRecentListings(
+      await repository.getRecentListings(
         listingType: listingType,
         onUpdate: (listings) {
           // Called first with local data, then with remote data
+          // This is the source of truth for displaying listings
           emit({
             ...state,
             'data': listings,
@@ -43,24 +54,17 @@ class RecentCubit extends Cubit<Map<String, dynamic>> {
           });
         },
       );
-      print('🔴🔴🔴');
-      print('Fetched recent listings: $recentListings');
-      print('Loaded saved listing IDs: $savedIds');
 
-      _hasFetched = true;
-      emit({
-        ...state,
-        'data': recentListings,
-        'savedIds': savedIds,
-        'state': 'done',
-        'message': 'Listings loaded',
-      });
+      // Don't emit again - onUpdate already handled all updates
     } catch (e) {
+      _hasFetched = false; // Reset on error so retry is possible
       emit({
         ...state,
         'state': 'error',
         'message': 'Failed to load listings: ${e.toString()}',
       });
+    } finally {
+      _isFetching = false;
     }
   }
 

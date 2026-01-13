@@ -156,10 +156,10 @@ class _HomeScreenState extends State<HomeScreen> {
           bottom: false,
           child: RefreshIndicator(
             onRefresh: () async {
-              // Refresh both sponsored and recent listings
+              // Refresh both sponsored and recent listings with forceRefresh
               await Future.wait([
-                context.read<SponsoredCubit>().getSponsoredListings(),
-                context.read<RecentCubit>().getRecentListings(),
+                context.read<SponsoredCubit>().getSponsoredListings(forceRefresh: true),
+                context.read<RecentCubit>().getRecentListings(forceRefresh: true),
               ]);
             },
             child: SingleChildScrollView(
@@ -209,7 +209,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               onRetry: () {
                                 context
                                     .read<SponsoredCubit>()
-                                    .getSponsoredListings();
+                                    .getSponsoredListings(forceRefresh: true);
                               },
                             );
                           }

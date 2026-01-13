@@ -157,11 +157,40 @@ class RemoteListingRepository implements ListingRepository {
     String? classification,
     String? propertyType,
     String? image,
+    List<String>? additionalImages,
     bool? isOnline,
   }) async {
     print('🔍 Editing listing: $id');
 
     try {
+      // Upload new images to Cloudinary if provided
+      String? mainPicUrl;
+      List<String>? picsUrls;
+
+      if (image != null && !image.startsWith('assets/') && !image.startsWith('http')) {
+        print('📤 Uploading images to Cloudinary...');
+
+        final uploadResult = await cloudinaryService.uploadListingImages(
+          mainImagePath: image,
+          additionalImagePaths: additionalImages,
+        );
+
+        if (!uploadResult.success) {
+          return ReturnResult(
+            state: false,
+            message: 'Failed to upload images: ${uploadResult.error}',
+          );
+        }
+
+        mainPicUrl = uploadResult.mainImageUrl;
+        picsUrls = uploadResult.additionalImageUrls;
+
+        print('✅ Images uploaded - Main: $mainPicUrl, Additional: ${picsUrls.length}');
+      } else if (image != null && image.startsWith('http')) {
+        // Keep existing URL
+        mainPicUrl = image;
+      }
+
       final body = <String, dynamic>{};
 
       // Only add fields that are provided
@@ -185,9 +214,18 @@ class RemoteListingRepository implements ListingRepository {
         body['building_type'] = propertyType.toLowerCase();
       }
 
-      // Handle image
-      if (image != null && !image.startsWith('assets/')) {
-        body['main_pic'] = image;
+      // Handle images
+      if (mainPicUrl != null) {
+        body['main_pic'] = mainPicUrl;
+      }
+      if (picsUrls != null) {
+        body['pics'] = picsUrls;
+      } else if (additionalImages != null && additionalImages.isNotEmpty) {
+        // If additionalImages are URLs (not file paths), keep them
+        final urlImages = additionalImages.where((img) => img.startsWith('http')).toList();
+        if (urlImages.isNotEmpty) {
+          body['pics'] = urlImages;
+        }
       }
 
       print('Edit request body: $body');
@@ -348,10 +386,10 @@ class RemoteListingRepository implements ListingRepository {
 
       print('My listings response: $response');
 
-      // If the service returned an error wrapper
+      // If the service returned an error wrapper, throw exception
       if (response is ReturnResult) {
         print('⚠️ getUserListings returned error: ${response.message}');
-        return {'active': [], 'inactive': []};
+        throw Exception('API error: ${response.message}');
       }
 
       // Backend returns { "active": [...], "inactive": [...] }
@@ -370,10 +408,10 @@ class RemoteListingRepository implements ListingRepository {
       }
 
       print('⚠️ Unexpected response shape for getUserListings');
-      return {'active': [], 'inactive': []};
+      throw Exception('Unexpected API response format');
     } catch (e) {
       print('❌ Error fetching user listings: $e');
-      return {'active': [], 'inactive': []};
+      rethrow; // Re-throw so composite repo catches it and keeps local data
     }
   }
 
@@ -427,6 +465,12 @@ class RemoteListingRepository implements ListingRepository {
       print('Response from recent listings: $response');
       print(response.runtimeType);
 
+      // Handle API error response - throw exception so composite repo doesn't update UI with empty data
+      if (response is ReturnResult) {
+        print('⚠️ getRecentListings returned error: ${response.message}');
+        throw Exception('API error: ${response.message}');
+      }
+
       // Expecting a JSON list from the backend
       if (response is List) {
         try {
@@ -448,15 +492,16 @@ class RemoteListingRepository implements ListingRepository {
           }).toList();
         } catch (e) {
           print('Error parsing listings: $e');
-          return <PropertyListing>[];
+          throw Exception('Error parsing listings: $e');
         }
       }
 
-      // If the API returned an error-shaped object, return empty list
-      return <PropertyListing>[];
+      // If the API returned an unexpected shape, throw exception
+      print('⚠️ Unexpected response shape for getRecentListings');
+      throw Exception('Unexpected API response format');
     } catch (e) {
       print('Error fetching recent listings: $e');
-      return <PropertyListing>[];
+      rethrow; // Re-throw so composite repo catches it and keeps local data
     }
   }
 
@@ -471,14 +516,22 @@ class RemoteListingRepository implements ListingRepository {
 
       print('📥 Sponsored listings response: $response');
 
+      // Handle API error response - throw exception so composite repo doesn't update UI with empty data
+      if (response is ReturnResult) {
+        print('⚠️ getSponsoredListings returned error: ${response.message}');
+        throw Exception('API error: ${response.message}');
+      }
+
       if (response is List) {
         return _parseListingList(response);
       }
 
-      return <PropertyListing>[];
+      // If the API returned an unexpected shape, throw exception
+      print('⚠️ Unexpected response shape for getSponsoredListings');
+      throw Exception('Unexpected API response format');
     } catch (e) {
       print('❌ Error fetching sponsored listings: $e');
-      return <PropertyListing>[];
+      rethrow; // Re-throw so composite repo catches it and keeps local data
     }
   }
 
@@ -493,14 +546,22 @@ class RemoteListingRepository implements ListingRepository {
 
       print('📥 Saved listings response: $response');
 
+      // Handle API error response - throw exception so composite repo doesn't update UI with empty data
+      if (response is ReturnResult) {
+        print('⚠️ getSavedListings returned error: ${response.message}');
+        throw Exception('API error: ${response.message}');
+      }
+
       if (response is List) {
         return _parseListingList(response);
       }
 
-      return <PropertyListing>[];
+      // If the API returned an unexpected shape, throw exception
+      print('⚠️ Unexpected response shape for getSavedListings');
+      throw Exception('Unexpected API response format');
     } catch (e) {
       print('❌ Error fetching saved listings: $e');
-      return <PropertyListing>[];
+      rethrow; // Re-throw so composite repo catches it and keeps local data
     }
   }
 

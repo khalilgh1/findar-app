@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 import 'package:findar/core/models/property_listing_model.dart';
 import 'package:findar/logic/cubits/my_listings_cubit.dart';
 import 'package:findar/features/create_listing/widgets/property_title.dart';
@@ -30,6 +32,11 @@ class _EditListingScreenState extends State<EditListingScreen> {
 
   late String _classification;
   late String _propertyType;
+  
+  // Image handling
+  final List<File> _newImages = [];
+  final List<String> _existingImageUrls = [];
+  final ImagePicker _imagePicker = ImagePicker();
 
   @override
   void initState() {
@@ -45,6 +52,91 @@ class _EditListingScreenState extends State<EditListingScreen> {
     // Capitalize first letter to match dropdown items
     _propertyType = widget.listing.propertyType.substring(0, 1).toUpperCase() + 
                     widget.listing.propertyType.substring(1).toLowerCase();
+    
+    // Load existing images
+    if (widget.listing.image.isNotEmpty) {
+      _existingImageUrls.add(widget.listing.image);
+    }
+    if (widget.listing.additionalImages != null && widget.listing.additionalImages!.isNotEmpty) {
+      _existingImageUrls.addAll(widget.listing.additionalImages!);
+    }
+  }
+  
+  /// Pick images from gallery or camera
+  Future<void> _pickImages({bool fromCamera = false}) async {
+    try {
+      if (fromCamera) {
+        final XFile? image = await _imagePicker.pickImage(
+          source: ImageSource.camera,
+          maxWidth: 1920,
+          maxHeight: 1080,
+          imageQuality: 85,
+        );
+        if (image != null) {
+          setState(() {
+            _newImages.add(File(image.path));
+          });
+        }
+      } else {
+        final List<XFile> images = await _imagePicker.pickMultiImage(
+          maxWidth: 1920,
+          maxHeight: 1080,
+          imageQuality: 85,
+        );
+        if (images.isNotEmpty) {
+          setState(() {
+            _newImages.addAll(images.map((xFile) => File(xFile.path)));
+          });
+        }
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to pick image: $e')),
+      );
+    }
+  }
+
+  /// Show image source selection dialog
+  void _showImageSourceDialog() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Choose from Gallery'),
+              onTap: () {
+                Navigator.pop(context);
+                _pickImages(fromCamera: false);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('Take a Photo'),
+              onTap: () {
+                Navigator.pop(context);
+                _pickImages(fromCamera: true);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Remove an existing image
+  void _removeExistingImage(int index) {
+    setState(() {
+      _existingImageUrls.removeAt(index);
+    });
+  }
+
+  /// Remove a new image
+  void _removeNewImage(int index) {
+    setState(() {
+      _newImages.removeAt(index);
+    });
   }
 
   @override
@@ -99,6 +191,17 @@ class _EditListingScreenState extends State<EditListingScreen> {
       return;
     }
 
+    // Prepare image data
+    // Combine existing URLs with new file paths
+    final allImages = <String>[
+      ..._existingImageUrls,
+      ..._newImages.map((file) => file.path),
+    ];
+
+    // The first image is the main image, rest are additional
+    final mainImage = allImages.isNotEmpty ? allImages.first : null;
+    final additionalImages = allImages.length > 1 ? allImages.sublist(1) : null;
+
     context.read<MyListingsCubit>().editListing(
       id: widget.listing.id,
       title: _titleController.text,
@@ -109,6 +212,8 @@ class _EditListingScreenState extends State<EditListingScreen> {
       bathrooms: bathrooms,
       classification: _classification,
       propertyType: _propertyType.toLowerCase(), // Convert back to lowercase for backend
+      image: mainImage,
+      additionalImages: additionalImages,
     );
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -271,6 +376,209 @@ class _EditListingScreenState extends State<EditListingScreen> {
                       ),
                     ),
                   ],
+                ),
+                const SizedBox(height: 24),
+
+                // Photos Section
+                Text('Photos', style: theme.textTheme.headlineSmall),
+                const SizedBox(height: 12),
+                
+                // Display existing images from URLs
+                if (_existingImageUrls.isNotEmpty)
+                  SizedBox(
+                    height: 120,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: _existingImageUrls.length,
+                      itemBuilder: (context, index) {
+                        return Container(
+                          width: 120,
+                          margin: const EdgeInsets.only(right: 12),
+                          child: Stack(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.network(
+                                  _existingImageUrls[index],
+                                  width: 120,
+                                  height: 120,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Container(
+                                      color: Colors.grey.shade300,
+                                      child: const Center(
+                                        child: Icon(Icons.broken_image, color: Colors.grey),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                              // Main image badge for first existing image
+                              if (index == 0 && _newImages.isEmpty)
+                                Positioned(
+                                  bottom: 8,
+                                  left: 8,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: theme.colorScheme.primary,
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      'Main',
+                                      style: TextStyle(
+                                        color: theme.colorScheme.onPrimary,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              // Delete button
+                              Positioned(
+                                top: 8,
+                                right: 8,
+                                child: GestureDetector(
+                                  onTap: () => _removeExistingImage(index),
+                                  child: Container(
+                                    width: 28,
+                                    height: 28,
+                                    decoration: BoxDecoration(
+                                      color: Colors.black.withOpacity(0.6),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.close,
+                                      color: Colors.white,
+                                      size: 18,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                if (_existingImageUrls.isNotEmpty) const SizedBox(height: 12),
+                
+                // Display new images from files
+                if (_newImages.isNotEmpty)
+                  SizedBox(
+                    height: 120,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: _newImages.length,
+                      itemBuilder: (context, index) {
+                        return Container(
+                          width: 120,
+                          margin: const EdgeInsets.only(right: 12),
+                          child: Stack(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.file(
+                                  _newImages[index],
+                                  width: 120,
+                                  height: 120,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                              // Main image badge for first new image if no existing images
+                              if (index == 0 && _existingImageUrls.isEmpty)
+                                Positioned(
+                                  bottom: 8,
+                                  left: 8,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: theme.colorScheme.primary,
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      'Main',
+                                      style: TextStyle(
+                                        color: theme.colorScheme.onPrimary,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              // Delete button
+                              Positioned(
+                                top: 8,
+                                right: 8,
+                                child: GestureDetector(
+                                  onTap: () => _removeNewImage(index),
+                                  child: Container(
+                                    width: 28,
+                                    height: 28,
+                                    decoration: BoxDecoration(
+                                      color: Colors.black.withOpacity(0.6),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.close,
+                                      color: Colors.white,
+                                      size: 18,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                if (_newImages.isNotEmpty) const SizedBox(height: 12),
+                
+                // Add photos button
+                GestureDetector(
+                  onTap: _showImageSourceDialog,
+                  child: Container(
+                    height: 100,
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.secondary,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: Colors.grey.shade300,
+                        style: BorderStyle.solid,
+                        width: 2,
+                      ),
+                    ),
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.add_photo_alternate_outlined,
+                            color: Colors.grey[400],
+                            size: 32,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            (_existingImageUrls.isEmpty && _newImages.isEmpty)
+                                ? 'Add Photos'
+                                : 'Add More Photos',
+                            style: TextStyle(
+                              color: Colors.grey[400],
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 24),
 

@@ -138,6 +138,7 @@ class CompositeListingRepository implements ListingRepository {
     String? classification,
     String? propertyType,
     String? image,
+    List<String>? additionalImages,
     bool? isOnline,
   }) async {
     await _requireConnection('Edit listing');
@@ -153,6 +154,7 @@ class CompositeListingRepository implements ListingRepository {
       classification: classification,
       propertyType: propertyType,
       image: image,
+      additionalImages: additionalImages,
       isOnline: isOnline,
     );
 
@@ -181,15 +183,16 @@ class CompositeListingRepository implements ListingRepository {
     String? listingType,
     OnDataUpdate<List<PropertyListing>>? onUpdate,
   }) async {
-    // First, fetch from local database and call onUpdate immediately
+    // First, fetch from local database
     print("Fetching recent listings from local database repository...");
     final localListings = await _databaseRepo.getRecentListings(
       query: query,
       listingType: listingType,
     );
 
-    // Call onUpdate with local data immediately (even if empty)
-    if (onUpdate != null) {
+    // Only call onUpdate with local data if it's not empty
+    // This prevents overwriting existing UI data with empty local cache
+    if (onUpdate != null && localListings.isNotEmpty) {
       onUpdate(localListings);
     }
 
@@ -230,12 +233,16 @@ class CompositeListingRepository implements ListingRepository {
         return remoteListings;
       } catch (e) {
         print("Error fetching remote listings: $e");
-        // Return local listings on error
+        // On error, don't call onUpdate - keep whatever is already displayed
         return localListings;
       }
     }
 
     // Return local listings if offline
+    // Only call onUpdate if we have data or haven't called it yet
+    if (onUpdate != null && localListings.isEmpty) {
+      onUpdate(localListings);
+    }
     return localListings;
   }
 
@@ -243,15 +250,20 @@ class CompositeListingRepository implements ListingRepository {
   Future<List<PropertyListing>> getSponsoredListings({
     OnDataUpdate<List<PropertyListing>>? onUpdate,
   }) async {
-    // First, fetch from local database and call onUpdate immediately
+    // First, fetch from local database
     final localListings = await _databaseRepo.getSponsoredListings();
 
-    // Call onUpdate with local data immediately (even if empty)
-    if (onUpdate != null) {
+    // Only call onUpdate with local data if it's not empty
+    // This prevents overwriting existing UI data with empty local cache
+    if (onUpdate != null && localListings.isNotEmpty) {
       onUpdate(localListings);
     }
 
     if (!await _hasConnection()) {
+      // If offline and no local data, still call onUpdate with empty list
+      if (onUpdate != null && localListings.isEmpty) {
+        onUpdate(localListings);
+      }
       return localListings;
     }
 
@@ -265,6 +277,8 @@ class CompositeListingRepository implements ListingRepository {
       return remoteListings;
     } catch (e) {
       print("Error fetching remote sponsored listings: $e");
+      // On error, only call onUpdate if we have local data to show
+      // Otherwise, don't overwrite what might already be displayed
       return localListings;
     }
   }
@@ -341,15 +355,24 @@ class CompositeListingRepository implements ListingRepository {
   Future<Map<String, List<PropertyListing>>> getUserListings({
     OnDataUpdate<Map<String, List<PropertyListing>>>? onUpdate,
   }) async {
-    // First, fetch from local database and call onUpdate immediately
+    // First, fetch from local database
     final localListings = await _databaseRepo.getUserListings();
 
-    // Call onUpdate with local data immediately (even if empty)
-    if (onUpdate != null) {
+    // Check if local data has any listings
+    final hasLocalData = localListings['active']?.isNotEmpty == true ||
+        localListings['inactive']?.isNotEmpty == true;
+
+    // Only call onUpdate with local data if it's not empty
+    // This prevents overwriting existing UI data with empty local cache
+    if (onUpdate != null && hasLocalData) {
       onUpdate(localListings);
     }
 
     if (!await _hasConnection()) {
+      // If offline and no local data, still call onUpdate
+      if (onUpdate != null && !hasLocalData) {
+        onUpdate(localListings);
+      }
       return localListings;
     }
 
@@ -363,6 +386,7 @@ class CompositeListingRepository implements ListingRepository {
       return remoteListings;
     } catch (e) {
       print("Error fetching remote user listings: $e");
+      // On error, don't call onUpdate - keep whatever is already displayed
       return localListings;
     }
   }
@@ -371,15 +395,20 @@ class CompositeListingRepository implements ListingRepository {
   Future<List<PropertyListing>> getSavedListings({
     OnDataUpdate<List<PropertyListing>>? onUpdate,
   }) async {
-    // First, fetch from local database and call onUpdate immediately
+    // First, fetch from local database
     final localListings = await _databaseRepo.getSavedListings();
 
-    // Call onUpdate with local data immediately (even if empty)
-    if (onUpdate != null) {
+    // Only call onUpdate with local data if it's not empty
+    // This prevents overwriting existing UI data with empty local cache
+    if (onUpdate != null && localListings.isNotEmpty) {
       onUpdate(localListings);
     }
 
     if (!await _hasConnection()) {
+      // If offline and no local data, still call onUpdate
+      if (onUpdate != null && localListings.isEmpty) {
+        onUpdate(localListings);
+      }
       return localListings;
     }
 
@@ -393,6 +422,7 @@ class CompositeListingRepository implements ListingRepository {
       return remoteListings;
     } catch (e) {
       print("Error fetching remote saved listings: $e");
+      // On error, don't call onUpdate - keep whatever is already displayed
       return localListings;
     }
   }

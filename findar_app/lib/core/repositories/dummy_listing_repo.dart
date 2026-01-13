@@ -201,6 +201,7 @@ class DummyListingRepository implements ListingRepository {
     String? classification,
     String? propertyType,
     String? image,
+    List<String>? additionalImages,
     bool? isOnline,
   }) async {
     // Simulate network delay

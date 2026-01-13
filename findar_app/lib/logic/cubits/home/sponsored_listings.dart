@@ -7,6 +7,7 @@ import 'package:findar/core/repositories/abstract_listing_repo.dart';
 class SponsoredCubit extends Cubit<Map<String, dynamic>> {
   final ListingRepository repository;
   bool _hasFetched = false;
+  bool _isFetching = false;
 
   SponsoredCubit(this.repository)
       : super({
@@ -24,14 +25,24 @@ class SponsoredCubit extends Cubit<Map<String, dynamic>> {
       return;
     }
 
+    // Prevent concurrent fetches
+    if (_isFetching) {
+      return;
+    }
+
+    // Set flags immediately to prevent duplicate calls
+    _isFetching = true;
+    _hasFetched = true;
+
     emit({...state, 'state': 'loading', 'message': ''});
 
     try {
       final savedIds = await repository.getSavedListingIds();
 
-      final sponsoredListings = await repository.getSponsoredListings(
+      await repository.getSponsoredListings(
         onUpdate: (listings) {
           // Called first with local data, then with remote data
+          // This is the source of truth for displaying listings
           emit({
             ...state,
             'data': listings,
@@ -42,20 +53,16 @@ class SponsoredCubit extends Cubit<Map<String, dynamic>> {
         },
       );
 
-      _hasFetched = true;
-      emit({
-        ...state,
-        'data': sponsoredListings,
-        'savedIds': savedIds,
-        'state': 'done',
-        'message': 'Listings loaded',
-      });
+      // Don't emit again - onUpdate already handled all updates
     } catch (e) {
+      _hasFetched = false; // Reset on error so retry is possible
       emit({
         ...state,
         'state': 'error',
         'message': 'Failed to load listings: ${e.toString()}',
       });
+    } finally {
+      _isFetching = false;
     }
   }
 

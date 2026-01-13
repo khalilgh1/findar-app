@@ -44,6 +44,7 @@ abstract class ListingRepository {
     String? classification,
     String? propertyType,
     String? image,
+    List<String>? additionalImages,
     bool? isOnline,
   });
 

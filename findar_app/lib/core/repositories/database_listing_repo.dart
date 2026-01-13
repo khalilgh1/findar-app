@@ -193,6 +193,7 @@ class LocalListingRepository implements ListingRepository {
     String? classification,
     String? propertyType,
     String? image,
+    List<String>? additionalImages,
     bool? isOnline,
   }) async {
     try {

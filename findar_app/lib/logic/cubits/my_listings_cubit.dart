@@ -120,6 +120,7 @@ class MyListingsCubit extends Cubit<Map<String, dynamic>> {
     String? classification,
     String? propertyType,
     String? image,
+    List<String>? additionalImages,
     bool? isOnline,
   }) async {
     emit({...state, 'state': 'loading', 'message': ''});
@@ -136,6 +137,7 @@ class MyListingsCubit extends Cubit<Map<String, dynamic>> {
         classification: classification,
         propertyType: propertyType,
         image: image,
+        additionalImages: additionalImages,
         isOnline: isOnline,
       );
 
