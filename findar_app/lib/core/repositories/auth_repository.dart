@@ -370,6 +370,16 @@ class AuthRepository {
     return _currentUser;
   }
 
+  Future<void> fetchCurrentUser() async {
+    final response = await apiService.post('/api/auth/me' , body: {});
+
+    if( response is ReturnResult) {
+      throw 'Failed to fetch user';
+    }
+    
+    _currentUser = User.fromJson(response['data']);
+    await _userStore.saveUser(_currentUser!);
+  }
   /// Load cached user without touching the network
   Future<User?> loadCachedUser() async {
     _currentUser = await _userStore.loadUser();

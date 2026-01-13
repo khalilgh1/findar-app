@@ -319,6 +319,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 // Email Field
                 ProfileTextField(
                   label: l10n.emailAddress,
+                  enabled: false,
                   controller: _emailController,
                   validator: ProfileValidators.validateEmail,
                   keyboardType: TextInputType.emailAddress,

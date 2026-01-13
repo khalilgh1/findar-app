@@ -1,3 +1,5 @@
+import 'package:findar/core/repositories/auth_repository.dart' as a;
+import 'package:findar/core/repositories/local_user_store.dart';
 import 'package:findar/core/services/findar_api_service.dart';
 import 'package:findar/core/services/notification_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -148,7 +150,6 @@ class FirebaseOAuthService {
           refreshToken: response['data']['refresh'],
         ),
       );
-
       NotificationService.registerDeviceAfterLogin();
       FirebaseMessaging.instance.subscribeToTopic(currentUser!.accountType == 'agency' ? 'agency' : 'individual');
 

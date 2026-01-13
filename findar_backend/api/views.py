@@ -578,7 +578,12 @@ def oauth(request):
             status=status.HTTP_401_UNAUTHORIZED
         )
 
-
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def me(request):
+    user = request.user
+    serializer = UserSerializers(user)
+    return Response(serializer.data, status=status.HTTP_200_OK)
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
@@ -641,7 +646,7 @@ def register(request):
 def me(request):
     user = request.user
     serializer = UserSerializers(user)
-    return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response({"data": serializer.data , "success": True}, status=status.HTTP_200_OK)
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -710,10 +715,10 @@ def register_device_token(request):
         )
 
     # 2️⃣ If token exists for ANOTHER user → remove it
-    DeviceToken.objects.filter(token=token).exclude(user=request.user).delete()
+    DeviceToken.objects.filter(token=token).delete()
 
     # 3️⃣ Create token for current user
-    DeviceToken.objects.create(
+    DeviceToken.objects.get_or_create(
         user=request.user,
         token=token
     )
@@ -732,6 +737,7 @@ class PasswordResetRequestAPI(APIView):
     permission_classes = []
 
     def post(self, request):
+
         email = request.data.get("email")
 
         user = CustomUser.objects.filter(email=email).first()

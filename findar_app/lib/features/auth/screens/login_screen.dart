@@ -263,6 +263,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     .signInWithGoogle();
 
                                 if (mounted) {
+                                  await context.read<AuthCubit>().fetchCurrentUser();
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                       content: Text(l10n.success),

@@ -364,6 +364,11 @@ class AuthCubit extends Cubit<Map<String, dynamic>> {
   }
 
   /// Complete registration by verifying OTP
+  
+  Future<void> fetchCurrentUser() async {
+    await authRepository.fetchCurrentUser();
+  }
+
   Future<void> completeRegister({
     required dynamic data,
     required String otp,
