@@ -27,7 +27,8 @@ class BottomBar extends StatelessWidget {
       elevation: 0,
       iconSize: screenWidth.clamp(10, 25),
       items: [
-        BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: l10n.home),
+        BottomNavigationBarItem(
+            icon: Icon(Icons.home_outlined), label: l10n.home),
         BottomNavigationBarItem(
           icon: Icon(Icons.bookmark_outline),
           label: l10n.saved,
@@ -41,24 +42,35 @@ class BottomBar extends StatelessWidget {
           label: l10n.profile,
         ),
       ],
-      onTap: (index) {
-        switch (index) {
+      onTap: (tappedIndex) {
+        // Don't navigate if already on the same tab
+        if (tappedIndex == index) return;
+
+        String routeName;
+        switch (tappedIndex) {
           case 0:
-            Navigator.pushNamed(context, '/home');
+            routeName = '/home';
             break;
           case 1:
-
-            Navigator.pushNamed(context, '/saved-listings');
+            routeName = '/saved-listings';
             break;
           case 2:
-
-            Navigator.pushNamed(context, '/my-listings');
+            routeName = '/my-listings';
             break;
           case 3:
-
-            Navigator.pushNamed(context, '/profile');
+            routeName = '/profile';
             break;
+          default:
+            return;
         }
+
+        // Use pushNamedAndRemoveUntil to avoid stacking multiple routes
+        // Keep only the home route at the bottom of the stack
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          routeName,
+          (route) => route.settings.name == '/home' || route.isFirst,
+        );
       },
     );
   }

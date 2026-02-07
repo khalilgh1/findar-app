@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:findar/logic/cubits/home/recent_listings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:findar/features/home/property.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 const String _kDefaultImageUrl =
     'https://res.cloudinary.com/da5xjc4dx/image/upload/v1767273156/default_cxkkda.jpg';
@@ -20,28 +21,28 @@ Widget _buildListingImage(String imagePath,
     {double? width, double? height, BoxFit fit = BoxFit.cover}) {
   // Check if it's a network URL
   if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
-    return Image.network(
-      imagePath,
+    return CachedNetworkImage(
+      imageUrl: imagePath,
       width: width,
       height: height,
       fit: fit,
-      errorBuilder: (context, error, stackTrace) {
+      placeholder: (context, url) => Container(
+        width: width,
+        height: height,
+        color: Colors.grey[300],
+        child: const Center(
+          child: SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2)),
+        ),
+      ),
+      errorWidget: (context, url, error) {
         return Container(
           width: width,
           height: height,
           color: Colors.grey[300],
           child: Icon(Icons.broken_image, color: Colors.grey[600]),
-        );
-      },
-      loadingBuilder: (context, child, loadingProgress) {
-        if (loadingProgress == null) return child;
-        return Center(
-          child: CircularProgressIndicator(
-            value: loadingProgress.expectedTotalBytes != null
-                ? loadingProgress.cumulativeBytesLoaded /
-                    loadingProgress.expectedTotalBytes!
-                : null,
-          ),
         );
       },
     );

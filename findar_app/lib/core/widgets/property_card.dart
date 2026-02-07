@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 import 'package:findar/core/models/property_listing_model.dart';
 import 'package:findar/logic/cubits/property_details_cubit.dart';
@@ -423,10 +424,19 @@ class PropertyListingCard extends StatelessWidget {
       ColorScheme colorScheme, double screenWidth) {
     // Check if it's a network URL
     if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
-      return Image.network(
-        imagePath,
+      return CachedNetworkImage(
+        imageUrl: imagePath,
         fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) {
+        placeholder: (context, url) => Container(
+          color: colorScheme.secondary.withOpacity(0.3),
+          child: const Center(
+            child: SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(strokeWidth: 2)),
+          ),
+        ),
+        errorWidget: (context, url, error) {
           return _buildPlaceholder(colorScheme, screenWidth);
         },
       );

@@ -5,7 +5,6 @@ import 'package:findar/core/repositories/abstract_listing_repo.dart';
 /// State: {data: [], state: 'loading|done|error', message: '', count: 0}
 class SavedListingsCubit extends Cubit<Map<String, dynamic>> {
   final ListingRepository listingRepository;
-  bool _hasFetched = false;
 
   SavedListingsCubit(this.listingRepository)
       : super({
@@ -17,9 +16,12 @@ class SavedListingsCubit extends Cubit<Map<String, dynamic>> {
 
   /// Fetch all saved listings for current user
   Future<void> fetchSavedListings({bool forceRefresh = false}) async {
-    // Skip fetch if already fetched and not forcing refresh
-    if (_hasFetched && !forceRefresh) {
-      return;
+    // If we already have data and not forcing refresh, just re-emit existing data
+    // so the UI shows it instantly, but still refresh in background
+    final currentData = state['data'] as List? ?? [];
+    if (currentData.isNotEmpty && !forceRefresh) {
+      // Re-emit current data so UI shows it, state is already 'done'
+      if (state['state'] == 'done') return;
     }
 
     emit({...state, 'state': 'loading', 'message': ''});
@@ -39,7 +41,6 @@ class SavedListingsCubit extends Cubit<Map<String, dynamic>> {
         },
       );
 
-      _hasFetched = true;
       emit({
         ...state,
         'data': listings,
@@ -62,8 +63,7 @@ class SavedListingsCubit extends Cubit<Map<String, dynamic>> {
       final result = await listingRepository.saveListing(listingId);
 
       if (result.state) {
-        // Reset _hasFetched to force refetch
-        _hasFetched = false;
+        // Force refetch to get updated list
         await fetchSavedListings(forceRefresh: true);
 
         emit({

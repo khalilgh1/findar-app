@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:findar/logic/cubits/home/sponsored_listings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:findar/features/home/property.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 const String _kDefaultImageUrl =
     'https://res.cloudinary.com/da5xjc4dx/image/upload/v1767273156/default_cxkkda.jpg';
@@ -165,27 +166,27 @@ class _PropertyCardState extends State<PropertyCard> {
 
   Widget _buildSponsoredImage(String imageUrl) {
     if (imageUrl.startsWith('http')) {
-      return Image.network(
-        imageUrl,
+      return CachedNetworkImage(
+        imageUrl: imageUrl,
         fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) {
+        width: double.infinity,
+        height: double.infinity,
+        placeholder: (context, url) => Container(
+          color: Colors.grey[300],
+          child: const Center(
+            child: SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2)),
+          ),
+        ),
+        errorWidget: (context, url, error) {
           return Container(
             color: Colors.grey[300],
             child: const Icon(
               Icons.broken_image,
               size: 50,
               color: Colors.grey,
-            ),
-          );
-        },
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) return child;
-          return Center(
-            child: CircularProgressIndicator(
-              value: loadingProgress.expectedTotalBytes != null
-                  ? loadingProgress.cumulativeBytesLoaded /
-                      loadingProgress.expectedTotalBytes!
-                  : null,
             ),
           );
         },

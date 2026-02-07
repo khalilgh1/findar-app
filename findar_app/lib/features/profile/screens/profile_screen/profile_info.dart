@@ -26,8 +26,19 @@ class ProfileInfoCard extends StatelessWidget {
               var l10n = AppLocalizations.of(context);
               return ListTile(
                 leading: _iconBox(Icons.phone_outlined, theme),
-                title: Text(l10n?.phoneNumber ?? 'Phone Number', style: TextStyle(fontSize: 13)),
-                trailing: Text(phone, style: TextStyle(fontSize: 13)),
+                title: Text(l10n?.phoneNumber ?? 'Phone Number',
+                    style: TextStyle(fontSize: 13)),
+                trailing: ConstrainedBox(
+                  constraints: BoxConstraints(
+                      maxWidth: MediaQuery.of(context).size.width * 0.35),
+                  child: Text(
+                    phone,
+                    style: TextStyle(fontSize: 13),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                    textAlign: TextAlign.end,
+                  ),
+                ),
               );
             },
           ),
@@ -37,13 +48,17 @@ class ProfileInfoCard extends StatelessWidget {
               var l10n = AppLocalizations.of(context);
               return ListTile(
                 leading: _iconBox(Icons.email_outlined, theme),
-                title: Text(l10n?.email ?? 'Email', style: TextStyle(fontSize: 14)),
-                trailing: Flexible(
+                title: Text(l10n?.email ?? 'Email',
+                    style: TextStyle(fontSize: 14)),
+                trailing: ConstrainedBox(
+                  constraints: BoxConstraints(
+                      maxWidth: MediaQuery.of(context).size.width * 0.35),
                   child: Text(
                     email,
                     style: TextStyle(fontSize: 15, fontWeight: FontWeight.w300),
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
+                    textAlign: TextAlign.end,
                   ),
                 ),
               );

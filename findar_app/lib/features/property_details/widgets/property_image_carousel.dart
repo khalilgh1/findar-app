@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 const String _kDefaultImageUrl =
     'https://res.cloudinary.com/da5xjc4dx/image/upload/v1767273156/default_cxkkda.jpg';
@@ -208,20 +209,18 @@ class _PropertyImageCarouselState extends State<PropertyImageCarousel> {
 
   Widget _buildImage(String imageUrl) {
     if (imageUrl.startsWith('http')) {
-      return Image.network(
-        imageUrl,
+      return CachedNetworkImage(
+        imageUrl: imageUrl,
         fit: BoxFit.cover,
         width: double.infinity,
         height: double.infinity,
-        errorBuilder: (context, error, stackTrace) {
+        placeholder: (context, url) =>
+            const Center(child: CircularProgressIndicator()),
+        errorWidget: (context, url, error) {
           return Container(
             color: Colors.grey[300],
             child: Icon(Icons.broken_image, size: 50, color: Colors.grey[600]),
           );
-        },
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) return child;
-          return Center(child: CircularProgressIndicator());
         },
       );
     } else if (imageUrl.startsWith('/') || imageUrl.contains('\\')) {
@@ -332,19 +331,16 @@ class _FullScreenImageViewerState extends State<FullScreenImageViewer> {
 
   Widget _buildFullScreenImage(String imageUrl) {
     if (imageUrl.startsWith('http')) {
-      return Image.network(
-        imageUrl,
+      return CachedNetworkImage(
+        imageUrl: imageUrl,
         fit: BoxFit.contain,
-        errorBuilder: (context, error, stackTrace) {
+        placeholder: (context, url) => const Center(
+          child: CircularProgressIndicator(color: Colors.white),
+        ),
+        errorWidget: (context, url, error) {
           return Container(
             color: Colors.grey[900],
             child: Icon(Icons.broken_image, size: 50, color: Colors.grey[600]),
-          );
-        },
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) return child;
-          return const Center(
-            child: CircularProgressIndicator(color: Colors.white),
           );
         },
       );

@@ -6,22 +6,42 @@ import 'package:findar/core/repositories/abstract_listing_repo.dart';
 class PropertyDetailsCubit extends Cubit<Map<String, dynamic>> {
   final ListingRepository listingsRepository;
 
+  /// Cache of already-fetched property details to avoid re-fetching
+  final Map<int, Map<String, dynamic>> _cache = {};
+
   PropertyDetailsCubit(this.listingsRepository)
-    : super({'data': {}, 'state': 'initial', 'message': ''});
+      : super({'data': {}, 'state': 'initial', 'message': ''});
 
   /// Fetch property details by ID
   Future<void> fetchPropertyDetails(int propertyId) async {
+    // Return cached data immediately if available
+    if (_cache.containsKey(propertyId)) {
+      emit({
+        ...state,
+        'data': _cache[propertyId]!,
+        'state': 'done',
+        'message': 'Property details loaded from cache',
+      });
+      return;
+    }
+
     emit({...state, 'state': 'loading', 'message': ''});
 
     try {
       // get property details from repository
       final property = await listingsRepository.getListingById(propertyId);
 
-      await Future.delayed(const Duration(milliseconds: 800));
+      final propertyJson =
+          property != null ? property.toJson() : <String, dynamic>{};
+
+      // Cache the result
+      if (property != null) {
+        _cache[propertyId] = propertyJson;
+      }
 
       emit({
         ...state,
-        'data': property != null ? property.toJson() : {},
+        'data': propertyJson,
         'state': 'done',
         'message': 'Property details loaded successfully',
       });
@@ -32,6 +52,16 @@ class PropertyDetailsCubit extends Cubit<Map<String, dynamic>> {
         'message': 'Error loading property details: ${e.toString()}',
       });
     }
+  }
+
+  /// Invalidate cache for a specific property (e.g., after editing)
+  void invalidateCache(int propertyId) {
+    _cache.remove(propertyId);
+  }
+
+  /// Clear all cached data
+  void clearCache() {
+    _cache.clear();
   }
 
   /// Save/unsave property to favorites
