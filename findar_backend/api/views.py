@@ -32,7 +32,7 @@ from .services import *
 
 ######### Health-check ##########
 @api_view(['GET'])
-def health_check():
+def health_check(request):
     #a small endpoint used for keep-alive
     dummy_post = Post.objects.all()[:3] # get 3 posts
     return Response({"message": "Successully fetched the health-check endpoint "}, status = status.HTTP_200_OK)
