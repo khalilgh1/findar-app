@@ -1,1 +1,4 @@
 .vscode/
+# Local tooling
+.venv/
+graphify-out/

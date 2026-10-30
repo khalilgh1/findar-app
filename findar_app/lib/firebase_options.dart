@@ -17,10 +17,7 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -64,5 +61,14 @@ class DefaultFirebaseOptions {
     projectId: 'findar-87214',
     storageBucket: 'findar-87214.firebasestorage.app',
     iosBundleId: 'com.example.findarApp',
+  );
+
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyDPYzrgHsGzszzrpL0dnRUlPIWpkqvQtdE',
+    appId: '1:470241887742:web:69d6e92e3e74d69ecbecaf',
+    messagingSenderId: '470241887742',
+    projectId: 'findar-87214',
+    authDomain: 'findar-87214.firebaseapp.com',
+    storageBucket: 'findar-87214.firebasestorage.app',
   );
 }
