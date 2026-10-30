@@ -1,0 +1,19 @@
+# Build output, deps, generated and platform boilerplate — keep the graph focused on source
+.venv/
+**/node_modules/
+**/.next/
+**/build/
+**/.dart_tool/
+findar_app/android/
+findar_app/ios/
+findar_app/linux/
+findar_app/macos/
+findar_app/windows/
+findar_app/web/
+findar_app/lib/l10n/app_localizations*.dart
+**/*.g.dart
+findar_app/lib/firebase_options.dart
+findar_backend/api/migrations/
+temp_app/
+.claude/
+graphify-out/
