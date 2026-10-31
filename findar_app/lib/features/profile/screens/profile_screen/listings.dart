@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:findar/l10n/app_localizations.dart';
+import 'package:findar/logic/cubits/property_details_cubit.dart';
 
 const String _kDefaultImageUrl =
     'https://res.cloudinary.com/da5xjc4dx/image/upload/v1767273156/default_cxkkda.jpg';
@@ -13,12 +15,14 @@ String _imageOrDefault(String? img) {
 }
 
 class ListingCard extends StatelessWidget {
+  final int? listingId;
   final String imagePath;
   final String title;
   final double price;
 
   const ListingCard({
     super.key,
+    this.listingId,
     required this.imagePath,
     required this.title,
     required this.price,
@@ -77,9 +81,14 @@ class ListingCard extends StatelessWidget {
                       color: theme.colorScheme.surface,
                     ),
                     child: TextButton(
-                      onPressed: () => {
-                        Navigator.pushNamed(context, '/property-details'),
-                      },
+                      onPressed: listingId == null
+                          ? null
+                          : () {
+                              context
+                                  .read<PropertyDetailsCubit>()
+                                  .fetchPropertyDetails(listingId!);
+                              Navigator.pushNamed(context, '/property-details');
+                            },
                       child: Builder(
                         builder: (context) {
                           var l10n = AppLocalizations.of(context);

@@ -27,6 +27,7 @@ abstract class ListingRepository {
     double? longitude,
     int? livingrooms,
     double? area,
+    bool isOnline = true,
   });
 
   /// Edit an existing listing
@@ -129,6 +130,12 @@ abstract class ListingRepository {
   /// Returns a [ReturnResult] indicating success or failure
   Future<ReturnResult> unsaveListing(int listingId);
 
-  //get listing by id
+  /// Get a listing by id; null when it doesn't exist (or isn't visible).
   Future<PropertyListing?> getListingById(int id);
+
+  /// Report a listing to the moderators.
+  Future<ReturnResult> reportListing({
+    required int listingId,
+    required String reason,
+  });
 }

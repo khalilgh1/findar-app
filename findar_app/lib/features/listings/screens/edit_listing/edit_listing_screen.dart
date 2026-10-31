@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:findar/core/models/property_listing_model.dart';
 import 'package:findar/logic/cubits/my_listings_cubit.dart';
+import 'package:findar/logic/cubits/property_details_cubit.dart';
 import 'package:findar/features/create_listing/widgets/property_title.dart';
 import 'package:findar/features/create_listing/widgets/description.dart';
 import 'package:findar/features/create_listing/widgets/custom_selector.dart';
@@ -48,10 +49,20 @@ class _EditListingScreenState extends State<EditListingScreen> {
     _bedroomsController = TextEditingController(text: widget.listing.bedrooms.toString());
     _bathroomsController = TextEditingController(text: widget.listing.bathrooms.toString());
     _locationController = TextEditingController(text: widget.listing.location);
-    _classification = widget.listing.classification;
-    // Capitalize first letter to match dropdown items
-    _propertyType = widget.listing.propertyType.substring(0, 1).toUpperCase() + 
-                    widget.listing.propertyType.substring(1).toLowerCase();
+    // The API stores 'rent'/'sale'; the selector shows 'For Rent'/'For Sale'.
+    _classification = widget.listing.classification.toLowerCase().contains('rent')
+        ? 'For Rent'
+        : 'For Sale';
+    // Capitalize first letter to match dropdown items; an unknown value would
+    // trip DropdownButton's "exactly one item with this value" assertion.
+    final type = widget.listing.propertyType;
+    final capitalized = type.isEmpty
+        ? ''
+        : type.substring(0, 1).toUpperCase() + type.substring(1).toLowerCase();
+    _propertyType = const ['Apartment', 'House', 'Villa', 'Studio', 'Office']
+            .contains(capitalized)
+        ? capitalized
+        : 'Apartment';
     
     // Load existing images
     if (widget.listing.image.isNotEmpty) {
@@ -90,6 +101,7 @@ class _EditListingScreenState extends State<EditListingScreen> {
         }
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to pick image: $e')),
       );
@@ -150,7 +162,7 @@ class _EditListingScreenState extends State<EditListingScreen> {
     super.dispose();
   }
 
-  void _handleUpdate() {
+  Future<void> _handleUpdate() async {
     // Simple validation - check required fields
     if (_titleController.text.trim().isEmpty ||
         _descriptionController.text.trim().isEmpty ||
@@ -202,7 +214,7 @@ class _EditListingScreenState extends State<EditListingScreen> {
     final mainImage = allImages.isNotEmpty ? allImages.first : null;
     final additionalImages = allImages.length > 1 ? allImages.sublist(1) : null;
 
-    context.read<MyListingsCubit>().editListing(
+    final result = await context.read<MyListingsCubit>().editListing(
       id: widget.listing.id,
       title: _titleController.text,
       description: _descriptionController.text,
@@ -213,15 +225,22 @@ class _EditListingScreenState extends State<EditListingScreen> {
       classification: _classification,
       propertyType: _propertyType.toLowerCase(), // Convert back to lowercase for backend
       image: mainImage,
-      additionalImages: additionalImages,
+      // Always send the list so removed photos are removed server-side.
+      additionalImages: additionalImages ?? const [],
     );
+    if (!mounted) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Updating listing...')),
+      SnackBar(
+        content: Text(result.message),
+        backgroundColor: result.state ? Colors.green : Colors.red,
+      ),
     );
 
-    // Navigate back after update
-    Navigator.pop(context);
+    if (result.state) {
+      context.read<PropertyDetailsCubit>().invalidateCache(widget.listing.id);
+      Navigator.pop(context);
+    }
   }
 
   @override

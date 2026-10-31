@@ -6,6 +6,7 @@ import 'package:findar/features/profile/screens/profile_screen/listings.dart';
 import 'package:findar/features/profile/screens/profile_screen/profile_info.dart';
 import 'package:findar/core/widgets/progress_button.dart';
 import 'package:findar/core/widgets/shimmer_loading.dart';
+import 'package:findar/l10n/app_localizations.dart';
 
 class UserProfileScreen extends StatefulWidget {
   final String userId;
@@ -43,7 +44,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Profile',
+          AppLocalizations.of(context)!.profile,
           style: TextStyle(
             color: Theme.of(context).colorScheme.onSurface,
             fontWeight: FontWeight.w600,
@@ -62,10 +63,10 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('Error: ${state['message'] ?? 'Unknown error'}'),
+                  Text(state['message'] ?? ''),
                   const SizedBox(height: 16),
                   ProgressButton(
-                    label: 'Retry',
+                    label: AppLocalizations.of(context)!.retry,
                     backgroundColor: Theme.of(context).colorScheme.primary,
                     textColor: Theme.of(context).colorScheme.onPrimary,
                     onPressed: () {
@@ -163,6 +164,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                           children: myListings
                               .map(
                                 (listing) => ListingCard(
+                                  listingId: listing['id'] as int?,
                                   imagePath:
                                       listing['imagePath'] ??
                                       'assets/find-dar-test1.jpg',

@@ -25,25 +25,87 @@ class LocalListingRepository implements ListingRepository {
     _savedIdsCache ??= await _userStore.loadSavedIds();
   }
 
-  /// Get current user ID from SharedPreferences
-  /// If no user exists, seeds a debug user for local testing
-  Future<int> _getCurrentUserId() async {
-    var user = await _userStore.loadUser();
-    if (user == null) {
-      // Seed a debug user for local testing
-      user = await _userStore.seedDebugUser(savedIds: {});
-      // Also save the user to the local database
-      await db.insertOrUpdateUser({
-        'id': user.id,
-        'username': user.username,
-        'email': user.email,
-        'phone': user.phone,
-        'profile_pic': user.profilePic,
-        'account_type': user.accountType,
-        'credits': user.credits,
-      });
+  /// Logged-in user's id, or null when signed out.
+  Future<int?> _getCurrentUserId() async {
+    return (await _userStore.loadUser())?.id;
+  }
+
+  // ----------------------------------------------------------------
+  // CACHE WRITES — called by CompositeListingRepository with server data
+  // ----------------------------------------------------------------
+
+  Map<String, dynamic> _toRow(PropertyListing l) => {
+        'id': l.id,
+        'title': l.title,
+        'description': l.description,
+        'price': l.price,
+        'address': l.location,
+        'bedrooms': l.bedrooms,
+        'bathrooms': l.bathrooms,
+        'livingrooms': l.livingrooms,
+        'area': l.area,
+        'listing_type': l.classification,
+        'building_type': l.propertyType,
+        'main_pic': l.image,
+        'pics': l.additionalImages != null ? jsonEncode(l.additionalImages) : null,
+        'active': l.isOnline ? 1 : 0,
+        'boosted': l.isBoosted ? 1 : 0,
+        'created_at': l.createdAt,
+        'latitude': l.latitude,
+        'longitude': l.longitude,
+        'owner_id': l.ownerId,
+      };
+
+  Map<String, dynamic>? _ownerRow(PropertyListing l) {
+    if (l.ownerId == null) return null;
+    return {
+      'id': l.ownerId,
+      'username': l.ownerName ?? '',
+      'email': l.ownerEmail,
+      'phone': l.ownerPhone,
+      'profile_pic': l.ownerImage,
+      'account_type': l.ownerAccountType ?? 'individual',
+    };
+  }
+
+  /// Upserts server listings, keeping their server ids and owners.
+  Future<void> cacheListings(List<PropertyListing> listings) async {
+    final owners = <int, Map<String, dynamic>>{};
+    for (final l in listings) {
+      final owner = _ownerRow(l);
+      if (owner != null) owners[l.ownerId!] = owner;
     }
-    return user.id;
+    await db.upsertListings(
+      listings.map(_toRow).toList(),
+      owners.values.toList(),
+    );
+  }
+
+  /// Replaces the cached copy of the current user's listings, so listings
+  /// deleted on the server also disappear offline.
+  Future<void> cacheUserListings(Map<String, List<PropertyListing>> data) async {
+    final userId = await _getCurrentUserId();
+    if (userId == null) return;
+    final listings = [...?data['active'], ...?data['inactive']];
+    await db.deleteWhere(table, 'owner_id = ?', [userId]);
+    await cacheListings(
+      // The my_listings payload may lack owner details; they're ours.
+      listings.map((l) => l.ownerId == null ? l.copyWith(ownerId: userId) : l).toList(),
+    );
+  }
+
+  /// Caches the saved listings and remembers which ids are saved.
+  Future<void> cacheSavedListings(List<PropertyListing> listings) async {
+    await cacheListings(listings);
+    _savedIdsCache = listings.map((l) => l.id).toSet();
+    await _userStore.saveSavedIds(_savedIdsCache!);
+  }
+
+  /// Forget everything cached for the signed-out user.
+  Future<void> clearAll() async {
+    await db.clearAll();
+    _savedIdsCache = <int>{};
+    await _userStore.saveSavedIds(_savedIdsCache!);
   }
 
   /// Copy an image file to the app's local storage directory
@@ -129,9 +191,9 @@ class LocalListingRepository implements ListingRepository {
     double? longitude,
     int? livingrooms,
     double? area,
+    bool isOnline = true,
   }) async {
     try {
-      // Get current user ID for owner_id (will auto-seed if needed)
       final ownerId = await _getCurrentUserId();
 
       // Map classification to backend values
@@ -164,13 +226,14 @@ class LocalListingRepository implements ListingRepository {
         "pics": localAdditionalImages != null
             ? jsonEncode(localAdditionalImages)
             : null,
-        "active": 1,
+        "active": isOnline ? 1 : 0,
         "boosted": 0,
         "created_at": DateTime.now().toIso8601String(),
         "latitude": latitude,
         "longitude": longitude,
         "owner_id": ownerId,
       };
+
 
       final newId = await db.insert(table, row);
       print("New listing created with ID: $newId, owner_id: $ownerId");
@@ -341,8 +404,10 @@ class LocalListingRepository implements ListingRepository {
   Future<Map<String, List<PropertyListing>>> getUserListings({
     OnDataUpdate<Map<String, List<PropertyListing>>>? onUpdate,
   }) async {
-    // Get current user's ID (will auto-seed if needed)
     final ownerId = await _getCurrentUserId();
+    if (ownerId == null) {
+      return {"active": <PropertyListing>[], "inactive": <PropertyListing>[]};
+    }
 
     // Query listings where owner_id matches current user
     final rows = await db.query(
@@ -470,6 +535,17 @@ class LocalListingRepository implements ListingRepository {
     _savedIdsCache!.remove(listingId);
     await _userStore.saveSavedIds(_savedIdsCache!);
     return ReturnResult(state: true, message: "Listing unsaved.");
+  }
+
+  @override
+  Future<ReturnResult> reportListing({
+    required int listingId,
+    required String reason,
+  }) async {
+    return ReturnResult(
+      state: false,
+      message: 'Reporting requires an internet connection.',
+    );
   }
 
   @override

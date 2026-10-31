@@ -1,6 +1,7 @@
 import 'package:findar/logic/cubits/property_details_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:findar/logic/cubits/home/recent_listings.dart';
 import 'package:findar/logic/cubits/my_listings_cubit.dart';
 import 'package:findar/core/models/property_listing_model.dart';
 import 'package:findar/l10n/app_localizations.dart';
@@ -35,7 +36,7 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
   void initState() {
     super.initState();
     // Fetch listings when screen loads
-    context.read<MyListingsCubit>().fetchMyListings();
+    context.read<MyListingsCubit>().fetchMyListings(forceRefresh: true);
   }
 
   @override
@@ -131,7 +132,7 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
                       message:
                           'Viewing your listings from local storage. Some actions may be unavailable until you reconnect.',
                       onRetry: () {
-                        context.read<MyListingsCubit>().fetchMyListings();
+                        context.read<MyListingsCubit>().fetchMyListings(forceRefresh: true);
                       },
                     );
                   }
@@ -154,7 +155,7 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
                               onPressed: () {
                                 context
                                     .read<MyListingsCubit>()
-                                    .fetchMyListings();
+                                    .fetchMyListings(forceRefresh: true);
                               },
                             ),
                           ],
@@ -245,9 +246,11 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
         onPressed: () async {
           // Open create listing and refresh when a new listing was created
           final created = await Navigator.pushNamed(context, '/create-listing');
-          if (created == true) {
+          if (created == true && context.mounted) {
             // refresh listings
-            context.read<MyListingsCubit>().fetchMyListings();
+            context.read<MyListingsCubit>().fetchMyListings(forceRefresh: true);
+            // The home feed fetches once per session; show the new listing.
+            context.read<RecentCubit>().getRecentListings(forceRefresh: true);
           }
         },
         backgroundColor: theme.colorScheme.primary,
@@ -269,22 +272,24 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
       context: context,
       title: 'Remove Listing',
       message: 'Are you sure you want to remove "${listing.title}"?',
-      onConfirm: () {
-        context.read<MyListingsCubit>().deleteListing(listing.id);
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Removing listing...')));
+      onConfirm: () async {
+        final result =
+            await context.read<MyListingsCubit>().deleteListing(listing.id);
+        if (!mounted) return;
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(result.message)));
       },
     );
   }
 
   // UPDATED: Toggle online/offline handler
-  void _handleToggleStatus(PropertyListing listing) {
-    final newStatus = listing.isOnline ? 'Offline' : 'Online';
-    context.read<MyListingsCubit>().toggleActiveListing(listing.id);
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('Setting listing to $newStatus...')));
+  Future<void> _handleToggleStatus(PropertyListing listing) async {
+    final result =
+        await context.read<MyListingsCubit>().toggleActiveListing(listing.id);
+    if (!mounted) return;
+    context.read<PropertyDetailsCubit>().invalidateCache(listing.id);
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(result.message)));
   }
 
   // UPDATED: Boost handler

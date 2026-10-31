@@ -335,5 +335,10 @@
   "describeIssue": "وصف المشكلة:",
   "provideDetails": "يرجى تقديم تفاصيل حول المشكلة...",
   "sendReport": "إرسال التقرير",
-  "pleaseSelectOrDescribe": "يرجى اختيار أو وصف المشكلة قبل الإرسال."
+  "pleaseSelectOrDescribe": "يرجى اختيار أو وصف المشكلة قبل الإرسال.",
+  "sessionExpired": "انتهت صلاحية جلستك. يرجى تسجيل الدخول مرة أخرى.",
+  "listingNotFound": "هذا الإعلان لم يعد متاحًا.",
+  "areaSqm": "المساحة (م²)",
+  "signInWithGoogle": "تسجيل الدخول باستخدام Google",
+  "actionNeedsInternet": "أنت غير متصل. اتصل بالإنترنت وحاول مرة أخرى."
 }

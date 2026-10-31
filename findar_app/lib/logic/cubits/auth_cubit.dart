@@ -1,7 +1,8 @@
-import 'package:findar/core/services/findar_api_service.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:findar/core/di/service_locator.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:findar/core/repositories/auth_repository.dart';
+import 'package:findar/core/services/firebase_oauth_service.dart';
 import 'package:findar/core/services/notification_service.dart';
 
 /// AuthCubit handles all authentication operations
@@ -13,16 +14,11 @@ import 'package:findar/core/services/notification_service.dart';
 ///   'message': 'success or error message'
 /// }
 class AuthCubit extends Cubit<Map<String, dynamic>> {
-  late final AuthRepository authRepository;
+  final AuthRepository authRepository;
 
-  AuthCubit() : super({
-    'data': null,
-    'state': 'initial',
-    'message': ''
-  }) {
-    // Initialize repository with ApiService
-    authRepository = AuthRepository(apiService: FindarApiService());
-  }
+  AuthCubit({AuthRepository? authRepository})
+      : authRepository = authRepository ?? getIt<AuthRepository>(),
+        super({'data': null, 'state': 'initial', 'message': ''});
 
   /// Attempt to hydrate from cached user on start
   Future<void> hydrateFromCache() async {
@@ -73,9 +69,8 @@ class AuthCubit extends Cubit<Map<String, dynamic>> {
         // Success: get current user from repository
         final user = authRepository.getCurrentUser();
 
-        await NotificationService.registerDeviceAfterLogin();
-        await FirebaseMessaging.instance.subscribeToTopic(user!.accountType == 'agency' ? 'agency' : 'individual');
-     
+        _setUpPushNotifications(user!);
+
         emit({
           ...state,
           'data': user,
@@ -125,9 +120,7 @@ class AuthCubit extends Cubit<Map<String, dynamic>> {
         // Success
         final user = authRepository.getCurrentUser();
         
-        // Register device token for notifications after successful login
-        await NotificationService.registerDeviceAfterLogin();
-        await FirebaseMessaging.instance.subscribeToTopic(user!.accountType == 'agency' ? 'agency' : 'individual');
+        _setUpPushNotifications(user!);
         emit({
           ...state,
           'data': user,
@@ -149,6 +142,63 @@ class AuthCubit extends Cubit<Map<String, dynamic>> {
         'message': 'Login error: ${e.toString()}',
       });
     }
+  }
+
+  /// Sign in with Google (Firebase), then exchange the token with the
+  /// backend. Cancelling the picker returns to the initial state silently.
+  Future<void> loginWithGoogle() async {
+    emit({...state, 'state': 'loading', 'message': ''});
+
+    try {
+      final idToken = await FirebaseOAuthService().getGoogleIdToken();
+      if (idToken == null) {
+        emit({...state, 'state': 'initial', 'message': ''});
+        return;
+      }
+
+      final result = await authRepository.loginWithFirebaseToken(idToken);
+      if (result.state) {
+        final user = authRepository.getCurrentUser()!;
+        _setUpPushNotifications(user);
+        emit({
+          ...state,
+          'data': user,
+          'state': 'done',
+          'message': result.message,
+        });
+      } else {
+        emit({...state, 'state': 'error', 'message': result.message});
+      }
+    } catch (e) {
+      emit({
+        ...state,
+        'state': 'error',
+        'message': 'Google sign-in failed: ${e.toString()}',
+      });
+    }
+  }
+
+  /// Forget the signed-in user (after logout or session expiry).
+  void reset() {
+    emit({'data': null, 'state': 'initial', 'message': ''});
+  }
+
+  /// Registers this device for pushes. Fire-and-forget: a push setup
+  /// failure (e.g. no Play Services) must not turn a successful sign-in into
+  /// an error.
+  void _setUpPushNotifications(User user) {
+    () async {
+      try {
+        await NotificationService.registerDeviceAfterLogin();
+        // Logout deletes the FCM token, which drops all topic subscriptions.
+        await NotificationService.subscribeToTopics([
+          'all_users',
+          user.accountType == 'agency' ? 'agency' : 'individual',
+        ]);
+      } catch (e) {
+        debugPrint('Push notification setup failed: $e');
+      }
+    }();
   }
 
   /// Logout user

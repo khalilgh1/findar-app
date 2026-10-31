@@ -33,6 +33,7 @@ class _SplashScreenState extends State<SplashScreen>
     if (isLoggedIn) {
       // Small delay to avoid frame issues
       await Future.delayed(const Duration(milliseconds: 100));
+      if (!mounted) return;
 
       Navigator.pushReplacementNamed(context, '/home');
     } else {
@@ -303,7 +304,7 @@ class _SplashScreenState extends State<SplashScreen>
           ),
         ),
         child: Text(
-          'Get Started',
+          AppLocalizations.of(context)!.getStarted,
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,

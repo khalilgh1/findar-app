@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:findar/core/services/findar_api_service.dart';
 import 'package:findar/core/config/api_config.dart';
+import 'package:findar/core/models/return_result.dart';
 
 /// BoostCubit handles listing boost operations
 /// State: {data: {...}, state: 'initial|loading|done|error', message: ''}
@@ -39,11 +40,11 @@ class BoostCubit extends Cubit<Map<String, dynamic>> {
         },
       );
 
-      if (response['error'] != null) {
+      if (response is ReturnResult) {
         emit({
           ...state,
           'state': 'error',
-          'message': response['error'],
+          'message': response.message,
         });
         return;
       }

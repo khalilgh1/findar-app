@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:findar/logic/cubits/saved_listings_cubit.dart';
 import 'package:findar/logic/cubits/search_cubit.dart';
 import 'package:findar/logic/cubits/sort_cubit.dart';
 import 'package:findar/core/models/property_listing_model.dart';
@@ -36,6 +37,8 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
 
     // Get the search query from route arguments and perform search once
     if (!_hasSearched) {
+      // Saved state for the bookmark icons comes from SavedListingsCubit.
+      context.read<SavedListingsCubit>().fetchSavedListings();
       final rawQuery = ModalRoute.of(context)?.settings.arguments;
       print('🔍 Raw search query from arguments: $rawQuery');
       // Handle string "null" or actual null by converting to empty string
@@ -52,9 +55,6 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
       _hasSearched = true;
     }
   }
-
-  // Keep track of locally saved listing ids for optimistic UI updates
-  final Set<int> _savedIds = {};
 
   void _applyCurrentFiltersWithSort(String sortBy) {
     final searchCubit = context.read<SearchCubit>();
@@ -92,23 +92,13 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
   }
 
   void _toggleSave(int listingId) async {
-    final result = await context.read<SearchCubit>().saveListing(listingId);
-    if (result.state) {
-      setState(() {
-        if (_savedIds.contains(listingId)) {
-          _savedIds.remove(listingId);
-        } else {
-          _savedIds.add(listingId);
-        }
-      });
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(result.message)));
-    } else {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(result.message)));
-    }
+    final saved = context.read<SavedListingsCubit>();
+    final result = saved.isSaved(listingId)
+        ? await saved.unsaveListing(listingId)
+        : await saved.saveListing(listingId);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(result.message)));
   }
 
   @override
@@ -235,13 +225,18 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                       SizedBox(height: screenHeight * 0.02),
                   itemBuilder: (context, index) {
                     final listing = listings[index];
-                    final isSaved = _savedIds.contains(listing.id);
-
-                    return PropertyListingCard(
-                      listing: listing,
-                      isSaved: isSaved,
-                      onSaveToggle: () => _toggleSave(listing.id),
-                    );
+                    // provider forbids context.select directly in a
+                    // list itemBuilder; each card gets its own context.
+                    return Builder(builder: (context) {
+                      final isSaved = context
+                          .select<SavedListingsCubit, bool>(
+                              (c) => c.isSaved(listing.id));
+                      return PropertyListingCard(
+                        listing: listing,
+                        isSaved: isSaved,
+                        onSaveToggle: () => _toggleSave(listing.id),
+                      );
+                    });
                   },
                 );
               },
@@ -368,58 +363,6 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
             Navigator.pop(context);
             // Apply sort
           },
-    );
-  }
-
-  void _showFilterBottomSheet(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-
-    showModalBottomSheet(
-      context: context,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(screenWidth * 0.05),
-        ),
-      ),
-      isScrollControlled: true,
-      builder: (context) {
-        return DraggableScrollableSheet(
-          initialChildSize: 0.7,
-          minChildSize: 0.5,
-          maxChildSize: 0.95,
-          expand: false,
-          builder: (context, scrollController) {
-            return Container(
-              padding: EdgeInsets.all(screenWidth * 0.05),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Filters',
-                    style: TextStyle(
-                      fontSize: screenWidth * 0.05,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: screenWidth * 0.04),
-                  Expanded(
-                    child: ListView(
-                      controller: scrollController,
-                      children: [
-                        Text(
-                          'Filter options would go here',
-                          style: TextStyle(fontSize: screenWidth * 0.04),
-                        ),
-                        // Add filter options
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
     );
   }
 }

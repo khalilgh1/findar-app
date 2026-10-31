@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:findar/logic/cubits/auth_cubit.dart';
+import 'package:findar/logic/cubits/profile_cubit.dart';
 import 'package:findar/core/services/cloudinary_service.dart';
 
 class ProfileAvatar extends StatefulWidget {
@@ -37,7 +38,10 @@ class _ProfileAvatarState extends State<ProfileAvatar>
     super.dispose();
   }
 
-  ImageProvider _getImageProvider(dynamic authState) {
+  /// [profileState] is ProfileCubit's state: its user is refreshed from the
+  /// server, unlike AuthCubit's (only set at login, so a picture added at
+  /// registration or on another device never showed).
+  ImageProvider _getImageProvider(Map<String, dynamic> profileState) {
     // First check if user just uploaded/selected an image in this session
     if (kIsWeb && _webImageBytes != null) {
       return MemoryImage(_webImageBytes!);
@@ -46,14 +50,10 @@ class _ProfileAvatarState extends State<ProfileAvatar>
     }
 
     // Then check if user has a saved profile picture from backend
-    final userData = authState['data'];
-    if (userData != null && userData.profilePic != null) {
-      final profilePic = userData.profilePic as String;
-
-      // If it's a URL from Cloudinary, use NetworkImage
-      if (profilePic.startsWith('http')) {
-        return NetworkImage(profilePic);
-      }
+    final userData = profileState['data'];
+    final profilePic = userData is Map ? userData['profilePic'] : null;
+    if (profilePic is String && profilePic.startsWith('http')) {
+      return NetworkImage(profilePic);
     }
 
     // Finally, fall back to default avatar
@@ -61,11 +61,11 @@ class _ProfileAvatarState extends State<ProfileAvatar>
   }
 
   void _showFullScreenImage(BuildContext context) {
-    final authState = context.read<AuthCubit>().state;
+    final profileState = context.read<ProfileCubit>().state;
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) =>
-            _FullScreenImageViewer(imageProvider: _getImageProvider(authState)),
+        builder: (context) => _FullScreenImageViewer(
+            imageProvider: _getImageProvider(profileState)),
       ),
     );
   }
@@ -177,6 +177,7 @@ class _ProfileAvatarState extends State<ProfileAvatar>
                 );
 
             if (!mounted) return;
+            context.read<ProfileCubit>().fetchProfile();
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text('Profile picture updated successfully'),
@@ -217,8 +218,8 @@ class _ProfileAvatarState extends State<ProfileAvatar>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return BlocBuilder<AuthCubit, Map<String, dynamic>>(
-      builder: (context, authState) {
+    return BlocBuilder<ProfileCubit, Map<String, dynamic>>(
+      builder: (context, profileState) {
         return Stack(
           alignment: Alignment.center,
           children: [
@@ -229,7 +230,7 @@ class _ProfileAvatarState extends State<ProfileAvatar>
                 tag: 'profile_avatar',
                 child: CircleAvatar(
                   radius: 50,
-                  backgroundImage: _getImageProvider(authState),
+                  backgroundImage: _getImageProvider(profileState),
                   backgroundColor: Colors.transparent,
                 ),
               ),

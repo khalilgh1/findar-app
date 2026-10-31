@@ -10,22 +10,19 @@ import 'package:internet_connection_checker_plus/internet_connection_checker_plu
 /// it checks for connectivity and uses the appropriate repository accordingly.
 /// Also, there are methods where both repos are used to keep data in sync (caching).
 ///
-/// **Offline Mode Behavior:**
-/// When offline, the user can only:
-/// - View their own listings
-/// - View their saved listings
-/// - View property details of their own and saved listings
+/// Reads are offline-first: `onUpdate` fires with cached rows, then with
+/// server data, which is written back to the cache with its server ids.
+/// If the server call fails, the cache stays on screen; if nothing was
+/// cached, the error is rethrown so the caller can show it.
 ///
-/// All other operations (CRUD, recent listings, sponsored, search, etc.)
-/// will throw a [NetworkException].
-
+/// **Offline Mode Behavior:**
+/// When offline, the user can view cached recent listings, their own
+/// listings, their saved listings and the details of any cached listing.
+/// Writes (create/edit/delete/save/report) throw a [NetworkException].
 class CompositeListingRepository implements ListingRepository {
   final LocalListingRepository _databaseRepo;
   final RemoteListingRepository _remoteRepo;
   final InternetConnection _connectionChecker;
-
-  /// Static flag to track if initial sync has been done this session
-  static bool _hasInitialSyncCompleted = false;
 
   CompositeListingRepository(
       this._databaseRepo, this._remoteRepo, this._connectionChecker);
@@ -35,53 +32,42 @@ class CompositeListingRepository implements ListingRepository {
     return await _connectionChecker.hasInternetAccess;
   }
 
-  /// Sync local database with remote data once per session
-  /// Call this when the app starts (e.g., on first authenticated screen)
-  Future<void> syncOncePerSession() async {
-    if (_hasInitialSyncCompleted) return;
-
-    if (!await _hasConnection()) {
-      print('No connection, skipping initial sync');
-      return;
-    }
-
-    try {
-      print('Starting initial session sync...');
-
-      // Fetch recent listings from remote and cache them
-      final remoteListings = await _remoteRepo.getRecentListings();
-      await _databaseRepo.clearCachedListings();
-      for (final listing in remoteListings) {
-        try {
-          await _databaseRepo.createListing(
-            title: listing.title,
-            description: listing.description,
-            price: listing.price,
-            location: listing.location,
-            bedrooms: listing.bedrooms,
-            bathrooms: listing.bathrooms,
-            classification: listing.classification,
-            propertyType: listing.propertyType,
-            image: listing.image,
-          );
-        } catch (e) {
-          print('Error caching listing: $e');
-        }
-      }
-
-      _hasInitialSyncCompleted = true;
-      print('Initial session sync completed');
-    } catch (e) {
-      print('Error during initial sync: $e');
-    }
-  }
-
   /// Throws [NetworkException] if offline and operation is not allowed
   Future<void> _requireConnection(String operation) async {
     if (!await _hasConnection()) {
       throw NetworkException.featureUnavailable(operation);
     }
   }
+
+  /// Maps UI filter labels onto the backend's values
+  /// ('For Rent' -> 'rent', 'Real Estate Agent' -> 'agency', ...). Unknown
+  /// values become null (= no filter) rather than silently matching nothing.
+  static String? _apiListingType(String? value) {
+    final v = value?.toLowerCase();
+    if (v == null) return null;
+    if (v.contains('rent')) return 'rent';
+    if (v.contains('sale')) return 'sale';
+    return null;
+  }
+
+  static String? _apiListedBy(String? value) {
+    final v = value?.toLowerCase();
+    if (v == null) return null;
+    if (v.contains('agen')) return 'agency';
+    if (v.contains('owner') || v.contains('individual')) return 'individual';
+    return null;
+  }
+
+  Future<void> _cache(Future<void> Function() write) async {
+    try {
+      await write();
+    } catch (e) {
+      print('Error updating listing cache: $e');
+    }
+  }
+
+  /// Drop all cached listings and saved ids (call on logout).
+  Future<void> clearCache() => _databaseRepo.clearAll();
 
   // ============================================================
   // CRUD Operations - Require internet connection
@@ -103,10 +89,11 @@ class CompositeListingRepository implements ListingRepository {
     double? longitude,
     int? livingrooms,
     double? area,
+    bool isOnline = true,
   }) async {
     await _requireConnection('Create listing');
 
-    final result = await _remoteRepo.createListing(
+    return _remoteRepo.createListing(
       title: title,
       description: description,
       price: price,
@@ -121,9 +108,8 @@ class CompositeListingRepository implements ListingRepository {
       longitude: longitude,
       livingrooms: livingrooms,
       area: area,
+      isOnline: isOnline,
     );
-
-    return result;
   }
 
   @override
@@ -143,7 +129,7 @@ class CompositeListingRepository implements ListingRepository {
   }) async {
     await _requireConnection('Edit listing');
 
-    final result = await _remoteRepo.editListing(
+    return _remoteRepo.editListing(
       id: id,
       title: title,
       description: description,
@@ -157,14 +143,16 @@ class CompositeListingRepository implements ListingRepository {
       additionalImages: additionalImages,
       isOnline: isOnline,
     );
-
-    return result;
   }
 
   @override
   Future<ReturnResult> deleteListing(int id) async {
     await _requireConnection('Delete listing');
-    return await _remoteRepo.deleteListing(id);
+    final result = await _remoteRepo.deleteListing(id);
+    if (result.state) {
+      await _cache(() => _databaseRepo.deleteListing(id));
+    }
+    return result;
   }
 
   @override
@@ -173,8 +161,17 @@ class CompositeListingRepository implements ListingRepository {
     return await _remoteRepo.toggleActiveListing(id);
   }
 
+  @override
+  Future<ReturnResult> reportListing({
+    required int listingId,
+    required String reason,
+  }) async {
+    await _requireConnection('Report listing');
+    return _remoteRepo.reportListing(listingId: listingId, reason: reason);
+  }
+
   // ============================================================
-  // Listings that require internet - throw NetworkException if offline
+  // Offline-first reads
   // ============================================================
 
   @override
@@ -183,8 +180,6 @@ class CompositeListingRepository implements ListingRepository {
     String? listingType,
     OnDataUpdate<List<PropertyListing>>? onUpdate,
   }) async {
-    // First, fetch from local database
-    print("Fetching recent listings from local database repository...");
     final localListings = await _databaseRepo.getRecentListings(
       query: query,
       listingType: listingType,
@@ -196,71 +191,44 @@ class CompositeListingRepository implements ListingRepository {
       onUpdate(localListings);
     }
 
-    // Then try to fetch from remote if connected
-    if (await _hasConnection()) {
-      print("Fetching recent listings from remote repository...");
-      try {
-        final remoteListings = await _remoteRepo.getRecentListings(
-          query: query,
-          listingType: listingType,
-        );
-
-        // Clear old cached listings and cache new ones
-        await _databaseRepo.clearCachedListings();
-        for (final listing in remoteListings) {
-          try {
-            await _databaseRepo.createListing(
-              title: listing.title,
-              description: listing.description,
-              price: listing.price,
-              location: listing.location,
-              bedrooms: listing.bedrooms,
-              bathrooms: listing.bathrooms,
-              classification: listing.classification,
-              propertyType: listing.propertyType,
-              image: listing.image,
-            );
-          } catch (e) {
-            print("Error caching listing ID ${listing.id}: $e");
-          }
-        }
-
-        // Call onUpdate with remote data
-        if (onUpdate != null) {
-          onUpdate(remoteListings);
-        }
-
-        return remoteListings;
-      } catch (e) {
-        print("Error fetching remote listings: $e");
-        // On error, don't call onUpdate - keep whatever is already displayed
-        return localListings;
+    if (!await _hasConnection()) {
+      if (onUpdate != null && localListings.isEmpty) {
+        onUpdate(localListings);
       }
+      return localListings;
     }
 
-    // Return local listings if offline
-    // Only call onUpdate if we have data or haven't called it yet
-    if (onUpdate != null && localListings.isEmpty) {
-      onUpdate(localListings);
+    try {
+      final remoteListings = await _remoteRepo.getRecentListings(
+        query: query,
+        listingType: listingType,
+      );
+      await _cache(() => _databaseRepo.cacheListings(remoteListings));
+
+      if (onUpdate != null) {
+        onUpdate(remoteListings);
+      }
+      return remoteListings;
+    } catch (e) {
+      print("Error fetching remote listings: $e");
+      // Keep showing the cache; with nothing cached, let the cubit show
+      // its error/retry state instead of spinning forever.
+      if (localListings.isEmpty) rethrow;
+      return localListings;
     }
-    return localListings;
   }
 
   @override
   Future<List<PropertyListing>> getSponsoredListings({
     OnDataUpdate<List<PropertyListing>>? onUpdate,
   }) async {
-    // First, fetch from local database
     final localListings = await _databaseRepo.getSponsoredListings();
 
-    // Only call onUpdate with local data if it's not empty
-    // This prevents overwriting existing UI data with empty local cache
     if (onUpdate != null && localListings.isNotEmpty) {
       onUpdate(localListings);
     }
 
     if (!await _hasConnection()) {
-      // If offline and no local data, still call onUpdate with empty list
       if (onUpdate != null && localListings.isEmpty) {
         onUpdate(localListings);
       }
@@ -269,16 +237,15 @@ class CompositeListingRepository implements ListingRepository {
 
     try {
       final remoteListings = await _remoteRepo.getSponsoredListings();
+      await _cache(() => _databaseRepo.cacheListings(remoteListings));
 
       if (onUpdate != null) {
         onUpdate(remoteListings);
       }
-
       return remoteListings;
     } catch (e) {
       print("Error fetching remote sponsored listings: $e");
-      // On error, only call onUpdate if we have local data to show
-      // Otherwise, don't overwrite what might already be displayed
+      if (localListings.isEmpty) rethrow;
       return localListings;
     }
   }
@@ -299,8 +266,30 @@ class CompositeListingRepository implements ListingRepository {
     String? sortBy,
     OnDataUpdate<List<PropertyListing>>? onUpdate,
   }) async {
-    // First, fetch from local database and call onUpdate immediately
-    final localListings = await _databaseRepo.getFilteredListings(
+    listingType = _apiListingType(listingType);
+    listedBy = _apiListedBy(listedBy);
+    buildingType = buildingType?.toLowerCase();
+
+    if (!await _hasConnection()) {
+      // The local cache can't do radius search, so this is a best-effort
+      // approximation over whatever has been cached.
+      final localListings = await _databaseRepo.getFilteredListings(
+        minPrice: minPrice,
+        maxPrice: maxPrice,
+        listingType: listingType,
+        buildingType: buildingType,
+        numBedrooms: numBedrooms,
+        numBathrooms: numBathrooms,
+        minSqft: minSqft,
+        maxSqft: maxSqft,
+      );
+      onUpdate?.call(localListings);
+      return localListings;
+    }
+
+    // Online: show only server results, so a partial local match doesn't
+    // flash before the real result set.
+    final remoteListings = await _remoteRepo.getFilteredListings(
       latitude: latitude,
       longitude: longitude,
       minPrice: minPrice,
@@ -314,62 +303,26 @@ class CompositeListingRepository implements ListingRepository {
       listedBy: listedBy,
       sortBy: sortBy,
     );
+    await _cache(() => _databaseRepo.cacheListings(remoteListings));
 
-    // Call onUpdate with local data immediately (even if empty)
-    if (onUpdate != null) {
-      onUpdate(localListings);
-    }
-
-    if (!await _hasConnection()) {
-      return localListings;
-    }
-
-    try {
-      final remoteListings = await _remoteRepo.getFilteredListings(
-        latitude: latitude,
-        longitude: longitude,
-        minPrice: minPrice,
-        maxPrice: maxPrice,
-        listingType: listingType,
-        buildingType: buildingType,
-        numBedrooms: numBedrooms,
-        numBathrooms: numBathrooms,
-        minSqft: minSqft,
-        maxSqft: maxSqft,
-        listedBy: listedBy,
-        sortBy: sortBy,
-      );
-
-      if (onUpdate != null) {
-        onUpdate(remoteListings);
-      }
-
-      return remoteListings;
-    } catch (e) {
-      print("Error fetching remote filtered listings: $e");
-      return localListings;
-    }
+    onUpdate?.call(remoteListings);
+    return remoteListings;
   }
 
   @override
   Future<Map<String, List<PropertyListing>>> getUserListings({
     OnDataUpdate<Map<String, List<PropertyListing>>>? onUpdate,
   }) async {
-    // First, fetch from local database
     final localListings = await _databaseRepo.getUserListings();
 
-    // Check if local data has any listings
     final hasLocalData = localListings['active']?.isNotEmpty == true ||
         localListings['inactive']?.isNotEmpty == true;
 
-    // Only call onUpdate with local data if it's not empty
-    // This prevents overwriting existing UI data with empty local cache
     if (onUpdate != null && hasLocalData) {
       onUpdate(localListings);
     }
 
     if (!await _hasConnection()) {
-      // If offline and no local data, still call onUpdate
       if (onUpdate != null && !hasLocalData) {
         onUpdate(localListings);
       }
@@ -378,15 +331,15 @@ class CompositeListingRepository implements ListingRepository {
 
     try {
       final remoteListings = await _remoteRepo.getUserListings();
+      await _cache(() => _databaseRepo.cacheUserListings(remoteListings));
 
       if (onUpdate != null) {
         onUpdate(remoteListings);
       }
-
       return remoteListings;
     } catch (e) {
       print("Error fetching remote user listings: $e");
-      // On error, don't call onUpdate - keep whatever is already displayed
+      if (!hasLocalData) rethrow;
       return localListings;
     }
   }
@@ -395,17 +348,13 @@ class CompositeListingRepository implements ListingRepository {
   Future<List<PropertyListing>> getSavedListings({
     OnDataUpdate<List<PropertyListing>>? onUpdate,
   }) async {
-    // First, fetch from local database
     final localListings = await _databaseRepo.getSavedListings();
 
-    // Only call onUpdate with local data if it's not empty
-    // This prevents overwriting existing UI data with empty local cache
     if (onUpdate != null && localListings.isNotEmpty) {
       onUpdate(localListings);
     }
 
     if (!await _hasConnection()) {
-      // If offline and no local data, still call onUpdate
       if (onUpdate != null && localListings.isEmpty) {
         onUpdate(localListings);
       }
@@ -414,15 +363,15 @@ class CompositeListingRepository implements ListingRepository {
 
     try {
       final remoteListings = await _remoteRepo.getSavedListings();
+      await _cache(() => _databaseRepo.cacheSavedListings(remoteListings));
 
       if (onUpdate != null) {
         onUpdate(remoteListings);
       }
-
       return remoteListings;
     } catch (e) {
       print("Error fetching remote saved listings: $e");
-      // On error, don't call onUpdate - keep whatever is already displayed
+      if (localListings.isEmpty) rethrow;
       return localListings;
     }
   }
@@ -430,7 +379,13 @@ class CompositeListingRepository implements ListingRepository {
   @override
   Future<Set<int>> getSavedListingIds() async {
     if (await _hasConnection()) {
-      return await _remoteRepo.getSavedListingIds();
+      try {
+        final saved = await _remoteRepo.getSavedListings();
+        await _cache(() => _databaseRepo.cacheSavedListings(saved));
+        return saved.map((l) => l.id).toSet();
+      } catch (e) {
+        print("Error fetching saved listing ids: $e");
+      }
     }
     return await _databaseRepo.getSavedListingIds();
   }
@@ -438,28 +393,41 @@ class CompositeListingRepository implements ListingRepository {
   @override
   Future<ReturnResult> saveListing(int listingId) async {
     await _requireConnection('Save listing');
-    return await _remoteRepo.saveListing(listingId);
+    final result = await _remoteRepo.saveListing(listingId);
+    if (result.state) {
+      await _cache(() => _databaseRepo.saveListing(listingId));
+    }
+    return result;
   }
 
   @override
   Future<ReturnResult> unsaveListing(int listingId) async {
     await _requireConnection('Unsave listing');
     final result = await _remoteRepo.unsaveListing(listingId);
+    if (result.state) {
+      await _cache(() => _databaseRepo.unsaveListing(listingId));
+    }
     return result;
   }
 
   // ============================================================
-  // Get listing by ID - Available offline for own/saved listings only
+  // Get listing by ID - Available offline for cached listings
   // ============================================================
 
   @override
   Future<PropertyListing?> getListingById(int id) async {
     if (await _hasConnection()) {
-      // Online: fetch from remote
-      return await _remoteRepo.getListingById(id);
-    } else {
-      // Offline: fetch from local database
-      return await _databaseRepo.getListingById(id);
+      final listing = await _remoteRepo.getListingById(id);
+      if (listing != null) {
+        await _cache(() => _databaseRepo.cacheListings([listing]));
+      }
+      return listing;
     }
+
+    final cached = await _databaseRepo.getListingById(id);
+    if (cached == null) {
+      throw NetworkException.featureUnavailable('This listing');
+    }
+    return cached;
   }
 }

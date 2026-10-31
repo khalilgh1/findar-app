@@ -12,7 +12,6 @@ import 'package:findar/features/create_listing/widgets/description.dart';
 import 'package:findar/features/create_listing/widgets/custom_selector.dart';
 import 'package:findar/features/create_listing/widgets/price_field.dart';
 import 'package:findar/features/create_listing/widgets/numeric_field.dart';
-import 'package:findar/features/create_listing/widgets/location_field.dart';
 import 'package:findar/features/create_listing/widgets/location_autocomplete_field.dart';
 //package imports
 import 'package:findar/logic/cubits/my_listings_cubit.dart';
@@ -32,14 +31,15 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _priceController = TextEditingController();
-  final _floorsController = TextEditingController();
-  final _roomsController = TextEditingController();
+  final _bathroomsController = TextEditingController();
+  final _areaController = TextEditingController();
   final _bedroomsController = TextEditingController();
   final _locationController = TextEditingController();
 
   String _classification = 'For Sale';
   String _propertyType = 'Apartment';
   String _status = 'Online';
+  bool _isSubmitting = false;
   final List<File> _selectedImages = [];
   final ImagePicker _imagePicker = ImagePicker();
 
@@ -71,6 +71,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
         }
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to pick image: $e')),
       );
@@ -346,7 +347,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
                 ),
                 const SizedBox(height: 24),
 
-                // Floors, Rooms, Bedrooms Row
+                // Bedrooms, Bathrooms, Area Row
                 Builder(
                   builder: (context) {
                     var l10n = AppLocalizations.of(context);
@@ -354,38 +355,38 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
                       children: [
                         Expanded(
                           child: NumericField(
-                            label: l10n?.floors ?? 'Floors',
-                            hint: 'e.g. 2',
-                            controller: _floorsController,
-                            keyboardType: TextInputType.number,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: NumericField(
-                            label: l10n?.rooms ?? 'Rooms',
-                            hint: 'e.g. 5',
-                            controller: _roomsController,
-                            keyboardType: TextInputType.number,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: NumericField(
                             label: l10n?.bedrooms ?? 'Bedrooms',
-                            hint: 'e.g. 3',
+                            hint: '3',
                             controller: _bedroomsController,
                             keyboardType: TextInputType.number,
                             inputFormatters: [
                               FilteringTextInputFormatter.digitsOnly
                             ],
                             validator: _validateBedrooms,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: NumericField(
+                            label: l10n?.bathrooms ?? 'Bathrooms',
+                            hint: '1',
+                            controller: _bathroomsController,
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: NumericField(
+                            label: l10n?.areaSqm ?? 'Area (m²)',
+                            hint: '120',
+                            controller: _areaController,
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly
+                            ],
                           ),
                         ),
                       ],
@@ -574,91 +575,97 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
       // Create Listing Button
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: BlocListener<MyListingsCubit, Map<String, dynamic>>(
-          listener: (context, state) {
-            final l10n = AppLocalizations.of(context)!;
-            if (state['state'] == 'done') {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(l10n.listingCreatedSuccessfully),
-                  backgroundColor: Colors.green,
-                ),
-              );
-              // Return to previous screen and signal that a listing was created
-              Navigator.pop(context, true);
-            } else if (state['state'] == 'error') {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state['message'] ?? l10n.listingCreateFailed),
-                  backgroundColor: Colors.red,
-                ),
-              );
-            }
+        child: Builder(
+          builder: (context) {
+            final l10n = AppLocalizations.of(context);
+            return ProgressButton(
+              label: l10n?.createListing ?? 'Create Listing',
+              backgroundColor: theme.colorScheme.primary,
+              textColor: theme.colorScheme.onPrimary,
+              isLoading: _isSubmitting,
+              onPressed: _submit,
+            );
           },
-          child: BlocBuilder<MyListingsCubit, Map<String, dynamic>>(
-            builder: (context, state) {
-              final isLoading = state['state'] == 'loading';
-              final isError = state['state'] == 'error';
-              final errorMessage =
-                  isError ? (state['message'] as String?) : null;
-
-              return Builder(
-                builder: (context) {
-                  var l10n = AppLocalizations.of(context);
-                  return ProgressButton(
-                    label: l10n?.createListing ?? 'Create Listing',
-                    backgroundColor: theme.colorScheme.primary,
-                    textColor: theme.colorScheme.onPrimary,
-                    isLoading: isLoading,
-                    isError: isError,
-                    errorMessage: errorMessage,
-                    onPressed: () {
-                      // Validate form
-                      if (!_formKey.currentState!.validate()) {
-                        return;
-                      }
-
-                      // Validate at least one image is selected
-                      if (_selectedImages.isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Please add at least one photo'),
-                            backgroundColor: Colors.red,
-                          ),
-                        );
-                        return;
-                      }
-
-                      // Get image paths
-                      final mainImage = _selectedImages.first.path;
-                      final additionalImages = _selectedImages.length > 1
-                          ? _selectedImages.skip(1).map((f) => f.path).toList()
-                          : <String>[];
-
-                      // Call cubit to create listing
-                      context.read<MyListingsCubit>().createListing(
-                            title: _titleController.text,
-                            description: _descriptionController.text,
-                            price: double.parse(_priceController.text),
-                            location: _locationController.text,
-                            latitude: _latitude,
-                            longitude: _longitude,
-                            bedrooms: int.parse(_bedroomsController.text),
-                            bathrooms: 1,
-                            classification: _classification,
-                            propertyType: _propertyType,
-                            image: mainImage,
-                            additionalImages: additionalImages,
-                          );
-                    },
-                  );
-                },
-              );
-            },
-          ),
         ),
       ),
     );
+  }
+
+  Future<void> _submit() async {
+    if (_isSubmitting) return;
+    final l10n = AppLocalizations.of(context)!;
+
+    // Validate form
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    // Validate at least one image is selected
+    if (_selectedImages.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please add at least one photo'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    final price = double.tryParse(_priceController.text.trim());
+    if (price == null || price <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a valid price'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // Get image paths
+    final mainImage = _selectedImages.first.path;
+    final additionalImages = _selectedImages.length > 1
+        ? _selectedImages.skip(1).map((f) => f.path).toList()
+        : <String>[];
+
+    setState(() => _isSubmitting = true);
+    final result = await context.read<MyListingsCubit>().createListing(
+          title: _titleController.text.trim(),
+          description: _descriptionController.text.trim(),
+          price: price,
+          location: _locationController.text.trim(),
+          latitude: _latitude,
+          longitude: _longitude,
+          bedrooms: int.tryParse(_bedroomsController.text) ?? 0,
+          bathrooms: int.tryParse(_bathroomsController.text) ?? 0,
+          area: double.tryParse(_areaController.text),
+          classification: _classification,
+          propertyType: _propertyType,
+          image: mainImage,
+          additionalImages: additionalImages,
+          isOnline: _status == 'Online',
+        );
+    if (!mounted) return;
+    setState(() => _isSubmitting = false);
+
+    if (result.state) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.listingCreatedSuccessfully),
+          backgroundColor: Colors.green,
+        ),
+      );
+      // Return to previous screen and signal that a listing was created
+      Navigator.pop(context, true);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+              result.message.isNotEmpty ? result.message : l10n.listingCreateFailed),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   @override
@@ -666,8 +673,8 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
     _titleController.dispose();
     _descriptionController.dispose();
     _priceController.dispose();
-    _floorsController.dispose();
-    _roomsController.dispose();
+    _bathroomsController.dispose();
+    _areaController.dispose();
     _bedroomsController.dispose();
     _locationController.dispose();
     super.dispose();

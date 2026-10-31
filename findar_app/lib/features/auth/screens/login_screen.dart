@@ -3,8 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:findar/logic/cubits/auth_cubit.dart';
 import 'package:findar/core/widgets/progress_button.dart';
 import 'package:findar/l10n/app_localizations.dart';
-import 'package:findar/core/repositories/local_user_store.dart';
-import 'package:findar/core/services/firebase_oauth_service.dart';
 
 
 class LoginScreen extends StatefulWidget {
@@ -180,8 +178,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           margin: const EdgeInsets.all(16),
                         ),
                       );
-                      Navigator.pop(context);
-                      Navigator.pushNamed(context, '/home');
+                      Navigator.pushNamedAndRemoveUntil(
+                          context, '/home', (route) => false);
                     }
                     if (state['state'] == 'error' && state['message'] != null) {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -228,28 +226,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 SizedBox(
                   width: double.infinity,
                   child: OutlinedButton.icon(
-                    onPressed: () async {
-                      try {
-                        await FirebaseOAuthService().signInWithGoogle();
-                        if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(l10n.success),
-                              backgroundColor: Colors.green,
-                            ),
-                          );
-                          Navigator.pushNamed(context, '/home');
-                        }
-                      } catch (e) {
-                        if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Google sign-in failed: $e')),
-                          );
-                        }
-                      }
-                    },
+                    // Success/error navigation is handled by the AuthCubit
+                    // listener above, same as email login.
+                    onPressed: () =>
+                        context.read<AuthCubit>().loginWithGoogle(),
                     icon: const Icon(Icons.login),
-                    label: Text('Sign in with Google'),
+                    label: Text(l10n.signInWithGoogle),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       side: BorderSide(color: theme.colorScheme.primary),

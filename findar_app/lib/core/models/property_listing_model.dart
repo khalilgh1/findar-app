@@ -12,16 +12,22 @@ class PropertyListing {
   @JsonKey(name: 'address', defaultValue: 'Unknown')
   final String location;
 
+  @JsonKey(defaultValue: 0)
   final int bedrooms;
+  @JsonKey(defaultValue: 0)
   final int bathrooms;
+  final int? livingrooms;
+  final double? area;
+  final double? latitude;
+  final double? longitude;
 
-  @JsonKey(name: 'listing_type')
+  @JsonKey(name: 'listing_type', defaultValue: 'rent')
   final String classification;
 
-  @JsonKey(name: 'building_type')
+  @JsonKey(name: 'building_type', defaultValue: 'apartment')
   final String propertyType;
 
-  @JsonKey(name: 'main_pic')
+  @JsonKey(name: 'main_pic', defaultValue: '')
   final String image;
 
   @JsonKey(name: 'pics')
@@ -56,6 +62,10 @@ class PropertyListing {
     required this.location,
     required this.bedrooms,
     required this.bathrooms,
+    this.livingrooms,
+    this.area,
+    this.latitude,
+    this.longitude,
     required this.classification,
     required this.propertyType,
     required this.image,
@@ -95,6 +105,10 @@ class PropertyListing {
     String? location,
     int? bedrooms,
     int? bathrooms,
+    int? livingrooms,
+    double? area,
+    double? latitude,
+    double? longitude,
     String? classification,
     String? propertyType,
     String? image,
@@ -119,6 +133,10 @@ class PropertyListing {
       location: location ?? this.location,
       bedrooms: bedrooms ?? this.bedrooms,
       bathrooms: bathrooms ?? this.bathrooms,
+      livingrooms: livingrooms ?? this.livingrooms,
+      area: area ?? this.area,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
       classification: classification ?? this.classification,
       propertyType: propertyType ?? this.propertyType,
       image: image ?? this.image,

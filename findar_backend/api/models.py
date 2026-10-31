@@ -38,7 +38,6 @@ class CustomUser(AbstractUser):
     credits = models.IntegerField(default=0)
     
     def __str__(self):
-        print(f"DEBUG - User ID: {self.id}, Username: {self.username}")
         return self.username
     
     
@@ -64,7 +63,7 @@ class Post(models.Model):
     price        = models.FloatField()
     description  = models.TextField(max_length=1000) 
     address      = models.CharField(max_length=500, null=True, blank=True)
-    created_at   = models.DateTimeField(auto_now=True)
+    created_at   = models.DateTimeField(auto_now_add=True)
     active       = models.BooleanField(default=True)
     boosted      = models.BooleanField(default=False)
     main_pic     = models.URLField(max_length=500 , null=True , blank=True)
@@ -79,7 +78,6 @@ class Post(models.Model):
     building_type = models.CharField(max_length=50 , choices=BUILDING_TYPE_CHOICES, null=True)  
 
     def __str__(self):
-        print(f"DEBUG POST - ID: {self.id}, Owner ID: {self.owner.id}, Owner Username: {self.owner.username}, Title: {self.title}")
         return f"{self.owner} : {self.title}"
 
 ################# SavedPosts Model
@@ -129,12 +127,19 @@ class BoostingPlan(models.Model):
     duration            = models.IntegerField() #not sure if in days, hours or seconds
 
     def save(self, *args, **kwargs):
-        
-        if self.target_audience == 'agencies':
-            new_agency_boosting_plans_notification()
-        elif self.target_audience == 'individuals':
-            new_individual_boosting_plans_notification()
+        is_new = self._state.adding
         super().save(*args, **kwargs)
+        # Announce only newly created plans, and never let a push failure
+        # prevent the plan from being saved.
+        if not is_new:
+            return
+        try:
+            if self.target_audience == 'agencies':
+                new_agency_boosting_plans_notification()
+            elif self.target_audience == 'individuals':
+                new_individual_boosting_plans_notification()
+        except Exception as e:
+            print(f"Failed to send new boosting plan notification: {e}")
     
 ################# Boosting Model
 

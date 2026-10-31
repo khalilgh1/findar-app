@@ -4,6 +4,7 @@ import 'package:findar/logic/cubits/profile_cubit.dart';
 import 'package:findar/features/profile/screens/profile_screen/profile_avatar.dart';
 import 'package:findar/features/profile/screens/profile_screen/profile_info.dart';
 import 'package:findar/logic/cubits/my_listings_cubit.dart';
+import 'package:findar/logic/session_reset.dart';
 
 import 'package:findar/core/widgets/progress_button.dart';
 import 'package:findar/core/widgets/build_bottom_bar.dart';
@@ -79,6 +80,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           if (state['state'] == 'initial' &&
               (state['data'] as Map?)?.isEmpty == true &&
               state['message'] != null) {
+            resetUserSession(context);
             Navigator.pushNamedAndRemoveUntil(
               context,
               '/login',

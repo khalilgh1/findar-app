@@ -18,8 +18,15 @@ class ProfilePictureSetupCubit extends Cubit<ProfilePictureSetupState> {
     );
   }
 
+  // copyWith can't null fields out, so build the state explicitly.
   void clearImage() {
-    emit(state.copyWith(imageFile: null, imageBytes: null, hasImage: false));
+    emit(ProfilePictureSetupState(isUploading: state.isUploading));
+  }
+
+  /// Fresh state for a new setup session; the cubit is app-global, so a
+  /// previous user's upload must not carry over.
+  void reset() {
+    emit(ProfilePictureSetupState());
   }
 
   void setUploading(bool isUploading) {
@@ -66,14 +73,7 @@ class ProfilePictureSetupCubit extends Cubit<ProfilePictureSetupState> {
 
   /// Skip profile picture setup
   void skipProfilePicture() {
-    emit(
-      state.copyWith(
-        imageFile: null,
-        imageBytes: null,
-        hasImage: false,
-        uploadComplete: true,
-      ),
-    );
+    emit(ProfilePictureSetupState(uploadComplete: true));
   }
 }
 

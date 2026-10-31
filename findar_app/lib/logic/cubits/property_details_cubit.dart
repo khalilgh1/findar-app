@@ -1,8 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:findar/core/models/return_result.dart';
 import 'package:findar/core/repositories/abstract_listing_repo.dart';
 
 /// PropertyDetailsCubit handles displaying detailed information about a property
-/// State: {data: {}, state: 'loading|done|error', message: ''}
+/// State: {id: int?, data: {}, state: 'initial|loading|done|notFound|error', message: ''}
 class PropertyDetailsCubit extends Cubit<Map<String, dynamic>> {
   final ListingRepository listingsRepository;
 
@@ -10,48 +11,54 @@ class PropertyDetailsCubit extends Cubit<Map<String, dynamic>> {
   final Map<int, Map<String, dynamic>> _cache = {};
 
   PropertyDetailsCubit(this.listingsRepository)
-      : super({'data': {}, 'state': 'initial', 'message': ''});
+      : super({'id': null, 'data': {}, 'state': 'initial', 'message': ''});
 
   /// Fetch property details by ID
-  Future<void> fetchPropertyDetails(int propertyId) async {
+  Future<void> fetchPropertyDetails(int propertyId,
+      {bool forceRefresh = false}) async {
+    if (forceRefresh) _cache.remove(propertyId);
+
     // Return cached data immediately if available
     if (_cache.containsKey(propertyId)) {
       emit({
-        ...state,
+        'id': propertyId,
         'data': _cache[propertyId]!,
         'state': 'done',
-        'message': 'Property details loaded from cache',
+        'message': '',
       });
       return;
     }
 
-    emit({...state, 'state': 'loading', 'message': ''});
+    // Clear the previous property so it never flashes under the new id.
+    emit({'id': propertyId, 'data': {}, 'state': 'loading', 'message': ''});
 
     try {
-      // get property details from repository
       final property = await listingsRepository.getListingById(propertyId);
+      if (state['id'] != propertyId) return; // user already opened another
 
-      final propertyJson =
-          property != null ? property.toJson() : <String, dynamic>{};
-
-      // Cache the result
-      if (property != null) {
-        _cache[propertyId] = propertyJson;
+      if (property == null) {
+        emit({...state, 'state': 'notFound', 'message': ''});
+        return;
       }
 
-      emit({
-        ...state,
-        'data': propertyJson,
-        'state': 'done',
-        'message': 'Property details loaded successfully',
-      });
+      final propertyJson = property.toJson();
+      _cache[propertyId] = propertyJson;
+
+      emit({...state, 'data': propertyJson, 'state': 'done', 'message': ''});
     } catch (e) {
+      if (state['id'] != propertyId) return;
       emit({
         ...state,
         'state': 'error',
-        'message': 'Error loading property details: ${e.toString()}',
+        'message': e.toString(),
       });
     }
+  }
+
+  /// Retry loading the property currently shown.
+  Future<void> retry() async {
+    final id = state['id'] as int?;
+    if (id != null) await fetchPropertyDetails(id, forceRefresh: true);
   }
 
   /// Invalidate cache for a specific property (e.g., after editing)
@@ -64,97 +71,24 @@ class PropertyDetailsCubit extends Cubit<Map<String, dynamic>> {
     _cache.clear();
   }
 
-  /// Save/unsave property to favorites
-  Future<void> toggleSaveListing(int propertyId) async {
-    try {
-      final currentData = state['data'] as Map<String, dynamic>;
-      final isSaved = currentData['isFavorite'] as bool? ?? false;
-
-      if (isSaved) {
-        // Remove from saved
-        final result = await listingsRepository.unsaveListing(propertyId);
-
-        if (result.state) {
-          emit({
-            ...state,
-            'data': {...currentData, 'isFavorite': false},
-            'message': result.message,
-          });
-        } else {
-          emit({...state, 'message': result.message});
-        }
-      } else {
-        // Add to saved
-        final result = await listingsRepository.saveListing(propertyId);
-
-        if (result.state) {
-          emit({
-            ...state,
-            'data': {...currentData, 'isFavorite': true},
-            'message': result.message,
-          });
-        } else {
-          emit({...state, 'message': result.message});
-        }
-      }
-    } catch (e) {
-      emit({...state, 'message': 'Error toggling favorite: ${e.toString()}'});
-    }
+  /// Forget everything (logout).
+  void reset() {
+    _cache.clear();
+    emit({'id': null, 'data': {}, 'state': 'initial', 'message': ''});
   }
 
-  Future<void> reportListing({
+  /// Report a listing to the moderators.
+  Future<ReturnResult> reportListing({
     required int propertyId,
     required String reason,
   }) async {
     try {
-      await Future.delayed(const Duration(milliseconds: 500));
-
-      emit({
-        ...state,
-        'reportState': 'success',
-      });
-
-      await Future.delayed(const Duration(milliseconds: 100));
-      emit({
-        ...state,
-        'reportState': 'idle',
-      });
+      return await listingsRepository.reportListing(
+        listingId: propertyId,
+        reason: reason,
+      );
     } catch (e) {
-      emit({
-        ...state,
-        'reportState': 'error',
-        'message': 'Error submitting report: ${e.toString()}',
-      });
-    }
-  }
-
-  /// Get similar properties
-  Future<void> getSimilarProperties(int propertyId) async {
-    try {
-      // Mock similar properties
-      final similarProperties = [
-        {
-          'id': propertyId + 1,
-          'title': 'Cozy Studio Near Beach',
-          'price': 30000,
-          'location': 'Beach Area',
-          'image': 'assets/find-dar-test2.jpg',
-        },
-        {
-          'id': propertyId + 2,
-          'title': 'Modern Apartment Downtown',
-          'price': 45000,
-          'location': 'Downtown',
-          'image': 'assets/find-dar-test3.jpg',
-        },
-      ];
-
-      emit({...state, 'similar': similarProperties});
-    } catch (e) {
-      emit({
-        ...state,
-        'message': 'Error fetching similar properties: ${e.toString()}',
-      });
+      return ReturnResult(state: false, message: e.toString());
     }
   }
 }

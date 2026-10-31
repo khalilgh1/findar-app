@@ -335,5 +335,10 @@
   "describeIssue": "Décrivez le problème :",
   "provideDetails": "Veuillez fournir des détails sur le problème...",
   "sendReport": "Envoyer le rapport",
-  "pleaseSelectOrDescribe": "Veuillez sélectionner ou décrire le problème avant de soumettre."
+  "pleaseSelectOrDescribe": "Veuillez sélectionner ou décrire le problème avant de soumettre.",
+  "sessionExpired": "Votre session a expiré. Veuillez vous reconnecter.",
+  "listingNotFound": "Cette annonce n'est plus disponible.",
+  "areaSqm": "Surface (m²)",
+  "signInWithGoogle": "Se connecter avec Google",
+  "actionNeedsInternet": "Vous êtes hors ligne. Connectez-vous à Internet et réessayez."
 }

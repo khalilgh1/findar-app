@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:findar/l10n/app_localizations.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:findar/core/models/return_result.dart';
 
 class ReportSuggestion {
   final String Function(AppLocalizations) titleBuilder;
@@ -32,13 +32,12 @@ class ReportSuggestion {
 }
 
 class ReportBottomSheet extends StatefulWidget {
-  final Function(String) onReasonSelected;
-  final String? propertyId;
+  /// Sends the report; the sheet closes itself when this succeeds.
+  final Future<ReturnResult> Function(String reason) onSubmit;
 
   const ReportBottomSheet({
     super.key,
-    required this.onReasonSelected,
-    this.propertyId,
+    required this.onSubmit,
   });
 
   @override
@@ -48,6 +47,7 @@ class ReportBottomSheet extends StatefulWidget {
 class _ReportBottomSheetState extends State<ReportBottomSheet> {
   final TextEditingController _controller = TextEditingController();
   String? _selectedSuggestion;
+  bool _isSending = false;
 
   @override
   void dispose() {
@@ -58,214 +58,33 @@ class _ReportBottomSheetState extends State<ReportBottomSheet> {
   Future<void> _submitReport() async {
     final l10n = AppLocalizations.of(context)!;
     final reportText = _controller.text.trim();
-    
+
     if (reportText.isEmpty) {
       _showErrorDialog(l10n.pleaseSelectOrDescribe);
       return;
     }
-    
-    final subject = 'Property Report - ${widget.propertyId ?? "Unknown"}';
-    final body = '''Property Report
 
-Issue Description:
-$reportText
+    setState(() => _isSending = true);
+    final result = await widget.onSubmit(reportText);
+    if (!mounted) return;
+    setState(() => _isSending = false);
 
-Property ID: ${widget.propertyId ?? "Unknown"}
-
-This report was submitted through the Findar mobile app.''';
-    
-    // Try different approaches to launch email
-    await _tryLaunchEmail(subject, body);
-  }
-
-  Future<void> _tryLaunchEmail(String subject, String body) async {
-    // Method 1: Try standard mailto with proper encoding
-    final emailUri = Uri(
-      scheme: 'mailto',
-      path: 'dibishak.23@gmail.com',
-      query: 'subject=${Uri.encodeComponent(subject)}&body=${Uri.encodeComponent(body)}',
-    );
-    
-    try {
-      // First try: Standard mailto
-      final launched = await launchUrl(
-        emailUri,
-        mode: LaunchMode.externalApplication,
+    if (result.state) {
+      final messenger = ScaffoldMessenger.of(context);
+      Navigator.pop(context);
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.propertyReportedThankYou)),
       );
-      
-      if (launched) {
-        widget.onReasonSelected(_controller.text.trim());
-        Navigator.pop(context);
-        return;
-      }
-    } catch (e) {
-      print('Standard mailto failed: $e');
+    } else {
+      _showErrorDialog(result.message);
     }
-    
-    try {
-      // Second try: Gmail specific intent
-      final gmailUri = Uri.parse(
-        'https://mail.google.com/mail/?view=cm&to=dibishak.23@gmail.com&su=${Uri.encodeComponent(subject)}&body=${Uri.encodeComponent(body)}',
-      );
-      
-      final launched = await launchUrl(
-        gmailUri,
-        mode: LaunchMode.externalApplication,
-      );
-      
-      if (launched) {
-        widget.onReasonSelected(_controller.text.trim());
-        Navigator.pop(context);
-        return;
-      }
-    } catch (e) {
-      print('Gmail web intent failed: $e');
-    }
-    
-    try {
-      // Third try: Any available email app
-      final genericEmailUri = Uri.parse('mailto:dibishak.23@gmail.com');
-      
-      final launched = await launchUrl(
-        genericEmailUri,
-        mode: LaunchMode.externalApplication,
-      );
-      
-      if (launched) {
-        // Show a dialog with the report details for manual entry
-        _showManualReportDialog(subject, body);
-        return;
-      }
-    } catch (e) {
-      print('Generic mailto failed: $e');
-    }
-    
-    // All methods failed - show instructions
-    _showEmailInstructionsDialog(subject, body);
-  }
-
-  void _showManualReportDialog(String subject, String body) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Email App Opened'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('An email app should have opened. If the details aren\'t filled automatically, please copy this information:'),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('To: dibishak.23@gmail.com', style: const TextStyle(fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 4),
-                  Text('Subject: $subject', style: const TextStyle(fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 4),
-                  Text('Message:', style: const TextStyle(fontWeight: FontWeight.bold)),
-                  Text(body, style: const TextStyle(fontSize: 12)),
-                ],
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              widget.onReasonSelected(_controller.text.trim());
-              Navigator.pop(context);
-            },
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showEmailInstructionsDialog(String subject, String body) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Row(
-          children: [
-            Icon(Icons.email_outlined, color: Colors.blue),
-            SizedBox(width: 8),
-            Text('Send Report Manually'),
-          ],
-        ),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Please send this report manually using your preferred email app:',
-                style: TextStyle(fontWeight: FontWeight.w500),
-              ),
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.grey[100],
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.grey[300]!),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildCopyableField('To:', 'dibishak.23@gmail.com'),
-                    const Divider(height: 16),
-                    _buildCopyableField('Subject:', subject),
-                    const Divider(height: 16),
-                    _buildCopyableField('Message:', body),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Steps:\n1. Open Gmail or your email app\n2. Compose new email\n3. Copy the details above\n4. Send the email',
-                style: TextStyle(fontSize: 14, color: Colors.grey),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              widget.onReasonSelected(_controller.text.trim());
-              Navigator.pop(context);
-            },
-            child: const Text('Got it'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCopyableField(String label, String value) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
-        const SizedBox(height: 4),
-        Text(value, style: const TextStyle(fontSize: 12)),
-      ],
-    );
   }
 
   void _showErrorDialog(String message) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Report Error'),
+        title: Text(AppLocalizations.of(context)!.reportProperty),
         content: Text(message),
         actions: [
           TextButton(
@@ -456,7 +275,7 @@ This report was submitted through the Findar mobile app.''';
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: _submitReport,
+                onPressed: _isSending ? null : _submitReport,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.red[600],
                   foregroundColor: Colors.white,
@@ -465,13 +284,22 @@ This report was submitted through the Findar mobile app.''';
                     borderRadius: BorderRadius.circular(screenWidth * 0.03),
                   ),
                 ),
-                child: Text(
-                  l10n.sendReport,
-                  style: TextStyle(
-                    fontSize: screenWidth * 0.04,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+                child: _isSending
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : Text(
+                        l10n.sendReport,
+                        style: TextStyle(
+                          fontSize: screenWidth * 0.04,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
               ),
             ),
             

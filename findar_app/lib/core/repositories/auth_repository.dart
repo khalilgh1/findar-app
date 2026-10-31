@@ -1,6 +1,8 @@
 import 'package:findar/core/models/return_result.dart';
 import 'package:findar/core/services/findar_api_service.dart';
 import 'package:findar/core/services/auth_manager.dart';
+import 'package:findar/core/services/auth_service.dart';
+import 'package:findar/core/services/firebase_oauth_service.dart';
 import 'package:findar/core/repositories/local_user_store.dart';
 import 'package:findar/core/config/api_config.dart';
 import 'package:findar/core/services/notification_service.dart';
@@ -31,8 +33,8 @@ class User {
       username: json['username'] ?? '',
       email: json['email'] ?? '',
       phone: json['phone'] ?? '',
-      profilePic: json['profile_pic'] ?? "",
-      accountType: json['account_type'] ?? 'normal',
+      profilePic: json['profile_pic'],
+      accountType: json['account_type'] ?? 'individual',
       credits: json['credits'] ?? 0,
     );
   }
@@ -51,20 +53,45 @@ class User {
 }
 
 /// Repository for authentication operations
-/// Handles user registration, login, and token management
-/// Currently uses mock data - will connect to real API when backend is complete
-/// Repository for authentication operations
-/// Handles user registration, login, and token management
-/// Currently uses mock data - will connect to real API when backend is complete
+/// Handles user registration, login, logout and the current user's profile.
+/// Registered as a singleton in get_it so every cubit sees the same user.
 class AuthRepository {
   final FindarApiService apiService;
   final LocalUserStore _userStore;
+  final AuthService _authService;
 
-  // Mock storage for current user session
+  /// Wipes per-user cached data (listings cache, saved ids) on logout or
+  /// when a different account signs in.
+  final Future<void> Function()? clearUserData;
+
   User? _currentUser;
 
-  AuthRepository({required this.apiService, LocalUserStore? userStore})
-      : _userStore = userStore ?? LocalUserStore();
+  AuthRepository({
+    required this.apiService,
+    LocalUserStore? userStore,
+    AuthService? authService,
+    this.clearUserData,
+  })  : _userStore = userStore ?? LocalUserStore(),
+        _authService = authService ?? AuthService();
+
+  /// Stores tokens + user after login/register, dropping the previous
+  /// account's cached data if a different user signed in on this device.
+  Future<void> _startSession(Map data) async {
+    final user = User.fromJson(Map<String, dynamic>.from(data['user']));
+    final previousId = await _userStore.getCurrentUserId();
+    if (previousId != null && previousId != user.id) {
+      await clearUserData?.call();
+    }
+
+    _currentUser = user;
+    await _userStore.saveUser(user);
+    await AuthManager().setTokens(
+      AuthTokens(
+        accessToken: data['access'],
+        refreshToken: data['refresh'],
+      ),
+    );
+  }
 
   /// Register a new user
   ///
@@ -104,7 +131,7 @@ class AuthRepository {
       }
 
       final response = await apiService.post(
-        '/api/auth/register',
+        ApiConfig.registerEndpoint,
         body: {
           'username': name,
           'email': email,
@@ -114,24 +141,14 @@ class AuthRepository {
         },
       );
 
-      if (response is ReturnResult && response.state != true) {
+      if (response is ReturnResult) {
         return ReturnResult(
           state: false,
-          message: response.message ?? 'Registration failed',
+          message: response.message,
         );
       }
 
-      // Store user data
-      _currentUser = User.fromJson(response['data']['user']);
-      await _userStore.saveUser(_currentUser!);
-
-      // Store tokens securely (NEW)
-      await AuthManager().setTokens(
-        AuthTokens(
-          accessToken: response['data']['access'],
-          refreshToken: response['data']['refresh'],
-        ),
-      );
+      await _startSession(response['data']);
 
       return ReturnResult(
         state: true,
@@ -167,30 +184,20 @@ class AuthRepository {
         );
       }
       final response = await apiService.post(
-        '/api/auth/login',
+        ApiConfig.loginEndpoint,
         body: {
           'email': email,
           'password': password,
         },
       );
-      if (response is ReturnResult && response.state == false) {
+      if (response is ReturnResult) {
         return ReturnResult(
           state: false,
-          message: response.message ?? 'Login failed',
+          message: response.message,
         );
       }
 
-      // Store user data
-      _currentUser = User.fromJson(response['data']['user']);
-      await _userStore.saveUser(_currentUser!);
-
-      // Store tokens securely (NEW)
-      await AuthManager().setTokens(
-        AuthTokens(
-          accessToken: response['data']['access'],
-          refreshToken: response['data']['refresh'],
-        ),
-      );
+      await _startSession(response['data']);
 
       return ReturnResult(
         state: true,
@@ -204,24 +211,41 @@ class AuthRepository {
     }
   }
 
+  /// Exchange a Firebase ID token (Google sign-in) for a backend session.
+  Future<ReturnResult> loginWithFirebaseToken(String idToken) async {
+    try {
+      final response = await apiService.post(
+        ApiConfig.oauthEndpoint,
+        body: {'id_token': idToken, 'provider': 'google'},
+      );
+      if (response is ReturnResult) {
+        return ReturnResult(state: false, message: response.message);
+      }
+
+      await _startSession(response['data']);
+      return ReturnResult(state: true, message: 'Login successful');
+    } catch (e) {
+      return ReturnResult(
+        state: false,
+        message: 'Login error: ${e.toString()}',
+      );
+    }
+  }
+
   /// Logout user
-  /// Clears stored token and user data
+  /// Tells the backend (while the access token is still valid), drops the
+  /// FCM token, then clears tokens and every piece of cached user data.
   Future<ReturnResult> logout() async {
     try {
+      final deviceToken = await NotificationService.getFCMToken();
+      await _authService.logout(deviceToken: deviceToken);
+      await NotificationService.removeTokenOnLogout();
+      await FirebaseOAuthService().signOut();
+
       await AuthManager().clear();
       _currentUser = null;
       await _userStore.clearUser();
-      print("sssssssssssssssssss");
-      print("sssssssssssssssssss");
-      print("sssssssssssssssssss");
-      print("sssssssssssssssssss");
-      print("sssssssssssssssssss");
-      print("sssssssssssssssssss");
-      print("sssssssssssssssssss");
-      print("sssssssssssssssssss");
-      print("sssssssssssssssssss");
-      print("sssssssssssssssssss");
-      await NotificationService.removeTokenOnLogout();
+      await clearUserData?.call();
 
       return ReturnResult(
         state: true,
@@ -257,7 +281,20 @@ class AuthRepository {
         );
       }
 
-      final response = await apiService.get('/api/users/profile');
+      return await refreshProfile();
+    } catch (e) {
+      return ReturnResult(
+        state: false,
+        message: 'Profile fetch error: ${e.toString()}',
+      );
+    }
+  }
+
+  /// Always fetches the profile from the server (credits, picture, etc. can
+  /// change server-side) and updates the cache.
+  Future<ReturnResult> refreshProfile() async {
+    try {
+      final response = await apiService.get(ApiConfig.UpdateprofileEndpoint);
 
       // Handle error response from API service
       if (response is ReturnResult) {

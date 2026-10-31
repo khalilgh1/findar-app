@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 /// API Configuration for the Findar app
 ///
 /// This file was adapted from another project. The `baseUrl` can be
@@ -14,7 +16,8 @@ class ApiConfig {
 
   static String get apiBaseUrl => baseUrl;
 
-  static const Duration requestTimeout = Duration(seconds: 10);
+  // Generous because the Render free tier cold-starts in 30-60s.
+  static const Duration requestTimeout = Duration(seconds: 45);
   static const Duration connectionTimeout = Duration(seconds: 10);
 
   // API endpoints (all prefixed with /api/) — adapted to your Django urlpatterns
@@ -28,6 +31,7 @@ class ApiConfig {
   static String saveListing(int id) => '/api/save_listing/$id';
   static const String savedListings = '/api/saved-listings/';
   static String listingDetails(int id) => '/api/listing-details/$id';
+  static const String reportProperty = '/api/report-property/';
   static const String sponsoredListings = '/api/sponsored-listings/';
   static const String recentListings = '/api/recent-listings/';
   static const String advancedSearch = '/api/advanced-search/';
@@ -35,13 +39,18 @@ class ApiConfig {
   // Auth
   static const String loginEndpoint = '/api/auth/login';
   static const String registerEndpoint = '/api/auth/register';
+  static const String logoutEndpoint = '/api/auth/logout';
+  static const String oauthEndpoint = '/api/auth/oauth/';
+  static const String refreshEndpoint = '/api/auth/refresh';
+  static const String passwordResetRequest = '/api/auth/password-reset/request/';
+  static const String passwordResetVerify = '/api/auth/password-reset/verify/';
+  static const String passwordResetConfirm = '/api/auth/password-reset/confirm/';
   static const String UpdateprofileEndpoint = '/api/users/profile/';
   static String getUserProfile(int userId) => '/api/users/$userId/profile/';
 
   // Notifications
   static const String notificationsRegisterDeviceEndpoint =
       '/api/notifications/register-device/';
-  static const String notificationsListEndpoint = '/api/notifications/list/';
 
   // Helpers
   static String getUrl(String endpoint) => '$apiBaseUrl$endpoint';
@@ -73,5 +82,6 @@ class ApiConfig {
 
   // Feature flags
   static const bool useMockData = false;
-  static const bool enableApiLogging = true;
+  // Request/response bodies include tokens and personal data: debug only.
+  static const bool enableApiLogging = kDebugMode;
 }

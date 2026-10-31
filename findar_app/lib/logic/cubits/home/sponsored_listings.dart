@@ -67,6 +67,17 @@ class SponsoredCubit extends Cubit<Map<String, dynamic>> {
   }
 
   /// Save a listing (add to favorites) using the abstract repository
+  /// Forget per-user state (saved ids) so the next account refetches.
+  void reset() {
+    _hasFetched = false;
+    emit({
+      'data': [],
+      'state': 'initial',
+      'message': '',
+      'savedIds': <int>{},
+    });
+  }
+
   Future<ReturnResult> saveListing(int listingId) async {
     try {
       final result = await repository.saveListing(listingId);

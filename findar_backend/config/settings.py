@@ -13,8 +13,9 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import json
 from pathlib import Path
 import os
+import sys
 from datetime import timedelta
-from decouple import config
+from decouple import config, Csv
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -25,12 +26,25 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-hn!e^*&nytn-0sipc@_7_g1-zeuhp8usjnic50ce1n(3m4@tbk'
+# Set SECRET_KEY in the environment. The fallback is the key that was
+# historically committed, kept only so existing JWTs stay valid until the
+# deployment defines its own; rotating it logs every user out.
+SECRET_KEY = config(
+    'SECRET_KEY',
+    default='django-insecure-hn!e^*&nytn-0sipc@_7_g1-zeuhp8usjnic50ce1n(3m4@tbk',
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG', cast=bool)
+DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='*', cast=Csv())
+CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', default='', cast=Csv())
+
+if not DEBUG:
+    # Render terminates TLS at its proxy.
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
 
 
 # Application definition
@@ -100,22 +114,43 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 
-#moving to postgresql now, empty fields for now
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('PGDATABASE', default=''),
-        'USER': config('PGUSER', default=''),
-        'PASSWORD': config('PGPASSWORD', default=''),
-        'HOST': config('PGHOST', default=''),
-        'PORT': '5432', #default postgres port
-        'OPTIONS': {
-            'sslmode': config('PGSSLMODE', default=''),
-            'channel_binding': config('PGCHANNELBINDING', default=''),
-        },
-        
+# A developer .env usually points at the hosted database, so:
+# - `manage.py test` always uses SQLite unless FINDAR_TEST_POSTGRES=1 (no
+#   test_* database created/dropped next to production data);
+# - setting SQLITE_PATH forces SQLite (local e2e server). Don't rely on
+#   blanking PGDATABASE: PowerShell deletes a variable set to '', and then
+#   the .env value wins.
+RUNNING_TESTS = len(sys.argv) > 1 and sys.argv[1] == 'test'
+SQLITE_PATH = config('SQLITE_PATH', default='')
+USE_POSTGRES = (
+    bool(config('PGDATABASE', default=''))
+    and not SQLITE_PATH
+    and (not RUNNING_TESTS or config('FINDAR_TEST_POSTGRES', default=False, cast=bool))
+)
+
+if USE_POSTGRES:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': config('PGDATABASE'),
+            'USER': config('PGUSER', default=''),
+            'PASSWORD': config('PGPASSWORD', default=''),
+            'HOST': config('PGHOST', default=''),
+            'PORT': '5432',  # default postgres port
+            'OPTIONS': {
+                'sslmode': config('PGSSLMODE', default=''),
+                'channel_binding': config('PGCHANNELBINDING', default=''),
+            },
+        }
     }
-}
+else:
+    # Local development and tests without a Postgres instance.
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': SQLITE_PATH or str(BASE_DIR / 'db.sqlite3'),
+        }
+    }
 
 
 # Password validation
@@ -185,8 +220,12 @@ EMAIL_HOST_USER = config('EMAIL', default='')
 EMAIL_HOST_PASSWORD = config('APP_PASSWORD', default='')
 
 FIREBASE_SERVICE_ACCOUNT_JSON = config('FIREBASE_SERVICE_ACCOUNT_JSON', default='')
-FIREBASE_SERVICE_ACCOUNT = json.loads(FIREBASE_SERVICE_ACCOUNT_JSON)
+# None when unset: Firebase features (OAuth, push) are then disabled instead of
+# crashing the whole app at import time.
+FIREBASE_SERVICE_ACCOUNT = (
+    json.loads(FIREBASE_SERVICE_ACCOUNT_JSON) if FIREBASE_SERVICE_ACCOUNT_JSON else None
+)
 
 # Chargily Payment Gateway
-CHARGILY_API_KEY = config('CHARGILY_API_KEY')
-CHARGILY_SECRET_KEY = config('CHARGILY_SECRET_KEY')
+CHARGILY_API_KEY = config('CHARGILY_API_KEY', default='')
+CHARGILY_SECRET_KEY = config('CHARGILY_SECRET_KEY', default='')

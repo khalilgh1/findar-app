@@ -239,22 +239,29 @@ class SplashAnimationController {
     );
   }
   
+  /// Set by [dispose]; the sequence below awaits delays, and the screen can
+  /// be left (e.g. "Get Started" tapped) before it finishes.
+  bool _disposed = false;
+
   Future<void> startAnimation() async {
     // Start text animation first
     textController.forward();
     
     // Wait for text animation to complete
     await Future.delayed(const Duration(milliseconds: 2000));
+    if (_disposed) return;
     
     // Start the main controller (for text movement)
     mainController.forward();
     
     // Start content animation after text starts moving
     await Future.delayed(const Duration(milliseconds: 500));
+    if (_disposed) return;
     contentController.forward();
   }
   
   void dispose() {
+    _disposed = true;
     mainController.dispose();
     textController.dispose();
     contentController.dispose();

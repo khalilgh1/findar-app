@@ -17,6 +17,9 @@ class PostSerializers(serializers.ModelSerializer):
     class Meta:
         model = Post
         fields= "__all__"
+        # Ownership and boost status are set server-side only; clients must not
+        # be able to reassign a post or boost it for free via create/edit.
+        read_only_fields = ("owner", "boosted", "created_at")
     
     def get_owner_details(self, obj):
         """Return owner user details"""
@@ -57,21 +60,28 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ("username", "email", "password", "phone", "profile_pic", "account_type")
+        # `id` is read-only; the app keys its offline cache and account-switch
+        # detection on it (login/register/oauth responses use this serializer).
+        fields = ("id", "username", "email", "password", "phone", "profile_pic", "account_type")
+        read_only_fields = ("id",)
 
     def validate_account_type(self, value):
-        if value not in ["individual", "Individual" , "agency" , "Agency"]:
+        value = (value or "").lower()
+        if value not in ["individual", "agency"]:
             raise ValidationError("Invalid account type.")
         return value
     
-    def validate_username(self,value):
+    def validate_username(self, value, exclude_user_id=None):
         if len(value) < 4:
             raise ValidationError("Username must be at least 4 characters long.")
 
         if not re.match(r'^[a-zA-Z0-9_ ]+$', value):
             raise ValidationError("Username can only contain letters, numbers, and underscores.")
 
-        if CustomUser.objects.filter(username=value).exists():
+        taken = CustomUser.objects.filter(username=value)
+        if exclude_user_id is not None:
+            taken = taken.exclude(id=exclude_user_id)
+        if taken.exists():
             raise ValidationError("This username is already taken.")
         return value
 

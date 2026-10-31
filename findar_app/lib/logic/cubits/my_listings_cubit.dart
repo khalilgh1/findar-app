@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:findar/core/models/return_result.dart';
 import 'package:findar/core/repositories/abstract_listing_repo.dart';
 
 /// MyListingsCubit manages the current user's listings
@@ -12,8 +13,16 @@ class MyListingsCubit extends Cubit<Map<String, dynamic>> {
           'data': {'active': [], 'inactive': []},
           'state': 'initial',
           'message': '',
-        }) {
-    //for now use DummyListingRepository
+        });
+
+  /// Forget the signed-out user's listings.
+  void reset() {
+    _hasFetched = false;
+    emit({
+      'data': {'active': [], 'inactive': []},
+      'state': 'initial',
+      'message': '',
+    });
   }
 
   /// Fetch user's listings
@@ -55,38 +64,27 @@ class MyListingsCubit extends Cubit<Map<String, dynamic>> {
   }
 
   /// Delete a listing
-  Future<void> deleteListing(int id) async {
-    emit({...state, 'state': 'loading', 'message': ''});
-
-    try {
-      final result = await repository.deleteListing(id);
-
-      if (result.state) {
-        final listings = await repository.getUserListings();
-        emit({
-          ...state,
-          'data': listings,
-          'state': 'done',
-          'message': result.message,
-        });
-      } else {
-        emit({...state, 'state': 'error', 'message': result.message});
-      }
-    } catch (e) {
-      emit({
-        ...state,
-        'state': 'error',
-        'message': 'Failed to delete: ${e.toString()}',
-      });
-    }
+  Future<ReturnResult> deleteListing(int id) {
+    return _mutate(() => repository.deleteListing(id), 'Failed to delete');
   }
 
   /// Toggle active status of a listing
-  Future<void> toggleActiveListing(int id) async {
+  Future<ReturnResult> toggleActiveListing(int id) {
+    return _mutate(
+        () => repository.toggleActiveListing(id), 'Failed to toggle status');
+  }
+
+  /// Runs a write, then reloads the list. A failed write keeps showing the
+  /// current list ('done') — the caller shows the returned message — instead
+  /// of replacing it with an error page.
+  Future<ReturnResult> _mutate(
+    Future<ReturnResult> Function() action,
+    String failurePrefix,
+  ) async {
     emit({...state, 'state': 'loading', 'message': ''});
 
     try {
-      final result = await repository.toggleActiveListing(id);
+      final result = await action();
 
       if (result.state) {
         final listings = await repository.getUserListings();
@@ -97,19 +95,18 @@ class MyListingsCubit extends Cubit<Map<String, dynamic>> {
           'message': result.message,
         });
       } else {
-        emit({...state, 'state': 'error', 'message': result.message});
+        emit({...state, 'state': 'done', 'message': result.message});
       }
+      return result;
     } catch (e) {
-      emit({
-        ...state,
-        'state': 'error',
-        'message': 'Failed to toggle status: ${e.toString()}',
-      });
+      final message = '$failurePrefix: ${e.toString()}';
+      emit({...state, 'state': 'done', 'message': message});
+      return ReturnResult(state: false, message: message);
     }
   }
 
   /// Edit a listing
-  Future<void> editListing({
+  Future<ReturnResult> editListing({
     required int id,
     String? title,
     String? description,
@@ -150,19 +147,18 @@ class MyListingsCubit extends Cubit<Map<String, dynamic>> {
           'message': result.message,
         });
       } else {
-        emit({...state, 'state': 'error', 'message': result.message});
+        emit({...state, 'state': 'done', 'message': result.message});
       }
+      return result;
     } catch (e) {
-      emit({
-        ...state,
-        'state': 'error',
-        'message': 'Failed to edit: ${e.toString()}',
-      });
+      final message = 'Failed to edit: ${e.toString()}';
+      emit({...state, 'state': 'done', 'message': message});
+      return ReturnResult(state: false, message: message);
     }
   }
 
   /// Create a new listing
-  Future<void> createListing({
+  Future<ReturnResult> createListing({
     required String title,
     required String description,
     required double price,
@@ -177,6 +173,7 @@ class MyListingsCubit extends Cubit<Map<String, dynamic>> {
     double? longitude,
     int? livingrooms,
     double? area,
+    bool isOnline = true,
   }) async {
     emit({...state, 'state': 'loading', 'message': ''});
     try {
@@ -195,6 +192,7 @@ class MyListingsCubit extends Cubit<Map<String, dynamic>> {
         longitude: longitude,
         livingrooms: livingrooms,
         area: area,
+        isOnline: isOnline,
       );
       if (result.state) {
         final listings = await repository.getUserListings();
@@ -205,14 +203,13 @@ class MyListingsCubit extends Cubit<Map<String, dynamic>> {
           'message': result.message,
         });
       } else {
-        emit({...state, 'state': 'error', 'message': result.message});
+        emit({...state, 'state': 'done', 'message': result.message});
       }
+      return result;
     } catch (e) {
-      emit({
-        ...state,
-        'state': 'error',
-        'message': 'Failed to create: ${e.toString()}',
-      });
+      final message = 'Failed to create: ${e.toString()}';
+      emit({...state, 'state': 'done', 'message': message});
+      return ReturnResult(state: false, message: message);
     }
   }
 

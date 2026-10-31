@@ -22,6 +22,7 @@ class _ProfilePictureSetupScreenState extends State<ProfilePictureSetupScreen>
   @override
   void initState() {
     super.initState();
+    context.read<ProfilePictureSetupCubit>().reset();
     _progressController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
@@ -143,7 +144,7 @@ class _ProfilePictureSetupScreenState extends State<ProfilePictureSetupScreen>
               );
         }
         // Navigate to home after upload or skip
-        if (!mounted) return;
+        if (!context.mounted) return;
         Navigator.pushReplacementNamed(context, '/home');
       },
       child: Scaffold(
@@ -234,7 +235,7 @@ class _ProfilePictureSetupScreenState extends State<ProfilePictureSetupScreen>
                                     final url =
                                         await cubit.uploadProfilePicture();
 
-                                    if (url == null && mounted) {
+                                    if (url == null && context.mounted) {
                                       ScaffoldMessenger.of(context)
                                           .showSnackBar(
                                         const SnackBar(

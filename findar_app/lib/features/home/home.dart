@@ -13,9 +13,6 @@ import 'package:findar/features/home/listings.dart';
 import 'package:findar/features/home/sponsored.dart';
 import '../../../core/widgets/build_bottom_bar.dart';
 import 'package:findar/l10n/app_localizations.dart';
-import 'package:findar/core/di/service_locator.dart';
-import 'package:findar/core/repositories/abstract_listing_repo.dart';
-import 'package:findar/core/repositories/composite_listing_repo.dart';
 
 /// Helper function to check if an error message indicates a network issue
 bool _isNetworkError(String? message) {
@@ -38,18 +35,9 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    // Sync local database with remote data once per session
-    _syncOncePerSession();
     // Fetch listings when screen loads
     context.read<SponsoredCubit>().getSponsoredListings();
     context.read<RecentCubit>().getRecentListings();
-  }
-
-  Future<void> _syncOncePerSession() async {
-    final repo = getIt<ListingRepository>();
-    if (repo is CompositeListingRepository) {
-      await repo.syncOncePerSession();
-    }
   }
 
   @override

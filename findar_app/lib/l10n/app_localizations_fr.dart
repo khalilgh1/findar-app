@@ -761,35 +761,20 @@ class AppLocalizationsFr extends AppLocalizations {
   String get sendReport => 'Envoyer le rapport';
 
   @override
-  String get sendReportManually => 'Envoyer le rapport manuellement';
-
-  @override
   String get pleaseSelectOrDescribe => 'Veuillez sélectionner ou décrire le problème avant de soumettre.';
 
   @override
-  String get emailAppOpened => 'Application de messagerie ouverte';
+  String get sessionExpired => 'Votre session a expiré. Veuillez vous reconnecter.';
 
   @override
-  String get emailNotFilledAutomatically => 'Une application de messagerie devrait s\'être ouverte. Si les détails ne sont pas remplis automatiquement, veuillez copier ces informations :';
+  String get listingNotFound => 'Cette annonce n\'est plus disponible.';
 
   @override
-  String get sendReportManuallyInstructions => 'Veuillez envoyer ce rapport manuellement en utilisant votre application de messagerie préférée :';
+  String get areaSqm => 'Surface (m²)';
 
   @override
-  String get gotIt => 'Compris';
+  String get signInWithGoogle => 'Se connecter avec Google';
 
   @override
-  String get reportError => 'Erreur de rapport';
-
-  @override
-  String get to => 'À :';
-
-  @override
-  String get subject => 'Objet :';
-
-  @override
-  String get message => 'Message :';
-
-  @override
-  String get manualEmailSteps => 'Étapes :\n1. Ouvrez Gmail ou votre application de messagerie\n2. Composez un nouveau courriel\n3. Copiez les détails ci-dessus\n4. Envoyez le courriel';
+  String get actionNeedsInternet => 'Vous êtes hors ligne. Connectez-vous à Internet et réessayez.';
 }

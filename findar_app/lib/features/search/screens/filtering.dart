@@ -22,8 +22,9 @@ class _FilteringScreenState extends State<FilteringScreen> {
   String propertyType = 'Any';
   String buildingType = 'Any'; // Only one can be selected now
 
-  int bedrooms = 1;
-  int bathrooms = 1;
+  // Minimums; 0 = any.
+  int bedrooms = 0;
+  int bathrooms = 0;
   String? listedBy = 'Any';
 
   // Location coordinates
@@ -52,8 +53,8 @@ class _FilteringScreenState extends State<FilteringScreen> {
 
         propertyType = filters['listingType'] as String? ?? 'Any';
         buildingType = filters['buildingType'] as String? ?? 'Any';
-        bedrooms = filters['numBedrooms'] as int? ?? 1;
-        bathrooms = filters['numBathrooms'] as int? ?? 1;
+        bedrooms = filters['numBedrooms'] as int? ?? 0;
+        bathrooms = filters['numBathrooms'] as int? ?? 0;
         listedBy = filters['listedBy'] as String? ?? 'Any';
 
         final minSqft = filters['minSqft'];
@@ -74,8 +75,8 @@ class _FilteringScreenState extends State<FilteringScreen> {
       priceRange = const RangeValues(0, 250000000);
       propertyType = 'Any';
       buildingType = 'Any';
-      bedrooms = 1;
-      bathrooms = 1;
+      bedrooms = 0;
+      bathrooms = 0;
       listedBy = 'Any';
       minSqftController.clear();
       maxSqftController.clear();
@@ -216,9 +217,9 @@ class _FilteringScreenState extends State<FilteringScreen> {
                     _buildBuildingRadio('Any'),
                     _buildBuildingRadio('House'),
                     _buildBuildingRadio('Apartment'),
-                    _buildBuildingRadio('Condo'),
                     _buildBuildingRadio('Villa'),
                     _buildBuildingRadio('Studio'),
+                    _buildBuildingRadio('Office'),
                   ],
                 ),
               ],
@@ -440,7 +441,10 @@ class _FilteringScreenState extends State<FilteringScreen> {
                 color: Theme.of(context).colorScheme.primary,
               ),
             ),
-            Text('$value', style: const TextStyle(fontSize: 16)),
+            Text(
+              value == 0 ? AppLocalizations.of(context)!.any : '$value+',
+              style: const TextStyle(fontSize: 16),
+            ),
             IconButton(
               onPressed: () => onChanged(value + 1),
               icon: Icon(
@@ -480,6 +484,7 @@ class _FilteringScreenState extends State<FilteringScreen> {
       listedBy: listedByValue,
     );
 
+    if (!context.mounted) return;
     Navigator.pop(context);
   }
 }

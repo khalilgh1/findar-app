@@ -1,52 +1,62 @@
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-from .models import Boosting, CustomUser
+from datetime import timedelta
+
+from django.utils import timezone
+
+from .models import Boosting, CustomUser, DeviceToken
+from .services import reminder_boosting_expiry_notification, send_user_notification
+
 
 def check_almost_expired_boostings():
-    from .models import Post
-    from .services import reminder_boosting_expiry_notification
-    from django.utils import timezone
-    from datetime import timedelta
-
     now = timezone.now()
     reminder_threshold = now + timedelta(days=1)
 
-    almost_expired_posts = Boosting.objects.filter(
-        expires_at__lte=reminder_threshold,
-        expires_at__gt=now,
-        notified = False
+    # Materialise before flagging: updating `notified` first would make the
+    # lazy queryset (filtered on notified=False) come back empty.
+    almost_expired = list(
+        Boosting.objects.select_related('post__owner').filter(
+            expires_at__lte=reminder_threshold,
+            expires_at__gt=now,
+            notified=False,
+        )
     )
+    Boosting.objects.filter(id__in=[b.id for b in almost_expired]).update(notified=True)
 
-    almost_expired_posts.update(notified=True)
+    for boosting in almost_expired:
+        for device in DeviceToken.objects.filter(user=boosting.post.owner):
+            try:
+                reminder_boosting_expiry_notification(device.token, boosting.post_id)
+            except Exception as e:
+                print(f"Boost expiry reminder failed for token {device.id}: {e}")
 
-    for post in almost_expired_posts:
-        user = post.owner
-        device_tokens = user.devicetoken_set.all()
-        for token_obj in device_tokens:
-            reminder_boosting_expiry_notification(token_obj.token, post.id)
+
+def expire_boostings():
+    """Un-boost posts whose last boosting has expired."""
+    now = timezone.now()
+    from .models import Post
+
+    expired_posts = Post.objects.filter(boosted=True).exclude(
+        boosting__expires_at__gt=now
+    ).filter(boosting__isnull=False)
+    expired_posts.update(boosted=False)
+
 
 def engagement_reminder():
-    from .models import CustomUser ,DeviceToken
-    from .services import send_user_notification
-    from django.utils import timezone
-    from datetime import timedelta
+    engagement_threshold = timezone.now() - timedelta(days=1)
 
-    now = timezone.now()
-    engagement_threshold = now - timedelta(days=1)
+    users_to_remind = CustomUser.objects.filter(last_active__lte=engagement_threshold)
 
-    users_to_remind = CustomUser.objects.filter(
-        last_active__lte=engagement_threshold
-    )
+    for device in DeviceToken.objects.filter(user__in=users_to_remind):
+        try:
+            send_user_notification(
+                device.token,
+                "We miss you at FinDAR!",
+                "It's been a while since your last engagement. Check out new listings today!"
+            )
+        except Exception as e:
+            print(f"Engagement reminder failed for token {device.id}: {e}")
 
-    for user in users_to_remind:
-        device_tokens = DeviceToken.objects.filter(user=user)
-        for device_token in device_tokens:
-            try:
-                send_user_notification(
-                    device_token.token,
-                    "We miss you at FinDAR!",
-                    "It's been a while since your last engagement. Check out new listings today!"
-                )
-            except DeviceToken.DoesNotExist:
-                continue
 
+def subscription_renewal():
+    """Daily job referenced by CRONJOBS: remind owners and expire old boosts."""
+    check_almost_expired_boostings()
+    expire_boostings()

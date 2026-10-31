@@ -1,3 +1,4 @@
+import 'package:findar/core/utils/save_feedback.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'dart:ui';
@@ -33,6 +34,15 @@ class _PropertyCardState extends State<PropertyCard> {
     _bookmarked = widget.property.bookmarked; // initial value
   }
 
+  @override
+  void didUpdateWidget(covariant PropertyCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Saved ids load after the first build; follow the parent's value.
+    if (oldWidget.property.bookmarked != widget.property.bookmarked) {
+      _bookmarked = widget.property.bookmarked;
+    }
+  }
+
   void _toggleSave() async {
     final cubit = context.read<SponsoredCubit>();
     print('Before toggle: _bookmarked=$_bookmarked, id=${widget.property.id}');
@@ -48,7 +58,7 @@ class _PropertyCardState extends State<PropertyCard> {
           _bookmarked = false;
         });
       } else {
-        print('Failed to unsave: ${result.message}');
+        showSaveFailure(context, result.message);
       }
     } else {
       // Currently not saved, so save it
@@ -61,7 +71,7 @@ class _PropertyCardState extends State<PropertyCard> {
           _bookmarked = true;
         });
       } else {
-        print('Failed to save: ${result.message}');
+        showSaveFailure(context, result.message);
       }
     }
   }

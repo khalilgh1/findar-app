@@ -1,3 +1,4 @@
+import 'package:findar/core/repositories/auth_repository.dart';
 import 'package:findar/core/repositories/composite_listing_repo.dart';
 import 'package:findar/core/repositories/database_listing_repo.dart';
 import 'package:get_it/get_it.dart';
@@ -43,4 +44,11 @@ void SetupRepositories() {
             getIt<RemoteListingRepository>(),
             getIt<InternetConnection>(),
           ));
+
+  getIt.registerLazySingleton<AuthRepository>(
+    () => AuthRepository(
+      apiService: getIt<FindarApiService>(),
+      clearUserData: () => getIt<LocalListingRepository>().clearAll(),
+    ),
+  );
 }

@@ -1,11 +1,12 @@
+import 'dart:async';
+
 import 'package:findar/core/models/property_listing_model.dart';
 import 'package:findar/core/repositories/abstract_listing_repo.dart';
-//import repository
+import 'package:findar/core/repositories/auth_repository.dart';
 import 'package:findar/logic/cubits/home/recent_listings.dart';
 import 'package:findar/logic/cubits/home/sponsored_listings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 
@@ -19,7 +20,6 @@ import 'package:findar/features/auth/screens/profile_picture_setup_screen.dart';
 import 'package:findar/features/auth/screens/register_screen.dart';
 import 'package:findar/features/auth/screens/reset_password_screen.dart';
 import 'package:findar/features/create_listing/create_listing.dart';
-import 'package:findar/features/demoscreen.dart';
 import 'package:findar/features/home/home.dart';
 import 'package:findar/features/landing/screens/splash_screen.dart';
 import 'package:findar/features/listings/screens/edit_listing/edit_listing_screen.dart';
@@ -35,11 +35,9 @@ import 'package:findar/features/search/screens/filtering.dart';
 import 'package:findar/features/search/screens/search_results.dart';
 import 'package:findar/features/settings/settings_screen.dart';
 import 'package:findar/l10n/app_localizations.dart';
-// import './features/demo/demo_test_screen.dart';
 // Import all cubits
 import 'package:findar/logic/cubits/auth_cubit.dart';
 import 'package:findar/logic/cubits/boost_cubit.dart';
-import 'package:findar/logic/cubits/create_listing_cubit.dart';
 import 'package:findar/logic/cubits/language_cubit.dart';
 import 'package:findar/logic/cubits/listings_cubit.dart';
 import 'package:findar/logic/cubits/my_listings_cubit.dart';
@@ -47,7 +45,6 @@ import 'package:findar/logic/cubits/profile_cubit.dart';
 import 'package:findar/logic/cubits/profile_picture_setup_cubit.dart';
 import 'package:findar/logic/cubits/property_details_cubit.dart';
 import 'package:findar/logic/cubits/saved_listings_cubit.dart';
-// import 'logic/cubits/listing_cubit.dart'; // Disabled - has incompatible methods
 import 'package:findar/logic/cubits/search_cubit.dart';
 import 'package:findar/logic/cubits/settings_cubit.dart';
 import 'package:findar/logic/cubits/sort_cubit.dart';
@@ -57,15 +54,16 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'package:findar/core/services/notification_service.dart';
-import 'package:findar/utils/firebase.dart';
+import 'package:findar/logic/session_reset.dart';
 import 'firebase_options.dart';
 
-FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-   FlutterLocalNotificationsPlugin();
-   
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
+    GlobalKey<ScaffoldMessengerState>();
+
 void main() async {
-  SetupRepositories();
   WidgetsFlutterBinding.ensureInitialized();
+  SetupRepositories();
   await dotenv.load(fileName: ".env");
   await AuthManager().init();
 
@@ -73,20 +71,53 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // Initialize notification service with all listeners and handlers
-  await NotificationService.initialize();
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
-  FirebaseMessaging.onBackgroundMessage(
-    firebaseMessagingBackgroundHandler,
-  );
-
-  initFirebaseMessaging();
+  // Not awaited: the permission prompt and FCM token fetch must not hold
+  // the first frame (or block startup entirely without Play Services).
+  NotificationService.initialize();
 
   runApp(const MainApp());
 }
 
-class MainApp extends StatelessWidget {
+class MainApp extends StatefulWidget {
   const MainApp({super.key});
+
+  @override
+  State<MainApp> createState() => _MainAppState();
+}
+
+class _MainAppState extends State<MainApp> {
+  StreamSubscription<void>? _sessionExpiredSub;
+
+  @override
+  void initState() {
+    super.initState();
+    _sessionExpiredSub =
+        AuthManager().onSessionExpired.listen((_) => _onSessionExpired());
+  }
+
+  @override
+  void dispose() {
+    _sessionExpiredSub?.cancel();
+    super.dispose();
+  }
+
+  /// The refresh token was rejected: drop the cached user and go to login.
+  Future<void> _onSessionExpired() async {
+    await getIt<AuthRepository>().logout();
+
+    final context = navigatorKey.currentContext;
+    if (context == null || !context.mounted) return;
+    resetUserSession(context);
+    final message = AppLocalizations.of(context)?.sessionExpired;
+    navigatorKey.currentState
+        ?.pushNamedAndRemoveUntil('/login', (route) => false);
+    if (message != null) {
+      scaffoldMessengerKey.currentState
+          ?.showSnackBar(SnackBar(content: Text(message)));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -94,9 +125,7 @@ class MainApp extends StatelessWidget {
       providers: [
         BlocProvider(create: (_) => LanguageCubit()),
         BlocProvider(create: (_) => AuthCubit()),
-        BlocProvider(create: (_) => CreateListingCubit(getIt<ListingRepository>())),
         BlocProvider(create: (_) => ListingsCubit(getIt<ListingRepository>())),
-        // BlocProvider(create: (_) => ListingCubit(getIt<ListingRepository>())), // Disabled - has incompatible methods
         BlocProvider(create: (_) => SearchCubit(getIt<ListingRepository>())),
         BlocProvider(create: (_) => SavedListingsCubit(getIt<ListingRepository>())),
         BlocProvider(create: (_) => PropertyDetailsCubit(getIt<ListingRepository>())),
@@ -116,6 +145,8 @@ class MainApp extends StatelessWidget {
             return BlocBuilder<LanguageCubit, String>(
               builder: (context, language) {
                 return MaterialApp(
+                  navigatorKey: navigatorKey,
+                  scaffoldMessengerKey: scaffoldMessengerKey,
                   theme: lightTheme,
                   // theme: darkTheme,
                   darkTheme: darkTheme,
@@ -164,8 +195,13 @@ class MainApp extends StatelessWidget {
                     // Handle user profile route with userId argument
                     if (settings.name == '/user-profile') {
                       final userId = settings.arguments as String;
+                      // Own cubit: viewing another user must not overwrite
+                      // the signed-in user's profile state.
                       return MaterialPageRoute(
-                        builder: (context) => UserProfileScreen(userId: userId),
+                        builder: (context) => BlocProvider(
+                          create: (_) => ProfileCubit(),
+                          child: UserProfileScreen(userId: userId),
+                        ),
                       );
                     }
                     // Default routes
@@ -186,8 +222,6 @@ class MainApp extends StatelessWidget {
                           const SavedListingsScreen(),
                       '/search-results': (context) =>
                           const SearchResultsScreen(),
-                      '/demoscreen': (context) => const Demoscreen(),
-                      // '/demo-test': (context) => const DemoTestScreen(),
                       '/settings': (context) => const SettingsScreen(),
                       '/property-details': (context) =>
                           const PropertyDetailsScreen(),

@@ -1,3 +1,4 @@
+import 'package:findar/core/utils/save_feedback.dart';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -112,8 +113,15 @@ class _ListingTileState extends State<ListingTile> {
   void initState() {
     super.initState();
     _bookmarked = widget.property.bookmarked; // initial value
-    print("property: ");
-    print(widget.property.image);
+  }
+
+  @override
+  void didUpdateWidget(covariant ListingTile oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Saved ids load after the first build; follow the parent's value.
+    if (oldWidget.property.bookmarked != widget.property.bookmarked) {
+      _bookmarked = widget.property.bookmarked;
+    }
   }
 
   void _toggleSave() async {
@@ -131,7 +139,7 @@ class _ListingTileState extends State<ListingTile> {
           _bookmarked = false;
         });
       } else {
-        print('Failed to unsave: ${result.message}');
+        showSaveFailure(context, result.message);
       }
     } else {
       // Currently not saved, so save it
@@ -144,7 +152,7 @@ class _ListingTileState extends State<ListingTile> {
           _bookmarked = true;
         });
       } else {
-        print('Failed to save: ${result.message}');
+        showSaveFailure(context, result.message);
       }
     }
   }

@@ -330,7 +330,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             backgroundColor: Colors.green,
                           ),
                         );
-                        Navigator.pushNamed(context, '/profile-picture-setup');
+                        Navigator.pushNamedAndRemoveUntil(context,
+                            '/profile-picture-setup', (route) => false);
                       }
                     },
                     builder: (context, state) {

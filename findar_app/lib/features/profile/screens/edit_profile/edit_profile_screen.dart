@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:findar/logic/cubits/profile_cubit.dart';
-import 'package:findar/logic/cubits/auth_cubit.dart';
 import 'package:findar/core/widgets/progress_button.dart';
 import 'package:findar/features/profile/screens/edit_profile/widgets/profile_text_field.dart';
 import 'package:findar/features/profile/screens/edit_profile/utils/validators.dart';
@@ -42,7 +41,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       final userData = profileState['data'] as Map<String, dynamic>?;
 
       if (userData != null) {
-        _nameController.text = userData['name'] ?? '';
+        _nameController.text = userData['username'] ?? '';
         _emailController.text = userData['email'] ?? '';
         _phoneController.text = userData['phone'] ?? '';
       }
@@ -126,14 +125,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
 
     // Then check if user has a saved profile picture
-    final authState = context.read<AuthCubit>().state;
-    final userData = authState['data'];
-
-    if (userData != null && userData.profilePic != null) {
-      final profilePic = userData.profilePic as String;
-      if (profilePic.startsWith('http')) {
-        return NetworkImage(profilePic);
-      }
+    final userData = context.read<ProfileCubit>().state['data'] as Map?;
+    final profilePic = userData?['profilePic'] as String?;
+    if (profilePic != null && profilePic.startsWith('http')) {
+      return NetworkImage(profilePic);
     }
 
     // Fall back to default avatar
@@ -154,9 +149,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
       if (result.success && result.url != null) {
         _uploadedImageUrl = result.url;
+        if (!mounted) return;
 
         // Update profile with new image URL
-        await context.read<AuthCubit>().updateProfile(
+        await context.read<ProfileCubit>().updateProfile(
               profilePic: _uploadedImageUrl,
             );
 

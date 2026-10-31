@@ -3,7 +3,9 @@ import 'package:path/path.dart';
 
 class DatabaseHelper {
   static const _dbName = "listings.db";
-  static const _dbVersion = 2; // Incremented for schema changes
+  // v3: cache rows keep server ids/owners; earlier caches are corrupt and are
+  // dropped on upgrade (it's only a cache, the server is the source of truth).
+  static const _dbVersion = 3;
   static const table = "property_listings";
   static const usersTable = "users";
 
@@ -61,7 +63,7 @@ class DatabaseHelper {
       CREATE TABLE $usersTable (
         id INTEGER PRIMARY KEY,
         username TEXT NOT NULL,
-        email TEXT NOT NULL UNIQUE,
+        email TEXT,
         phone TEXT,
         profile_pic TEXT,
         account_type TEXT NOT NULL DEFAULT 'normal',
@@ -71,7 +73,7 @@ class DatabaseHelper {
   }
 
   Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    if (oldVersion < 2) {
+    if (oldVersion < 3) {
       // Drop old table and create new schema
       await db.execute('DROP TABLE IF EXISTS $table');
       await db.execute('DROP TABLE IF EXISTS $usersTable');
@@ -99,6 +101,38 @@ class DatabaseHelper {
   Future<int> clearCachedListings() async {
     final db = await database;
     return await db.delete(table);
+  }
+
+  /// Inserts or replaces listing rows (keyed by server id) and their owners
+  /// in one transaction.
+  Future<void> upsertListings(
+    List<Map<String, dynamic>> rows,
+    List<Map<String, dynamic>> owners,
+  ) async {
+    final db = await database;
+    await db.transaction((txn) async {
+      final batch = txn.batch();
+      for (final owner in owners) {
+        batch.insert(usersTable, owner,
+            conflictAlgorithm: ConflictAlgorithm.replace);
+      }
+      for (final row in rows) {
+        batch.insert(table, row, conflictAlgorithm: ConflictAlgorithm.replace);
+      }
+      await batch.commit(noResult: true);
+    });
+  }
+
+  Future<int> deleteWhere(String table, String where, List<Object?> args) async {
+    final db = await database;
+    return await db.delete(table, where: where, whereArgs: args);
+  }
+
+  /// Wipes all cached data (used on logout so the next account starts clean).
+  Future<void> clearAll() async {
+    final db = await database;
+    await db.delete(table);
+    await db.delete(usersTable);
   }
 
   Future<List<Map<String, dynamic>>> query(

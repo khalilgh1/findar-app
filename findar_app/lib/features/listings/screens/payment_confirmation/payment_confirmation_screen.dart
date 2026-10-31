@@ -3,7 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:findar/core/models/sponsorship_plan.dart';
 import 'package:findar/core/models/property_listing_model.dart';
 import 'package:findar/logic/cubits/boost_cubit.dart';
-// import '../../../../logic/cubits/listing_cubit.dart'; // Disabled - has incompatible methods
+import 'package:findar/logic/cubits/my_listings_cubit.dart';
+import 'package:findar/logic/cubits/property_details_cubit.dart';
 import 'package:findar/core/widgets/progress_button.dart';
 import 'package:findar/features/listings/screens/payment_confirmation/widgets/order_summary.dart';
 import 'package:findar/features/listings/screens/payment_confirmation/widgets/payment_form.dart';
@@ -50,13 +51,11 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
 
   void _handleBoostSuccess(Map<String, dynamic> boostedData) {
     try {
-      // TODO: Update boost status when ListingCubit is re-enabled
-      // context.read<ListingCubit>().updateBoostStatus(
-      //   listingId: boostedData['listingId'],
-      //   sponsorshipPlanId: boostedData['sponsorshipPlanId'],
-      //   boostExpiryDate: DateTime.parse(boostedData['boostExpiryDate']),
-      // );
-      
+      // Show the new boosted badge everywhere.
+      context.read<MyListingsCubit>().fetchMyListings(forceRefresh: true);
+      context.read<PropertyDetailsCubit>().invalidateCache(widget.listing.id);
+      context.read<BoostCubit>().reset();
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Builder(

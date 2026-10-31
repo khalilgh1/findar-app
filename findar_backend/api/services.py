@@ -2,16 +2,20 @@ from firebase_admin import messaging , credentials
 from firebase_admin.messaging import UnregisteredError
 from django.core.mail import EmailMessage
 import firebase_admin
-import os
 
+
+def _ensure_firebase():
+    from django.conf import settings
+
+    if not firebase_admin._apps:
+        if not settings.FIREBASE_SERVICE_ACCOUNT:
+            raise RuntimeError("FIREBASE_SERVICE_ACCOUNT_JSON is not configured")
+        cred = credentials.Certificate(settings.FIREBASE_SERVICE_ACCOUNT)
+        firebase_admin.initialize_app(cred)
 
 
 def send_topic_notification(topic: str, title: str, body: str, data=None):
-    from config import settings
-        
-    if not firebase_admin._apps:
-        cred = credentials.Certificate(settings.FIREBASE_SERVICE_ACCOUNT)
-        firebase_admin.initialize_app(cred)
+    _ensure_firebase()
 
     message = messaging.Message(
         notification=messaging.Notification(
@@ -26,11 +30,7 @@ def send_topic_notification(topic: str, title: str, body: str, data=None):
     return response
 
 def send_user_notification(token: str, title: str, body: str, data=None):
-    from config import settings
-
-    if not firebase_admin._apps:
-        cred = credentials.Certificate(settings.FIREBASE_SERVICE_ACCOUNT)
-        firebase_admin.initialize_app(cred)
+    _ensure_firebase()
 
     message = messaging.Message(
         notification=messaging.Notification(

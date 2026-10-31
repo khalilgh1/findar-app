@@ -497,7 +497,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get no => 'لا';
 
   @override
-  String get ok => 'موافق';
+  String get ok => 'حسنًا';
 
   @override
   String get error => 'خطأ';
@@ -761,35 +761,20 @@ class AppLocalizationsAr extends AppLocalizations {
   String get sendReport => 'إرسال التقرير';
 
   @override
-  String get sendReportManually => 'إرسال التقرير يدوياً';
-
-  @override
   String get pleaseSelectOrDescribe => 'يرجى اختيار أو وصف المشكلة قبل الإرسال.';
 
   @override
-  String get emailAppOpened => 'تم فتح تطبيق البريد الإلكتروني';
+  String get sessionExpired => 'انتهت صلاحية جلستك. يرجى تسجيل الدخول مرة أخرى.';
 
   @override
-  String get emailNotFilledAutomatically => 'يجب أن يكون تطبيق البريد الإلكتروني قد تم فتحه. إذا لم يتم ملء التفاصيل تلقائياً، يرجى نسخ هذه المعلومات:';
+  String get listingNotFound => 'هذا الإعلان لم يعد متاحًا.';
 
   @override
-  String get sendReportManuallyInstructions => 'يرجى إرسال هذا التقرير يدوياً باستخدام تطبيق البريد الإلكتروني المفضل لديك:';
+  String get areaSqm => 'المساحة (م²)';
 
   @override
-  String get gotIt => 'حسناً';
+  String get signInWithGoogle => 'تسجيل الدخول باستخدام Google';
 
   @override
-  String get reportError => 'خطأ في التقرير';
-
-  @override
-  String get to => 'إلى:';
-
-  @override
-  String get subject => 'الموضوع:';
-
-  @override
-  String get message => 'الرسالة:';
-
-  @override
-  String get manualEmailSteps => 'الخطوات:\n1. افتح Gmail أو تطبيق البريد الإلكتروني\n2. إنشاء بريد إلكتروني جديد\n3. نسخ التفاصيل أعلاه\n4. إرسال البريد الإلكتروني';
+  String get actionNeedsInternet => 'أنت غير متصل. اتصل بالإنترنت وحاول مرة أخرى.';
 }

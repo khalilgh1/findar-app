@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class AuthTokens {
@@ -23,9 +25,16 @@ class AuthManager {
   String? _accessToken;
   String? _refreshToken;
 
+  final StreamController<void> _sessionExpired =
+      StreamController<void>.broadcast();
+
   String? get accessToken => _accessToken;
   String? get refreshToken => _refreshToken;
   bool get isAuthenticated => _accessToken != null;
+
+  /// Fires when the refresh token is rejected and the user has been signed
+  /// out; the app listens to this to send the user back to the login screen.
+  Stream<void> get onSessionExpired => _sessionExpired.stream;
 
   Future<void> init() async {
     _accessToken = await _storage.read(key: _accessKey);
@@ -42,6 +51,12 @@ class AuthManager {
   Future<void> clear() async {
     _accessToken = null;
     _refreshToken = null;
-    await _storage.deleteAll();
+    await _storage.delete(key: _accessKey);
+    await _storage.delete(key: _refreshKey);
+  }
+
+  Future<void> expireSession() async {
+    await clear();
+    _sessionExpired.add(null);
   }
 }

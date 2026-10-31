@@ -1,8 +1,22 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:findar/core/config/api_config.dart';
+import 'package:findar/core/models/return_result.dart';
+import 'package:findar/core/services/auth_manager.dart';
 import 'package:findar/core/services/findar_api_service.dart';
 import 'dart:developer' as developer;
+
+import 'package:firebase_core/firebase_core.dart';
+import 'package:findar/firebase_options.dart';
+
+/// FCM entry point for messages received while the app is in the background
+/// or terminated. Must be a top-level function.
+@pragma('vm:entry-point')
+Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  developer.log('Background message received: ${message.messageId}',
+      name: 'NotificationService');
+}
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
@@ -59,9 +73,8 @@ class NotificationService {
         onMessageOpenedAppCallback?.call(message);
       });
 
-      // Get FCM token
-      final token = await _firebaseMessaging.getToken();
-      _log('FCM Token: $token');
+      // Broadcasts to everyone (per-account topics are added after login).
+      await _firebaseMessaging.subscribeToTopic('all_users');
 
       // Setup token refresh listener
       _setupTokenRefreshListener();
@@ -244,6 +257,10 @@ class NotificationService {
   /// Send FCM token to backend
   static Future<bool> sendTokenToBackend() async {
     try {
+      // Token refreshes can fire while logged out; there's no user to bind
+      // the device to then.
+      if (!AuthManager().isAuthenticated) return false;
+
       final token = await getFCMToken();
       if (token == null || token.isEmpty) {
         _logError('Failed to send token', 'Token is null or empty');
@@ -260,11 +277,8 @@ class NotificationService {
         },
       );
 
-      if (response is bool && response == true) {
-        _log('Token sent to backend successfully');
-        return true;
-      } else if (response is Map && response['state'] == false) {
-        _logError('Backend rejected token', response['message']);
+      if (response is ReturnResult) {
+        _logError('Backend rejected token', response.message);
         return false;
       }
 
@@ -276,41 +290,16 @@ class NotificationService {
     }
   }
 
-  /// Remove device token on logout
-  /// Call this method when user logs out
-  static Future<bool> removeTokenOnLogout() async {
+  /// Drop this device's FCM token and per-user topics on logout, so the next
+  /// account signed in here doesn't receive the previous user's pushes.
+  /// The backend copy is removed by the logout endpoint (see AuthService).
+  static Future<void> removeTokenOnLogout() async {
     try {
-      _log('Removing device token on logout...');
-      final token = await getFCMToken();
-      if (token == null || token.isEmpty) {
-        _logError('Failed to remove token', 'Token is null or empty');
-        return false;
-      }
-
-      _log('Removing FCM token from backend: $token');
-
-      final apiService = FindarApiService();
-      final response = await apiService.post(
-        ApiConfig.notificationsRegisterDeviceEndpoint,
-        body: {
-          'token': token,
-          'action': 'remove',
-        },
-      );
-      FirebaseMessaging.instance.deleteToken();
-      if (response is bool && response == true) {
-        _log('Token removed from backend successfully');
-        return true;
-      } else if (response is Map && response['state'] == false) {
-        _logError('Backend failed to remove token', response['message']);
-        return false;
-      }
-
-      _log('Token removed from backend');
-      return true;
+      await clearAllTopics();
+      await _firebaseMessaging.deleteToken();
+      _log('FCM token deleted on logout');
     } catch (e) {
       _logError('Failed to remove token on logout', e);
-      return false;
     }
   }
 

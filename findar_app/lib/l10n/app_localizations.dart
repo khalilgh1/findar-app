@@ -1573,71 +1573,41 @@ abstract class AppLocalizations {
   /// **'Send Report'**
   String get sendReport;
 
-  /// No description provided for @sendReportManually.
-  ///
-  /// In en, this message translates to:
-  /// **'Send Report Manually'**
-  String get sendReportManually;
-
   /// No description provided for @pleaseSelectOrDescribe.
   ///
   /// In en, this message translates to:
   /// **'Please select or describe the issue before submitting.'**
   String get pleaseSelectOrDescribe;
 
-  /// No description provided for @emailAppOpened.
+  /// No description provided for @sessionExpired.
   ///
   /// In en, this message translates to:
-  /// **'Email App Opened'**
-  String get emailAppOpened;
+  /// **'Your session has expired. Please log in again.'**
+  String get sessionExpired;
 
-  /// No description provided for @emailNotFilledAutomatically.
+  /// No description provided for @listingNotFound.
   ///
   /// In en, this message translates to:
-  /// **'An email app should have opened. If the details aren\'t filled automatically, please copy this information:'**
-  String get emailNotFilledAutomatically;
+  /// **'This listing is no longer available.'**
+  String get listingNotFound;
 
-  /// No description provided for @sendReportManuallyInstructions.
+  /// No description provided for @areaSqm.
   ///
   /// In en, this message translates to:
-  /// **'Please send this report manually using your preferred email app:'**
-  String get sendReportManuallyInstructions;
+  /// **'Area (m²)'**
+  String get areaSqm;
 
-  /// No description provided for @gotIt.
+  /// No description provided for @signInWithGoogle.
   ///
   /// In en, this message translates to:
-  /// **'Got it'**
-  String get gotIt;
+  /// **'Sign in with Google'**
+  String get signInWithGoogle;
 
-  /// No description provided for @reportError.
+  /// No description provided for @actionNeedsInternet.
   ///
   /// In en, this message translates to:
-  /// **'Report Error'**
-  String get reportError;
-
-  /// No description provided for @to.
-  ///
-  /// In en, this message translates to:
-  /// **'To:'**
-  String get to;
-
-  /// No description provided for @subject.
-  ///
-  /// In en, this message translates to:
-  /// **'Subject:'**
-  String get subject;
-
-  /// No description provided for @message.
-  ///
-  /// In en, this message translates to:
-  /// **'Message:'**
-  String get message;
-
-  /// No description provided for @manualEmailSteps.
-  ///
-  /// In en, this message translates to:
-  /// **'Steps:\n1. Open Gmail or your email app\n2. Compose new email\n3. Copy the details above\n4. Send the email'**
-  String get manualEmailSteps;
+  /// **'You\'re offline. Connect to the internet and try again.'**
+  String get actionNeedsInternet;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

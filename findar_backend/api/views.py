@@ -14,14 +14,14 @@ from django.db.models.functions import ACos, Cos, Radians, Sin
 from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 
-from django.contrib.auth.hashers import check_password
-import random
+from django.contrib.auth.hashers import check_password, make_password
+from django.db.models import Value
+from django.db.models.functions import Greatest, Least
+from rest_framework.serializers import ValidationError
+import re
+import secrets
 from django.utils import timezone
-from django.contrib.auth.hashers import make_password
-from rest_framework.views import APIView
-from rest_framework.response import Response
-import firebase_admin
-from firebase_admin import credentials, auth as firebase_auth
+from firebase_admin import auth as firebase_auth
 
 from .services import *
 """
@@ -34,7 +34,7 @@ from .services import *
 @api_view(['GET'])
 def health_check(request):
     #a small endpoint used for keep-alive
-    dummy_post = Post.objects.all()[:3] # get 3 posts
+    Post.objects.exists()  # touch the DB so the keep-alive also keeps it warm
     return Response({"message": "Successully fetched the health-check endpoint "}, status = status.HTTP_200_OK)
 
 
@@ -57,7 +57,6 @@ def recent_listings(request):
     # maybe we need pagination here
     #in the ui there is a search bar
     #also in the ui there is an option on the top to select the property type
-    print('request query params:' , request.query_params)
     q = request.query_params.get('q' , None)
     q = '' if q is None else q
     listing_type = request.query_params.get('listing_type' , None) # rent / sale
@@ -123,36 +122,53 @@ def advanced_search(request):
     listed_by       = request.query_params.get('listed_by' , None) # normal / agency
     sort_by         = request.query_params.get('sort_by', 'date_posted')  # New parameter
     
-    if latitude and longitude:
-        latitude  = float(latitude)
-        longitude = float(longitude)
-        # calculate distance using Haversine formula
+    try:
+        has_location = bool(latitude and longitude)
+        if has_location:
+            latitude  = float(latitude)
+            longitude = float(longitude)
+        min_price     = float(min_price) if min_price else None
+        max_price     = float(max_price) if max_price else None
+        num_bedrooms  = int(num_bedrooms) if num_bedrooms else None
+        num_bathrooms = int(num_bathrooms) if num_bathrooms else None
+        min_sqft      = float(min_sqft) if min_sqft else None
+        max_sqft      = float(max_sqft) if max_sqft else None
+    except (TypeError, ValueError):
+        return Response({"error": "Invalid numeric filter value"}, status=status.HTTP_400_BAD_REQUEST)
+
+    if has_location:
+        # Spherical law of cosines. The cosine is clamped to [-1, 1] because
+        # float rounding can push it just past 1 for identical points, which
+        # makes Postgres' acos() raise "input is out of range".
+        cos_angle = (
+            Cos(Radians(latitude)) * Cos(Radians(F('latitude'))) *
+            Cos(Radians(F('longitude')) - Radians(longitude)) +
+            Sin(Radians(latitude)) * Sin(Radians(F('latitude')))
+        )
         posts = posts.annotate(
             distance=earth_radius_km * ACos(
-                Cos(Radians(latitude)) * Cos(Radians(F('latitude'))) *
-                Cos(Radians(F('longitude')) - Radians(longitude)) +
-                Sin(Radians(latitude)) * Sin(Radians(F('latitude')))
+                Greatest(Value(-1.0), Least(Value(1.0), cos_angle))
             )
         ).filter(distance__lte=radius_km)
-    
-    if min_price:
-        posts = posts.filter(price__gte=float(min_price))
-    if max_price:
-        posts = posts.filter(price__lte=float(max_price))
+
+    if min_price is not None:
+        posts = posts.filter(price__gte=min_price)
+    if max_price is not None:
+        posts = posts.filter(price__lte=max_price)
     if listing_type and listing_type in ['rent' , 'sale']:
         posts = posts.filter(listing_type=listing_type)
     if building_type:
         building_type = building_type.lower()
         if building_type in dict(BUILDING_TYPE_CHOICES).keys():
             posts = posts.filter(building_type=building_type)
-    if num_bedrooms:
-        posts = posts.filter(bedrooms__gte=int(num_bedrooms))
-    if num_bathrooms:
-        posts = posts.filter(bathrooms__gte=int(num_bathrooms))
-    if min_sqft:
-        posts = posts.filter(area__gte=float(min_sqft))
-    if max_sqft:
-        posts = posts.filter(area__lte=float(max_sqft))
+    if num_bedrooms is not None:
+        posts = posts.filter(bedrooms__gte=num_bedrooms)
+    if num_bathrooms is not None:
+        posts = posts.filter(bathrooms__gte=num_bathrooms)
+    if min_sqft is not None:
+        posts = posts.filter(area__gte=min_sqft)
+    if max_sqft is not None:
+        posts = posts.filter(area__lte=max_sqft)
     if listed_by in dict(ACCOUNT_CHOICES).keys():
         posts = posts.filter(owner__account_type=listed_by)
     
@@ -165,7 +181,9 @@ def advanced_search(request):
         'area_asc': 'area',
         'area_desc': '-area',
     }
-    
+    if has_location:
+        sort_mapping['distance'] = 'distance'
+
     # Apply sorting
     if sort_by in sort_mapping:
         posts = posts.order_by(sort_mapping[sort_by])
@@ -247,7 +265,10 @@ def listing_details(request, listing_id):
         post = Post.objects.get(id=listing_id)
     except Post.DoesNotExist:
         return Response({'errors':"not found"} , status=status.HTTP_404_NOT_FOUND)
-    
+
+    if not post.active and post.owner_id != request.user.id:
+        return Response({'errors':"not found"} , status=status.HTTP_404_NOT_FOUND)
+
     post = PostSerializers(post).data
     return Response(post , status=status.HTTP_200_OK)
     
@@ -283,30 +304,32 @@ def create_listing(request):
     """
      get users location for post position or we will get it from frontend?
     """
-    # Use authenticated user as owner
-    request.data['owner'] = request.user.id
-    
     serializer = PostSerializers(data=request.data)
     if serializer.is_valid():
-        serializer.save()
+        serializer.save(owner=request.user)
         return Response(serializer.data, status=201)
     return Response(serializer.errors, status=400)
 
 
 ######## edit Listing VIEW#########
 
-@api_view(['PUT'])
+@api_view(['PUT', 'DELETE'])
 @permission_classes([IsAuthenticated])
 def edit_listing(request , listing_id):
     try:
         post = Post.objects.get(id=listing_id)
     except Post.DoesNotExist:
         return Response({'errors':"not found"} , status=status.HTTP_404_NOT_FOUND)
-    
-    # Check if user owns the listing
+
+    # Check if user owns the listing. 403, not 401: the client treats 401 as
+    # "token expired" and would try to refresh.
     if post.owner.id != request.user.id:
-        return Response({"error" : "dont have permission"} , status=status.HTTP_401_UNAUTHORIZED)
-    
+        return Response({"error" : "dont have permission"} , status=status.HTTP_403_FORBIDDEN)
+
+    if request.method == 'DELETE':
+        post.delete()
+        return Response({"message": "Listing deleted"}, status=status.HTTP_200_OK)
+        
     serializer = PostSerializers(post , data=request.data , partial=True)
     if serializer.is_valid():
         serializer.save()
@@ -327,12 +350,10 @@ def toggle_active_listing(request , listing_id):
     # Get authenticated user ID
     user_id = request.user.id
     if post.owner.id != user_id:
-        return Response({"error" : "dont have permission"} , status=status.HTTP_401_UNAUTHORIZED)
-    
-    print(f"DEBUG TOGGLE - Before: Post ID {post.id}, active={post.active}")
+        return Response({"error" : "dont have permission"} , status=status.HTTP_403_FORBIDDEN)
+
     post.active = not post.active
     post.save()
-    print(f"DEBUG TOGGLE - After: Post ID {post.id}, active={post.active}")
     return Response({"message": "Listing status updated", "active": post.active}, status=status.HTTP_200_OK)
 
 
@@ -388,11 +409,11 @@ class Profile(APIView):
         serializer = UserSerializers(user)
         listings = Post.objects.filter(owner=request.user.id, active=True).order_by('-created_at')
         listings_data = PostSerializers(listings, many=True).data
-        print(serializer.data['username'])
-        return Response({"message":"way" , "success":True , "data": {**serializer.data ,"listings":listings_data} , "listings":listings_data}, status=status.HTTP_200_OK)
+        return Response({"message":"profile loaded" , "success":True , "data": {**serializer.data ,"listings":listings_data} , "listings":listings_data}, status=status.HTTP_200_OK)
     
     def put(self, request):
-        full_name = request.data.get("name")
+        # The app sends "username"; "name" is kept for older clients.
+        full_name = request.data.get("username", request.data.get("name"))
         phone_number = request.data.get("phone")
         email = request.data.get("email")
         profile_pic = request.data.get("profile_pic")
@@ -408,7 +429,7 @@ class Profile(APIView):
 
         if phone_number is not None:
             try:
-                validated_phone = serializer.validate_phone(value=phone_number)
+                serializer.validate_phone(phone_number)
                 user.phone = phone_number
 
             except ValidationError as e:
@@ -416,21 +437,19 @@ class Profile(APIView):
 
         if full_name is not None:
             try:
-                validated_username = serializer.validate_username(value=full_name)
+                serializer.validate_username(full_name, exclude_user_id=user.id)
                 user.username = full_name 
             except ValidationError as e:
                 return Response( {"success":False , "message":e.detail } , status=status.HTTP_400_BAD_REQUEST )        
 
 
         if profile_pic is not None:
-            print("profile pic url:" , profile_pic)
             user.profile_pic = profile_pic
 
         user.save()
         user = UserSerializers(user).data
-        print( user )
 
-        return Response( {"success":True , "message":"updated successfully" , "data":user } , status=status.HTTP_201_CREATED )
+        return Response( {"success":True , "message":"updated successfully" , "data":user } , status=status.HTTP_200_OK )
 
 
 #########  Get User Profile by ID  #########
@@ -459,9 +478,10 @@ def get_user_profile(request, user_id):
             "message": "User not found"
         }, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
+        print(f"get_user_profile failed: {e}")
         return Response({
             "success": False,
-            "message": str(e)
+            "message": "Failed to load user profile"
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
@@ -479,14 +499,12 @@ def login(request):
         errors += "password should not be empty"
 
     if errors != "":
-        return Response(errors , status=status.HTTP_400_BAD_REQUEST)
-    
+        return Response({"success": False, "message": errors.strip(" ,")} , status=status.HTTP_400_BAD_REQUEST)
 
     user = authenticate(request=request,email=email, password=password)
-    print( request.data  )
 
     if not user:
-        return Response("incorrect email or password", status=status.HTTP_400_BAD_REQUEST)
+        return Response({"success": False, "message": "incorrect email or password"}, status=status.HTTP_400_BAD_REQUEST)
 
     refresh = RefreshToken.for_user(user)
     #serialize user
@@ -505,8 +523,6 @@ def login(request):
 
 @api_view(["POST"])
 def oauth(request):
-    print("OAuth request received")
-    # print(f"Request data: {request.data}")
     """
     OAuth authentication endpoint for Firebase providers (Google, Facebook, Apple)
     Expects:
@@ -534,10 +550,9 @@ def oauth(request):
     try:
         # Verify Firebase ID token
         decoded_token = firebase_auth.verify_id_token(id_token)
-        print(f"Decoded Firebase token: {decoded_token}")
-        firebase_uid = decoded_token.get('uid')
-        firebase_email = decoded_token.get('email') or email
-        firebase_name = decoded_token.get('name')
+        # Only trust the email Firebase verified, never the client-sent one.
+        firebase_email = decoded_token.get('email')
+        firebase_name = decoded_token.get('name') or (firebase_email or '').split('@')[0]
         firebase_phone = "0000000000"
         
         if not firebase_email:
@@ -547,24 +562,22 @@ def oauth(request):
             )
 
         # Try to get existing user or create new one
-        user = None
         try:
             user = CustomUser.objects.get(email=firebase_email)
-            print(f"Existing user found: {user.email}")
         except CustomUser.DoesNotExist:
-            if not user:
-                user = CustomUser.objects.create(
-                        email=firebase_email,
-                        username=firebase_name,
-                        phone=firebase_phone,
-                        password=make_password('oauth_user'),
-                        account_type='individual',
-                )
+            # OAuth accounts get an unusable password so nobody can log in to
+            # them through the email/password endpoint.
+            user = CustomUser.objects.create(
+                    email=firebase_email,
+                    username=firebase_name,
+                    phone=firebase_phone,
+                    password=make_password(None),
+                    account_type='individual',
+            )
 
         # Generate JWT tokens
         refresh = RefreshToken.for_user(user)
         user_data = RegisterSerializer(user).data
-        print(user_data)
 
         return Response({
             "success": True,
@@ -577,8 +590,7 @@ def oauth(request):
         }, status=status.HTTP_200_OK)
 
     except Exception as e:
-        import traceback
-        traceback.print_exc()
+        print(f"OAuth verification failed: {e}")
         return Response(
             {"error": "Firebase authentication failed"},
             status=status.HTTP_401_UNAUTHORIZED
@@ -595,18 +607,19 @@ def logout(request):
     refresh_token = request.data.get("refresh")
     device_token = request.data.get("device_token")
 
-    if not refresh_token:
-        return Response({"error": "Refresh token is required"}, status=status.HTTP_400_BAD_REQUEST)
-    
-    try:
-        token = RefreshToken(refresh_token)
-        # Remove device token from backend
-        if device_token:
-            DeviceToken.objects.filter(user=request.user, token=device_token).delete()
-        token.blacklist()
-        return Response({"message": "Logout successful"}, status=status.HTTP_200_OK)
-    except Exception as e:
-        return Response({"error": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST)
+    # Stop pushing to this device even if the refresh token is bad.
+    if device_token:
+        DeviceToken.objects.filter(user=request.user, token=device_token).delete()
+
+    if refresh_token:
+        try:
+            # Only effective when rest_framework_simplejwt.token_blacklist is
+            # installed and migrated; otherwise the token simply expires.
+            RefreshToken(refresh_token).blacklist()
+        except Exception as e:
+            print(f"Refresh token not blacklisted: {e}")
+
+    return Response({"message": "Logout successful"}, status=status.HTTP_200_OK)
 
 @api_view(["POST"])
 def register(request):
@@ -616,7 +629,6 @@ def register(request):
         request.data["account_type"] = account_type.lower()
 
     serializer = RegisterSerializer(data=request.data)
-    print( request.data )
 
     if not serializer.is_valid():
 
@@ -656,23 +668,23 @@ def report_property(request):
     Report a property with issue description
     """
     property_id = request.data.get('property_id')
-    issue_description = request.data.get('issue_description')
-    reporter_email = request.data.get('reporter_email')
-    
-    if not property_id or not issue_description or not reporter_email:
+    issue_description = (request.data.get('issue_description') or '').strip()
+
+    if not property_id or not issue_description:
         return Response({
-            "error": "property_id, issue_description, and reporter_email are required"
+            "error": "property_id and issue_description are required"
         }, status=status.HTTP_400_BAD_REQUEST)
-    
+
     try:
         # Check if property exists
         property_post = Post.objects.get(id=property_id)
-        
+
         # Create report entry
         report = Report.objects.create(
             post=property_post,
-            user=request.user,
-            reason=issue_description[:500],  # Limit to 500 characters
+            reporter_user=request.user,
+            reported_user=property_post.owner,
+            description=issue_description[:1000],
         )
         
         return Response({
@@ -685,10 +697,10 @@ def report_property(request):
         return Response({
             "error": "Property not found"
         }, status=status.HTTP_404_NOT_FOUND)
-    except Exception as e:
+    except (ValueError, TypeError):
         return Response({
-            "error": f"Failed to submit report: {str(e)}"
-        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            "error": "Invalid property_id"
+        }, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['POST'])
@@ -744,8 +756,10 @@ class PasswordResetRequestAPI(APIView):
         if not user:
             return Response({"message": "the email is not linked to an account" , "success" : True } , status=status.HTTP_200_OK)
 
-        code = f"{random.randint(0, 999999):06d}"
+        code = f"{secrets.randbelow(1_000_000):06d}"
 
+        # Only the newest code is valid.
+        PasswordResetOTP.objects.filter(user=user, used=False).update(used=True)
         PasswordResetOTP.objects.create(
             user=user,
             code_hash=make_password(code)
@@ -846,7 +860,13 @@ class PasswordResetConfirmAPI(APIView):
                 {"message": "Code expired", "success": False},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
+        if otp.attempts >= 5:
+            return Response(
+                {"message": "Too many attempts", "success": False},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         if not check_password(code, otp.code_hash):
             otp.attempts += 1
             otp.save()

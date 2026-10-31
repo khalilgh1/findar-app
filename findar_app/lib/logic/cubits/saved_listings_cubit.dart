@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:findar/core/models/return_result.dart';
 import 'package:findar/core/repositories/abstract_listing_repo.dart';
 
 /// SavedListingsCubit handles user's saved/favorite listings
@@ -57,8 +58,19 @@ class SavedListingsCubit extends Cubit<Map<String, dynamic>> {
     }
   }
 
+  /// Whether [listingId] is in the user's saved list.
+  bool isSaved(int listingId) {
+    final data = state['data'] as List? ?? const [];
+    return data.any((listing) => listing.id == listingId);
+  }
+
+  /// Forget the signed-out user's saved listings.
+  void reset() {
+    emit({'data': [], 'state': 'initial', 'message': '', 'count': 0});
+  }
+
   /// Add listing to saved/favorites
-  Future<void> saveListing(int listingId) async {
+  Future<ReturnResult> saveListing(int listingId) async {
     try {
       final result = await listingRepository.saveListing(listingId);
 
@@ -76,16 +88,16 @@ class SavedListingsCubit extends Cubit<Map<String, dynamic>> {
           'message': result.message,
         });
       }
+      return result;
     } catch (e) {
-      emit({
-        ...state,
-        'message': 'Error saving listing: ${e.toString()}',
-      });
+      final message = 'Error saving listing: ${e.toString()}';
+      emit({...state, 'message': message});
+      return ReturnResult(state: false, message: message);
     }
   }
 
   /// Remove listing from saved/favorites
-  Future<void> unsaveListing(int listingId) async {
+  Future<ReturnResult> unsaveListing(int listingId) async {
     try {
       // Call repository to unsave the listing
       final result = await listingRepository.unsaveListing(listingId);
@@ -108,11 +120,11 @@ class SavedListingsCubit extends Cubit<Map<String, dynamic>> {
           'message': result.message,
         });
       }
+      return result;
     } catch (e) {
-      emit({
-        ...state,
-        'message': 'Error removing listing: ${e.toString()}',
-      });
+      final message = 'Error removing listing: ${e.toString()}';
+      emit({...state, 'message': message});
+      return ReturnResult(state: false, message: message);
     }
   }
 

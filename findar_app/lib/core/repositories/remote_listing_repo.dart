@@ -27,6 +27,7 @@ class RemoteListingRepository implements ListingRepository {
     double? longitude,
     int? livingrooms,
     double? area,
+    bool isOnline = true,
   }) async {
     print('🔍 Creating listing: $title');
 
@@ -74,6 +75,7 @@ class RemoteListingRepository implements ListingRepository {
         'bathrooms': bathrooms,
         'listing_type': listingType, // 'rent' or 'sale'
         'building_type': buildingType, // 'apartment', 'house', etc.
+        'active': isOnline,
       };
 
       // Add Cloudinary URLs if available
@@ -163,32 +165,41 @@ class RemoteListingRepository implements ListingRepository {
     print('🔍 Editing listing: $id');
 
     try {
-      // Upload new images to Cloudinary if provided
+      // Images that are already URLs are kept; local file paths are uploaded.
       String? mainPicUrl;
       List<String>? picsUrls;
 
-      if (image != null && !image.startsWith('assets/') && !image.startsWith('http')) {
-        print('📤 Uploading images to Cloudinary...');
-
-        final uploadResult = await cloudinaryService.uploadListingImages(
-          mainImagePath: image,
-          additionalImagePaths: additionalImages,
-        );
-
-        if (!uploadResult.success) {
-          return ReturnResult(
-            state: false,
-            message: 'Failed to upload images: ${uploadResult.error}',
-          );
+      if (image != null && !image.startsWith('assets/')) {
+        if (_isRemote(image)) {
+          mainPicUrl = image;
+        } else {
+          final upload = await cloudinaryService.uploadImage(image, folder: 'listings');
+          if (!upload.success) {
+            return ReturnResult(
+              state: false,
+              message: 'Failed to upload images: ${upload.error}',
+            );
+          }
+          mainPicUrl = upload.url;
         }
+      }
 
-        mainPicUrl = uploadResult.mainImageUrl;
-        picsUrls = uploadResult.additionalImageUrls;
-
-        print('✅ Images uploaded - Main: $mainPicUrl, Additional: ${picsUrls.length}');
-      } else if (image != null && image.startsWith('http')) {
-        // Keep existing URL
-        mainPicUrl = image;
+      if (additionalImages != null) {
+        picsUrls = [];
+        for (final img in additionalImages) {
+          if (_isRemote(img)) {
+            picsUrls.add(img);
+            continue;
+          }
+          final upload = await cloudinaryService.uploadImage(img, folder: 'listings');
+          if (!upload.success) {
+            return ReturnResult(
+              state: false,
+              message: 'Failed to upload images: ${upload.error}',
+            );
+          }
+          picsUrls.add(upload.url!);
+        }
       }
 
       final body = <String, dynamic>{};
@@ -196,6 +207,7 @@ class RemoteListingRepository implements ListingRepository {
       // Only add fields that are provided
       if (title != null) body['title'] = title;
       if (description != null) body['description'] = description;
+      if (location != null) body['address'] = location;
       if (price != null) body['price'] = price;
       if (bedrooms != null) body['bedrooms'] = bedrooms;
       if (bathrooms != null) body['bathrooms'] = bathrooms;
@@ -220,12 +232,6 @@ class RemoteListingRepository implements ListingRepository {
       }
       if (picsUrls != null) {
         body['pics'] = picsUrls;
-      } else if (additionalImages != null && additionalImages.isNotEmpty) {
-        // If additionalImages are URLs (not file paths), keep them
-        final urlImages = additionalImages.where((img) => img.startsWith('http')).toList();
-        if (urlImages.isNotEmpty) {
-          body['pics'] = urlImages;
-        }
       }
 
       print('Edit request body: $body');
@@ -266,7 +272,8 @@ class RemoteListingRepository implements ListingRepository {
     print('🔍 Deleting listing: $id');
 
     try {
-      await apiService.delete(ApiConfig.editListing(id));
+      final response = await apiService.delete(ApiConfig.editListing(id));
+      if (response is ReturnResult) return response;
 
       return ReturnResult(
         state: true,
@@ -364,14 +371,18 @@ class RemoteListingRepository implements ListingRepository {
 
       print('Filtered listings response: $response');
 
+      if (response is ReturnResult) {
+        throw Exception('API error: ${response.message}');
+      }
+
       if (response is List) {
         return _parseListingList(response);
       }
 
-      return <PropertyListing>[];
+      throw Exception('Unexpected API response format');
     } catch (e) {
       print('Error fetching filtered listings: $e');
-      return <PropertyListing>[];
+      rethrow;
     }
   }
 
@@ -415,27 +426,46 @@ class RemoteListingRepository implements ListingRepository {
     }
   }
 
-  /// Helper method to parse a list of listing objects
-  List<PropertyListing> _parseListingList(List rawList) {
-    try {
-      return rawList.map<PropertyListing>((e) {
-        final data = Map<String, dynamic>.from(e as Map);
+  static bool _isRemote(String path) =>
+      path.startsWith('http://') || path.startsWith('https://');
 
-        // Map backend field names to model field names
-        data['image'] = data['main_pic'] ?? data['image'] ?? '';
-        data['isOnline'] = data['active'] ?? data['isOnline'] ?? true;
-        data['isBoosted'] = data['boosted'] ?? data['isBoosted'] ?? false;
+  /// Maps a backend `Post` payload onto [PropertyListing]'s JSON keys.
+  static PropertyListing parseListing(Map raw) {
+    final data = Map<String, dynamic>.from(raw);
 
-        if (!data.containsKey('location')) {
-          data['location'] = data['city'] ?? 'Unknown';
-        }
+    // The model reads `is_online` / `is_boosted`; the API sends
+    // `active` / `boosted`.
+    data['is_online'] = data['active'] ?? true;
+    data['is_boosted'] = data['boosted'] ?? false;
+    data['main_pic'] ??= '';
 
-        return PropertyListing.fromJson(data);
-      }).toList();
-    } catch (e) {
-      print('❌ Error parsing listing list: $e');
-      return <PropertyListing>[];
+    final owner = data['owner_details'];
+    if (owner is Map) {
+      data['owner_id'] = owner['id'];
+      data['owner_name'] = owner['username'];
+      data['owner_email'] = owner['email'];
+      data['owner_phone'] = owner['phone'];
+      data['owner_image'] = owner['profile_pic'];
+      data['owner_account_type'] = owner['account_type'];
+    } else if (data['owner'] is int) {
+      data['owner_id'] = data['owner'];
     }
+
+    return PropertyListing.fromJson(data);
+  }
+
+  /// Parses each listing on its own so one malformed row doesn't blank the
+  /// whole list.
+  List<PropertyListing> _parseListingList(List rawList) {
+    final listings = <PropertyListing>[];
+    for (final e in rawList) {
+      try {
+        listings.add(parseListing(e as Map));
+      } catch (err) {
+        print('❌ Skipping unparsable listing: $err');
+      }
+    }
+    return listings;
   }
 
   @override
@@ -454,16 +484,12 @@ class RemoteListingRepository implements ListingRepository {
       if (listingType != null && listingType.isNotEmpty) {
         queryParams['listing_type'] = listingType;
       }
-      print('🔴🔴🔴');
       print('Fetching recent listings with params: $queryParams');
 
       final response = await apiService.get(
         ApiConfig.recentListings,
         queryParams: queryParams.isNotEmpty ? queryParams : null,
       );
-      print('🔵🔵🔵');
-      print('Response from recent listings: $response');
-      print(response.runtimeType);
 
       // Handle API error response - throw exception so composite repo doesn't update UI with empty data
       if (response is ReturnResult) {
@@ -473,27 +499,7 @@ class RemoteListingRepository implements ListingRepository {
 
       // Expecting a JSON list from the backend
       if (response is List) {
-        try {
-          return response.map((e) {
-            final data = Map<String, dynamic>.from(e as Map);
-
-            // Map backend field names to model field names
-            data['image'] = data['main_pic'] ?? '';
-            data['isOnline'] = data['active'] ?? true;
-            data['isBoosted'] = data['boosted'] ?? false;
-
-            // For location, use a placeholder since backend doesn't provide it
-            if (!data.containsKey('location')) {
-              data['location'] = 'Unknown';
-            }
-
-            print('Parsing listing: ${data['title']}');
-            return PropertyListing.fromJson(data);
-          }).toList();
-        } catch (e) {
-          print('Error parsing listings: $e');
-          throw Exception('Error parsing listings: $e');
-        }
+        return _parseListingList(response);
       }
 
       // If the API returned an unexpected shape, throw exception
@@ -569,13 +575,8 @@ class RemoteListingRepository implements ListingRepository {
   Future<Set<int>> getSavedListingIds() async {
     print('🔍 Fetching saved listing IDs');
 
-    try {
-      final listings = await getSavedListings();
-      return listings.map((listing) => listing.id).toSet();
-    } catch (e) {
-      print('❌ Error fetching saved listing IDs: $e');
-      return <int>{};
-    }
+    final listings = await getSavedListings();
+    return listings.map((listing) => listing.id).toSet();
   }
 
   @override
@@ -669,41 +670,32 @@ class RemoteListingRepository implements ListingRepository {
   Future<PropertyListing?> getListingById(int id) async {
     print('🔍 Fetching listing by ID: $id');
 
-    try {
-      final response = await apiService.get(ApiConfig.getListing(id));
+    final response = await apiService.get(ApiConfig.listingDetails(id));
 
-      print('📥 Get listing response: $response');
-
-      if (response is Map) {
-        final data = Map<String, dynamic>.from(response);
-
-        // Map backend field names to model field names
-        data['image'] = data['main_pic'] ?? data['image'] ?? '';
-        data['isOnline'] = data['active'] ?? data['isOnline'] ?? true;
-        data['isBoosted'] = data['boosted'] ?? data['isBoosted'] ?? false;
-
-        if (!data.containsKey('location')) {
-          data['location'] = data['city'] ?? 'Unknown';
-        }
-
-        // Map owner_details to owner fields (use snake_case for json_serializable)
-        if (data['owner_details'] != null) {
-          final ownerDetails = data['owner_details'] as Map<String, dynamic>;
-          data['owner_id'] = ownerDetails['id'];
-          data['owner_name'] = ownerDetails['username'];
-          data['owner_email'] = ownerDetails['email'];
-          data['owner_phone'] = ownerDetails['phone'];
-          data['owner_image'] = ownerDetails['profile_pic'];
-          data['owner_account_type'] = ownerDetails['account_type'];
-        }
-
-        return PropertyListing.fromJson(data);
-      }
-
-      return null;
-    } catch (e) {
-      print('❌ Error fetching listing by ID: $e');
-      return null;
+    if (response is ReturnResult) {
+      // 404 means the listing is gone; anything else is a real failure the
+      // UI should show instead of an empty page.
+      if (response.message.contains('not found')) return null;
+      throw Exception(response.message);
     }
+
+    if (response is Map) {
+      return parseListing(response);
+    }
+
+    return null;
+  }
+
+  @override
+  Future<ReturnResult> reportListing({
+    required int listingId,
+    required String reason,
+  }) async {
+    final response = await apiService.post(
+      ApiConfig.reportProperty,
+      body: {'property_id': listingId, 'issue_description': reason},
+    );
+    if (response is ReturnResult) return response;
+    return ReturnResult(state: true, message: 'Report submitted');
   }
 }

@@ -335,5 +335,10 @@
   "describeIssue": "Describe the issue:",
   "provideDetails": "Please provide details about the issue...",
   "sendReport": "Send Report",
-  "pleaseSelectOrDescribe": "Please select or describe the issue before submitting."
+  "pleaseSelectOrDescribe": "Please select or describe the issue before submitting.",
+  "sessionExpired": "Your session has expired. Please log in again.",
+  "listingNotFound": "This listing is no longer available.",
+  "areaSqm": "Area (m²)",
+  "signInWithGoogle": "Sign in with Google",
+  "actionNeedsInternet": "You're offline. Connect to the internet and try again."
 }

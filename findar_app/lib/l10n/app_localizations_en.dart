@@ -761,35 +761,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sendReport => 'Send Report';
 
   @override
-  String get sendReportManually => 'Send Report Manually';
-
-  @override
   String get pleaseSelectOrDescribe => 'Please select or describe the issue before submitting.';
 
   @override
-  String get emailAppOpened => 'Email App Opened';
+  String get sessionExpired => 'Your session has expired. Please log in again.';
 
   @override
-  String get emailNotFilledAutomatically => 'An email app should have opened. If the details aren\'t filled automatically, please copy this information:';
+  String get listingNotFound => 'This listing is no longer available.';
 
   @override
-  String get sendReportManuallyInstructions => 'Please send this report manually using your preferred email app:';
+  String get areaSqm => 'Area (m²)';
 
   @override
-  String get gotIt => 'Got it';
+  String get signInWithGoogle => 'Sign in with Google';
 
   @override
-  String get reportError => 'Report Error';
-
-  @override
-  String get to => 'To:';
-
-  @override
-  String get subject => 'Subject:';
-
-  @override
-  String get message => 'Message:';
-
-  @override
-  String get manualEmailSteps => 'Steps:\n1. Open Gmail or your email app\n2. Compose new email\n3. Copy the details above\n4. Send the email';
+  String get actionNeedsInternet => 'You\'re offline. Connect to the internet and try again.';
 }
