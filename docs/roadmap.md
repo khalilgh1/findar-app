@@ -7,7 +7,7 @@ The owner wants this done in discrete steps, **stopping for review after each st
 | 1 | Analyze project; write CLAUDE.md + docs; install skills/MCPs/tools (graphify, apple-design, Flutter plugin, mobile-mcp) | done 2026-10-30 |
 | 2 | Investigate code + run analysis/tests; find and fix all issues (app + backend) | done 2026-10-30 (see below) |
 | 3 | E2E + real-device tests so every flow works (integration_test, mobile-mcp driving the emulator, backend API tests) | done 2026-10-31 (see below; how to run: [testing.md](testing.md)) |
-| 4 | Redesign screens/components, app icon, splash with Claude Design; implement it; add motion/animations (use `apple-design` skill for HIG review) | not started |
+| 4 | Redesign screens/components, app icon, splash with Claude Design; implement it; add motion/animations (use `apple-design` skill for HIG review) | 4a design **approved 2026-11-01**: spec in [design/README.md](design/README.md), [canvas](https://claude.ai/artifact/NXLyPR63DLLKiY4ezRvt4D). 4b implementation not started; follow the plan in design/README.md §5 |
 | 5 | Owner tests manually, reports remaining issues | — |
 
 ## Step 2 results (2026-10-30)

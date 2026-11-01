@@ -10,9 +10,10 @@ Real-estate marketplace (Algeria-focused): sellers/agencies post listings (house
 | `findar_backend/` | REST API, deployed at `https://findar-app.onrender.com` | Django 5.2, DRF, SimpleJWT, PostgreSQL, firebase_admin (FCM) |
 | `findar_website/` | Marketing landing page (vercel) | Next.js 16, React 19, Tailwind 4 |
 | `docs/` | Project docs for Claude sessions — read before big changes | — |
+| `docs/design/` | Approved redesign: spec (README.md), brand SVGs, canvas generator | — |
 | `main.py`, `pyproject.toml`, `temp_app/` | uv scaffold leftovers, not part of the product | — |
 
-Deep dives: [docs/architecture.md](docs/architecture.md) (layers, data flow, API map) · [docs/testing.md](docs/testing.md) (test layers, e2e setup) · [docs/roadmap.md](docs/roadmap.md) (the 4-step improvement plan, status, known-issue backlog).
+Deep dives: [docs/architecture.md](docs/architecture.md) (layers, data flow, API map) · [docs/testing.md](docs/testing.md) (test layers, e2e setup) · [docs/roadmap.md](docs/roadmap.md) (the 4-step improvement plan, status, known-issue backlog) · [docs/design/README.md](docs/design/README.md) (approved redesign: tokens, decor widgets, per-screen spec, motion, implementation plan).
 
 ## Commands
 
