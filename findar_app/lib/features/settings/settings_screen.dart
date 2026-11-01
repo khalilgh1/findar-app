@@ -1,10 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:findar/logic/cubits/settings_cubit.dart';
 import 'package:provider/provider.dart';
-import '../../../core/theme/theme_provider.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+import 'package:findar/core/config/support_config.dart';
+import 'package:findar/core/motion/motion.dart';
+import 'package:findar/core/theme/findar_tokens.dart';
+import 'package:findar/core/theme/theme_provider.dart';
+import 'package:findar/core/widgets/decor/decor.dart';
+import 'package:findar/core/widgets/f_icon.dart';
+import 'package:findar/core/widgets/ui.dart';
 import 'package:findar/l10n/app_localizations.dart';
 import 'package:findar/logic/cubits/language_cubit.dart';
+import 'package:findar/logic/cubits/profile_cubit.dart';
+import 'package:findar/logic/cubits/settings_cubit.dart';
+import 'package:findar/logic/session_reset.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -14,264 +24,174 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  @override
-  void initState() {
-    super.initState();
-    // Settings are initialized in SettingsCubit constructor
+  bool _loggingOut = false;
+
+  Future<void> _logout() async {
+    final l10n = AppLocalizations.of(context)!;
+    final c = context.fc;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.logout),
+        content: Text(l10n.logoutConfirm),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              style: TextButton.styleFrom(foregroundColor: c.ink),
+              child: Text(l10n.cancel)),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              style: TextButton.styleFrom(foregroundColor: c.red),
+              child: Text(l10n.logout)),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+    setState(() => _loggingOut = true);
+    final profile = context.read<ProfileCubit>();
+    await profile.logout();
+    if (!mounted) return;
+    setState(() => _loggingOut = false);
+    final st = profile.state;
+    if (st['state'] == 'initial') {
+      resetUserSession(context);
+      Navigator.pushNamedAndRemoveUntil(context, '/login', (r) => false);
+    } else {
+      showAppSnack(context, '${st['message'] ?? l10n.errorOccurred}');
+    }
+  }
+
+  Future<void> _launch(Uri uri) async {
+    final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!ok && mounted) showAppSnack(context, uri.path);
   }
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final textTheme = theme.textTheme;
+    final c = context.fc;
+    final l10n = AppLocalizations.of(context)!;
+    final theme = context.watch<ThemeProvider>();
+    final lang = context.watch<LanguageCubit>().state;
+
+    Widget langRow(String code, String title, String sub) => Semantics(
+          selected: code == lang,
+          inMutuallyExclusiveGroup: true,
+          button: true,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(14),
+            onTap: () {
+              if (code == lang) return;
+              Motion.softHaptic();
+              context.read<SettingsCubit>().changeLanguage(code);
+              context.read<LanguageCubit>().changeLanguage(code);
+            },
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 56),
+              child: Row(children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(title, style: context.tt.titleSmall),
+                      Text(sub,
+                          style: context.tt.bodySmall
+                              ?.copyWith(fontWeight: FontWeight.w500)),
+                    ],
+                  ),
+                ),
+                RadioDot(selected: code == lang),
+                const SizedBox(width: 4),
+              ]),
+            ),
+          ),
+        );
+
+    final hasSupport =
+        SupportConfig.phone != null || SupportConfig.email != null;
 
     return Scaffold(
-      backgroundColor: colorScheme.surface,
-      appBar: AppBar(
-        backgroundColor: colorScheme.surface,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: colorScheme.onSurface,
-            size: 28,
-          ),
-          onPressed: () => Navigator.pop(context),
-        ),
-        centerTitle: true,
-        title: Text(
-          AppLocalizations.of(context)!.settings,
-          style: textTheme.headlineMedium?.copyWith(
-            color: colorScheme.onSurface,
+      backgroundColor: c.bg,
+      body: Stack(children: [
+        Positioned(
+          left: -120,
+          bottom: -40,
+          child: IgnorePointer(
+            child: Rings(radii: const [90, 130], opacities: const [0.10, 0.06]),
           ),
         ),
-      ),
-      body: ListView(
-        children: [
-          // Appearance Section
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
-            child: Text(
-              AppLocalizations.of(context)!.appearance,
-              style: textTheme.headlineMedium?.copyWith(
-                color: colorScheme.onSurface,
+        SafeArea(
+          child: Column(children: [
+            FTopBar(title: l10n.settings),
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+                children: [
+                  SettingsGroup(title: l10n.appearance, children: [
+                    MenuRow(
+                      icon: theme.isDarkMode ? FIcons.moon : FIcons.sun,
+                      title: l10n.darkMode,
+                      subtitle: l10n.darkModeSub,
+                      trailing: Switch(
+                        value: theme.isDarkMode,
+                        onChanged: (v) {
+                          Motion.softHaptic();
+                          context.read<SettingsCubit>().toggleDarkMode();
+                          theme.toggleTheme(v);
+                        },
+                      ),
+                    ),
+                  ]),
+                  const SizedBox(height: 22),
+                  SettingsGroup(title: l10n.language, children: [
+                    langRow('en', 'English', l10n.english),
+                    langRow('ar', 'العربية', l10n.arabic),
+                    langRow('fr', 'Français', l10n.french),
+                  ]),
+                  if (hasSupport) ...[
+                    const SizedBox(height: 22),
+                    SettingsGroup(title: l10n.contactUs, children: [
+                      if (SupportConfig.phone != null)
+                        MenuRow(
+                          icon: FIcons.phone,
+                          title: l10n.callSupport,
+                          subtitle: SupportConfig.phone,
+                          onTap: () => _launch(
+                              Uri(scheme: 'tel', path: SupportConfig.phone)),
+                        ),
+                      if (SupportConfig.email != null)
+                        MenuRow(
+                          icon: FIcons.mail,
+                          title: l10n.emailSupport,
+                          subtitle: SupportConfig.email,
+                          onTap: () => _launch(
+                              Uri(scheme: 'mailto', path: SupportConfig.email)),
+                        ),
+                    ]),
+                  ],
+                  const SizedBox(height: 22),
+                  SettingsGroup(title: l10n.account, children: [
+                    MenuRow(
+                      icon: FIcons.logout,
+                      title: l10n.logout,
+                      color: c.red,
+                      showChevron: false,
+                      trailing: _loggingOut
+                          ? SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                  strokeWidth: 2, color: c.red))
+                          : null,
+                      onTap: _loggingOut ? null : _logout,
+                    ),
+                  ]),
+                ],
               ),
             ),
-          ),
-          _buildDarkModeToggle(themeProvider, colorScheme, textTheme),
-
-          const SizedBox(height: 24),
-
-          // Language Section
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-            child: Text(
-              AppLocalizations.of(context)!.language,
-              style: textTheme.headlineMedium?.copyWith(
-                color: colorScheme.onSurface,
-              ),
-            ),
-          ),
-          _buildLanguageOption('English', colorScheme, textTheme),
-          _buildLanguageOption('Arabic', colorScheme, textTheme),
-          _buildLanguageOption('French', colorScheme, textTheme),
-
-          const SizedBox(height: 24),
-
-          // Contact Us Section
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-            child: Text(
-              AppLocalizations.of(context)!.contactUs,
-              style: textTheme.headlineMedium?.copyWith(
-                color: colorScheme.onSurface,
-              ),
-            ),
-          ),
-          _buildContactOption(
-            icon: Icons.phone,
-            title: '+1 (234) 567-890',
-            colorScheme: colorScheme,
-            textTheme: textTheme,
-            onTap: () {
-              // Handle phone call
-            },
-          ),
-          _buildContactOption(
-            icon: Icons.chat_bubble_outline,
-            title: 'Twitter',
-            colorScheme: colorScheme,
-            textTheme: textTheme,
-            onTap: () {
-              // Handle Twitter
-            },
-          ),
-          _buildContactOption(
-            icon: Icons.facebook,
-            title: 'Facebook',
-            colorScheme: colorScheme,
-            textTheme: textTheme,
-            onTap: () {
-              // Handle Facebook
-            },
-          ),
-          _buildContactOption(
-            icon: Icons.camera_alt,
-            title: 'Instagram',
-            colorScheme: colorScheme,
-            textTheme: textTheme,
-            onTap: () {
-              // Handle Instagram
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDarkModeToggle(ThemeProvider themeProvider, ColorScheme colorScheme, TextTheme textTheme) {
-    return BlocBuilder<SettingsCubit, Map<String, dynamic>>(
-      builder: (context, state) {
-        return Container(
-          margin: const EdgeInsets.symmetric(horizontal: 16),
-          decoration: BoxDecoration(
-            color: colorScheme.surface,
-            border: Border(
-              bottom: BorderSide(
-                color: colorScheme.onSurface.withOpacity(0.1),
-                width: 1,
-              ),
-            ),
-          ),
-          child: ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 0),
-            leading: Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                color: colorScheme.secondary.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(
-                themeProvider.isDarkMode ? Icons.dark_mode : Icons.dark_mode_outlined,
-                color: colorScheme.onSurface,
-                size: 30,
-              ),
-            ),
-            title: Text(
-              AppLocalizations.of(context)!.darkMode,
-              style: textTheme.bodyMedium?.copyWith(
-                fontSize: 18,
-                color: colorScheme.onSurface,
-              ),
-            ),
-            trailing: Switch(
-              value: state['darkMode'] as bool? ?? false,
-              onChanged: (value) {
-                context.read<SettingsCubit>().toggleDarkMode();
-                themeProvider.toggleTheme(value);
-              },
-              activeColor: colorScheme.primary,
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildLanguageOption(String language, ColorScheme colorScheme, TextTheme textTheme) {
-    return BlocBuilder<LanguageCubit, String>(
-      builder: (context, currentLanguage) {
-        final languageMap = {'English': 'en', 'Arabic': 'ar', 'French': 'fr'};
-        final isSelected = languageMap[language] == currentLanguage;
-
-        return Container(
-          margin: const EdgeInsets.symmetric(horizontal: 16),
-          decoration: BoxDecoration(
-            color: colorScheme.surface,
-            border: Border(
-              bottom: BorderSide(
-                color: colorScheme.onSurface.withOpacity(0.1),
-                width: 1,
-              ),
-            ),
-          ),
-          child: ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
-            title: Text(
-              language,
-              style: textTheme.bodyMedium?.copyWith(
-                fontSize: 18,
-                color: isSelected ? colorScheme.primary : colorScheme.onSurface.withOpacity(0.5),
-              ),
-            ),
-            trailing: isSelected
-                ? Icon(
-                    Icons.check,
-                    color: colorScheme.primary,
-                    size: 28,
-                  )
-                : null,
-            onTap: () {
-              context.read<LanguageCubit>().changeLanguage(languageMap[language]!);
-            },
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildContactOption({
-    required IconData icon,
-    required String title,
-    required ColorScheme colorScheme,
-    required TextTheme textTheme,
-    required VoidCallback onTap,
-  }) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        border: Border(
-          bottom: BorderSide(
-            color: colorScheme.onSurface.withOpacity(0.1),
-            width: 1,
-            
-            
-          ),
+          ]),
         ),
-      ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
-        leading: Container(
-          width: 56,
-          height: 56,
-          decoration: BoxDecoration(
-            color: colorScheme.secondary.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(
-            icon,
-            color: colorScheme.onSurface,
-            size: 30,
-          ),
-        ),
-        title: Text(
-          title,
-          style: textTheme.bodyMedium?.copyWith(
-            fontSize: 18,
-            color: colorScheme.onSurface,
-          ),
-        ),
-        trailing: Icon(
-          Icons.arrow_forward_ios,
-          color: colorScheme.onSurface.withOpacity(0.3),
-          size: 20,
-        ),
-        onTap: onTap,
-      ),
+      ]),
     );
   }
 }

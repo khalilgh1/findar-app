@@ -1,11 +1,20 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:main_button/main_button.dart';
 
-import 'package:findar/logic/cubits/search_cubit.dart';
-import 'package:findar/l10n/app_localizations.dart';
+import 'package:findar/core/theme/findar_tokens.dart';
+import 'package:findar/core/widgets/listing_widgets.dart';
+import 'package:findar/core/widgets/ui.dart';
 import 'package:findar/features/create_listing/widgets/location_autocomplete_field.dart';
+import 'package:findar/features/search/screens/search_results.dart';
+import 'package:findar/features/search/search_request.dart';
+import 'package:findar/l10n/app_localizations.dart';
+import 'package:findar/logic/cubits/search_cubit.dart';
 
+/// Advanced search. Route argument `true` = opened from Home: applying opens
+/// the results; otherwise it re-runs the search and pops with `true`.
 class FilteringScreen extends StatefulWidget {
   const FilteringScreen({super.key});
 
@@ -14,477 +23,281 @@ class FilteringScreen extends StatefulWidget {
 }
 
 class _FilteringScreenState extends State<FilteringScreen> {
-  final TextEditingController locationController = TextEditingController();
-  final TextEditingController minSqftController = TextEditingController();
-  final TextEditingController maxSqftController = TextEditingController();
+  final _location = TextEditingController();
+  final _minPrice = TextEditingController();
+  final _maxPrice = TextEditingController();
+  final _minArea = TextEditingController();
 
-  RangeValues priceRange = const RangeValues(0, 250000000);
-  String propertyType = 'Any';
-  String buildingType = 'Any'; // Only one can be selected now
+  String _listingType = 'Any'; // Any | sale | rent
+  String _buildingType = 'Any';
+  int _bedrooms = 0;
+  int _bathrooms = 0;
+  String _listedBy = 'Any'; // Any | individual | agency
+  double? _lat, _lng;
+  RangeValues _range = const RangeValues(0, 1);
+  bool _fromHome = false;
+  bool _loaded = false;
 
-  // Minimums; 0 = any.
-  int bedrooms = 0;
-  int bathrooms = 0;
-  String? listedBy = 'Any';
-
-  // Location coordinates
-  double? _latitude;
-  double? _longitude;
+  // Slider position p (0..1) -> price = max * p^3: fine steps for rents,
+  // still reaches villa prices.
+  static double _toPrice(double p) => (kMaxPrice * p * p * p).roundToDouble();
+  static double _toPos(double price) =>
+      math.pow((price / kMaxPrice).clamp(0, 1), 1 / 3).toDouble();
 
   @override
-  void initState() {
-    super.initState();
-    // Load saved filters from SearchCubit
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadSavedFilters();
-    });
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_loaded) return;
+    _loaded = true;
+    _fromHome = ModalRoute.of(context)?.settings.arguments == true;
+    final f = context.read<SearchCubit>().currentFilters;
+    final lt = (f['listingType'] ?? 'Any').toString().toLowerCase();
+    _listingType = lt.contains('rent')
+        ? 'rent'
+        : lt.contains('sale')
+            ? 'sale'
+            : 'Any';
+    final bt = (f['buildingType'] ?? 'Any').toString().toLowerCase();
+    _buildingType = kPropertyTypes.contains(bt) ? bt : 'Any';
+    _bedrooms = f['numBedrooms'] as int? ?? 0;
+    _bathrooms = f['numBathrooms'] as int? ?? 0;
+    final lb = (f['listedBy'] ?? 'Any').toString().toLowerCase();
+    _listedBy = lb.contains('agen')
+        ? 'agency'
+        : (lb.contains('owner') || lb.contains('individual'))
+            ? 'individual'
+            : 'Any';
+    _lat = (f['latitude'] as num?)?.toDouble();
+    _lng = (f['longitude'] as num?)?.toDouble();
+    final minP = (f['minPrice'] as num?)?.toDouble() ?? 0;
+    final maxP = (f['maxPrice'] as num?)?.toDouble() ?? kMaxPrice;
+    _setPrices(minP, maxP);
+    final area = (f['minSqft'] as num?)?.toDouble();
+    if (area != null && area > 0) _minArea.text = area.round().toString();
   }
 
-  void _loadSavedFilters() {
-    final searchCubit = context.read<SearchCubit>();
-    final filters = searchCubit.currentFilters;
-
-    if (filters.isNotEmpty) {
-      setState(() {
-        final minPrice = (filters['minPrice'] as num?)?.toDouble() ?? 0.0;
-        final maxPrice =
-            (filters['maxPrice'] as num?)?.toDouble() ?? 250000000.0;
-        priceRange = RangeValues(minPrice, maxPrice);
-
-        propertyType = filters['listingType'] as String? ?? 'Any';
-        buildingType = filters['buildingType'] as String? ?? 'Any';
-        bedrooms = filters['numBedrooms'] as int? ?? 0;
-        bathrooms = filters['numBathrooms'] as int? ?? 0;
-        listedBy = filters['listedBy'] as String? ?? 'Any';
-
-        final minSqft = filters['minSqft'];
-        final maxSqft = filters['maxSqft'];
-        if (minSqft != null) {
-          minSqftController.text = minSqft.toString();
-        }
-        if (maxSqft != null) {
-          maxSqftController.text = maxSqft.toString();
-        }
-      });
+  void _setPrices(double minP, double maxP, {bool fields = true}) {
+    _range = RangeValues(_toPos(minP), _toPos(maxP));
+    if (fields) {
+      _minPrice.text = minP <= 0 ? '' : minP.round().toString();
+      _maxPrice.text = maxP >= kMaxPrice ? '' : maxP.round().toString();
     }
-  }
-
-  void resetFilters() {
-    setState(() {
-      locationController.clear();
-      priceRange = const RangeValues(0, 250000000);
-      propertyType = 'Any';
-      buildingType = 'Any';
-      bedrooms = 0;
-      bathrooms = 0;
-      listedBy = 'Any';
-      minSqftController.clear();
-      maxSqftController.clear();
-      _latitude = null;
-      _longitude = null;
-    });
   }
 
   @override
   void dispose() {
-    locationController.dispose();
-    minSqftController.dispose();
-    maxSqftController.dispose();
+    _location.dispose();
+    _minPrice.dispose();
+    _maxPrice.dispose();
+    _minArea.dispose();
     super.dispose();
   }
 
-  String _formatPrice(double value) {
-    if (value >= 1000000) {
-      return "${(value / 1000000).toStringAsFixed(1)}M DA";
-    } else if (value >= 1000) {
-      return "${(value / 1000).toStringAsFixed(0)}k DA";
+  void _reset() {
+    setState(() {
+      _location.clear();
+      _minArea.clear();
+      _listingType = 'Any';
+      _buildingType = 'Any';
+      _bedrooms = 0;
+      _bathrooms = 0;
+      _listedBy = 'Any';
+      _lat = _lng = null;
+      _setPrices(0, kMaxPrice);
+    });
+  }
+
+  Map<String, dynamic> _filters() {
+    final minP = double.tryParse(_minPrice.text) ?? 0;
+    final maxP = double.tryParse(_maxPrice.text) ?? kMaxPrice;
+    final area = double.tryParse(_minArea.text.trim());
+    return {
+      'minPrice': math.min(minP, maxP),
+      'maxPrice': math.max(minP, maxP),
+      'listingType': _listingType,
+      'buildingType': _buildingType,
+      'numBedrooms': _bedrooms,
+      'numBathrooms': _bathrooms,
+      'minSqft': (area != null && area > 0) ? area : null,
+      'maxSqft': null,
+      'listedBy': _listedBy,
+      'latitude': _lat,
+      'longitude': _lng,
+      'sortBy': _lat != null ? 'distance' : 'date_newest',
+    };
+  }
+
+  void _apply() {
+    final f = _filters();
+    if (_fromHome) {
+      Navigator.pushReplacementNamed(context, '/search-results',
+          arguments: SearchRequest(filters: f));
+    } else {
+      runFilters(context.read<SearchCubit>(), f);
+      Navigator.pop(context, true);
     }
-    return "${value.toStringAsFixed(0)} DA";
   }
 
   @override
   Widget build(BuildContext context) {
-    var theme = Theme.of(context);
+    final c = context.fc;
     final l10n = AppLocalizations.of(context)!;
+    final digits = [FilteringTextInputFormatter.digitsOnly];
+
+    Widget label(String t, [Widget? trailing]) => Row(children: [
+          Expanded(
+              child: Text(t,
+                  style: context.tt.titleSmall
+                      ?.copyWith(fontWeight: FontWeight.w800))),
+          if (trailing != null) trailing,
+        ]);
+
     return Scaffold(
-      backgroundColor: theme.colorScheme.surface,
-      appBar: AppBar(
-        forceMaterialTransparency: false,
-        primary: true,
-        toolbarOpacity: 1,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(l10n.advancedSearch),
-        centerTitle: true,
-        elevation: 0,
-      ),
-      body: Container(
-        color: theme.colorScheme.surface,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            // Location
-            Text(l10n.location, style: theme.textTheme.headlineSmall),
-            const SizedBox(height: 8),
-            LocationAutocompleteField(
-              controller: locationController,
-              theme: theme,
-              onLocationSelected: (latitude, longitude) {
-                setState(() {
-                  _latitude = latitude;
-                  _longitude = longitude;
-                });
-                print('Selected location: $latitude, $longitude');
-              },
+      backgroundColor: c.bg,
+      body: SafeArea(
+        bottom: false,
+        child: Column(children: [
+          FTopBar(
+            title: l10n.advancedSearch,
+            close: true,
+            trailing: TextButton(
+              onPressed: _reset,
+              style: TextButton.styleFrom(
+                  textStyle: const TextStyle(
+                      fontSize: 15, fontWeight: FontWeight.w700)),
+              child: Text(l10n.reset),
             ),
-
-            const SizedBox(height: 24),
-
-            // Price Range
-            Text(l10n.priceRange, style: theme.textTheme.headlineSmall),
-
-            RangeSlider(
-              values: priceRange,
-              min: 0,
-              max: 250000000,
-              divisions: 20,
-              labels: RangeLabels(
-                _formatPrice(priceRange.start),
-                _formatPrice(priceRange.end),
-              ),
-              activeColor: theme.colorScheme.primary,
-              onChanged: (values) => setState(() => priceRange = values),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          ),
+          Expanded(
+            child: ListView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              padding: const EdgeInsets.fromLTRB(20, 4, 20, 32),
               children: [
-                Text(_formatPrice(priceRange.start)),
-                Text(_formatPrice(priceRange.end)),
-              ],
-            ),
-
-            const SizedBox(height: 24),
-
-            // Property Type
-            Text(l10n.propertyType, style: theme.textTheme.headlineSmall),
-
-            const SizedBox(height: 8),
-            Builder(
-              builder: (context) {
-                final l10n = AppLocalizations.of(context)!;
-                final types = [
-                  ('Any', 'Any'),
-                  ('For Sale', l10n.forSale),
-                  ('For Rent', l10n.forRent),
-                ];
-                return Row(
-                  children: types.map((typeData) {
-                    final value = typeData.$1;
-                    final label = typeData.$2;
-                    final isSelected = propertyType == value;
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: ChoiceChip(
-                        label: Text(label),
-                        selected: isSelected,
-                        onSelected: (_) => setState(() => propertyType = value),
-                        selectedColor: theme.colorScheme.primary,
-                        labelStyle: TextStyle(
-                          color: isSelected
-                              ? theme.colorScheme.onPrimary
-                              : theme.colorScheme.onSurface,
-                        ),
-                        side: BorderSide.none,
-                        showCheckmark: false,
-                      ),
-                    );
-                  }).toList(),
-                );
-              },
-            ),
-
-            const SizedBox(height: 24),
-
-            // Building Type
-            Text(l10n.buildingType, style: theme.textTheme.headlineSmall),
-            const SizedBox(height: 8),
-            Column(
-              children: [
-                Wrap(
-                  children: [
-                    _buildBuildingRadio('Any'),
-                    _buildBuildingRadio('House'),
-                    _buildBuildingRadio('Apartment'),
-                    _buildBuildingRadio('Villa'),
-                    _buildBuildingRadio('Studio'),
-                    _buildBuildingRadio('Office'),
-                  ],
+                PillSegmented<String>(
+                  values: const ['Any', 'sale', 'rent'],
+                  labels: [l10n.any, l10n.forSale, l10n.forRent],
+                  selected: _listingType,
+                  onChanged: (v) => setState(() => _listingType = v),
                 ),
-              ],
-            ),
-
-            const SizedBox(height: 24),
-
-            // Beds & Baths
-            Text(l10n.bedsAndBaths, style: theme.textTheme.headlineSmall),
-            const SizedBox(height: 8),
-            _buildCounterRow(
-              'Bedrooms',
-              bedrooms,
-              (v) => setState(() => bedrooms = v),
-            ),
-            const SizedBox(height: 8),
-            _buildCounterRow(
-              'Bathrooms',
-              bathrooms,
-              (v) => setState(() => bathrooms = v),
-            ),
-
-            const SizedBox(height: 24),
-
-            // Square Footage
-            Text(l10n.squareFootage, style: theme.textTheme.headlineSmall),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: minSqftController,
-                    decoration: InputDecoration(
-                      labelText: 'Min',
-                      labelStyle: const TextStyle(
-                        color: Colors.grey,
-                      ), // default (unfocused)
-                      floatingLabelStyle: TextStyle(
-                        color: theme.colorScheme.primary,
-                        fontWeight: FontWeight.w600,
-                      ), // on focus
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          color: theme.colorScheme.secondary,
-                        ),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          color: theme.colorScheme.primary,
-                          width: 2,
-                        ),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                const SizedBox(height: 20),
+                LocationAutocompleteField(
+                  controller: _location,
+                  label: l10n.location,
+                  hint: l10n.searchCityHint,
+                  onLocationSelected: (lat, lng) => setState(() {
+                    _lat = lat;
+                    _lng = lng;
+                  }),
+                  onCleared: () => setState(() => _lat = _lng = null),
+                ),
+                const SizedBox(height: 20),
+                label(l10n.propertyType),
+                const SizedBox(height: 12),
+                Wrap(spacing: 8, runSpacing: 8, children: [
+                  SelectChip(
+                    label: l10n.any,
+                    selected: _buildingType == 'Any',
+                    onTap: () => setState(() => _buildingType = 'Any'),
+                  ),
+                  for (final t in kPropertyTypes)
+                    SelectChip(
+                      label: propertyTypeLabel(t, l10n),
+                      icon: propertyTypeIcon(t),
+                      selected: _buildingType == t,
+                      onTap: () => setState(() => _buildingType = t),
                     ),
-                    keyboardType: TextInputType.number,
-                  ),
+                ]),
+                const SizedBox(height: 20),
+                const FDivider(),
+                const SizedBox(height: 20),
+                label(
+                    _listingType == 'rent'
+                        ? l10n.pricePerMonth
+                        : l10n.priceRange,
+                    Text(l10n.currencyDa, style: context.tt.bodySmall)),
+                const SizedBox(height: 4),
+                RangeSlider(
+                  values: _range,
+                  onChanged: (v) => setState(() {
+                    _range = v;
+                    final minP = v.start <= 0.001 ? 0.0 : _toPrice(v.start);
+                    final maxP = v.end >= 0.999 ? kMaxPrice : _toPrice(v.end);
+                    _minPrice.text = minP <= 0 ? '' : minP.round().toString();
+                    _maxPrice.text =
+                        maxP >= kMaxPrice ? '' : maxP.round().toString();
+                  }),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: TextField(
-                    controller: maxSqftController,
-                    decoration: InputDecoration(
-                      labelText: 'Max',
-                      labelStyle: TextStyle(color: theme.colorScheme.secondary),
-                      floatingLabelStyle: TextStyle(
-                        color: theme.colorScheme.primary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          color: theme.colorScheme.secondary,
-                        ),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          color: theme.colorScheme.primary,
-                          width: 2,
-                        ),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                Row(children: [
+                  Expanded(
+                    child: AppField(
+                      label: l10n.minLabel,
+                      controller: _minPrice,
+                      hint: '0',
+                      keyboardType: TextInputType.number,
+                      inputFormatters: digits,
+                      trailing: UnitSuffix(l10n.currencyDa),
+                      onChanged: (_) => setState(() => _setPrices(
+                          double.tryParse(_minPrice.text) ?? 0,
+                          double.tryParse(_maxPrice.text) ?? kMaxPrice,
+                          fields: false)),
                     ),
-                    keyboardType: TextInputType.number,
                   ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: AppField(
+                      label: l10n.maxLabel,
+                      controller: _maxPrice,
+                      hint: l10n.any,
+                      keyboardType: TextInputType.number,
+                      inputFormatters: digits,
+                      trailing: UnitSuffix(l10n.currencyDa),
+                      onChanged: (_) => setState(() => _setPrices(
+                          double.tryParse(_minPrice.text) ?? 0,
+                          double.tryParse(_maxPrice.text) ?? kMaxPrice,
+                          fields: false)),
+                    ),
+                  ),
+                ]),
+                const SizedBox(height: 20),
+                const FDivider(),
+                const SizedBox(height: 20),
+                label(l10n.bedrooms),
+                const SizedBox(height: 12),
+                NumberPills(
+                    value: _bedrooms,
+                    onChanged: (v) => setState(() => _bedrooms = v)),
+                const SizedBox(height: 20),
+                label(l10n.bathrooms),
+                const SizedBox(height: 12),
+                NumberPills(
+                    value: _bathrooms,
+                    onChanged: (v) => setState(() => _bathrooms = v)),
+                const SizedBox(height: 20),
+                const FDivider(),
+                const SizedBox(height: 20),
+                AppField(
+                  label: l10n.minimumArea,
+                  controller: _minArea,
+                  hint: '0',
+                  keyboardType: TextInputType.number,
+                  inputFormatters: digits,
+                  trailing: const UnitSuffix('m²'),
+                ),
+                const SizedBox(height: 20),
+                label(l10n.listedBy),
+                const SizedBox(height: 12),
+                PillSegmented<String>(
+                  values: const ['Any', 'individual', 'agency'],
+                  labels: [l10n.anyone, l10n.ownerLabel, l10n.agencyAccount],
+                  selected: _listedBy,
+                  onChanged: (v) => setState(() => _listedBy = v),
                 ),
               ],
             ),
-
-            const SizedBox(height: 24),
-
-            // Listed By
-            Text(l10n.listedBy, style: theme.textTheme.headlineSmall),
-            Column(
-              children: [
-                RadioListTile<String>(
-                  title: Text(l10n.any),
-                  value: 'Any',
-                  activeColor: theme.colorScheme.primary,
-                  groupValue: listedBy,
-                  onChanged: (v) => setState(() => listedBy = v),
-                ),
-                RadioListTile<String>(
-                  title: Builder(
-                    builder: (context) {
-                      final l10n = AppLocalizations.of(context)!;
-                      return Text(l10n.privateOwner);
-                    },
-                  ),
-                  value: 'Private Owner',
-                  activeColor: theme.colorScheme.primary,
-                  groupValue: listedBy,
-                  onChanged: (v) => setState(() => listedBy = v),
-                ),
-                RadioListTile<String>(
-                  title: Builder(
-                    builder: (context) {
-                      final l10n = AppLocalizations.of(context)!;
-                      return Text(l10n.realEstateAgent);
-                    },
-                  ),
-                  value: 'Real Estate Agent',
-                  activeColor: theme.colorScheme.primary,
-                  groupValue: listedBy,
-                  onChanged: (v) => setState(() => listedBy = v),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 24),
-          ],
-        ),
-      ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          children: [
-            Expanded(
-              child: Builder(
-                builder: (context) {
-                  final l10n = AppLocalizations.of(context)!;
-                  return MainButton(
-                    label: l10n.reset,
-                    backgroundColor: theme.colorScheme.secondary,
-                    onPressed: resetFilters,
-                  );
-                },
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Builder(
-                builder: (context) {
-                  final l10n = AppLocalizations.of(context)!;
-                  return MainButton(
-                    label: l10n.showResults,
-                    backgroundColor: theme.colorScheme.primary,
-                    onPressed: () async {
-                      await _applyFilters(context);
-                    },
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
+          ),
+          StickyBar(child: FButton(label: l10n.showResults, onPressed: _apply)),
+        ]),
       ),
     );
-  }
-
-  Widget _buildBuildingRadio(String type) {
-    final screenWidth = MediaQuery.of(context).size.width;
-
-    // Constrain the width so the Wrap can position multiple radios horizontally.
-    // Adjust `0.45` if you want more/less items per row.
-    return SizedBox(
-      width: screenWidth * 0.45,
-      child: RadioListTile<String>(
-        title: Text(type),
-        value: type,
-        groupValue: buildingType,
-        activeColor: Theme.of(context).colorScheme.primary,
-        onChanged: (value) {
-          setState(() {
-            buildingType = value!;
-          });
-        },
-        // Use a small horizontal padding and compact density so tiles are not full-width
-        contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-        dense: true,
-        visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
-      ),
-    );
-  }
-
-  Widget _buildCounterRow(
-    String label,
-    int value,
-    ValueChanged<int> onChanged,
-  ) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Builder(
-          builder: (context) {
-            final l10n = AppLocalizations.of(context)!;
-            final displayLabel = label == 'Bedrooms'
-                ? l10n.bedrooms
-                : (label == 'Bathrooms' ? l10n.bathrooms : label);
-            return Text(displayLabel);
-          },
-        ),
-        Row(
-          children: [
-            IconButton(
-              onPressed: value > 0 ? () => onChanged(value - 1) : null,
-              icon: Icon(
-                Icons.remove_circle,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-            ),
-            Text(
-              value == 0 ? AppLocalizations.of(context)!.any : '$value+',
-              style: const TextStyle(fontSize: 16),
-            ),
-            IconButton(
-              onPressed: () => onChanged(value + 1),
-              icon: Icon(
-                Icons.add_circle,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Future<void> _applyFilters(BuildContext context) async {
-    final searchCubit = context.read<SearchCubit>();
-
-    final double? minSqft = double.tryParse(minSqftController.text.trim());
-    final double? maxSqft = double.tryParse(maxSqftController.text.trim());
-    final String? listingTypeValue =
-        propertyType == 'Any' ? null : propertyType;
-    final String? buildingTypeValue =
-        (buildingType == 'Any') ? null : buildingType;
-    final String? listedByValue =
-        (listedBy == null || listedBy == 'Any') ? null : listedBy;
-
-    await searchCubit.getFilteredListings(
-      latitude: _latitude,
-      longitude: _longitude,
-      minPrice: priceRange.start,
-      maxPrice: priceRange.end,
-      listingType: listingTypeValue,
-      buildingType: buildingTypeValue,
-      numBedrooms: bedrooms,
-      numBathrooms: bathrooms,
-      minSqft: minSqft,
-      maxSqft: maxSqft,
-      listedBy: listedByValue,
-    );
-
-    if (!context.mounted) return;
-    Navigator.pop(context);
   }
 }

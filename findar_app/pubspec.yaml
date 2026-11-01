@@ -1,5 +1,5 @@
 name: findar
-description: "A new Flutter project."
+description: "Findar: real-estate marketplace for Algeria."
 
 publish_to: 'none'
 
@@ -42,6 +42,7 @@ dependencies:
   internet_connection_checker_plus: ^2.9.1+2
   flutter_dotenv: ^5.1.0
   cached_network_image: ^3.4.1
+  flutter_svg: ^2.0.10
 
 dev_dependencies:
   flutter_test:
@@ -55,6 +56,8 @@ dev_dependencies:
   sqflite_common_ffi: ^2.4.5
   integration_test:
     sdk: flutter
+  flutter_launcher_icons: ^0.14.1
+  flutter_native_splash: ^2.4.1
     
 
 flutter:
@@ -62,4 +65,55 @@ flutter:
   uses-material-design: true
   assets:
     - assets/
+    - assets/brand/
     - .env
+
+  fonts:
+    - family: Manrope
+      fonts:
+        - asset: assets/fonts/Manrope-400.ttf
+          weight: 400
+        - asset: assets/fonts/Manrope-500.ttf
+          weight: 500
+        - asset: assets/fonts/Manrope-600.ttf
+          weight: 600
+        - asset: assets/fonts/Manrope-700.ttf
+          weight: 700
+        - asset: assets/fonts/Manrope-800.ttf
+          weight: 800
+    - family: IBMPlexSansArabic
+      fonts:
+        - asset: assets/fonts/IBMPlexSansArabic-400.ttf
+          weight: 400
+        - asset: assets/fonts/IBMPlexSansArabic-500.ttf
+          weight: 500
+        - asset: assets/fonts/IBMPlexSansArabic-600.ttf
+          weight: 600
+        - asset: assets/fonts/IBMPlexSansArabic-700.ttf
+          weight: 700
+
+# dart run flutter_launcher_icons
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  remove_alpha_ios: true
+  image_path: "assets/brand/app_icon.png"
+  adaptive_icon_background: "#0A5FC2"
+  adaptive_icon_foreground: "assets/brand/adaptive_foreground.png"
+  adaptive_icon_monochrome: "assets/brand/adaptive_foreground.png"
+  adaptive_icon_foreground_inset: 0
+  min_sdk_android: 21
+
+# dart run flutter_native_splash:create
+flutter_native_splash:
+  color: "#FFFFFF"
+  color_dark: "#0E1014"
+  image: assets/brand/splash_tile.png
+  image_dark: assets/brand/splash_tile.png
+  android_12:
+    image: assets/brand/splash_android12.png
+    image_dark: assets/brand/splash_android12.png
+    color: "#FFFFFF"
+    color_dark: "#0E1014"
+  ios: true
+  web: false

@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:findar/logic/cubits/profile_cubit.dart';
-import 'package:findar/core/widgets/progress_button.dart';
-import 'package:findar/features/profile/screens/edit_profile/widgets/profile_text_field.dart';
-import 'package:findar/features/profile/screens/edit_profile/utils/validators.dart';
-import 'package:findar/features/profile/screens/edit_profile/utils/edit_profile_handler.dart';
+
+import 'package:findar/core/theme/findar_tokens.dart';
+import 'package:findar/core/widgets/f_icon.dart';
+import 'package:findar/core/widgets/ui.dart';
+import 'package:findar/features/profile/profile_photo.dart';
 import 'package:findar/l10n/app_localizations.dart';
-import 'package:findar/core/services/cloudinary_service.dart';
-import 'dart:io';
-import 'package:image_picker/image_picker.dart';
+import 'package:findar/logic/cubits/profile_cubit.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -18,348 +16,165 @@ class EditProfileScreen extends StatefulWidget {
 }
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _phoneController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  final CloudinaryService _cloudinaryService = CloudinaryService();
-  final ImagePicker _imagePicker = ImagePicker();
-  bool _isLoading = false;
-  File? _selectedImage;
-  String? _uploadedImageUrl;
+  final _name = TextEditingController();
+  final _email = TextEditingController();
+  final _phone = TextEditingController();
+  final _uploading = ValueNotifier(false);
+  bool _saving = false;
 
   @override
   void initState() {
     super.initState();
-    _loadUserData();
-  }
-
-  /// Load current user data into form fields
-  void _loadUserData() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final profileState = context.read<ProfileCubit>().state;
-      final userData = profileState['data'] as Map<String, dynamic>?;
-
-      if (userData != null) {
-        _nameController.text = userData['username'] ?? '';
-        _emailController.text = userData['email'] ?? '';
-        _phoneController.text = userData['phone'] ?? '';
-      }
-    });
+    final d = context.read<ProfileCubit>().state['data'];
+    if (d is Map) {
+      _name.text = (d['username'] ?? '') as String;
+      _email.text = (d['email'] ?? '') as String;
+      _phone.text = (d['phone'] ?? '') as String;
+    }
   }
 
   @override
   void dispose() {
-    _nameController.dispose();
-    _emailController.dispose();
-    _phoneController.dispose();
+    _name.dispose();
+    _email.dispose();
+    _phone.dispose();
+    _uploading.dispose();
     super.dispose();
   }
 
-  void _setLoading(bool loading) {
-    if (mounted) {
-      setState(() => _isLoading = loading);
-    }
-  }
-
-  /// Pick an image from gallery or camera
-  Future<void> _pickImage({bool fromCamera = false}) async {
-    try {
-      final XFile? image = await _imagePicker.pickImage(
-        source: fromCamera ? ImageSource.camera : ImageSource.gallery,
-        maxWidth: 1024,
-        maxHeight: 1024,
-        imageQuality: 85,
-      );
-
-      if (image != null) {
-        setState(() {
-          _selectedImage = File(image.path);
-        });
-      }
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to pick image: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
-
-  /// Show image source selection dialog
-  void _showImageSourceDialog() {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) => SafeArea(
-        child: Wrap(
-          children: [
-            ListTile(
-              leading: const Icon(Icons.photo_library),
-              title: const Text('Choose from Gallery'),
-              onTap: () {
-                Navigator.pop(context);
-                _pickImage(fromCamera: false);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.camera_alt),
-              title: const Text('Take a Photo'),
-              onTap: () {
-                Navigator.pop(context);
-                _pickImage(fromCamera: true);
-              },
-            ),
-          ],
-        ),
-      ),
+  Future<void> _save() async {
+    if (!_formKey.currentState!.validate()) return;
+    final l10n = AppLocalizations.of(context)!;
+    final cubit = context.read<ProfileCubit>();
+    setState(() => _saving = true);
+    await cubit.updateProfile(
+      name: _name.text.trim(),
+      email: _email.text.trim(),
+      phone: _phone.text.trim(),
     );
-  }
-
-  /// Get current profile picture
-  ImageProvider _getImageProvider() {
-    // First check if user just selected a new image
-    if (_selectedImage != null) {
-      return FileImage(_selectedImage!);
-    }
-
-    // Then check if user has a saved profile picture
-    final userData = context.read<ProfileCubit>().state['data'] as Map?;
-    final profilePic = userData?['profilePic'] as String?;
-    if (profilePic != null && profilePic.startsWith('http')) {
-      return NetworkImage(profilePic);
-    }
-
-    // Fall back to default avatar
-    return const AssetImage('assets/profile.png');
-  }
-
-  /// Upload image to Cloudinary and save
-  Future<void> _uploadAndSaveImage() async {
-    if (_selectedImage == null) return;
-
-    _setLoading(true);
-
-    try {
-      // Upload to Cloudinary
-      final result = await _cloudinaryService.uploadProfilePicture(
-        _selectedImage!.path,
-      );
-
-      if (result.success && result.url != null) {
-        _uploadedImageUrl = result.url;
-        if (!mounted) return;
-
-        // Update profile with new image URL
-        await context.read<ProfileCubit>().updateProfile(
-              profilePic: _uploadedImageUrl,
-            );
-
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Profile picture updated successfully'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      } else {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to upload image: ${result.error}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error uploading image: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    } finally {
-      _setLoading(false);
+    if (!mounted) return;
+    setState(() => _saving = false);
+    final st = cubit.state;
+    if (st['state'] == 'done') {
+      showAppSnack(context, (st['message'] as String?) ?? l10n.success);
+      Navigator.pop(context);
+    } else {
+      showAppSnack(context, (st['message'] as String?) ?? l10n.errorOccurred);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
+    final c = context.fc;
+    final d = context.select<ProfileCubit, Map?>(
+        (p) => p.state['data'] is Map ? p.state['data'] as Map : null);
 
     return Scaffold(
-      backgroundColor: theme.colorScheme.surface,
-      appBar: AppBar(
-        scrolledUnderElevation: 0,
-        backgroundColor: theme.colorScheme.surface,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: theme.colorScheme.onSurface,
-            size: 30,
-          ),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Builder(
-          builder: (context) {
-            final l10n = AppLocalizations.of(context)!;
-            return Text(
-              l10n.editProfile,
-              style: TextStyle(
-                color: theme.colorScheme.onSurface,
-                fontWeight: FontWeight.w600,
-              ),
-            );
-          },
-        ),
-        centerTitle: true,
-      ),
-      body: BlocListener<ProfileCubit, Map<String, dynamic>>(
-        listener: (context, state) {
-          // Handle state changes if needed
-        },
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 10),
-
-                // Profile Picture Section
-                Center(
-                  child: Stack(
-                    children: [
-                      GestureDetector(
-                        onTap: _showImageSourceDialog,
-                        child: Container(
-                          width: 120,
-                          height: 120,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: theme.colorScheme.primary,
-                              width: 3,
-                            ),
-                          ),
-                          child: ClipOval(
-                            child: Image(
-                              image: _getImageProvider(),
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        bottom: 0,
-                        right: 0,
-                        child: GestureDetector(
-                          onTap: _showImageSourceDialog,
-                          child: Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: theme.colorScheme.primary,
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: theme.colorScheme.surface,
-                                width: 2,
-                              ),
-                            ),
-                            child: Icon(
-                              Icons.camera_alt,
-                              color: theme.colorScheme.onPrimary,
-                              size: 20,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 10),
-
-                // Upload button (only show when image is selected)
-                if (_selectedImage != null)
+      backgroundColor: c.bg,
+      body: SafeArea(
+        bottom: false,
+        child: Column(children: [
+          FTopBar(title: l10n.editProfile),
+          Expanded(
+            child: Form(
+              key: _formKey,
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+                children: [
                   Center(
-                    child: TextButton.icon(
-                      onPressed: _isLoading ? null : _uploadAndSaveImage,
-                      icon: _isLoading
-                          ? const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(Icons.upload),
-                      label: Text(_isLoading ? 'Uploading...' : 'Upload Photo'),
+                    child: ValueListenableBuilder<bool>(
+                      valueListenable: _uploading,
+                      builder: (context, busy, child) => Stack(children: [
+                        child!,
+                        if (busy)
+                          Positioned.fill(
+                            child: Container(
+                              decoration: const BoxDecoration(
+                                  color: Color(0x66111317),
+                                  shape: BoxShape.circle),
+                              alignment: Alignment.center,
+                              child: const CircularProgressIndicator(
+                                  strokeWidth: 2.6, color: Colors.white),
+                            ),
+                          ),
+                      ]),
+                      child: InitialsAvatar(
+                        name: _name.text.isEmpty
+                            ? (d?['username'] as String?)
+                            : _name.text,
+                        imageUrl: d?['profilePic'] as String?,
+                        size: 96,
+                      ),
                     ),
                   ),
-
-                const SizedBox(height: 24),
-
-                // Full Name Field
-                ProfileTextField(
-                  label: l10n.fullName,
-                  controller: _nameController,
-                  validator: ProfileValidators.validateName,
-                  hintText: l10n.enterFullName,
-                ),
-
-                const SizedBox(height: 24),
-
-                // Email Field
-                ProfileTextField(
-                  label: l10n.emailAddress,
-                  controller: _emailController,
-                  validator: ProfileValidators.validateEmail,
-                  keyboardType: TextInputType.emailAddress,
-                  hintText: l10n.enterEmail,
-                ),
-
-                const SizedBox(height: 24),
-
-                // Phone Number Field
-                ProfileTextField(
-                  label: l10n.phoneNumber,
-                  controller: _phoneController,
-                  validator: ProfileValidators.validatePhone,
-                  keyboardType: TextInputType.phone,
-                  hintText: l10n.enterPhone,
-                ),
-
-                const SizedBox(height: 40),
-
-                // Save Changes Button
-                SizedBox(
-                  width: double.infinity,
-                  child: ProgressButton(
-                    label: l10n.saveChanges,
-                    backgroundColor: theme.colorScheme.primary,
-                    textColor: Colors.white,
-                    isLoading: _isLoading,
-                    onPressed: _isLoading
-                        ? null
-                        : () => EditProfileHandler.saveChanges(
-                              context: context,
-                              formKey: _formKey,
-                              nameController: _nameController,
-                              emailController: _emailController,
-                              phoneController: _phoneController,
-                              setLoading: _setLoading,
-                            ),
+                  const SizedBox(height: 12),
+                  Center(
+                    child: FButton(
+                      label: l10n.changePhoto,
+                      icon: FIcons.camera,
+                      kind: FButtonKind.secondary,
+                      height: 40,
+                      expand: false,
+                      onPressed: () =>
+                          changeProfilePhoto(context, uploading: _uploading),
+                    ),
                   ),
-                ),
-
-                const SizedBox(height: 20),
-              ],
+                  const SizedBox(height: 20),
+                  AppField(
+                    label: l10n.fullName,
+                    controller: _name,
+                    icon: FIcons.user,
+                    textInputAction: TextInputAction.next,
+                    autofillHints: const [AutofillHints.name],
+                    validator: (v) => (v == null || v.trim().length < 2)
+                        ? l10n.nameRequired
+                        : null,
+                  ),
+                  const SizedBox(height: 20),
+                  AppField(
+                    label: l10n.emailAddress,
+                    controller: _email,
+                    icon: FIcons.mail,
+                    keyboardType: TextInputType.emailAddress,
+                    textInputAction: TextInputAction.next,
+                    autofillHints: const [AutofillHints.email],
+                    validator: (v) {
+                      final t = v?.trim() ?? '';
+                      if (t.isEmpty) return l10n.emailRequired;
+                      if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]{2,}$')
+                          .hasMatch(t)) {
+                        return l10n.invalidEmail;
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  AppField(
+                    label: l10n.phoneNumber,
+                    controller: _phone,
+                    icon: FIcons.phone,
+                    keyboardType: TextInputType.phone,
+                    autofillHints: const [AutofillHints.telephoneNumber],
+                    validator: (v) {
+                      final t = v?.trim() ?? '';
+                      if (t.isEmpty) return l10n.phoneRequired;
+                      if (t.replaceAll(RegExp(r'\D'), '').length < 10) {
+                        return l10n.phoneTooShort;
+                      }
+                      return null;
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
+          StickyBar(
+            child: FButton(
+                label: l10n.saveChanges, loading: _saving, onPressed: _save),
+          ),
+        ]),
       ),
     );
   }

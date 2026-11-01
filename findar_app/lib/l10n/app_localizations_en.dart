@@ -9,13 +9,13 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appTitle => 'FinDar';
+  String get appTitle => 'Findar';
 
   @override
-  String get welcomeBack => 'Welcome Back!';
+  String get welcomeBack => 'Welcome back';
 
   @override
-  String get completeRegistration => 'Complete Your Registration';
+  String get completeRegistration => 'Complete registration';
 
   @override
   String get selectAccountType => 'Select Account Type';
@@ -27,19 +27,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountAgency => 'Agency';
 
   @override
-  String get fullName => 'Full Name';
+  String get fullName => 'Full name';
 
   @override
   String get enterFullName => 'Enter your full name';
 
   @override
-  String get emailAddress => 'Email Address';
+  String get emailAddress => 'Email address';
 
   @override
   String get enterEmail => 'Enter your Email Address';
 
   @override
-  String get phoneNumber => 'Phone Number';
+  String get phoneNumber => 'Phone number';
 
   @override
   String get enterPhone => 'Enter your phone number';
@@ -51,7 +51,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enterPassword => 'Enter your password';
 
   @override
-  String get forgotPassword => 'Forgot Password ?';
+  String get forgotPassword => 'Forgot password?';
 
   @override
   String get ninLabel => 'National Identification Number (NIN)';
@@ -66,7 +66,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get alreadyHaveAccount => 'Already have an account?';
 
   @override
-  String get login => 'Login';
+  String get login => 'Log in';
 
   @override
   String get dontHaveAccount => 'Don\'t have an account?';
@@ -90,25 +90,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rent => 'Rent';
 
   @override
-  String get getStarted => 'Get Started';
+  String get getStarted => 'Get started';
 
   @override
   String get sponsoredProperties => 'Sponsored Properties';
 
   @override
-  String get recentListings => 'Recent Listings';
+  String get recentListings => 'Recent listings';
 
   @override
-  String get viewAll => 'View All';
+  String get viewAll => 'View all';
 
   @override
   String get exploreProperties => 'Explore Properties';
 
   @override
-  String get forSale => 'For Sale';
+  String get forSale => 'For sale';
 
   @override
-  String get forRent => 'For Rent';
+  String get forRent => 'For rent';
 
   @override
   String get newConstructions => 'New Constructions';
@@ -189,16 +189,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noPropertiesFound => 'No properties found';
 
   @override
-  String get pleaseTryAdjustingFilters => 'Please try adjusting your search filters';
+  String get pleaseTryAdjustingFilters => 'Try a different place or fewer filters.';
 
   @override
   String get sortBy => 'Sort by';
 
   @override
-  String get priceLowToHigh => 'Price: Low to High';
+  String get priceLowToHigh => 'Price: low to high';
 
   @override
-  String get priceHighToLow => 'Price: High to Low';
+  String get priceHighToLow => 'Price: high to low';
 
   @override
   String get newest => 'Newest';
@@ -207,13 +207,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mostPopular => 'Most Popular';
 
   @override
-  String get advancedSearch => 'Advanced Search';
+  String get advancedSearch => 'Advanced search';
 
   @override
   String get enterLocationHint => 'Enter a city, zip code, or neighborhood';
 
   @override
-  String get priceRange => 'Price range';
+  String get priceRange => 'Price';
 
   @override
   String get propertyType => 'Property type';
@@ -262,7 +262,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get propertyTitle => 'Property Title';
 
   @override
-  String get examplePropertyTitleHint => 'e.g. Spacious 3 Bedroom Apartment';
+  String get examplePropertyTitleHint => 'e.g. Villa with garden';
 
   @override
   String get price => 'Price';
@@ -277,7 +277,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get propertyDescriptionHint => 'Describe the property details here...';
 
   @override
-  String get verificationCode => 'Verification Code';
+  String get verificationCode => 'Verification code';
 
   @override
   String get getCode => 'Get Code';
@@ -345,7 +345,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addImages => 'Add Images';
 
   @override
-  String get publishListing => 'Publish Listing';
+  String get publishListing => 'Publish listing';
 
   @override
   String get listingCreatedSuccessfully => 'Listing Created Successfully!';
@@ -363,7 +363,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get startExploring => 'Start exploring properties to save your favorites';
 
   @override
-  String get myListings => 'My Listings';
+  String get myListings => 'My listings';
 
   @override
   String get removeListingTitle => 'Remove Listing';
@@ -374,7 +374,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get listingRemoved => 'Listing removed';
+  String get listingRemoved => 'Listing deleted';
 
   @override
   String get edit => 'Edit';
@@ -392,19 +392,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addNew => 'Add New';
 
   @override
-  String get viewListing => 'View Listing';
+  String get viewListing => 'View listing';
 
   @override
-  String get editProfile => 'Edit Profile';
+  String get editProfile => 'Edit profile';
 
   @override
   String get accountSettings => 'Account Settings';
 
   @override
-  String get logout => 'Logout';
+  String get logout => 'Log out';
 
   @override
-  String get profilePictureUpdated => 'Profile picture updated successfully';
+  String get profilePictureUpdated => 'Profile photo updated';
 
   @override
   String get upload => 'Upload';
@@ -431,7 +431,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get french => 'French';
 
   @override
-  String get contactUs => 'Contact Us';
+  String get contactUs => 'Contact us';
 
   @override
   String get contactPhone => '+1 (234) 567-890';
@@ -446,7 +446,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get instagram => 'Instagram';
 
   @override
-  String get darkMode => 'Dark Mode';
+  String get darkMode => 'Dark mode';
 
   @override
   String get notifications => 'Notifications';
@@ -473,7 +473,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get confirm => 'Confirm';
 
   @override
-  String get saveChanges => 'Save Changes';
+  String get saveChanges => 'Save changes';
 
   @override
   String get apply => 'Apply';
@@ -575,7 +575,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get search => 'Search';
 
   @override
-  String get searchHint => 'Search properties...';
+  String get searchHint => 'Search';
 
   @override
   String get noResults => 'No results found';
@@ -607,7 +607,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get addFirstPropertyListing => 'Add your first property listing';
+  String get addFirstPropertyListing => 'Post your first property in a minute.';
 
   @override
   String get chooseSponsorshipPlan => 'Choose Sponsorship Plan';
@@ -616,7 +616,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get selectPlanToBoostProperty => 'Select a plan to boost your property';
 
   @override
-  String get continueToPayment => 'Continue to Payment';
+  String get continueToPayment => 'Continue to payment';
 
   @override
   String get paymentConfirmation => 'Payment Confirmation';
@@ -641,13 +641,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get basicSponsor => 'Basic Sponsor';
+  String get basicSponsor => 'Basic';
 
   @override
-  String get premiumSponsor => 'Premium Sponsor';
+  String get premiumSponsor => 'Premium';
 
   @override
-  String get agencySponsorPlan => 'Agency Sponsor Plan';
+  String get agencySponsorPlan => 'Agency';
 
   @override
   String get featuredPlacement => 'Featured placement';
@@ -659,7 +659,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get basicAnalytics => 'Basic analytics';
 
   @override
-  String get topPriority => 'Top priority in search results';
+  String get topPriority => 'Top priority in search';
 
   @override
   String get advancedAnalytics => 'Advanced analytics';
@@ -731,19 +731,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get selectReportReason => 'Please select a reason for reporting this property';
 
   @override
-  String get inaccurateInformation => 'Inaccurate Information';
+  String get inaccurateInformation => 'Inaccurate information';
 
   @override
-  String get fraudulentListing => 'Fraudulent Listing';
+  String get fraudulentListing => 'Fraudulent listing';
 
   @override
-  String get inappropriateContent => 'Inappropriate Content';
+  String get inappropriateContent => 'Inappropriate content';
 
   @override
-  String get propertyNotAvailable => 'Property Not Available';
+  String get propertyNotAvailable => 'No longer available';
 
   @override
-  String get propertyReportedThankYou => 'Property reported, thank you!';
+  String get propertyReportedThankYou => 'Thanks, we\'ll review this listing.';
 
   @override
   String get helpMaintainQuality => 'Help us maintain quality listings by reporting issues.';
@@ -758,10 +758,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get provideDetails => 'Please provide details about the issue...';
 
   @override
-  String get sendReport => 'Send Report';
+  String get sendReport => 'Send report';
 
   @override
-  String get pleaseSelectOrDescribe => 'Please select or describe the issue before submitting.';
+  String get pleaseSelectOrDescribe => 'Pick a reason or describe the issue.';
 
   @override
   String get sessionExpired => 'Your session has expired. Please log in again.';
@@ -770,11 +770,557 @@ class AppLocalizationsEn extends AppLocalizations {
   String get listingNotFound => 'This listing is no longer available.';
 
   @override
-  String get areaSqm => 'Area (m²)';
+  String get areaSqm => 'Area';
 
   @override
-  String get signInWithGoogle => 'Sign in with Google';
+  String get signInWithGoogle => 'Continue with Google';
 
   @override
   String get actionNeedsInternet => 'You\'re offline. Connect to the internet and try again.';
+
+  @override
+  String get currencyDa => 'DA';
+
+  @override
+  String get perMonth => '/ month';
+
+  @override
+  String bdShort(int count) {
+    return '$count bd';
+  }
+
+  @override
+  String baShort(int count) {
+    return '$count ba';
+  }
+
+  @override
+  String get noPhoto => 'No photo';
+
+  @override
+  String get removeFromSaved => 'Remove from saved';
+
+  @override
+  String get savedToList => 'Saved to your list';
+
+  @override
+  String get back => 'Back';
+
+  @override
+  String get orLabel => 'or';
+
+  @override
+  String get increase => 'Increase';
+
+  @override
+  String get decrease => 'Decrease';
+
+  @override
+  String get seeAll => 'See all';
+
+  @override
+  String get tryAgain => 'Try again';
+
+  @override
+  String get youreOffline => 'You\'re offline';
+
+  @override
+  String get offlineBannerBody => 'Showing saved results from your last visit.';
+
+  @override
+  String get couldntLoadListings => 'Couldn\'t load listings';
+
+  @override
+  String get couldntLoadBody => 'The server didn\'t respond. Try again in a moment.';
+
+  @override
+  String get listingUnavailableOffline => 'This listing isn\'t available offline';
+
+  @override
+  String get listingUnavailableOfflineBody => 'Only your own listings and saved properties open offline.';
+
+  @override
+  String get browseListings => 'Browse listings';
+
+  @override
+  String get postTab => 'Post';
+
+  @override
+  String helloName(String name) {
+    return 'Hello, $name';
+  }
+
+  @override
+  String get hello => 'Hello';
+
+  @override
+  String get heroTitle => 'Find your next place';
+
+  @override
+  String get searchCityHint => 'Search city or district';
+
+  @override
+  String get listYourProperty => 'List your property';
+
+  @override
+  String get listYourPropertySub => 'Sell or rent it out on Findar';
+
+  @override
+  String get browseByType => 'Browse by type';
+
+  @override
+  String get sponsored => 'Sponsored';
+
+  @override
+  String get noRecentListings => 'No listings yet';
+
+  @override
+  String get noRecentListingsBody => 'New properties will show up here.';
+
+  @override
+  String get tagHydra => '#Hydra';
+
+  @override
+  String get tagForRent => '#ForRent';
+
+  @override
+  String get tagVilla => '#Villa';
+
+  @override
+  String get tagOran => '#Oran';
+
+  @override
+  String get tagF3 => '#F3';
+
+  @override
+  String get anyLabel => 'Any';
+
+  @override
+  String get pricePerMonth => 'Price per month';
+
+  @override
+  String get minimumArea => 'Minimum area';
+
+  @override
+  String get anyone => 'Anyone';
+
+  @override
+  String get ownerLabel => 'Owner';
+
+  @override
+  String resultsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count results',
+      one: '1 result',
+      zero: 'No results',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String filtersActive(int count) {
+    return 'Filters, $count active';
+  }
+
+  @override
+  String removeFilter(String label) {
+    return 'Remove $label';
+  }
+
+  @override
+  String get nearest => 'Nearest';
+
+  @override
+  String bedsMin(int count) {
+    return '$count+ bd';
+  }
+
+  @override
+  String bathsMin(int count) {
+    return '$count+ ba';
+  }
+
+  @override
+  String areaMin(int count) {
+    return '$count+ m²';
+  }
+
+  @override
+  String get aboutProperty => 'About this property';
+
+  @override
+  String get readMore => 'Read more';
+
+  @override
+  String get showLess => 'Show less';
+
+  @override
+  String get viewProfile => 'View profile';
+
+  @override
+  String get reportThisListing => 'Report this listing';
+
+  @override
+  String listedDaysAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Listed $count days ago',
+      one: 'Listed yesterday',
+      zero: 'Listed today',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get areaLabel => 'Area';
+
+  @override
+  String get call => 'Call';
+
+  @override
+  String get sendSms => 'Send SMS';
+
+  @override
+  String get message => 'Message';
+
+  @override
+  String get individualLabel => 'Individual';
+
+  @override
+  String get noPhoneNumber => 'No phone number on this listing';
+
+  @override
+  String photoOf(int index, int total) {
+    return 'Photo $index of $total';
+  }
+
+  @override
+  String get reportPrivate => 'Reports are private. They help us keep listings accurate and safe.';
+
+  @override
+  String get detailsOptional => 'Details (optional)';
+
+  @override
+  String get tellUsWhatsWrong => 'Tell us what\'s wrong';
+
+  @override
+  String propertiesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count properties',
+      one: '1 property',
+      zero: 'No properties',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get noSavedYet => 'No saved properties yet';
+
+  @override
+  String get noSavedBody => 'Tap the bookmark on any listing to keep it here.';
+
+  @override
+  String onlineCount(int count) {
+    return 'Online · $count';
+  }
+
+  @override
+  String offlineCount(int count) {
+    return 'Offline · $count';
+  }
+
+  @override
+  String get makeOffline => 'Make offline';
+
+  @override
+  String get makeOnline => 'Make online';
+
+  @override
+  String get newListing => 'New listing';
+
+  @override
+  String actionsFor(String title) {
+    return 'Actions for $title';
+  }
+
+  @override
+  String get deleteListingTitle => 'Delete this listing?';
+
+  @override
+  String deleteListingBody(String title) {
+    return '\"$title\" will be removed for good.';
+  }
+
+  @override
+  String get listingStatusUpdated => 'Listing status updated';
+
+  @override
+  String get noOnlineListings => 'No online listings';
+
+  @override
+  String get noOfflineListings => 'No offline listings';
+
+  @override
+  String get titleLabel => 'Title';
+
+  @override
+  String get listingType => 'Listing type';
+
+  @override
+  String get addLabel => 'Add';
+
+  @override
+  String get coverLabel => 'Cover';
+
+  @override
+  String get photosHint => 'The first photo is the cover.';
+
+  @override
+  String get removePhoto => 'Remove photo';
+
+  @override
+  String get visibleToBuyers => 'Visible to buyers';
+
+  @override
+  String get visibleToBuyersSub => 'Turn off to save as offline';
+
+  @override
+  String get searchAddress => 'Search an address';
+
+  @override
+  String get describeHint => 'Describe the property, the neighbourhood, what\'s included…';
+
+  @override
+  String get deleteListing => 'Delete listing';
+
+  @override
+  String get editListingTitle => 'Edit listing';
+
+  @override
+  String get addAtLeastOnePhoto => 'Add at least one photo.';
+
+  @override
+  String get individualAccount => 'Individual account';
+
+  @override
+  String get agencyAccount => 'Agency';
+
+  @override
+  String get boostAListing => 'Boost a listing';
+
+  @override
+  String get boostAListingSub => 'Show up in Sponsored and higher in search.';
+
+  @override
+  String get seePlans => 'See plans';
+
+  @override
+  String get phoneLabel => 'Phone';
+
+  @override
+  String get changePhoto => 'Change photo';
+
+  @override
+  String listingsCount(int count) {
+    return 'Listings · $count';
+  }
+
+  @override
+  String get noListingsYet => 'No listings yet';
+
+  @override
+  String get removePhotoAction => 'Remove photo';
+
+  @override
+  String get chooseFromGallery => 'Choose from gallery';
+
+  @override
+  String get takePhoto => 'Take a photo';
+
+  @override
+  String get darkModeSub => 'Dark colours across the app';
+
+  @override
+  String get callSupport => 'Call support';
+
+  @override
+  String get emailSupport => 'Email support';
+
+  @override
+  String get account => 'Account';
+
+  @override
+  String get logoutConfirm => 'You\'ll need to log in again to see your listings.';
+
+  @override
+  String get loginSubtitle => 'Log in to save listings and contact owners.';
+
+  @override
+  String get createAccount => 'Create account';
+
+  @override
+  String get continueWithGoogle => 'Continue with Google';
+
+  @override
+  String get showPassword => 'Show password';
+
+  @override
+  String get hidePassword => 'Hide password';
+
+  @override
+  String get accountType => 'Account type';
+
+  @override
+  String get individualSub => 'Buying, renting or selling my own place';
+
+  @override
+  String get agencySub => 'Listing properties for clients';
+
+  @override
+  String get rule8Chars => '8+ characters';
+
+  @override
+  String get ruleUppercase => 'Uppercase';
+
+  @override
+  String get ruleLowercase => 'Lowercase';
+
+  @override
+  String get ruleNumber => 'Number';
+
+  @override
+  String get addProfilePhoto => 'Add a profile photo';
+
+  @override
+  String get addProfilePhotoBody => 'Buyers and owners are more likely to reply when they can see who they\'re talking to.';
+
+  @override
+  String get continueLabel => 'Continue';
+
+  @override
+  String get resetPassword => 'Reset password';
+
+  @override
+  String get resetPasswordSub => 'We\'ll email you a verification code.';
+
+  @override
+  String get sendCode => 'Send code';
+
+  @override
+  String get codeSent => 'Code sent. Check your inbox.';
+
+  @override
+  String get enterCode => 'Enter the code';
+
+  @override
+  String get verifyCode => 'Verify code';
+
+  @override
+  String get didntGetIt => 'Didn\'t get it?';
+
+  @override
+  String get resendCode => 'Resend code';
+
+  @override
+  String get newPasswordTitle => 'New password';
+
+  @override
+  String get newPasswordSub => 'Choose a password you haven\'t used before.';
+
+  @override
+  String get confirmPassword => 'Confirm password';
+
+  @override
+  String get updatePassword => 'Update password';
+
+  @override
+  String get passwordsDontMatch => 'Passwords don\'t match';
+
+  @override
+  String get welcomeHeadline => 'Find a place\nto call home.';
+
+  @override
+  String get welcomeBody => 'Houses, apartments, villas, studios and offices for sale or rent across Algeria.';
+
+  @override
+  String get boostListing => 'Boost listing';
+
+  @override
+  String get boostIntro => 'Boosted listings appear in Sponsored on the Home screen and higher in search.';
+
+  @override
+  String get mostChosen => 'Most chosen';
+
+  @override
+  String daysCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days',
+      one: '1 day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get featuredOnHome => 'Featured placement on Home';
+
+  @override
+  String get boostedBadgeFeature => 'Boosted badge';
+
+  @override
+  String get checkout => 'Checkout';
+
+  @override
+  String get orderSummary => 'Order summary';
+
+  @override
+  String get planLabel => 'Plan';
+
+  @override
+  String get durationLabel => 'Duration';
+
+  @override
+  String get totalLabel => 'Total';
+
+  @override
+  String get payWith => 'Card details';
+
+  @override
+  String payAmount(String amount) {
+    return 'Pay $amount';
+  }
+
+  @override
+  String get boostedTitle => 'Your listing is boosted';
+
+  @override
+  String boostedBody(String title) {
+    return '$title now appears in Sponsored.';
+  }
+
+  @override
+  String get noPlansAvailable => 'No plans available right now.';
+
+  @override
+  String get securePaymentNote => 'Payments are processed securely.';
+
+  @override
+  String get pickListingToBoost => 'Pick a listing to boost';
+
+  @override
+  String get noListingsToBoost => 'Post a listing first, then boost it.';
+
+  @override
+  String get uploadFailed => 'Upload failed. Try again.';
+
+  @override
+  String planPriceDays(String price, String days) {
+    return '$price · $days';
+  }
 }

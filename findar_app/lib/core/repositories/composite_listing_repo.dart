@@ -126,6 +126,9 @@ class CompositeListingRepository implements ListingRepository {
     String? image,
     List<String>? additionalImages,
     bool? isOnline,
+    double? area,
+    double? latitude,
+    double? longitude,
   }) async {
     await _requireConnection('Edit listing');
 
@@ -142,6 +145,9 @@ class CompositeListingRepository implements ListingRepository {
       image: image,
       additionalImages: additionalImages,
       isOnline: isOnline,
+        area: area,
+        latitude: latitude,
+        longitude: longitude,
     );
   }
 

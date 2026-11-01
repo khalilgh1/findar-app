@@ -1,25 +1,25 @@
 {
   "@@locale": "en",
-  "appTitle": "FinDar",
-  "welcomeBack": "Welcome Back!",
-  "completeRegistration": "Complete Your Registration",
+  "appTitle": "Findar",
+  "welcomeBack": "Welcome back",
+  "completeRegistration": "Complete registration",
   "selectAccountType": "Select Account Type",
   "accountIndividual": "Individual",
   "accountAgency": "Agency",
-  "fullName": "Full Name",
+  "fullName": "Full name",
   "enterFullName": "Enter your full name",
-  "emailAddress": "Email Address",
+  "emailAddress": "Email address",
   "enterEmail": "Enter your Email Address",
-  "phoneNumber": "Phone Number",
+  "phoneNumber": "Phone number",
   "enterPhone": "Enter your phone number",
   "password": "Password",
   "enterPassword": "Enter your password",
-  "forgotPassword":"Forgot Password ?" ,
+  "forgotPassword": "Forgot password?",
   "ninLabel": "National Identification Number (NIN)",
   "enterNin": "Enter your NIN",
   "registerNow": "Register Now",
   "alreadyHaveAccount": "Already have an account?",
-  "login": "Login",
+  "login": "Log in",
   "dontHaveAccount": "Don't have an account?",
   "register": "Register",
   "welcome": "Welcome",
@@ -27,13 +27,13 @@
   "buy": "Buy",
   "sell": "Sell",
   "rent": "Rent",
-  "getStarted": "Get Started",
+  "getStarted": "Get started",
   "sponsoredProperties": "Sponsored Properties",
-  "recentListings": "Recent Listings",
-  "viewAll": "View All",
+  "recentListings": "Recent listings",
+  "viewAll": "View all",
   "exploreProperties": "Explore Properties",
-  "forSale": "For Sale",
-  "forRent": "For Rent",
+  "forSale": "For sale",
+  "forRent": "For rent",
   "newConstructions": "New Constructions",
   "house": "House",
   "apartment": "Apartment",
@@ -60,15 +60,15 @@
   "filter": "Filter",
   "filters": "Filters",
   "noPropertiesFound": "No properties found",
-  "pleaseTryAdjustingFilters": "Please try adjusting your search filters.",
+  "pleaseTryAdjustingFilters": "Try a different place or fewer filters.",
   "sortBy": "Sort by",
-  "priceLowToHigh": "Price: Low to High",
-  "priceHighToLow": "Price: High to Low",
+  "priceLowToHigh": "Price: low to high",
+  "priceHighToLow": "Price: high to low",
   "newest": "Newest",
   "mostPopular": "Most Popular",
-  "advancedSearch": "Advanced Search",
+  "advancedSearch": "Advanced search",
   "enterLocationHint": "Enter a city, zip code, or neighborhood",
-  "priceRange": "Price range",
+  "priceRange": "Price",
   "propertyType": "Property type",
   "buildingType": "Building Type",
   "bedsAndBaths": "Beds & Baths",
@@ -97,12 +97,12 @@
     }
   },
   "propertyTitle": "Property Title",
-  "examplePropertyTitleHint": "e.g. Spacious 3 Bedroom Apartment",
+  "examplePropertyTitleHint": "e.g. Villa with garden",
   "price": "Price",
   "examplePriceHint": "250 000",
   "exampleLocationHint": "e.g. 15 Rue Didouche Mourad, Algiers",
   "propertyDescriptionHint": "Describe the property details here...",
-  "verificationCode": "Verification Code",
+  "verificationCode": "Verification code",
   "getCode": "Get Code",
   "enterVerificationCodeHint": "Enter verification code",
   "enterNewPasswordHint": "Enter new password",
@@ -131,13 +131,13 @@
   "floors": "Floors",
   "rooms": "Rooms",
   "addImages": "Add Images",
-  "publishListing": "Publish Listing",
+  "publishListing": "Publish listing",
   "listingCreatedSuccessfully": "Listing Created Successfully!",
   "removedFromSaved": "Removed from saved",
   "savedListings": "Saved Listings",
   "noSavedListings": "No saved listings yet",
   "startExploring": "Start exploring properties to save your favorites",
-  "myListings": "My Listings",
+  "myListings": "My listings",
   "removeListingTitle": "Remove Listing",
   "removeListingConfirm": "Are you sure you want to remove \"{title}\"?",
   "@removeListingConfirm": {
@@ -147,17 +147,17 @@
       }
     }
   },
-  "listingRemoved": "Listing removed",
+  "listingRemoved": "Listing deleted",
   "edit": "Edit",
   "delete": "Delete",
   "profile": "Profile",
   "listings": "Listings",
   "addNew": "Add New",
-  "viewListing": "View Listing",
-  "editProfile": "Edit Profile",
+  "viewListing": "View listing",
+  "editProfile": "Edit profile",
   "accountSettings": "Account Settings",
-  "logout": "Logout",
-  "profilePictureUpdated": "Profile picture updated successfully",
+  "logout": "Log out",
+  "profilePictureUpdated": "Profile photo updated",
   "upload": "Upload",
   "skip": "Skip",
   "settings": "Settings",
@@ -166,12 +166,12 @@
   "english": "English",
   "arabic": "Arabic",
   "french": "French",
-  "contactUs": "Contact Us",
+  "contactUs": "Contact us",
   "contactPhone": "+1 (234) 567-890",
   "twitter": "Twitter",
   "facebook": "Facebook",
   "instagram": "Instagram",
-  "darkMode": "Dark Mode",
+  "darkMode": "Dark mode",
   "notifications": "Notifications",
   "privacy": "Privacy",
   "termsOfService": "Terms of Service",
@@ -180,7 +180,7 @@
   "email": "Email",
   "cancel": "Cancel",
   "confirm": "Confirm",
-  "saveChanges": "Save Changes",
+  "saveChanges": "Save changes",
   "apply": "Apply",
   "close": "Close",
   "next": "Next",
@@ -212,46 +212,17 @@
   "phoneTooShort": "Phone number must be at least 10 digits",
   "accountTypeRequired": "Please select account type",
   "home": "Home",
-  "listings": "Listings",
   "saved": "Saved",
   "search": "Search",
-  "searchHint": "Search properties...",
+  "searchHint": "Search",
   "noResults": "No results found",
   "createNewListing": "Create New Listing",
-  "propertyTitle": "Property Title",
-  "description": "Description",
-  "classification": "Classification",
-  "price": "Price",
-  "propertyType": "Property Type",
-  "floors": "Floors",
-  "rooms": "Rooms",
-  "bedrooms": "Bedrooms",
-  "location": "Location",
   "photos": "Photos",
   "addPhotos": "Add Photos",
   "status": "Status",
-  "createListing": "Create Listing",
-  "profile": "Profile",
-  "edit": "Edit",
-  "addNew": "Add New",
-  "logout": "Logout",
-  "searchResults": "Search Results",
-  "sort": "Sort",
-  "filter": "Filter",
-  "noPropertiesFound": "No properties found",
-  "pleaseTryAdjustingFilters": "Please try adjusting your search filters",
-  "online": "Online",
-  "offline": "Offline",
-  "similarProperties": "Similar Properties",
-  "listedBy": "Listed by",
-  "viewListing": "View Listing",
-  "phoneNumber": "Phone Number",
-  "removedFromSaved": "Removed from saved",
   "undo": "Undo",
-  "savedListings": "Saved Listings",
   "noSavedProperties": "No saved properties",
   "savePropertiesToViewHere": "Save properties to view them here",
-  "myListings": "My Listings",
   "noListingsMessage": "No {tab} listings",
   "@noListingsMessage": {
     "placeholders": {
@@ -260,25 +231,14 @@
       }
     }
   },
-  "addFirstPropertyListing": "Add your first property listing",
-  "editProfile": "Edit Profile",
+  "addFirstPropertyListing": "Post your first property in a minute.",
   "chooseSponsorshipPlan": "Choose Sponsorship Plan",
   "selectPlanToBoostProperty": "Select a plan to boost your property",
-  "continueToPayment": "Continue to Payment",
+  "continueToPayment": "Continue to payment",
   "paymentConfirmation": "Payment Confirmation",
   "propertyBoostedSuccessfully": "Property boosted successfully!",
   "payNow": "Pay Now",
-  "reset": "Reset",
-  "showResults": "Show results",
-  "bedrooms": "Bedrooms",
-  "bathrooms": "Bathrooms",
-  "privateOwner": "Private Owner",
-  "realEstateAgent": "Real Estate Agent",
   "locationHint": "Enter a city, zip code, or neighborhood",
-  "propertyType": "Property type",
-  "forSale": "For Sale",
-  "forRent": "For Rent",
-  "floors": "Floors",
   "bedroomsCount": "{count} Bedrooms",
   "@bedroomsCount": {
     "placeholders": {
@@ -295,13 +255,13 @@
       }
     }
   },
-  "basicSponsor": "Basic Sponsor",
-  "premiumSponsor": "Premium Sponsor",
-  "agencySponsorPlan": "Agency Sponsor Plan",
+  "basicSponsor": "Basic",
+  "premiumSponsor": "Premium",
+  "agencySponsorPlan": "Agency",
   "featuredPlacement": "Featured placement",
   "priorityInSearch": "Priority in search results",
   "basicAnalytics": "Basic analytics",
-  "topPriority": "Top priority in search results",
+  "topPriority": "Top priority in search",
   "advancedAnalytics": "Advanced analytics",
   "premiumAnalyticsDashboard": "Premium analytics dashboard",
   "dedicatedSupport": "Dedicated support",
@@ -325,20 +285,332 @@
   "validateBedroomsEmpty": "Please enter number of bedrooms",
   "reportProperty": "Report Property",
   "selectReportReason": "Please select a reason for reporting this property",
-  "inaccurateInformation": "Inaccurate Information",
-  "fraudulentListing": "Fraudulent Listing",
-  "inappropriateContent": "Inappropriate Content",
-  "propertyNotAvailable": "Property Not Available",
-  "propertyReportedThankYou": "Property reported, thank you!",
+  "inaccurateInformation": "Inaccurate information",
+  "fraudulentListing": "Fraudulent listing",
+  "inappropriateContent": "Inappropriate content",
+  "propertyNotAvailable": "No longer available",
+  "propertyReportedThankYou": "Thanks, we'll review this listing.",
   "helpMaintainQuality": "Help us maintain quality listings by reporting issues.",
   "quickSuggestions": "Quick suggestions:",
   "describeIssue": "Describe the issue:",
   "provideDetails": "Please provide details about the issue...",
-  "sendReport": "Send Report",
-  "pleaseSelectOrDescribe": "Please select or describe the issue before submitting.",
+  "sendReport": "Send report",
+  "pleaseSelectOrDescribe": "Pick a reason or describe the issue.",
   "sessionExpired": "Your session has expired. Please log in again.",
   "listingNotFound": "This listing is no longer available.",
-  "areaSqm": "Area (m²)",
-  "signInWithGoogle": "Sign in with Google",
-  "actionNeedsInternet": "You're offline. Connect to the internet and try again."
+  "areaSqm": "Area",
+  "signInWithGoogle": "Continue with Google",
+  "actionNeedsInternet": "You're offline. Connect to the internet and try again.",
+  "currencyDa": "DA",
+  "perMonth": "/ month",
+  "bdShort": "{count} bd",
+  "@bdShort": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "baShort": "{count} ba",
+  "@baShort": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noPhoto": "No photo",
+  "removeFromSaved": "Remove from saved",
+  "savedToList": "Saved to your list",
+  "back": "Back",
+  "orLabel": "or",
+  "increase": "Increase",
+  "decrease": "Decrease",
+  "seeAll": "See all",
+  "tryAgain": "Try again",
+  "youreOffline": "You're offline",
+  "offlineBannerBody": "Showing saved results from your last visit.",
+  "couldntLoadListings": "Couldn't load listings",
+  "couldntLoadBody": "The server didn't respond. Try again in a moment.",
+  "listingUnavailableOffline": "This listing isn't available offline",
+  "listingUnavailableOfflineBody": "Only your own listings and saved properties open offline.",
+  "browseListings": "Browse listings",
+  "postTab": "Post",
+  "helloName": "Hello, {name}",
+  "@helloName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "hello": "Hello",
+  "heroTitle": "Find your next place",
+  "searchCityHint": "Search city or district",
+  "listYourProperty": "List your property",
+  "listYourPropertySub": "Sell or rent it out on Findar",
+  "browseByType": "Browse by type",
+  "sponsored": "Sponsored",
+  "noRecentListings": "No listings yet",
+  "noRecentListingsBody": "New properties will show up here.",
+  "tagHydra": "#Hydra",
+  "tagForRent": "#ForRent",
+  "tagVilla": "#Villa",
+  "tagOran": "#Oran",
+  "tagF3": "#F3",
+  "anyLabel": "Any",
+  "pricePerMonth": "Price per month",
+  "minimumArea": "Minimum area",
+  "anyone": "Anyone",
+  "ownerLabel": "Owner",
+  "resultsCount": "{count, plural, =0{No results} =1{1 result} other{{count} results}}",
+  "@resultsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "filtersActive": "Filters, {count} active",
+  "@filtersActive": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "removeFilter": "Remove {label}",
+  "@removeFilter": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "nearest": "Nearest",
+  "bedsMin": "{count}+ bd",
+  "@bedsMin": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bathsMin": "{count}+ ba",
+  "@bathsMin": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "areaMin": "{count}+ m²",
+  "@areaMin": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "aboutProperty": "About this property",
+  "readMore": "Read more",
+  "showLess": "Show less",
+  "viewProfile": "View profile",
+  "reportThisListing": "Report this listing",
+  "listedDaysAgo": "{count, plural, =0{Listed today} =1{Listed yesterday} other{Listed {count} days ago}}",
+  "@listedDaysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "areaLabel": "Area",
+  "call": "Call",
+  "sendSms": "Send SMS",
+  "message": "Message",
+  "individualLabel": "Individual",
+  "noPhoneNumber": "No phone number on this listing",
+  "photoOf": "Photo {index} of {total}",
+  "@photoOf": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "reportPrivate": "Reports are private. They help us keep listings accurate and safe.",
+  "detailsOptional": "Details (optional)",
+  "tellUsWhatsWrong": "Tell us what's wrong",
+  "propertiesCount": "{count, plural, =0{No properties} =1{1 property} other{{count} properties}}",
+  "@propertiesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noSavedYet": "No saved properties yet",
+  "noSavedBody": "Tap the bookmark on any listing to keep it here.",
+  "onlineCount": "Online · {count}",
+  "@onlineCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "offlineCount": "Offline · {count}",
+  "@offlineCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "makeOffline": "Make offline",
+  "makeOnline": "Make online",
+  "newListing": "New listing",
+  "actionsFor": "Actions for {title}",
+  "@actionsFor": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteListingTitle": "Delete this listing?",
+  "deleteListingBody": "\"{title}\" will be removed for good.",
+  "@deleteListingBody": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "listingStatusUpdated": "Listing status updated",
+  "noOnlineListings": "No online listings",
+  "noOfflineListings": "No offline listings",
+  "titleLabel": "Title",
+  "listingType": "Listing type",
+  "addLabel": "Add",
+  "coverLabel": "Cover",
+  "photosHint": "The first photo is the cover.",
+  "removePhoto": "Remove photo",
+  "visibleToBuyers": "Visible to buyers",
+  "visibleToBuyersSub": "Turn off to save as offline",
+  "searchAddress": "Search an address",
+  "describeHint": "Describe the property, the neighbourhood, what's included…",
+  "deleteListing": "Delete listing",
+  "editListingTitle": "Edit listing",
+  "addAtLeastOnePhoto": "Add at least one photo.",
+  "individualAccount": "Individual account",
+  "agencyAccount": "Agency",
+  "boostAListing": "Boost a listing",
+  "boostAListingSub": "Show up in Sponsored and higher in search.",
+  "seePlans": "See plans",
+  "phoneLabel": "Phone",
+  "changePhoto": "Change photo",
+  "listingsCount": "Listings · {count}",
+  "@listingsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noListingsYet": "No listings yet",
+  "removePhotoAction": "Remove photo",
+  "chooseFromGallery": "Choose from gallery",
+  "takePhoto": "Take a photo",
+  "darkModeSub": "Dark colours across the app",
+  "callSupport": "Call support",
+  "emailSupport": "Email support",
+  "account": "Account",
+  "logoutConfirm": "You'll need to log in again to see your listings.",
+  "loginSubtitle": "Log in to save listings and contact owners.",
+  "createAccount": "Create account",
+  "continueWithGoogle": "Continue with Google",
+  "showPassword": "Show password",
+  "hidePassword": "Hide password",
+  "accountType": "Account type",
+  "individualSub": "Buying, renting or selling my own place",
+  "agencySub": "Listing properties for clients",
+  "rule8Chars": "8+ characters",
+  "ruleUppercase": "Uppercase",
+  "ruleLowercase": "Lowercase",
+  "ruleNumber": "Number",
+  "addProfilePhoto": "Add a profile photo",
+  "addProfilePhotoBody": "Buyers and owners are more likely to reply when they can see who they're talking to.",
+  "continueLabel": "Continue",
+  "resetPassword": "Reset password",
+  "resetPasswordSub": "We'll email you a verification code.",
+  "sendCode": "Send code",
+  "codeSent": "Code sent. Check your inbox.",
+  "enterCode": "Enter the code",
+  "verifyCode": "Verify code",
+  "didntGetIt": "Didn't get it?",
+  "resendCode": "Resend code",
+  "newPasswordTitle": "New password",
+  "newPasswordSub": "Choose a password you haven't used before.",
+  "confirmPassword": "Confirm password",
+  "updatePassword": "Update password",
+  "passwordsDontMatch": "Passwords don't match",
+  "welcomeHeadline": "Find a place\nto call home.",
+  "welcomeBody": "Houses, apartments, villas, studios and offices for sale or rent across Algeria.",
+  "boostListing": "Boost listing",
+  "boostIntro": "Boosted listings appear in Sponsored on the Home screen and higher in search.",
+  "mostChosen": "Most chosen",
+  "daysCount": "{count, plural, =1{1 day} other{{count} days}}",
+  "@daysCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "featuredOnHome": "Featured placement on Home",
+  "boostedBadgeFeature": "Boosted badge",
+  "checkout": "Checkout",
+  "orderSummary": "Order summary",
+  "planLabel": "Plan",
+  "durationLabel": "Duration",
+  "totalLabel": "Total",
+  "payWith": "Card details",
+  "payAmount": "Pay {amount}",
+  "@payAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "boostedTitle": "Your listing is boosted",
+  "boostedBody": "{title} now appears in Sponsored.",
+  "@boostedBody": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "noPlansAvailable": "No plans available right now.",
+  "securePaymentNote": "Payments are processed securely.",
+  "pickListingToBoost": "Pick a listing to boost",
+  "noListingsToBoost": "Post a listing first, then boost it.",
+  "uploadFailed": "Upload failed. Try again.",
+  "planPriceDays": "{price} · {days}",
+  "@planPriceDays": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      },
+      "days": {
+        "type": "String"
+      }
+    }
+  }
 }

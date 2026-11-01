@@ -1,3 +1,5 @@
+import 'package:findar/core/models/property_listing_model.dart';
+import 'package:findar/core/repositories/remote_listing_repo.dart';
 import 'package:findar/core/di/service_locator.dart';
 import 'package:findar/core/models/return_result.dart';
 import 'package:findar/core/services/findar_api_service.dart';
@@ -96,6 +98,11 @@ class ProfileCubit extends Cubit<Map<String, dynamic>> {
             'accountType': user['account_type'] ?? user['accountType'],
             'credits': user['credits'] ?? 0,
             'listings': mappedListings,
+            // Full models for the redesigned grid (skips unparsable rows).
+            'listingModels': [
+              for (final l in listings)
+                if (l is Map) _tryParse(l),
+            ].whereType<PropertyListing>().toList(),
           },
           'state': 'done',
           'message': 'User profile loaded',
@@ -184,6 +191,14 @@ class ProfileCubit extends Cubit<Map<String, dynamic>> {
         'state': 'error',
         'message': 'Error logging out: ${e.toString()}',
       });
+    }
+  }
+
+  static PropertyListing? _tryParse(Map raw) {
+    try {
+      return RemoteListingRepository.parseListing(raw);
+    } catch (_) {
+      return null;
     }
   }
 }

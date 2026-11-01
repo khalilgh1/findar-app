@@ -161,6 +161,9 @@ class RemoteListingRepository implements ListingRepository {
     String? image,
     List<String>? additionalImages,
     bool? isOnline,
+    double? area,
+    double? latitude,
+    double? longitude,
   }) async {
     print('🔍 Editing listing: $id');
 
@@ -212,6 +215,9 @@ class RemoteListingRepository implements ListingRepository {
       if (bedrooms != null) body['bedrooms'] = bedrooms;
       if (bathrooms != null) body['bathrooms'] = bathrooms;
       if (isOnline != null) body['active'] = isOnline;
+      if (area != null) body['area'] = area;
+      if (latitude != null) body['latitude'] = latitude;
+      if (longitude != null) body['longitude'] = longitude;
 
       // Map classification to backend values
       if (classification != null) {

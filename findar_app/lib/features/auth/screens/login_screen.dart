@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:findar/logic/cubits/auth_cubit.dart';
-import 'package:findar/core/widgets/progress_button.dart';
-import 'package:findar/l10n/app_localizations.dart';
 
+import 'package:findar/core/motion/motion.dart';
+import 'package:findar/core/widgets/f_icon.dart';
+import 'package:findar/core/widgets/ui.dart';
+import 'package:findar/features/auth/widgets/auth_scaffold.dart';
+import 'package:findar/l10n/app_localizations.dart';
+import 'package:findar/logic/cubits/auth_cubit.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -13,260 +16,135 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  bool _obscurePassword = true;
+  final _formKey = GlobalKey<FormState>();
+  final _email = TextEditingController();
+  final _password = TextEditingController();
+  bool _hidden = true;
+  bool _google = false;
+  int _shake = 0;
+
+  @override
+  void dispose() {
+    _email.dispose();
+    _password.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    FocusScope.of(context).unfocus();
+    if (!_formKey.currentState!.validate()) {
+      setState(() => _shake++);
+      return;
+    }
+    _google = false;
+    context
+        .read<AuthCubit>()
+        .login(email: _email.text.trim(), password: _password.text);
+  }
 
   @override
   Widget build(BuildContext context) {
-  final theme = Theme.of(context);
-  var l10n = AppLocalizations.of(context)!;
-  
-  /// Validate email format - defined here to access l10n
-  String? validateEmail(String? email) {
-    if (email == null || email.isEmpty) {
-      return l10n.emailRequired;
-    }
-    final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
-    if (!emailRegex.hasMatch(email)) {
-      return l10n.invalidEmail;
-    }
-    return null;
-  }
+    final l10n = AppLocalizations.of(context)!;
 
-  String? validatePassword(String? password) {
-    if (password == null || password.isEmpty) {
-      return l10n.passwordRequired;
-    }
-    return null;
-  }
-    return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                const SizedBox(height: 120),
-                Text(
-                  'FinDAR',
-                  style: TextStyle(
-                    color: theme.colorScheme.primary,
-                    fontSize: 60,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                 Text(
-                  l10n.welcomeBack,
-                  style: TextStyle(
-                    color: Theme.of( context).colorScheme.onSurface,
-                    fontSize: 25,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 40),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    l10n.emailAddress,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.onSurface,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 6),
-                TextFormField(
-                  controller: _emailController,
-                  validator: validateEmail,
-                  decoration: InputDecoration(
-                    hintText: l10n.enterEmail,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    errorBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Colors.red),
-                    ),
-                    focusedErrorBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Colors.red, width: 2),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    l10n.password,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.onSurface,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 6),
-                TextFormField(
-                  controller: _passwordController,
-                  obscureText: _obscurePassword,
-                  validator: validatePassword,
-                  decoration: InputDecoration(
-                    hintText: l10n.enterPassword,
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                        color: Colors.grey,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _obscurePassword = !_obscurePassword;
-                        });
-                      },
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    errorBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Colors.red),
-                    ),
-                    focusedErrorBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Colors.red, width: 2),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/forgot-password');
-                    },
-                    child: Text(
-                      l10n.forgotPassword,
-                      style: TextStyle(
-                        color: theme.colorScheme.primary,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                BlocConsumer<AuthCubit, Map<String, dynamic>>(
-                  listener: (context, state) {
-                    if (state['state'] == 'done') {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(l10n.success),
-                          backgroundColor: Colors.green,
-                          duration: const Duration(seconds: 2),
-                          behavior: SnackBarBehavior.floating,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          margin: const EdgeInsets.all(16),
-                        ),
-                      );
-                      Navigator.pushNamedAndRemoveUntil(
-                          context, '/home', (route) => false);
-                    }
-                    if (state['state'] == 'error' && state['message'] != null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(state['message'] as String),
-                          backgroundColor: Colors.red,
-                          duration: const Duration(seconds: 2),
-                          behavior: SnackBarBehavior.floating,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          margin: const EdgeInsets.all(16),
-                        ),
-                      );
-                      // Clear error state after showing message
-                      Future.delayed(const Duration(milliseconds: 100), () {
-                        if (context.mounted) {
-                          context.read<AuthCubit>().clearError();
-                        }
-                      });
-                    }
-                  },
-                  builder: (context, state) {
-                    final isLoading = state['state'] == 'loading';
-
-                    return ProgressButton(
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          context.read<AuthCubit>().login(
-                            email: _emailController.text,
-                            password: _passwordController.text,
-                          );
-                        }
-                      },
-                      label: l10n.login,
-                      isLoading: isLoading,
-                      backgroundColor: theme.colorScheme.primary,
-                      textColor: Colors.white,
-                    );
-                  },
-                ),
-                const SizedBox(height: 12),
-                // Google Sign-In Button
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    // Success/error navigation is handled by the AuthCubit
-                    // listener above, same as email login.
-                    onPressed: () =>
-                        context.read<AuthCubit>().loginWithGoogle(),
-                    icon: const Icon(Icons.login),
-                    label: Text(l10n.signInWithGoogle),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      side: BorderSide(color: theme.colorScheme.primary),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      l10n.dontHaveAccount,
-                      style: TextStyle(color:theme.colorScheme.onSurface, fontSize: 14),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pushNamed(context, '/register');
-                      },
-                      child: Text(
-                        l10n.register,
-                        style: TextStyle(
-                          color: theme.colorScheme.primary,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+    return BlocConsumer<AuthCubit, Map<String, dynamic>>(
+      listener: (context, state) {
+        if (state['state'] == 'done') {
+          // No success snackbar: it used to sit over the tab bar and
+          // swallow the first tap.
+          Navigator.pushNamedAndRemoveUntil(context, '/home', (r) => false);
+        }
+        if (state['state'] == 'error' && state['message'] != null) {
+          setState(() => _shake++);
+          showAppSnack(context, state['message'] as String);
+          Future.delayed(const Duration(milliseconds: 100), () {
+            if (context.mounted) context.read<AuthCubit>().clearError();
+          });
+        }
+      },
+      builder: (context, state) {
+        final loading = state['state'] == 'loading';
+        return AuthScaffold(
+          formKey: _formKey,
+          children: [
+            const Entrance(child: AuthArt.login),
+            const SizedBox(height: 18),
+            ScreenTitle(l10n.welcomeBack, subtitle: l10n.loginSubtitle),
+            const SizedBox(height: 18),
+            AppField(
+              fieldKey: const Key('login-email'),
+              label: l10n.emailAddress,
+              controller: _email,
+              icon: FIcons.mail,
+              keyboardType: TextInputType.emailAddress,
+              textInputAction: TextInputAction.next,
+              autofillHints: const [AutofillHints.email],
+              validator: (v) {
+                final t = v?.trim() ?? '';
+                if (t.isEmpty) return l10n.emailRequired;
+                if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]{2,}$').hasMatch(t)) {
+                  return l10n.invalidEmail;
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 18),
+            AppField(
+              fieldKey: const Key('login-password'),
+              label: l10n.password,
+              controller: _password,
+              icon: FIcons.lock,
+              obscure: _hidden,
+              textInputAction: TextInputAction.done,
+              autofillHints: const [AutofillHints.password],
+              onSubmitted: (_) => _submit(),
+              trailing: EyeToggle(
+                  hidden: _hidden,
+                  onTap: () => setState(() => _hidden = !_hidden)),
+              validator: (v) =>
+                  (v == null || v.isEmpty) ? l10n.passwordRequired : null,
+            ),
+            Align(
+              alignment: AlignmentDirectional.centerEnd,
+              child: TextButton(
+                onPressed: () =>
+                    Navigator.pushNamed(context, '/forgot-password'),
+                child: Text(l10n.forgotPassword),
               ),
             ),
-          ),
-        ),
-      ),
+            const SizedBox(height: 4),
+            ShakeOnChange(
+              trigger: _shake == 0 ? null : _shake,
+              child: FButton(
+                key: const Key('login-submit'),
+                label: l10n.login,
+                loading: loading && !_google,
+                onPressed: loading ? null : _submit,
+              ),
+            ),
+            const SizedBox(height: 18),
+            const OrDivider(),
+            const SizedBox(height: 18),
+            FButton(
+              label: l10n.continueWithGoogle,
+              kind: FButtonKind.secondary,
+              leading: const GoogleMark(),
+              loading: loading && _google,
+              onPressed: loading
+                  ? null
+                  : () {
+                      _google = true;
+                      context.read<AuthCubit>().loginWithGoogle();
+                    },
+            ),
+            const SizedBox(height: 12),
+            AuthSwitchLine(
+              text: l10n.dontHaveAccount,
+              action: l10n.register,
+              onTap: () => Navigator.pushNamed(context, '/register'),
+            ),
+          ],
+        );
+      },
     );
   }
 }

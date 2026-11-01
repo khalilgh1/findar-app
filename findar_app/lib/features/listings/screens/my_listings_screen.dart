@@ -1,27 +1,21 @@
-import 'package:findar/logic/cubits/property_details_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:findar/logic/cubits/home/recent_listings.dart';
-import 'package:findar/logic/cubits/my_listings_cubit.dart';
-import 'package:findar/core/models/property_listing_model.dart';
-import 'package:findar/l10n/app_localizations.dart';
-import 'package:findar/core/widgets/property_card.dart';
-import 'package:findar/core/widgets/segment_control.dart';
-import 'package:findar/core/widgets/progress_button.dart';
-import 'package:findar/core/widgets/build_bottom_bar.dart';
-import 'package:findar/core/widgets/confirmation_dialog.dart';
-import 'package:findar/core/widgets/no_internet_widget.dart';
-import 'package:findar/core/widgets/shimmer_loading.dart';
 
-/// Helper function to check if an error message indicates a network issue
-bool _isNetworkError(String? message) {
-  if (message == null) return false;
-  final lowerMessage = message.toLowerCase();
-  return lowerMessage.contains('internet') ||
-      lowerMessage.contains('offline') ||
-      lowerMessage.contains('network') ||
-      lowerMessage.contains('connection');
-}
+import 'package:findar/core/models/property_listing_model.dart';
+import 'package:findar/core/motion/motion.dart';
+import 'package:findar/core/theme/findar_tokens.dart';
+import 'package:findar/core/widgets/decor/decor.dart';
+import 'package:findar/core/widgets/f_icon.dart';
+import 'package:findar/core/widgets/floating_tab_bar.dart';
+import 'package:findar/core/widgets/listing_widgets.dart';
+import 'package:findar/core/widgets/ui.dart';
+import 'package:findar/features/create_listing/open_create_listing.dart';
+import 'package:findar/l10n/app_localizations.dart';
+import 'package:findar/logic/cubits/my_listings_cubit.dart';
+import 'package:findar/logic/cubits/property_details_cubit.dart';
+
+enum _Action { edit, boost, toggle, delete }
+
 class MyListingsScreen extends StatefulWidget {
   const MyListingsScreen({super.key});
 
@@ -30,270 +24,269 @@ class MyListingsScreen extends StatefulWidget {
 }
 
 class _MyListingsScreenState extends State<MyListingsScreen> {
-  String _selectedTab = 'Online';
+  bool _online = true;
+  bool _entered = false;
+
+  /// Listings being toggled (dimmed) or deleted (collapsing).
+  final Set<int> _dimmed = {};
+  final Set<int> _removing = {};
 
   @override
   void initState() {
     super.initState();
-    // Fetch listings when screen loads
     context.read<MyListingsCubit>().fetchMyListings(forceRefresh: true);
+    Future.delayed(const Duration(milliseconds: 900), () => _entered = true);
+  }
+
+  Future<void> _onAction(_Action a, PropertyListing l) async {
+    final l10n = AppLocalizations.of(context)!;
+    final cubit = context.read<MyListingsCubit>();
+    switch (a) {
+      case _Action.edit:
+        Navigator.pushNamed(context, '/edit-listing', arguments: l);
+      case _Action.boost:
+        Navigator.pushNamed(context, '/sponsorship-plans', arguments: l);
+      case _Action.toggle:
+        setState(() => _dimmed.add(l.id));
+        final r = await cubit.toggleActiveListing(l.id);
+        if (!mounted) return;
+        context.read<PropertyDetailsCubit>().invalidateCache(l.id);
+        setState(() => _dimmed.remove(l.id));
+        showAppSnack(context, r.state ? l10n.listingStatusUpdated : r.message);
+      case _Action.delete:
+        final ok = await _confirmDelete(l);
+        if (ok != true || !mounted) return;
+        setState(() => _removing.add(l.id));
+        await Future.delayed(const Duration(milliseconds: 220));
+        final r = await cubit.deleteListing(l.id);
+        if (!mounted) return;
+        setState(() => _removing.remove(l.id));
+        showAppSnack(context, r.state ? l10n.listingRemoved : r.message);
+    }
+  }
+
+  Future<bool?> _confirmDelete(PropertyListing l) {
+    final l10n = AppLocalizations.of(context)!;
+    final c = context.fc;
+    return showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.deleteListingTitle),
+        content: Text(l10n.deleteListingBody(l.title)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            style: TextButton.styleFrom(foregroundColor: c.ink),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: TextButton.styleFrom(foregroundColor: c.red),
+            child: Text(l10n.delete),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final c = context.fc;
+    final l10n = AppLocalizations.of(context)!;
+    final top = MediaQuery.paddingOf(context).top;
 
-    return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      appBar: AppBar(
-        scrolledUnderElevation: 0,
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Builder(
-          builder: (context) {
-            var l10n = AppLocalizations.of(context)!;
-            return Text(
-              l10n.myListings,
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+    return TabScaffold(
+      index: 2,
+      body: BlocBuilder<MyListingsCubit, Map<String, dynamic>>(
+        builder: (context, state) {
+          final cubit = context.read<MyListingsCubit>();
+          final status = state['state'];
+          final online = cubit.onlineListings;
+          final offline = cubit.offlineListings;
+          final list = _online ? online : offline;
+          final nothingYet = online.isEmpty && offline.isEmpty;
+
+          Widget content;
+          if ((status == 'loading' || status == 'initial') && nothingYet) {
+            content = const SliverToBoxAdapter(child: SkeletonList(count: 3));
+          } else if (status == 'error' && nothingYet) {
+            final msg = state['message'] as String?;
+            void retry() => cubit.fetchMyListings(forceRefresh: true);
+            content = SliverToBoxAdapter(
+              child: isNetworkError(msg)
+                  ? OfflineBanner(onRetry: retry)
+                  : ErrorState(onRetry: retry),
+            );
+          } else if (list.isEmpty) {
+            content = SliverToBoxAdapter(
+              child: StateMessage(
+                icon: FIcons.listings,
+                title: _online ? l10n.noOnlineListings : l10n.noOfflineListings,
+                body: l10n.addFirstPropertyListing,
+                actionLabel: l10n.newListing,
+                actionIcon: FIcons.plus,
+                onAction: () => openCreateListing(context),
               ),
             );
-          },
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(
-              Icons.settings_outlined,
-              color: Theme.of(context).colorScheme.onSurface,
-              size: 25,
-            ),
-            onPressed: () {
-              Navigator.pushNamed(context, '/settings');
-              // Handle settings
-            },
-          ),
-        ],
-      ),
-      body: Column(
-        // Color this column
-        children: [
-          // Segmented Control
-          Container(
-            color: Theme.of(context).colorScheme.surface,
-            padding: EdgeInsets.all(15),
-            child: SegmentedControl(
-              inactiveColor: const Color.fromARGB(255, 87, 71, 71),
-              options: const ['Online', 'Offline'],
-              initialValue: _selectedTab,
-              activeColor: Theme.of(context).colorScheme.primary,
-              onChanged: (value) {
-                setState(() {
-                  _selectedTab = value;
-                });
-              },
-            ),
-          ),
-          Divider(
-            height: 1,
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.2),
-          ),
-          // Listings
-          Expanded(
-            child: BlocBuilder<MyListingsCubit, Map<String, dynamic>>(
-              builder: (context, state) {
-                if (state['state'] == 'loading') {
-                  return ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: 4,
-                    itemBuilder: (context, index) => Padding(
-                      padding: const EdgeInsets.only(bottom: 16),
-                      child: const PropertyGridCardSkeleton(),
-                    ),
-                  );
-                }
-
-                if (state['state'] == 'error') {
-                  final errorMessage = state['message'] as String?;
-
-                  // My listings should work offline from local cache
-                  // But if there's a network error, show appropriate message
-                  if (_isNetworkError(errorMessage)) {
-                    return NoInternetWidget(
-                      title: 'Your Listings Available Offline',
-                      message:
-                          'Viewing your listings from local storage. Some actions may be unavailable until you reconnect.',
-                      onRetry: () {
-                        context.read<MyListingsCubit>().fetchMyListings(forceRefresh: true);
-                      },
-                    );
-                  }
-
-                  return Builder(
-                    builder: (context) {
-                      final l10n = AppLocalizations.of(context)!;
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text('Error: ${errorMessage ?? 'Unknown error'}'),
-                            SizedBox(height: 16),
-                            ProgressButton(
-                              label: l10n.retry,
-                              backgroundColor:
-                                  Theme.of(context).colorScheme.primary,
-                              textColor:
-                                  Theme.of(context).colorScheme.onPrimary,
-                              onPressed: () {
-                                context
-                                    .read<MyListingsCubit>()
-                                    .fetchMyListings(forceRefresh: true);
-                              },
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  );
-                }
-
-                // Use cubit getters for filtered listings
-                final cubit = context.read<MyListingsCubit>();
-                final listings = _selectedTab == 'Online'
-                    ? cubit.onlineListings
-                    : cubit.offlineListings;
-
-                if (listings.isEmpty) {
-                  return Builder(
-                    builder: (context) {
-                      final l10n = AppLocalizations.of(context)!;
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.home_outlined,
-                              size: 60,
-                              color: Colors.grey[400],
-                            ),
-                            SizedBox(height: 30),
-                            Text(
-                              l10n.noListingsMessage(_selectedTab),
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.grey[700],
-                              ),
-                            ),
-                            SizedBox(height: 8),
-                            Text(
-                              l10n.addFirstPropertyListing,
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey[600],
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  );
-                }
-
-                return ListView.builder(
-                  padding: EdgeInsets.only(top: 8.0, bottom: 80.0),
-                  itemCount: listings.length,
-                  itemBuilder: (context, index) {
-                    final listing = listings[index];
-                    return PropertyListingCard(
-                      listing: listing,
-                      isSaved: false,
-                      showMenu: true,
-                      onEdit: () => _handleEdit(listing),
-                      onRemove: () => _handleRemove(listing),
-                      onToggleStatus: () => _handleToggleStatus(listing),
-                      menuToggleText: _selectedTab == 'Online'
-                          ? 'Make Offline'
-                          : 'Make Online',
-                      showBoostButton: true,
-                      onBoost: () => _handleBoost(listing),
-                      onTap: () {
-                        context
-                            .read<PropertyDetailsCubit>()
-                            .fetchPropertyDetails(
-                              listing.id,
-                            );
-                        Navigator.pushNamed(context, '/property-details');
-                      },
-                    );
-                  },
+          } else {
+            content = SliverList.separated(
+              itemCount: list.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 14),
+              itemBuilder: (context, i) {
+                final l = list[i];
+                return Entrance(
+                  key: ValueKey(l.id),
+                  index: i,
+                  play: !_entered,
+                  child: AnimatedSize(
+                    duration: const Duration(milliseconds: 220),
+                    curve: Curves.easeInOut,
+                    child: _removing.contains(l.id)
+                        ? const SizedBox(width: double.infinity)
+                        : AnimatedOpacity(
+                            duration: Motion.short,
+                            opacity: _dimmed.contains(l.id) ? 0.4 : 1,
+                            child: _MyListingCard(
+                                listing: l, onAction: (a) => _onAction(a, l)),
+                          ),
+                  ),
                 );
               },
+            );
+          }
+
+          return Stack(children: [
+            const SoftTop(height: 200),
+            RefreshIndicator(
+              color: c.accent,
+              edgeOffset: top,
+              onRefresh: () => cubit.fetchMyListings(forceRefresh: true),
+              child: CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: Stack(children: [
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(20, top + 24, 20, 16),
+                        child: Column(children: [
+                          Row(children: [
+                            Expanded(child: ScreenTitle(l10n.myListings)),
+                            CircleIconButton(
+                              icon: FIcons.plus,
+                              label: l10n.newListing,
+                              size: 48,
+                              iconSize: 22,
+                              border: false,
+                              background: c.btn,
+                              foreground: c.btnText,
+                              onPressed: () => openCreateListing(context),
+                            ),
+                          ]),
+                          const SizedBox(height: 16),
+                          PillSegmented<bool>(
+                            values: const [true, false],
+                            labels: [
+                              l10n.onlineCount(online.length),
+                              l10n.offlineCount(offline.length),
+                            ],
+                            selected: _online,
+                            onChanged: (v) => setState(() => _online = v),
+                          ),
+                        ]),
+                      ),
+                    ]),
+                  ),
+                  SliverPadding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    sliver: content,
+                  ),
+                  const SliverToBoxAdapter(
+                      child: SizedBox(height: kTabBarClearance)),
+                ],
+              ),
+            ),
+          ]);
+        },
+      ),
+    );
+  }
+}
+
+class _MyListingCard extends StatelessWidget {
+  const _MyListingCard({required this.listing, required this.onAction});
+  final PropertyListing listing;
+  final ValueChanged<_Action> onAction;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.fc;
+    final l10n = AppLocalizations.of(context)!;
+    final l = listing;
+    final tag = 'ml-${l.id}';
+
+    PopupMenuItem<_Action> item(_Action a, FIconData i, String t,
+            [Color? color]) =>
+        PopupMenuItem(
+          value: a,
+          height: 48,
+          child: Row(children: [
+            FIcon(i, size: 20, color: color ?? c.ink),
+            const SizedBox(width: 12),
+            Text(t, style: TextStyle(color: color ?? c.ink)),
+          ]),
+        );
+
+    return Pressable(
+      scale: 0.98,
+      semanticLabel: l.title,
+      onTap: () => openListing(context, l, heroTag: tag),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: c.bg,
+          border: Border.all(color: c.line),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          ListingPhoto(
+              url: l.image, width: 92, height: 92, radius: 14, heroTag: tag),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Wrap(spacing: 6, runSpacing: 6, children: [
+                  StatusPill(online: l.isOnline),
+                  if (l.isBoosted) const BoostedBadge(),
+                ]),
+                const SizedBox(height: 6),
+                Text(l.title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.tt.titleSmall
+                        ?.copyWith(fontWeight: FontWeight.w800)),
+                const SizedBox(height: 4),
+                PriceText(
+                    price: l.price, rent: isRent(l.classification), size: 15),
+              ],
             ),
           ),
-        ],
+          PopupMenuButton<_Action>(
+            tooltip: l10n.actionsFor(l.title),
+            onSelected: onAction,
+            position: PopupMenuPosition.under,
+            icon: FIcon(FIcons.more, size: 20, color: c.ink),
+            itemBuilder: (_) => [
+              item(_Action.edit, FIcons.edit, l10n.edit),
+              if (!l.isBoosted)
+                item(_Action.boost, FIcons.bolt, l10n.boostAction),
+              item(_Action.toggle, l.isOnline ? FIcons.eyeOff : FIcons.eye,
+                  l.isOnline ? l10n.makeOffline : l10n.makeOnline),
+              item(_Action.delete, FIcons.trash, l10n.delete, c.red),
+            ],
+          ),
+        ]),
       ),
-      // Floating Action Button to add new listing
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          // Open create listing and refresh when a new listing was created
-          final created = await Navigator.pushNamed(context, '/create-listing');
-          if (created == true && context.mounted) {
-            // refresh listings
-            context.read<MyListingsCubit>().fetchMyListings(forceRefresh: true);
-            // The home feed fetches once per session; show the new listing.
-            context.read<RecentCubit>().getRecentListings(forceRefresh: true);
-          }
-        },
-        backgroundColor: theme.colorScheme.primary,
-        child: Icon(Icons.add, size: 40, color: Colors.white),
-      ),
-      bottomNavigationBar: BuildBottomNavBar(index: 2),
     );
-  }
-
-  // UPDATED: Edit handler
-  void _handleEdit(PropertyListing listing) {
-    // Navigate to edit screen
-    Navigator.pushNamed(context, '/edit-listing', arguments: listing);
-  }
-
-  // UPDATED: Remove handler
-  void _handleRemove(PropertyListing listing) {
-    ConfirmationDialog.show(
-      context: context,
-      title: 'Remove Listing',
-      message: 'Are you sure you want to remove "${listing.title}"?',
-      onConfirm: () async {
-        final result =
-            await context.read<MyListingsCubit>().deleteListing(listing.id);
-        if (!mounted) return;
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(result.message)));
-      },
-    );
-  }
-
-  // UPDATED: Toggle online/offline handler
-  Future<void> _handleToggleStatus(PropertyListing listing) async {
-    final result =
-        await context.read<MyListingsCubit>().toggleActiveListing(listing.id);
-    if (!mounted) return;
-    context.read<PropertyDetailsCubit>().invalidateCache(listing.id);
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(result.message)));
-  }
-
-  // UPDATED: Boost handler
-  void _handleBoost(PropertyListing listing) {
-    Navigator.pushNamed(context, '/sponsorship-plans', arguments: listing);
   }
 }

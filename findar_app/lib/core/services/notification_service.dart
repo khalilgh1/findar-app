@@ -87,7 +87,7 @@ class NotificationService {
   static Future<void> _initializeLocalNotifications() async {
     try {
       const AndroidInitializationSettings androidSettings =
-          AndroidInitializationSettings('@mipmap/ic_launcher');
+          AndroidInitializationSettings('@drawable/ic_launcher_monochrome');
 
       const DarwinInitializationSettings iosSettings =
           DarwinInitializationSettings(

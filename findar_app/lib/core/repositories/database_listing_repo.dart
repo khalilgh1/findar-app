@@ -258,6 +258,9 @@ class LocalListingRepository implements ListingRepository {
     String? image,
     List<String>? additionalImages,
     bool? isOnline,
+    double? area,
+    double? latitude,
+    double? longitude,
   }) async {
     try {
       // Map classification to backend values if provided
@@ -280,6 +283,7 @@ class LocalListingRepository implements ListingRepository {
         if (propertyType != null) "building_type": propertyType.toLowerCase(),
         if (image != null) "main_pic": image,
         if (isOnline != null) "active": isOnline ? 1 : 0,
+        if (area != null) "area": area,
       };
 
       await db.update(table, row);

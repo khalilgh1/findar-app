@@ -413,6 +413,18 @@ class AuthRepository {
   }
 
   /// Get current user (helper method)
+  /// Password reset, step 1: email a verification code. Throws on failure.
+  Future<void> sendResetCode(String email) =>
+      _authService.sendResetCode(email.trim());
+
+  /// Password reset, step 2: check the code. Throws on failure.
+  Future<void> checkResetCode(String email, String code) =>
+      _authService.checkResetCode(email.trim(), code.trim());
+
+  /// Password reset, step 3: set the new password. Throws on failure.
+  Future<void> resetPassword(String email, String code, String password) =>
+      _authService.resetPassword(email.trim(), code.trim(), password);
+
   User? getCurrentUser() {
     return _currentUser;
   }

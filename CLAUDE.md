@@ -20,8 +20,8 @@ Deep dives: [docs/architecture.md](docs/architecture.md) (layers, data flow, API
 ```bash
 # Flutter app (run from findar_app/)
 flutter pub get
-flutter analyze                      # after step 2 (2026-10-30): 0 errors, 0 warnings, 177 infos
-flutter test                         # 61 unit/cubit/widget tests (test/)
+flutter analyze                      # after step 4b (2026-11-01): 0 errors, 0 warnings, 85 infos (74 avoid_print)
+flutter test                         # 67 unit/cubit/widget tests (test/)
 flutter test integration_test -d emulator-5554 --dart-define=API_BASE_URL=http://10.0.2.2:8000   # needs seeded local backend, see docs/testing.md
 flutter gen-l10n                     # regenerate lib/l10n/app_localizations*.dart from .arb files
 dart run build_runner build --delete-conflicting-outputs   # regenerate *.g.dart (json_serializable)
@@ -46,7 +46,9 @@ App needs `findar_app/.env` (gitignored, bundled as an asset) with `TOMTOM_API_K
 - HTTP goes through `FindarApiService` (auto JWT refresh on 401). Endpoints are centralized in `core/config/api_config.dart`.
 - Images upload directly from the app to Cloudinary (unsigned preset); backend stores URLs only.
 - i18n: en / ar / fr via `.arb` in `lib/l10n/`. RTL must work for Arabic.
-- Theme: `core/theme/` (light/dark, `ThemeProvider` via provider package).
+- Theme: `core/theme/` — `buildFindarTheme(dark:, language:)` (Manrope / IBM Plex Sans Arabic bundled in `assets/fonts`), design tokens in `FindarColors` (`context.fc`, `context.tt`). `ThemeProvider` (provider package) holds light/dark.
+- UI kit (redesign, docs/design/README.md): `core/widgets/ui.dart` (FButton, AppField, PillSegmented, SelectChip, FStepper, RadioCard, MenuRow/SettingsGroup, StateMessage/ErrorState/OfflineBanner, skeletons, `showAppSnack`), `listing_widgets.dart` (PriceText/`formatPrice`, ListingPhoto, the card variants, SaveButton, `openListing`), `floating_tab_bar.dart` (TabScaffold for the 4 tab screens), `decor/decor.dart` (SoftTop, Rings, GlassTile, BlueCard, WaveHeader, SpotIllustration), `f_icon.dart` (outline icon set from the design generator). Motion helpers in `core/motion/motion.dart` (Entrance, Pressable, PopOnChange, ShakeOnChange, FloatClock, Shimmer, FadeThroughRoute, SheetRoute); all honour reduced motion.
+- New UI strings: add them to `findar_app/tool/l10n_redesign.py` (en/ar/fr in one place) and run it, or edit the three `.arb` files; then `flutter gen-l10n`.
 
 ## Conventions
 

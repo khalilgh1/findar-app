@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:findar/core/widgets/progress_button.dart';
+
+import 'package:findar/core/di/service_locator.dart';
+import 'package:findar/core/motion/motion.dart';
+import 'package:findar/core/repositories/auth_repository.dart';
+import 'package:findar/core/theme/findar_tokens.dart';
+import 'package:findar/core/widgets/f_icon.dart';
+import 'package:findar/core/widgets/ui.dart';
+import 'package:findar/features/auth/widgets/auth_scaffold.dart';
 import 'package:findar/l10n/app_localizations.dart';
-import 'package:findar/core/services/auth_service.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -11,305 +17,162 @@ class ForgotPasswordScreen extends StatefulWidget {
 }
 
 class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _codeController = TextEditingController();
-  final AuthService _authService = AuthService();
-  bool _isLoading = false;
-  bool _codeSent = false;
-  String? _errorMessage;
-
-  String? _validateEmail(String? email) {
-    if (email == null || email.isEmpty) {
-      return 'Email is required';
-    }
-    final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
-    if (!emailRegex.hasMatch(email)) {
-      return 'Please enter a valid email address';
-    }
-    return null;
-  }
-
-  String? _validateCode(String? code) {
-    if (code == null || code.isEmpty) {
-      return 'Verification code is required';
-    }
-    if (code.length < 4) {
-      return 'Code must be at least 4 characters';
-    }
-    return null;
-  }
-
-  void _handleGetCode() async {
-    // Only validate email field when getting code
-    if (_emailController.text.isEmpty || _validateEmail(_emailController.text) != null) {
-      _formKey.currentState!.validate();
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
-    try {
-      await _authService.sendResetCode(_emailController.text);
-      setState(() {
-        _isLoading = false;
-        _codeSent = true;
-        _errorMessage = null;
-      });
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-        _errorMessage = e.toString().replaceFirst('Exception: ', '');
-      });
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(_errorMessage ?? 'Failed to send code')),
-        );
-      }
-    }
-  }
-
-  void _handleVerifyCode() async {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
-    try {
-      await _authService.checkResetCode(_emailController.text, _codeController.text);
-      
-      setState(() {
-        _isLoading = false;
-      });
-
-      if (mounted) {
-        Navigator.pushNamed(
-          context,
-          '/reset-password',
-          arguments: {
-            'email': _emailController.text,
-            'code': _codeController.text,
-          },
-        );
-      }
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-        _errorMessage = e.toString().replaceFirst('Exception: ', '');
-      });
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(_errorMessage ?? 'Failed to verify code')),
-        );
-      }
-    }
-  }
+  final _formKey = GlobalKey<FormState>();
+  final _email = TextEditingController();
+  final _code = TextEditingController();
+  final _codeFocus = FocusNode();
+  final _auth = getIt<AuthRepository>();
+  bool _sent = false;
+  bool _loading = false;
+  int _shake = 0;
 
   @override
   void dispose() {
-    _emailController.dispose();
-    _codeController.dispose();
+    _email.dispose();
+    _code.dispose();
+    _codeFocus.dispose();
     super.dispose();
+  }
+
+  String _clean(Object e) => e.toString().replaceFirst('Exception: ', '');
+
+  Future<void> _send() async {
+    if (!_formKey.currentState!.validate()) {
+      setState(() => _shake++);
+      return;
+    }
+    setState(() => _loading = true);
+    try {
+      await _auth.sendResetCode(_email.text);
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _sent = true;
+      });
+      Future.delayed(Motion.medium, () {
+        if (mounted) _codeFocus.requestFocus();
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _shake++;
+      });
+      showAppSnack(context, _clean(e));
+    }
+  }
+
+  Future<void> _verify() async {
+    if (!_formKey.currentState!.validate()) {
+      setState(() => _shake++);
+      return;
+    }
+    setState(() => _loading = true);
+    try {
+      await _auth.checkResetCode(_email.text, _code.text);
+      if (!mounted) return;
+      setState(() => _loading = false);
+      Navigator.pushNamed(context, '/reset-password', arguments: {
+        'email': _email.text.trim(),
+        'code': _code.text.trim(),
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _shake++;
+      });
+      showAppSnack(context, _clean(e));
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final c = context.fc;
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-    return Scaffold(
-      backgroundColor: theme.colorScheme.surface,
-      appBar: AppBar(
-        backgroundColor: theme.colorScheme.surface,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: theme.colorScheme.onSurface),
-          onPressed: () => Navigator.pop(context),
+
+    return AuthScaffold(
+      formKey: _formKey,
+      children: [
+        const Entrance(child: AuthArt.forgot),
+        const SizedBox(height: 18),
+        ScreenTitle(l10n.resetPassword, subtitle: l10n.resetPasswordSub),
+        const SizedBox(height: 18),
+        AppField(
+          label: l10n.emailAddress,
+          controller: _email,
+          icon: FIcons.mail,
+          enabled: !_sent,
+          keyboardType: TextInputType.emailAddress,
+          autofillHints: const [AutofillHints.email],
+          onSubmitted: (_) => _sent ? null : _send(),
+          validator: (v) {
+            final t = v?.trim() ?? '';
+            if (t.isEmpty) return l10n.emailRequired;
+            if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]{2,}$').hasMatch(t)) {
+              return l10n.invalidEmail;
+            }
+            return null;
+          },
         ),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 20),
-                  
-                  Text(
-                    'Forgot Password?',
-                    style: theme.textTheme.headlineLarge?.copyWith(
-                      color: theme.colorScheme.onSurface,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 32,
-                    ),
+        AnimatedSize(
+          duration: Motion.reduced(context) ? Duration.zero : Motion.medium,
+          curve: Motion.standard,
+          alignment: Alignment.topCenter,
+          child: !_sent
+              ? const SizedBox(width: double.infinity)
+              : Column(children: [
+                  const SizedBox(height: 18),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 12),
+                    decoration: BoxDecoration(
+                        color: c.greenT,
+                        borderRadius: BorderRadius.circular(14)),
+                    child: Row(children: [
+                      FIcon(FIcons.check, size: 18, color: c.green),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(l10n.codeSent,
+                            style: context.tt.titleSmall
+                                ?.copyWith(fontSize: 14, color: c.green)),
+                      ),
+                    ]),
                   ),
-                  const SizedBox(height: 12),
-                  
-                  Text(
-                    'Enter your email address and we\'ll send you a code to reset your password.',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                      fontSize: 16,
-                    ),
+                  const SizedBox(height: 18),
+                  AppField(
+                    label: l10n.verificationCode,
+                    controller: _code,
+                    focusNode: _codeFocus,
+                    hint: l10n.enterCode,
+                    icon: FIcons.shield,
+                    keyboardType: TextInputType.number,
+                    autofillHints: const [AutofillHints.oneTimeCode],
+                    onSubmitted: (_) => _verify(),
+                    validator: (v) => (_sent && (v ?? '').trim().isEmpty)
+                        ? l10n.fieldRequired
+                        : null,
                   ),
-                  const SizedBox(height: 40),
-
-                  Text(
-                    l10n.emailAddress,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurface,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    controller: _emailController,
-                    validator: _codeSent ? null : _validateEmail,
-                    keyboardType: TextInputType.emailAddress,
-                    enabled: !_codeSent,
-                    style: TextStyle(color: theme.colorScheme.onSurface),
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: theme.colorScheme.secondaryContainer,
-                      hintText: l10n.enterEmail,
-                      hintStyle: TextStyle(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                      prefixIcon: Icon(
-                        Icons.email_outlined,
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: theme.colorScheme.outline.withOpacity(0.2)),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
-                      ),
-                      errorBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Colors.red),
-                      ),
-                      focusedErrorBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Colors.red, width: 2),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-
-                  if (!_codeSent)
-                    ProgressButton(
-                      onPressed: _handleGetCode,
-                      label: l10n.getCode,
-                      isLoading: _isLoading,
-                      backgroundColor: theme.colorScheme.primary,
-                      textColor: Colors.white,
-                    ),
-
-                  if (_codeSent) ...[
-                    Text(
-                      l10n.verificationCode,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurface,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _codeController,
-                      validator: _validateCode,
-                      keyboardType: TextInputType.number,
-                      style: TextStyle(color: theme.colorScheme.onSurface),
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: theme.colorScheme.secondaryContainer,
-                        hintText: l10n.enterVerificationCodeHint,
-                        hintStyle: TextStyle(
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                        prefixIcon: Icon(
-                          Icons.verified_user_outlined,
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide.none,
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: theme.colorScheme.outline.withOpacity(0.2)),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
-                        ),
-                        errorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Colors.red),
-                        ),
-                        focusedErrorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Colors.red, width: 2),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 32),
-                    ProgressButton(
-                      onPressed: _handleVerifyCode,
-                      label: 'Verify Code',
-                      isLoading: _isLoading,
-                      backgroundColor: theme.colorScheme.primary,
-                      textColor: Colors.white,
-                    ),
-                  ],
-                  
-                  const SizedBox(height: 24),
-
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "Remember your password?",
-                        style: TextStyle(color: theme.colorScheme.onSurface, fontSize: 14),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        child: Text(
-                          'Login',
-                          style: TextStyle(
-                            color: theme.colorScheme.primary,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
+                ]),
+        ),
+        const SizedBox(height: 20),
+        ShakeOnChange(
+          trigger: _shake == 0 ? null : _shake,
+          child: FButton(
+            label: _sent ? l10n.verifyCode : l10n.sendCode,
+            loading: _loading,
+            onPressed: _sent ? _verify : _send,
           ),
         ),
-      ),
+        if (_sent) ...[
+          const SizedBox(height: 6),
+          AuthSwitchLine(
+            text: l10n.didntGetIt,
+            action: l10n.resendCode,
+            onTap: _loading ? () {} : _send,
+          ),
+        ],
+      ],
     );
   }
 }

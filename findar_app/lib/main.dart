@@ -13,6 +13,8 @@ import 'package:provider/provider.dart';
 import 'package:findar/core/services/auth_manager.dart';
 import 'package:findar/core/models/sponsorship_plan.dart';
 import 'package:findar/core/theme/app_theme.dart';
+import 'package:findar/core/motion/motion.dart';
+import 'package:findar/core/widgets/floating_tab_bar.dart';
 import 'package:findar/core/theme/theme_provider.dart';
 import 'package:findar/features/auth/screens/forgot_password_screen.dart';
 import 'package:findar/features/auth/screens/login_screen.dart';
@@ -147,10 +149,11 @@ class _MainAppState extends State<MainApp> {
                 return MaterialApp(
                   navigatorKey: navigatorKey,
                   scaffoldMessengerKey: scaffoldMessengerKey,
-                  theme: lightTheme,
-                  // theme: darkTheme,
-                  darkTheme: darkTheme,
+                  title: 'Findar',
+                  theme: buildFindarTheme(dark: false, language: language),
+                  darkTheme: buildFindarTheme(dark: true, language: language),
                   themeMode: themeProvider.themeMode,
+                  themeAnimationDuration: const Duration(milliseconds: 250),
                   debugShowCheckedModeBanner: false,
                   locale: Locale(language),
                   localizationsDelegates: [
@@ -169,7 +172,8 @@ class _MainAppState extends State<MainApp> {
                     // Handle edit listing route with arguments
                     if (settings.name == '/edit-listing') {
                       final listing = settings.arguments;
-                      return MaterialPageRoute(
+                      return SheetRoute(
+                        settings: settings,
                         builder: (context) => EditListingScreen(
                             listing: listing as PropertyListing),
                       );
@@ -178,6 +182,7 @@ class _MainAppState extends State<MainApp> {
                     if (settings.name == '/sponsorship-plans') {
                       final listing = settings.arguments as PropertyListing;
                       return MaterialPageRoute(
+                        settings: settings,
                         builder: (context) =>
                             SponsorshipPlansScreen(listing: listing),
                       );
@@ -186,6 +191,7 @@ class _MainAppState extends State<MainApp> {
                     if (settings.name == '/payment-confirmation') {
                       final args = settings.arguments as Map<String, dynamic>;
                       return MaterialPageRoute(
+                        settings: settings,
                         builder: (context) => PaymentConfirmationScreen(
                           listing: args['listing'] as PropertyListing,
                           plan: args['plan'] as SponsorshipPlan,
@@ -198,6 +204,7 @@ class _MainAppState extends State<MainApp> {
                       // Own cubit: viewing another user must not overwrite
                       // the signed-in user's profile state.
                       return MaterialPageRoute(
+                        settings: settings,
                         builder: (context) => BlocProvider(
                           create: (_) => ProfileCubit(),
                           child: UserProfileScreen(userId: userId),
@@ -233,6 +240,14 @@ class _MainAppState extends State<MainApp> {
 
                     final builder = routes[settings.name];
                     if (builder != null) {
+                      // Tabs fade through; Create listing rises like a sheet.
+                      if (kTabRoutes.contains(settings.name)) {
+                        return FadeThroughRoute(
+                            settings: settings, builder: builder);
+                      }
+                      if (settings.name == '/create-listing') {
+                        return SheetRoute(settings: settings, builder: builder);
+                      }
                       return MaterialPageRoute(settings: settings, builder: builder);
                     }
 

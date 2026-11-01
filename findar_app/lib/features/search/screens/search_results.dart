@@ -1,24 +1,50 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
+import 'package:findar/core/models/property_listing_model.dart';
+import 'package:findar/core/motion/motion.dart';
+import 'package:findar/core/theme/findar_tokens.dart';
+import 'package:findar/core/utils/save_feedback.dart';
+import 'package:findar/core/widgets/f_icon.dart';
+import 'package:findar/core/widgets/listing_widgets.dart';
+import 'package:findar/core/widgets/ui.dart';
+import 'package:findar/features/home/home_widgets.dart';
+import 'package:findar/features/search/search_request.dart';
+import 'package:findar/l10n/app_localizations.dart';
 import 'package:findar/logic/cubits/saved_listings_cubit.dart';
 import 'package:findar/logic/cubits/search_cubit.dart';
-import 'package:findar/logic/cubits/sort_cubit.dart';
-import 'package:findar/core/models/property_listing_model.dart';
-import '../../../../core/widgets/appbar_title.dart';
-import '../../../../core/widgets/property_card.dart';
-import '../../../../core/widgets/sort_and_filter.dart';
-import '../../../../core/widgets/progress_button.dart';
-import '../../../../core/widgets/no_internet_widget.dart';
-import 'package:findar/l10n/app_localizations.dart';
 
-/// Helper function to check if an error message indicates a network issue
-bool _isNetworkError(String? message) {
-  if (message == null) return false;
-  final lowerMessage = message.toLowerCase();
-  return lowerMessage.contains('internet') ||
-      lowerMessage.contains('offline') ||
-      lowerMessage.contains('network') ||
-      lowerMessage.contains('connection');
+const double kMaxPrice = 250000000;
+
+/// Runs [SearchCubit.getFilteredListings] from a filters map as stored by the
+/// cubit ('Any' / 0 / null mean no filter).
+Future<void> runFilters(SearchCubit cubit, Map<String, dynamic> f,
+    {String? sortBy}) {
+  String? any(Object? v) => (v == null || v == 'Any') ? null : v as String;
+  return cubit.getFilteredListings(
+    latitude: (f['latitude'] as num?)?.toDouble(),
+    longitude: (f['longitude'] as num?)?.toDouble(),
+    minPrice: (f['minPrice'] as num?)?.toDouble() ?? 0,
+    maxPrice: (f['maxPrice'] as num?)?.toDouble() ?? kMaxPrice,
+    listingType: any(f['listingType']),
+    buildingType: any(f['buildingType']),
+    numBedrooms: f['numBedrooms'] as int? ?? 0,
+    numBathrooms: f['numBathrooms'] as int? ?? 0,
+    minSqft: (f['minSqft'] as num?)?.toDouble(),
+    maxSqft: (f['maxSqft'] as num?)?.toDouble(),
+    listedBy: any(f['listedBy']),
+    sortBy: sortBy ?? f['sortBy'] as String?,
+  );
+}
+
+/// Compact price for chips: 30k, 1.2M.
+String shortPrice(num v) {
+  if (v >= 1000000) {
+    final m = v / 1000000;
+    return '${m == m.roundToDouble() ? m.toInt() : m.toStringAsFixed(1)}M';
+  }
+  if (v >= 1000) return '${(v / 1000).round()}k';
+  return v.round().toString();
 }
 
 class SearchResultsScreen extends StatefulWidget {
@@ -29,340 +55,505 @@ class SearchResultsScreen extends StatefulWidget {
 }
 
 class _SearchResultsScreenState extends State<SearchResultsScreen> {
-  bool _hasSearched = false;
+  final _query = TextEditingController();
+  final _focus = FocusNode();
+  bool _started = false;
+  bool _filtered = false;
+  bool _entered = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    if (_started) return;
+    _started = true;
+    context.read<SavedListingsCubit>().fetchSavedListings();
 
-    // Get the search query from route arguments and perform search once
-    if (!_hasSearched) {
-      // Saved state for the bookmark icons comes from SavedListingsCubit.
-      context.read<SavedListingsCubit>().fetchSavedListings();
-      final rawQuery = ModalRoute.of(context)?.settings.arguments;
-      print('🔍 Raw search query from arguments: $rawQuery');
-      // Handle string "null" or actual null by converting to empty string
-      final query = (rawQuery == null ||
-              rawQuery.toString() == 'null' ||
-              rawQuery.toString().isEmpty)
-          ? ''
-          : rawQuery.toString();
+    final raw = ModalRoute.of(context)?.settings.arguments;
+    final req = raw is SearchRequest
+        ? raw
+        : SearchRequest(
+            query: (raw == null || raw.toString() == 'null') ? '' : '$raw');
+    final cubit = context.read<SearchCubit>();
 
-      print('🔍 Search query received: "$query"');
-      print(
-          '🔍 Calling getrecentListings with query: "${query.isEmpty ? "(empty - show all)" : query}"');
-      context.read<SearchCubit>().getrecentListings(query);
-      _hasSearched = true;
+    if (req.isFiltered) {
+      _filtered = true;
+      if (req.filters != null) {
+        runFilters(cubit, req.filters!);
+      } else if (req.useCurrentFilters) {
+        runFilters(cubit, cubit.currentFilters);
+      } else {
+        runFilters(cubit, {
+          'listingType': req.listingType ?? 'Any',
+          'buildingType': req.buildingType ?? 'Any',
+        });
+      }
+    } else {
+      _query.text = req.query;
+      cubit.getrecentListings(req.query);
+      if (req.focus) {
+        // After the shared-element flight lands.
+        Future.delayed(const Duration(milliseconds: 320), () {
+          if (mounted) _focus.requestFocus();
+        });
+      }
+    }
+    Future.delayed(const Duration(milliseconds: 900), () => _entered = true);
+  }
+
+  @override
+  void dispose() {
+    _query.dispose();
+    _focus.dispose();
+    super.dispose();
+  }
+
+  void _search(String q) {
+    setState(() => _filtered = false);
+    context.read<SearchCubit>().getrecentListings(q.trim());
+  }
+
+  Future<void> _openFilters() async {
+    final applied = await Navigator.pushNamed(context, '/filtering');
+    if (applied == true && mounted) {
+      setState(() => _filtered = true);
+      _query.clear();
     }
   }
 
-  void _applyCurrentFiltersWithSort(String sortBy) {
-    final searchCubit = context.read<SearchCubit>();
-    final filters = searchCubit.currentFilters;
-
-    // Extract filter values, converting 'Any' to null for the API
-    final double minPrice = (filters['minPrice'] as num?)?.toDouble() ?? 0.0;
-    final double maxPrice =
-        (filters['maxPrice'] as num?)?.toDouble() ?? 250000000.0;
-    final String? listingType = filters['listingType'] == 'Any'
-        ? null
-        : filters['listingType'] as String?;
-    final String? buildingType = filters['buildingType'] == 'Any'
-        ? null
-        : filters['buildingType'] as String?;
-    final int? numBedrooms = filters['numBedrooms'] as int?;
-    final int? numBathrooms = filters['numBathrooms'] as int?;
-    final double? minSqft = (filters['minSqft'] as num?)?.toDouble();
-    final double? maxSqft = (filters['maxSqft'] as num?)?.toDouble();
-    final String? listedBy =
-        filters['listedBy'] == 'Any' ? null : filters['listedBy'] as String?;
-
-    searchCubit.getFilteredListings(
-      minPrice: minPrice,
-      maxPrice: maxPrice,
-      listingType: listingType,
-      buildingType: buildingType,
-      numBedrooms: numBedrooms,
-      numBathrooms: numBathrooms,
-      minSqft: minSqft,
-      maxSqft: maxSqft,
-      listedBy: listedBy,
-      sortBy: sortBy,
-    );
+  void _sort(String sortBy) {
+    setState(() => _filtered = true);
+    final cubit = context.read<SearchCubit>();
+    runFilters(cubit, cubit.currentFilters, sortBy: sortBy);
   }
 
-  void _toggleSave(int listingId) async {
-    final saved = context.read<SavedListingsCubit>();
-    final result = saved.isSaved(listingId)
-        ? await saved.unsaveListing(listingId)
-        : await saved.saveListing(listingId);
-    if (!mounted) return;
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(result.message)));
+  void _removeFilter(String key) {
+    final cubit = context.read<SearchCubit>();
+    final f = Map<String, dynamic>.from(cubit.currentFilters);
+    switch (key) {
+      case 'price':
+        f['minPrice'] = 0.0;
+        f['maxPrice'] = kMaxPrice;
+      case 'location':
+        f['latitude'] = null;
+        f['longitude'] = null;
+        if (f['sortBy'] == 'distance') f['sortBy'] = 'date_newest';
+      case 'numBedrooms' || 'numBathrooms':
+        f[key] = 0;
+      case 'minSqft':
+        f['minSqft'] = null;
+      default:
+        f[key] = 'Any';
+    }
+    runFilters(cubit, f);
+  }
+
+  /// Active filters as (key, label) pairs.
+  List<(String, String)> _chips(Map<String, dynamic> f, AppLocalizations l10n) {
+    final out = <(String, String)>[];
+    final lt = f['listingType'];
+    if (lt != null && lt != 'Any') {
+      out.add((
+        'listingType',
+        lt.toString().contains('rent') ? l10n.forRent : l10n.forSale
+      ));
+    }
+    final bt = f['buildingType'];
+    if (bt != null && bt != 'Any') {
+      out.add(('buildingType', propertyTypeLabel(bt.toString(), l10n)));
+    }
+    final bd = f['numBedrooms'] as int? ?? 0;
+    if (bd > 0) out.add(('numBedrooms', l10n.bedsMin(bd)));
+    final ba = f['numBathrooms'] as int? ?? 0;
+    if (ba > 0) out.add(('numBathrooms', l10n.bathsMin(ba)));
+    final minP = (f['minPrice'] as num?)?.toDouble() ?? 0;
+    final maxP = (f['maxPrice'] as num?)?.toDouble() ?? kMaxPrice;
+    if (minP > 0 || maxP < kMaxPrice) {
+      out.add((
+        'price',
+        '${shortPrice(minP)}–${shortPrice(maxP)} ${l10n.currencyDa}'
+      ));
+    }
+    final area = (f['minSqft'] as num?)?.toDouble();
+    if (area != null && area > 0) {
+      out.add(('minSqft', l10n.areaMin(area.round())));
+    }
+    final lb = f['listedBy'];
+    if (lb != null && lb != 'Any') {
+      out.add((
+        'listedBy',
+        lb.toString().contains('agen') ? l10n.agencyAccount : l10n.ownerLabel
+      ));
+    }
+    if (f['latitude'] != null) out.add(('location', l10n.location));
+    return out;
   }
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-    var l10n = AppLocalizations.of(context)!;
+    final c = context.fc;
+    final l10n = AppLocalizations.of(context)!;
+    final top = MediaQuery.paddingOf(context).top;
 
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      appBar: AppBar(
-        scrolledUnderElevation: 0,
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: Theme.of(context).colorScheme.onSurface,
-            size: 30,
-          ),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: AppbarTitle(title: l10n.searchResults),
-        actions: [
-          IconButton(
-            icon: Icon(
-              Icons.filter_alt_rounded,
-              color: Theme.of(context).colorScheme.onSurface,
-              size: 30,
-            ),
-            onPressed: () {
-              Navigator.pushNamed(context, '/filtering');
-            },
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          // Filter buttons
-          Container(
-            color: Theme.of(context).colorScheme.surface,
-            padding: EdgeInsets.symmetric(
-              horizontal: screenWidth * 0.04,
-              vertical: screenHeight * 0.015,
-            ),
-            child: Row(
-              children: [
-                FilterButton(
-                  text: l10n.sort,
-                  icon: Icons.swap_vert,
-                  onPressed: () {
-                    _showSortBottomSheet(context);
-                  },
+      backgroundColor: c.bg,
+      body: BlocBuilder<SearchCubit, Map<String, dynamic>>(
+        builder: (context, state) {
+          final filters = (state['filters'] as Map<String, dynamic>?) ?? {};
+          final chips =
+              _filtered ? _chips(filters, l10n) : const <(String, String)>[];
+          final status = state['state'];
+          final listings =
+              (state['data'] as List?)?.cast<PropertyListing>() ?? const [];
+          final hasLocation = filters['latitude'] != null;
+
+          return CustomScrollView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            slivers: [
+              SliverPadding(
+                padding: EdgeInsets.fromLTRB(20, top + 8, 20, 0),
+                sliver: SliverToBoxAdapter(
+                  child: Row(children: [
+                    const FBackButton(),
+                    const SizedBox(width: 10),
+                    Expanded(
+                        child: _QueryField(
+                            controller: _query,
+                            focus: _focus,
+                            onSubmit: _search)),
+                    const SizedBox(width: 10),
+                    _FilterButton(count: chips.length, onTap: _openFilters),
+                  ]),
                 ),
-              ],
-            ),
-          ),
-          Divider(height: 1, color: Theme.of(context).dividerColor),
-          // Properties list
-          Expanded(
-            child: BlocBuilder<SearchCubit, Map<String, dynamic>>(
-              builder: (context, searchState) {
-                if (searchState['state'] == 'loading') {
-                  return const Center(child: CircularProgressIndicator());
-                }
-
-                if (searchState['state'] == 'error') {
-                  final errorMessage = searchState['message'] as String?;
-
-                  // Check if it's a network error
-                  if (_isNetworkError(errorMessage)) {
-                    return NoInternetWidget(
-                      title: 'Search Unavailable Offline',
-                      message:
-                          'Searching for properties requires an internet connection. Please connect to the internet and try again.',
-                      onRetry: () {
-                        context.read<SearchCubit>().getFilteredListings(
-                              minPrice: 0,
-                              maxPrice: double.infinity,
-                            );
-                      },
-                    );
-                  }
-
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Error: ${errorMessage ?? 'Unknown error'}',
-                        ),
-                        SizedBox(height: 16),
-                        ProgressButton(
-                          label: l10n.retry,
-                          backgroundColor: Theme.of(
-                            context,
-                          ).colorScheme.primary,
-                          textColor: Theme.of(context).colorScheme.onPrimary,
-                          onPressed: () {
-                            context.read<SearchCubit>().getFilteredListings(
-                                  minPrice: 0,
-                                  maxPrice: double.infinity,
-                                );
-                          },
-                        ),
-                      ],
-                    ),
-                  );
-                }
-
-                //use cubit getters for listings
-                final listings =
-                    (searchState['data'] as List<PropertyListing>?) ?? const [];
-                if (listings.isEmpty) {
-                  return _buildEmptyState();
-                }
-                return ListView.separated(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: screenWidth * 0.01,
-                    vertical: screenHeight * 0.02,
+              ),
+              if (chips.isNotEmpty)
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                  sliver: SliverToBoxAdapter(
+                    child: Wrap(spacing: 8, runSpacing: 8, children: [
+                      for (final (key, label) in chips)
+                        _ActiveChip(
+                            label: label, onRemove: () => _removeFilter(key)),
+                    ]),
                   ),
-                  itemCount: listings.length,
-                  separatorBuilder: (context, index) =>
-                      SizedBox(height: screenHeight * 0.02),
-                  itemBuilder: (context, index) {
-                    final listing = listings[index];
-                    // provider forbids context.select directly in a
-                    // list itemBuilder; each card gets its own context.
-                    return Builder(builder: (context) {
-                      final isSaved = context
-                          .select<SavedListingsCubit, bool>(
-                              (c) => c.isSaved(listing.id));
-                      return PropertyListingCard(
-                        listing: listing,
-                        isSaved: isSaved,
-                        onSaveToggle: () => _toggleSave(listing.id),
-                      );
-                    });
-                  },
-                );
-              },
-            ),
-          ),
-        ],
+                ),
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+                sliver: SliverToBoxAdapter(
+                  child: Row(children: [
+                    Expanded(
+                      child: AnimatedSwitcher(
+                        duration: Motion.short,
+                        layoutBuilder: (current, previous) => Stack(
+                          alignment: AlignmentDirectional.centerStart,
+                          children: [...previous, if (current != null) current],
+                        ),
+                        transitionBuilder: (child, a) => FadeTransition(
+                          opacity: a,
+                          child: SlideTransition(
+                            position: Tween(
+                                    begin: const Offset(0, 0.4),
+                                    end: Offset.zero)
+                                .animate(a),
+                            child: child,
+                          ),
+                        ),
+                        child: Text(
+                          status == 'done'
+                              ? l10n.resultsCount(listings.length)
+                              : ' ',
+                          key: ValueKey('$status${listings.length}'),
+                          style: context.tt.bodyMedium?.copyWith(
+                              color: c.muted, fontWeight: FontWeight.w700),
+                        ),
+                      ),
+                    ),
+                    _SortMenu(
+                      current: _filtered
+                          ? filters['sortBy'] as String? ?? 'date_newest'
+                          : 'date_newest',
+                      allowDistance: hasLocation,
+                      onSelected: _sort,
+                    ),
+                  ]),
+                ),
+              ),
+              ..._results(
+                  context, status, state['message'] as String?, listings),
+              const SliverToBoxAdapter(child: SizedBox(height: 32)),
+            ],
+          );
+        },
       ),
     );
   }
 
-  Widget _buildEmptyState() {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-    var l10n = AppLocalizations.of(context)!;
+  List<Widget> _results(BuildContext context, Object? status, String? message,
+      List<PropertyListing> listings) {
+    final l10n = AppLocalizations.of(context)!;
+    Widget pad(Widget w) => SliverPadding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        sliver: SliverToBoxAdapter(child: w));
 
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.search_off,
-            size: screenWidth * 0.2,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-          SizedBox(height: screenHeight * 0.02),
-          Text(
-            l10n.noPropertiesFound,
-            style: TextStyle(
-              fontSize: screenWidth * 0.05,
-              fontWeight: FontWeight.w600,
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
-          ),
-          SizedBox(height: screenHeight * 0.01),
-          Text(
-            l10n.pleaseTryAdjustingFilters,
-            style: TextStyle(
-              fontSize: screenWidth * 0.035,
-              color: Colors.grey[600],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showSortBottomSheet(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-    final sortCubit = context.read<SortCubit>();
-
-    showModalBottomSheet(
-      context: context,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(screenWidth * 0.05),
-        ),
-      ),
-      builder: (context) {
-        return BlocBuilder<SortCubit, SortOption>(
-          builder: (context, state) {
-            final currentSort = sortCubit.currentSort;
-
-            return Container(
-              padding: EdgeInsets.all(screenWidth * 0.05),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Sort by',
-                    style: TextStyle(
-                      fontSize: screenWidth * 0.05,
-                      fontWeight: FontWeight.bold,
-                    ),
+    if (status == 'loading' || status == 'initial') {
+      return [pad(const SkeletonList(count: 2, card: true))];
+    }
+    if (status == 'error') {
+      void retry() => _filtered
+          ? runFilters(context.read<SearchCubit>(),
+              context.read<SearchCubit>().currentFilters)
+          : _search(_query.text);
+      return [
+        pad(isNetworkError(message)
+            ? OfflineBanner(onRetry: retry, body: l10n.actionNeedsInternet)
+            : ErrorState(onRetry: retry)),
+      ];
+    }
+    if (listings.isEmpty) {
+      return [
+        pad(StateMessage(
+          icon: FIcons.search,
+          title: l10n.noPropertiesFound,
+          body: l10n.pleaseTryAdjustingFilters,
+          actionLabel: l10n.filters,
+          actionIcon: FIcons.sliders,
+          secondaryAction: true,
+          onAction: _openFilters,
+        )),
+      ];
+    }
+    final saved = context.read<SavedListingsCubit>();
+    return [
+      SliverPadding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        sliver: SliverList.separated(
+          itemCount: listings.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 24),
+          itemBuilder: (context, i) {
+            final l = listings[i];
+            return Entrance(
+              index: i,
+              play: !_entered,
+              child: SavedSelector(
+                id: l.id,
+                builder: (context, isSaved) => ListingWideCard(
+                  listing: l,
+                  heroPrefix: 'sr',
+                  saved: isSaved,
+                  onToggleSave: (save) => toggleSaveWithUndo(
+                    context,
+                    save: save,
+                    doSave: () => saved.saveListing(l.id),
+                    doUnsave: () => saved.unsaveListing(l.id),
                   ),
-                  SizedBox(height: screenHeight * 0.02),
-                  Flexible(
-                    child: ListView(
-                      shrinkWrap: true,
-                      children: SortOption.values.map((option) {
-                        return _buildSortOption(
-                          option.displayName,
-                          screenWidth,
-                          isSelected: currentSort == option,
-                          onTap: () {
-                            sortCubit.updateSort(option);
-                            Navigator.pop(context);
-                            _applyCurrentFiltersWithSort(option.backendValue);
-                          },
-                        );
-                      }).toList(),
-                    ),
-                  ),
-                ],
+                ),
               ),
             );
           },
-        );
-      },
-    );
-  }
-
-  Widget _buildSortOption(
-    String title,
-    double screenWidth, {
-    bool isSelected = false,
-    VoidCallback? onTap,
-  }) {
-    return ListTile(
-      title: Text(
-        title,
-        style: TextStyle(
-          fontSize: screenWidth * 0.04,
-          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-          color: isSelected ? Theme.of(context).colorScheme.primary : null,
         ),
       ),
-      trailing: isSelected
-          ? Icon(Icons.check, color: Theme.of(context).colorScheme.primary)
-          : null,
-      onTap: onTap ??
-          () {
-            Navigator.pop(context);
-            // Apply sort
-          },
+    ];
+  }
+}
+
+class _QueryField extends StatelessWidget {
+  const _QueryField(
+      {required this.controller, required this.focus, required this.onSubmit});
+  final TextEditingController controller;
+  final FocusNode focus;
+  final ValueChanged<String> onSubmit;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.fc;
+    final l10n = AppLocalizations.of(context)!;
+    return SizedBox(
+      height: 48,
+      child: Stack(children: [
+        Positioned.fill(
+          child: Hero(
+            tag: kSearchPillHero,
+            flightShuttleBuilder: searchPillShuttle,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                  color: c.surf, borderRadius: BorderRadius.circular(999)),
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsetsDirectional.only(start: 16, end: 8),
+          child: Row(children: [
+            FIcon(FIcons.search, size: 20, color: c.muted),
+            const SizedBox(width: 10),
+            Expanded(
+              child: TextField(
+                controller: controller,
+                focusNode: focus,
+                textInputAction: TextInputAction.search,
+                onSubmitted: onSubmit,
+                style:
+                    context.tt.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+                decoration: InputDecoration(
+                  hintText: l10n.searchCityHint,
+                  filled: false,
+                  isCollapsed: true,
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                ),
+              ),
+            ),
+          ]),
+        ),
+      ]),
+    );
+  }
+}
+
+class _FilterButton extends StatelessWidget {
+  const _FilterButton({required this.count, required this.onTap});
+  final int count;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.fc;
+    final l10n = AppLocalizations.of(context)!;
+    return Semantics(
+      button: true,
+      label: count > 0 ? l10n.filtersActive(count) : l10n.filters,
+      excludeSemantics: true,
+      child: Stack(clipBehavior: Clip.none, children: [
+        CircleIconButton(
+          icon: FIcons.sliders,
+          label: l10n.filters,
+          size: 48,
+          border: false,
+          background: c.btn,
+          foreground: c.btnText,
+          onPressed: onTap,
+        ),
+        if (count > 0)
+          PositionedDirectional(
+            top: -2,
+            end: -2,
+            child: PopOnChange(
+              trigger: count,
+              peak: 1.2,
+              child: Container(
+                constraints: const BoxConstraints(minWidth: 20),
+                height: 20,
+                padding: const EdgeInsets.symmetric(horizontal: 5),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: c.accent,
+                  borderRadius: BorderRadius.circular(99),
+                  border: Border.all(color: c.bg, width: 2),
+                ),
+                child: Text('$count',
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800)),
+              ),
+            ),
+          ),
+      ]),
+    );
+  }
+}
+
+class _ActiveChip extends StatelessWidget {
+  const _ActiveChip({required this.label, required this.onRemove});
+  final String label;
+  final VoidCallback onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.fc;
+    final l10n = AppLocalizations.of(context)!;
+    return Container(
+      height: 34,
+      padding: const EdgeInsetsDirectional.only(start: 14, end: 4),
+      decoration: BoxDecoration(
+          color: c.accentT, borderRadius: BorderRadius.circular(999)),
+      child: Row(mainAxisSize: MainAxisSize.min, children: [
+        Text(label,
+            style: TextStyle(
+                color: c.accent, fontSize: 13, fontWeight: FontWeight.w700)),
+        Semantics(
+          button: true,
+          label: l10n.removeFilter(label),
+          excludeSemantics: true,
+          child: GestureDetector(
+            onTap: onRemove,
+            behavior: HitTestBehavior.opaque,
+            child: Padding(
+              padding: const EdgeInsets.all(6),
+              child:
+                  FIcon(FIcons.x, size: 14, strokeWidth: 2.2, color: c.accent),
+            ),
+          ),
+        ),
+      ]),
+    );
+  }
+}
+
+class _SortMenu extends StatelessWidget {
+  const _SortMenu(
+      {required this.current,
+      required this.allowDistance,
+      required this.onSelected});
+  final String current;
+  final bool allowDistance;
+  final ValueChanged<String> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.fc;
+    final l10n = AppLocalizations.of(context)!;
+    final options = <(String, String)>[
+      ('date_newest', l10n.newest),
+      ('price_asc', l10n.priceLowToHigh),
+      ('price_desc', l10n.priceHighToLow),
+      if (allowDistance) ('distance', l10n.nearest),
+    ];
+    final label = options
+        .firstWhere((o) => o.$1 == current, orElse: () => options.first)
+        .$2;
+    return PopupMenuButton<String>(
+      tooltip: l10n.sortBy,
+      onSelected: onSelected,
+      position: PopupMenuPosition.under,
+      itemBuilder: (_) => [
+        for (final (v, t) in options)
+          PopupMenuItem(
+            value: v,
+            height: 48,
+            child: Row(children: [
+              Expanded(child: Text(t)),
+              if (v == current) FIcon(FIcons.check, size: 18, color: c.accent),
+            ]),
+          ),
+      ],
+      child: Container(
+        height: 36,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          color: c.bg,
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(color: c.line),
+        ),
+        child: Row(mainAxisSize: MainAxisSize.min, children: [
+          FIcon(FIcons.sort, size: 16, color: c.ink),
+          const SizedBox(width: 6),
+          Text(label,
+              style: TextStyle(
+                  color: c.ink, fontSize: 13, fontWeight: FontWeight.w700)),
+          const SizedBox(width: 4),
+          FIcon(FIcons.chevDown, size: 16, color: c.ink),
+        ]),
+      ),
     );
   }
 }

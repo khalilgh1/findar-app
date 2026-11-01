@@ -47,6 +47,9 @@ abstract class ListingRepository {
     String? image,
     List<String>? additionalImages,
     bool? isOnline,
+    double? area,
+    double? latitude,
+    double? longitude,
   });
 
   /// Delete a listing

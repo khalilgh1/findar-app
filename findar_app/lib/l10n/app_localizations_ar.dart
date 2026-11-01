@@ -9,13 +9,13 @@ class AppLocalizationsAr extends AppLocalizations {
   AppLocalizationsAr([String locale = 'ar']) : super(locale);
 
   @override
-  String get appTitle => 'FinDar';
+  String get appTitle => 'Findar';
 
   @override
-  String get welcomeBack => 'مرحبًا بعودتك!';
+  String get welcomeBack => 'مرحبًا بعودتك';
 
   @override
-  String get completeRegistration => 'أكمل تسجيلك';
+  String get completeRegistration => 'إكمال التسجيل';
 
   @override
   String get selectAccountType => 'اختر نوع الحساب';
@@ -33,7 +33,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get enterFullName => 'أدخل اسمك الكامل';
 
   @override
-  String get emailAddress => 'عنوان البريد الإلكتروني';
+  String get emailAddress => 'البريد الإلكتروني';
 
   @override
   String get enterEmail => 'أدخل عنوان بريدك الإلكتروني';
@@ -51,7 +51,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get enterPassword => 'أدخل كلمة المرور';
 
   @override
-  String get forgotPassword => 'نسيت كلمة المرور';
+  String get forgotPassword => 'نسيت كلمة المرور؟';
 
   @override
   String get ninLabel => 'رقم الهوية الوطنية';
@@ -72,13 +72,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get dontHaveAccount => 'ليس لديك حساب؟';
 
   @override
-  String get register => 'التسجيل';
+  String get register => 'إنشاء حساب';
 
   @override
   String get welcome => 'مرحبًا';
 
   @override
-  String get yourPropertyMarketplace => 'سوق العقارات الخاص بك';
+  String get yourPropertyMarketplace => 'سوق عقاراتك';
 
   @override
   String get buy => 'شراء';
@@ -90,13 +90,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get rent => 'إيجار';
 
   @override
-  String get getStarted => 'ابدأ الآن';
+  String get getStarted => 'ابدأ';
 
   @override
   String get sponsoredProperties => 'عقارات مُمولة';
 
   @override
-  String get recentListings => 'القوائم الأخيرة';
+  String get recentListings => 'أحدث الإعلانات';
 
   @override
   String get viewAll => 'عرض الكل';
@@ -138,7 +138,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get bedrooms => 'غرف النوم';
 
   @override
-  String get bathrooms => 'الحمامات';
+  String get bathrooms => 'الحمّامات';
 
   @override
   String get squareFootage => 'المساحة بالقدم المربع';
@@ -189,16 +189,16 @@ class AppLocalizationsAr extends AppLocalizations {
   String get noPropertiesFound => 'لم يتم العثور على عقارات';
 
   @override
-  String get pleaseTryAdjustingFilters => 'يرجى محاولة تعديل معايير البحث';
+  String get pleaseTryAdjustingFilters => 'جرّب مكانًا آخر أو فلاتر أقل.';
 
   @override
   String get sortBy => 'ترتيب حسب';
 
   @override
-  String get priceLowToHigh => 'السعر: من الأقل إلى الأعلى';
+  String get priceLowToHigh => 'السعر: من الأقل';
 
   @override
-  String get priceHighToLow => 'السعر: من الأعلى إلى الأقل';
+  String get priceHighToLow => 'السعر: من الأعلى';
 
   @override
   String get newest => 'الأحدث';
@@ -213,7 +213,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get enterLocationHint => 'أدخل مدينة أو رمز بريدي أو حي';
 
   @override
-  String get priceRange => 'نطاق السعر';
+  String get priceRange => 'السعر';
 
   @override
   String get propertyType => 'نوع العقار';
@@ -225,13 +225,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get bedsAndBaths => 'غرف النوم والحمامات';
 
   @override
-  String get minLabel => 'الحد الأدنى';
+  String get minLabel => 'الأدنى';
 
   @override
-  String get maxLabel => 'الحد الأقصى';
+  String get maxLabel => 'الأقصى';
 
   @override
-  String get listedBy => 'مدرج بواسطة';
+  String get listedBy => 'المعلِن';
 
   @override
   String get privateOwner => 'صاحب خاص';
@@ -262,7 +262,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get propertyTitle => 'عنوان العقار';
 
   @override
-  String get examplePropertyTitleHint => 'مثال: شقة واسعة بـ 3 غرف نوم';
+  String get examplePropertyTitleHint => 'مثال: فيلا مع حديقة';
 
   @override
   String get price => 'السعر';
@@ -295,10 +295,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get priceOnRequest => 'السعر عند الطلب';
 
   @override
-  String get boostedBadge => 'مُعزَّز';
+  String get boostedBadge => 'مُروَّج';
 
   @override
-  String get boostAction => 'تعزيز';
+  String get boostAction => 'ترويج';
 
   @override
   String get toggleStatus => 'تبديل الحالة';
@@ -330,10 +330,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get propertyStatus => 'حالة العقار';
 
   @override
-  String get online => 'متصل';
+  String get online => 'منشور';
 
   @override
-  String get offline => 'غير متصل';
+  String get offline => 'غير منشور';
 
   @override
   String get floors => 'الطوابق';
@@ -383,7 +383,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get delete => 'حذف';
 
   @override
-  String get profile => 'الملف الشخصي';
+  String get profile => 'حسابي';
 
   @override
   String get listings => 'الإعلانات';
@@ -395,7 +395,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get viewListing => 'عرض الإعلان';
 
   @override
-  String get editProfile => 'تحرير الملف الشخصي';
+  String get editProfile => 'تعديل الملف';
 
   @override
   String get accountSettings => 'إعدادات الحساب';
@@ -404,7 +404,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get logout => 'تسجيل الخروج';
 
   @override
-  String get profilePictureUpdated => 'تم تحديث صورة الملف الشخصي بنجاح';
+  String get profilePictureUpdated => 'تم تحديث الصورة الشخصية';
 
   @override
   String get upload => 'رفع';
@@ -569,13 +569,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get home => 'الرئيسية';
 
   @override
-  String get saved => 'محفوظ';
+  String get saved => 'المحفوظات';
 
   @override
   String get search => 'بحث';
 
   @override
-  String get searchHint => 'البحث عن العقارات...';
+  String get searchHint => 'بحث';
 
   @override
   String get noResults => 'لم يتم العثور على نتائج';
@@ -607,7 +607,7 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get addFirstPropertyListing => 'أضف قائمة العقارات الأولى الخاصة بك';
+  String get addFirstPropertyListing => 'انشر عقارك الأول في دقيقة.';
 
   @override
   String get chooseSponsorshipPlan => 'اختر خطة رعاية';
@@ -616,7 +616,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get selectPlanToBoostProperty => 'حدد خطة لتعزيز العقار الخاص بك';
 
   @override
-  String get continueToPayment => 'متابعة إلى الدفع';
+  String get continueToPayment => 'المتابعة إلى الدفع';
 
   @override
   String get paymentConfirmation => 'تأكيد الدفع';
@@ -641,25 +641,25 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get basicSponsor => 'راعي أساسي';
+  String get basicSponsor => 'أساسية';
 
   @override
-  String get premiumSponsor => 'راعي بريميوم';
+  String get premiumSponsor => 'مميزة';
 
   @override
-  String get agencySponsorPlan => 'خطة رعاية الوكالة';
+  String get agencySponsorPlan => 'وكالة';
 
   @override
   String get featuredPlacement => 'موضع مميز';
 
   @override
-  String get priorityInSearch => 'الأولوية في نتائج البحث';
+  String get priorityInSearch => 'أولوية في نتائج البحث';
 
   @override
   String get basicAnalytics => 'تحليلات أساسية';
 
   @override
-  String get topPriority => 'أولوية عليا في نتائج البحث';
+  String get topPriority => 'أولوية قصوى في البحث';
 
   @override
   String get advancedAnalytics => 'تحليلات متقدمة';
@@ -740,10 +740,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get inappropriateContent => 'محتوى غير لائق';
 
   @override
-  String get propertyNotAvailable => 'العقار غير متوفر';
+  String get propertyNotAvailable => 'لم يعد متاحًا';
 
   @override
-  String get propertyReportedThankYou => 'تم الإبلاغ عن العقار، شكراً لك!';
+  String get propertyReportedThankYou => 'شكرًا، سنراجع هذا الإعلان.';
 
   @override
   String get helpMaintainQuality => 'ساعدنا في الحفاظ على جودة القوائم من خلال الإبلاغ عن المشاكل.';
@@ -758,10 +758,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get provideDetails => 'يرجى تقديم تفاصيل حول المشكلة...';
 
   @override
-  String get sendReport => 'إرسال التقرير';
+  String get sendReport => 'إرسال البلاغ';
 
   @override
-  String get pleaseSelectOrDescribe => 'يرجى اختيار أو وصف المشكلة قبل الإرسال.';
+  String get pleaseSelectOrDescribe => 'اختر سببًا أو صف المشكلة.';
 
   @override
   String get sessionExpired => 'انتهت صلاحية جلستك. يرجى تسجيل الدخول مرة أخرى.';
@@ -770,11 +770,567 @@ class AppLocalizationsAr extends AppLocalizations {
   String get listingNotFound => 'هذا الإعلان لم يعد متاحًا.';
 
   @override
-  String get areaSqm => 'المساحة (م²)';
+  String get areaSqm => 'المساحة';
 
   @override
-  String get signInWithGoogle => 'تسجيل الدخول باستخدام Google';
+  String get signInWithGoogle => 'المتابعة باستخدام Google';
 
   @override
   String get actionNeedsInternet => 'أنت غير متصل. اتصل بالإنترنت وحاول مرة أخرى.';
+
+  @override
+  String get currencyDa => 'دج';
+
+  @override
+  String get perMonth => '/ شهر';
+
+  @override
+  String bdShort(int count) {
+    return '$count غرف';
+  }
+
+  @override
+  String baShort(int count) {
+    return '$count حمّام';
+  }
+
+  @override
+  String get noPhoto => 'لا توجد صورة';
+
+  @override
+  String get removeFromSaved => 'إزالة من المحفوظات';
+
+  @override
+  String get savedToList => 'تم الحفظ في قائمتك';
+
+  @override
+  String get back => 'رجوع';
+
+  @override
+  String get orLabel => 'أو';
+
+  @override
+  String get increase => 'زيادة';
+
+  @override
+  String get decrease => 'إنقاص';
+
+  @override
+  String get seeAll => 'عرض الكل';
+
+  @override
+  String get tryAgain => 'حاول مجددًا';
+
+  @override
+  String get youreOffline => 'أنت غير متصل';
+
+  @override
+  String get offlineBannerBody => 'نعرض النتائج المحفوظة من زيارتك الأخيرة.';
+
+  @override
+  String get couldntLoadListings => 'تعذّر تحميل الإعلانات';
+
+  @override
+  String get couldntLoadBody => 'لم يستجب الخادم. حاول مرة أخرى بعد قليل.';
+
+  @override
+  String get listingUnavailableOffline => 'هذا الإعلان غير متاح دون اتصال';
+
+  @override
+  String get listingUnavailableOfflineBody => 'يمكنك فتح إعلاناتك والعقارات المحفوظة فقط دون اتصال.';
+
+  @override
+  String get browseListings => 'تصفح الإعلانات';
+
+  @override
+  String get postTab => 'انشر';
+
+  @override
+  String helloName(String name) {
+    return 'مرحبًا، $name';
+  }
+
+  @override
+  String get hello => 'مرحبًا';
+
+  @override
+  String get heroTitle => 'اعثر على منزلك القادم';
+
+  @override
+  String get searchCityHint => 'ابحث عن مدينة أو حي';
+
+  @override
+  String get listYourProperty => 'انشر عقارك';
+
+  @override
+  String get listYourPropertySub => 'للبيع أو للإيجار على Findar';
+
+  @override
+  String get browseByType => 'تصفح حسب النوع';
+
+  @override
+  String get sponsored => 'عقارات مميزة';
+
+  @override
+  String get noRecentListings => 'لا توجد إعلانات بعد';
+
+  @override
+  String get noRecentListingsBody => 'ستظهر العقارات الجديدة هنا.';
+
+  @override
+  String get tagHydra => '#حيدرة';
+
+  @override
+  String get tagForRent => '#للإيجار';
+
+  @override
+  String get tagVilla => '#فيلا';
+
+  @override
+  String get tagOran => '#وهران';
+
+  @override
+  String get tagF3 => '#F3';
+
+  @override
+  String get anyLabel => 'الكل';
+
+  @override
+  String get pricePerMonth => 'السعر الشهري';
+
+  @override
+  String get minimumArea => 'المساحة الدنيا';
+
+  @override
+  String get anyone => 'الجميع';
+
+  @override
+  String get ownerLabel => 'مالك';
+
+  @override
+  String resultsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count نتيجة',
+      many: '$count نتيجة',
+      few: '$count نتائج',
+      two: 'نتيجتان',
+      one: 'نتيجة واحدة',
+      zero: 'لا نتائج',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String filtersActive(int count) {
+    return 'الفلاتر، $count مفعّلة';
+  }
+
+  @override
+  String removeFilter(String label) {
+    return 'إزالة $label';
+  }
+
+  @override
+  String get nearest => 'الأقرب';
+
+  @override
+  String bedsMin(int count) {
+    return '$count+ غرف';
+  }
+
+  @override
+  String bathsMin(int count) {
+    return '$count+ حمّام';
+  }
+
+  @override
+  String areaMin(int count) {
+    return '$count+ م²';
+  }
+
+  @override
+  String get aboutProperty => 'عن هذا العقار';
+
+  @override
+  String get readMore => 'اقرأ المزيد';
+
+  @override
+  String get showLess => 'عرض أقل';
+
+  @override
+  String get viewProfile => 'عرض الملف';
+
+  @override
+  String get reportThisListing => 'الإبلاغ عن هذا الإعلان';
+
+  @override
+  String listedDaysAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'نُشر قبل $count يومًا',
+      few: 'نُشر قبل $count أيام',
+      two: 'نُشر قبل يومين',
+      one: 'نُشر أمس',
+      zero: 'نُشر اليوم',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get areaLabel => 'المساحة';
+
+  @override
+  String get call => 'اتصال';
+
+  @override
+  String get sendSms => 'إرسال رسالة';
+
+  @override
+  String get message => 'رسالة';
+
+  @override
+  String get individualLabel => 'فرد';
+
+  @override
+  String get noPhoneNumber => 'لا يوجد رقم هاتف لهذا الإعلان';
+
+  @override
+  String photoOf(int index, int total) {
+    return 'الصورة $index من $total';
+  }
+
+  @override
+  String get reportPrivate => 'البلاغات سرية. تساعدنا على إبقاء الإعلانات دقيقة وآمنة.';
+
+  @override
+  String get detailsOptional => 'تفاصيل (اختياري)';
+
+  @override
+  String get tellUsWhatsWrong => 'أخبرنا بما هو خطأ';
+
+  @override
+  String propertiesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count عقار',
+      many: '$count عقارًا',
+      few: '$count عقارات',
+      two: 'عقاران',
+      one: 'عقار واحد',
+      zero: 'لا عقارات',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get noSavedYet => 'لا توجد عقارات محفوظة بعد';
+
+  @override
+  String get noSavedBody => 'اضغط على علامة الحفظ في أي إعلان للاحتفاظ به هنا.';
+
+  @override
+  String onlineCount(int count) {
+    return 'منشورة · $count';
+  }
+
+  @override
+  String offlineCount(int count) {
+    return 'غير منشورة · $count';
+  }
+
+  @override
+  String get makeOffline => 'إخفاء';
+
+  @override
+  String get makeOnline => 'نشر';
+
+  @override
+  String get newListing => 'إعلان جديد';
+
+  @override
+  String actionsFor(String title) {
+    return 'إجراءات $title';
+  }
+
+  @override
+  String get deleteListingTitle => 'حذف هذا الإعلان؟';
+
+  @override
+  String deleteListingBody(String title) {
+    return 'سيُحذف \"$title\" نهائيًا.';
+  }
+
+  @override
+  String get listingStatusUpdated => 'تم تحديث حالة الإعلان';
+
+  @override
+  String get noOnlineListings => 'لا توجد إعلانات منشورة';
+
+  @override
+  String get noOfflineListings => 'لا توجد إعلانات مخفية';
+
+  @override
+  String get titleLabel => 'العنوان';
+
+  @override
+  String get listingType => 'نوع الإعلان';
+
+  @override
+  String get addLabel => 'إضافة';
+
+  @override
+  String get coverLabel => 'الغلاف';
+
+  @override
+  String get photosHint => 'الصورة الأولى هي الغلاف.';
+
+  @override
+  String get removePhoto => 'إزالة الصورة';
+
+  @override
+  String get visibleToBuyers => 'مرئي للمشترين';
+
+  @override
+  String get visibleToBuyersSub => 'أوقفه للحفظ كإعلان مخفي';
+
+  @override
+  String get searchAddress => 'ابحث عن عنوان';
+
+  @override
+  String get describeHint => 'صف العقار والحي وما يتضمنه…';
+
+  @override
+  String get deleteListing => 'حذف الإعلان';
+
+  @override
+  String get editListingTitle => 'تعديل الإعلان';
+
+  @override
+  String get addAtLeastOnePhoto => 'أضف صورة واحدة على الأقل.';
+
+  @override
+  String get individualAccount => 'حساب فردي';
+
+  @override
+  String get agencyAccount => 'وكالة';
+
+  @override
+  String get boostAListing => 'روّج إعلانًا';
+
+  @override
+  String get boostAListingSub => 'اظهر في المميزة وأعلى في البحث.';
+
+  @override
+  String get seePlans => 'عرض الباقات';
+
+  @override
+  String get phoneLabel => 'الهاتف';
+
+  @override
+  String get changePhoto => 'تغيير الصورة';
+
+  @override
+  String listingsCount(int count) {
+    return 'الإعلانات · $count';
+  }
+
+  @override
+  String get noListingsYet => 'لا توجد إعلانات بعد';
+
+  @override
+  String get removePhotoAction => 'إزالة الصورة';
+
+  @override
+  String get chooseFromGallery => 'اختر من المعرض';
+
+  @override
+  String get takePhoto => 'التقط صورة';
+
+  @override
+  String get darkModeSub => 'ألوان داكنة في كل التطبيق';
+
+  @override
+  String get callSupport => 'اتصل بالدعم';
+
+  @override
+  String get emailSupport => 'راسل الدعم';
+
+  @override
+  String get account => 'الحساب';
+
+  @override
+  String get logoutConfirm => 'ستحتاج لتسجيل الدخول مجددًا لرؤية إعلاناتك.';
+
+  @override
+  String get loginSubtitle => 'سجّل الدخول لحفظ الإعلانات والتواصل مع المالكين.';
+
+  @override
+  String get createAccount => 'إنشاء حساب';
+
+  @override
+  String get continueWithGoogle => 'المتابعة باستخدام Google';
+
+  @override
+  String get showPassword => 'إظهار كلمة المرور';
+
+  @override
+  String get hidePassword => 'إخفاء كلمة المرور';
+
+  @override
+  String get accountType => 'نوع الحساب';
+
+  @override
+  String get individualSub => 'أشتري أو أستأجر أو أبيع عقاري';
+
+  @override
+  String get agencySub => 'أنشر عقارات لعملائي';
+
+  @override
+  String get rule8Chars => '8 أحرف أو أكثر';
+
+  @override
+  String get ruleUppercase => 'حرف كبير';
+
+  @override
+  String get ruleLowercase => 'حرف صغير';
+
+  @override
+  String get ruleNumber => 'رقم';
+
+  @override
+  String get addProfilePhoto => 'أضف صورة شخصية';
+
+  @override
+  String get addProfilePhotoBody => 'يرد المشترون والمالكون أكثر عندما يرون مع من يتحدثون.';
+
+  @override
+  String get continueLabel => 'متابعة';
+
+  @override
+  String get resetPassword => 'إعادة تعيين كلمة المرور';
+
+  @override
+  String get resetPasswordSub => 'سنرسل لك رمز تحقق عبر البريد.';
+
+  @override
+  String get sendCode => 'إرسال الرمز';
+
+  @override
+  String get codeSent => 'تم إرسال الرمز. تحقق من بريدك.';
+
+  @override
+  String get enterCode => 'أدخل الرمز';
+
+  @override
+  String get verifyCode => 'تحقق من الرمز';
+
+  @override
+  String get didntGetIt => 'لم يصلك؟';
+
+  @override
+  String get resendCode => 'إعادة إرسال الرمز';
+
+  @override
+  String get newPasswordTitle => 'كلمة مرور جديدة';
+
+  @override
+  String get newPasswordSub => 'اختر كلمة مرور لم تستخدمها من قبل.';
+
+  @override
+  String get confirmPassword => 'تأكيد كلمة المرور';
+
+  @override
+  String get updatePassword => 'تحديث كلمة المرور';
+
+  @override
+  String get passwordsDontMatch => 'كلمتا المرور غير متطابقتين';
+
+  @override
+  String get welcomeHeadline => 'اعثر على مكان\nتسميه بيتك.';
+
+  @override
+  String get welcomeBody => 'منازل وشقق وفيلات واستوديوهات ومكاتب للبيع أو الإيجار في كل الجزائر.';
+
+  @override
+  String get boostListing => 'ترويج الإعلان';
+
+  @override
+  String get boostIntro => 'تظهر الإعلانات المروّجة في المميزة على الرئيسية وأعلى في البحث.';
+
+  @override
+  String get mostChosen => 'الأكثر اختيارًا';
+
+  @override
+  String daysCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count يومًا',
+      few: '$count أيام',
+      two: 'يومان',
+      one: 'يوم واحد',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get featuredOnHome => 'ظهور مميز في الرئيسية';
+
+  @override
+  String get boostedBadgeFeature => 'شارة الترويج';
+
+  @override
+  String get checkout => 'الدفع';
+
+  @override
+  String get orderSummary => 'ملخص الطلب';
+
+  @override
+  String get planLabel => 'الباقة';
+
+  @override
+  String get durationLabel => 'المدة';
+
+  @override
+  String get totalLabel => 'المجموع';
+
+  @override
+  String get payWith => 'بيانات البطاقة';
+
+  @override
+  String payAmount(String amount) {
+    return 'ادفع $amount';
+  }
+
+  @override
+  String get boostedTitle => 'تم ترويج إعلانك';
+
+  @override
+  String boostedBody(String title) {
+    return 'يظهر $title الآن في العقارات المميزة.';
+  }
+
+  @override
+  String get noPlansAvailable => 'لا توجد باقات متاحة حاليًا.';
+
+  @override
+  String get securePaymentNote => 'تتم معالجة المدفوعات بأمان.';
+
+  @override
+  String get pickListingToBoost => 'اختر إعلانًا لترويجه';
+
+  @override
+  String get noListingsToBoost => 'انشر إعلانًا أولًا ثم روّجه.';
+
+  @override
+  String get uploadFailed => 'فشل الرفع. حاول مجددًا.';
+
+  @override
+  String planPriceDays(String price, String days) {
+    return '$price · $days';
+  }
 }

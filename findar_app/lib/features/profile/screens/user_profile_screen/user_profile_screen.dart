@@ -1,17 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:findar/logic/cubits/profile_cubit.dart';
-import 'package:findar/features/profile/screens/user_profile_screen/user_profile_avatar.dart';
-import 'package:findar/features/profile/screens/profile_screen/listings.dart';
-import 'package:findar/features/profile/screens/profile_screen/profile_info.dart';
-import 'package:findar/core/widgets/progress_button.dart';
-import 'package:findar/core/widgets/shimmer_loading.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+import 'package:findar/core/models/property_listing_model.dart';
+import 'package:findar/core/motion/motion.dart';
+import 'package:findar/core/theme/findar_tokens.dart';
+import 'package:findar/core/utils/save_feedback.dart';
+import 'package:findar/core/widgets/decor/decor.dart';
+import 'package:findar/core/widgets/f_icon.dart';
+import 'package:findar/core/widgets/listing_widgets.dart';
+import 'package:findar/core/widgets/ui.dart';
 import 'package:findar/l10n/app_localizations.dart';
+import 'package:findar/logic/cubits/profile_cubit.dart';
+import 'package:findar/logic/cubits/saved_listings_cubit.dart';
 
+/// Another user's public profile (owner / agency).
 class UserProfileScreen extends StatefulWidget {
-  final String userId;
-
   const UserProfileScreen({super.key, required this.userId});
+  final String userId;
 
   @override
   State<UserProfileScreen> createState() => _UserProfileScreenState();
@@ -21,168 +27,226 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   @override
   void initState() {
     super.initState();
-    // Fetch the specific user's profile by their ID
-    context.read<ProfileCubit>().fetchUserById(int.parse(widget.userId));
+    _load();
+    context.read<SavedListingsCubit>().fetchSavedListings();
+  }
+
+  void _load() {
+    final id = int.tryParse(widget.userId);
+    if (id != null) context.read<ProfileCubit>().fetchUserById(id);
+  }
+
+  Future<void> _launch(Uri uri) async {
+    final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!ok && mounted) showAppSnack(context, uri.path);
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final c = context.fc;
+    final l10n = AppLocalizations.of(context)!;
+    final top = MediaQuery.paddingOf(context).top;
 
     return Scaffold(
-      backgroundColor: theme.colorScheme.surface,
-      appBar: AppBar(
-        scrolledUnderElevation: 0,
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: Theme.of(context).colorScheme.onSurface,
-            size: 30,
-          ),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          AppLocalizations.of(context)!.profile,
-          style: TextStyle(
-            color: Theme.of(context).colorScheme.onSurface,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        centerTitle: true,
-      ),
+      backgroundColor: c.bg,
       body: BlocBuilder<ProfileCubit, Map<String, dynamic>>(
         builder: (context, state) {
-          if (state['state'] == 'loading') {
-            return const UserProfileSkeleton();
-          }
+          final status = state['state'];
+          final d = state['data'] is Map
+              ? Map<String, dynamic>.from(state['data'] as Map)
+              : <String, dynamic>{};
+          final loaded = status == 'done' && d['listingModels'] != null;
 
-          if (state['state'] == 'error') {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(state['message'] ?? ''),
-                  const SizedBox(height: 16),
-                  ProgressButton(
-                    label: AppLocalizations.of(context)!.retry,
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                    textColor: Theme.of(context).colorScheme.onPrimary,
-                    onPressed: () {
-                      context.read<ProfileCubit>().fetchUserById(int.parse(widget.userId));
-                    },
+          if (status == 'error') {
+            return SafeArea(
+              child: Column(children: [
+                const FTopBar(),
+                Expanded(
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: ErrorState(
+                        title: l10n.errorOccurred,
+                        body: '${state['message'] ?? ''}',
+                        onRetry: _load,
+                      ),
+                    ),
                   ),
-                ],
-              ),
+                ),
+              ]),
             );
           }
 
-          final data = state['data'];
-          final user = data is Map
-              ? Map<String, dynamic>.from(data)
-              : <String, dynamic>{};
-          final username = user['name'] ?? 'User Name';
-          final email = user['email'] ?? 'user@example.com';
-      final phone = user['phone'] ?? 'N/A';
-          final profileImageUrl = user['profileImage'] as String?;
-          final myListings =
-              (user['listings'] as List?)?.cast<Map<String, dynamic>>() ??
-              [
-                {
-                  "imagePath": 'assets/find-dar-test1.jpg',
-                  "title": 'house 1',
-                  "price": 127000.0,
-                },
-                {
-                  "imagePath": 'assets/find-dar-test1.jpg',
-                  "title": 'house 2',
-                  "price": 150000.0,
-                },
-              ];
+          final name = (d['name'] ?? '') as String;
+          final phone = ((d['phone'] ?? '') as String).trim();
+          final agency =
+              (d['accountType'] ?? '').toString().toLowerCase() == 'agency';
+          final listings = loaded
+              ? (d['listingModels'] as List).cast<PropertyListing>()
+              : const <PropertyListing>[];
+          final saved = context.read<SavedListingsCubit>();
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const SizedBox(height: 10),
-                // Avatar without edit button
-                UserProfileAvatar(imageUrl: profileImageUrl),
-                const SizedBox(height: 10),
-                Text(
-                  username,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
+          return CustomScrollView(slivers: [
+            SliverToBoxAdapter(
+              child: WaveHeader(
+                height: 300 + top - 44,
+                child: Stack(children: [
+                  PositionedDirectional(
+                      top: top + 6, start: 16, child: const FBackButton()),
+                  Positioned(
+                    left: 20,
+                    right: 20,
+                    top: top + 26,
+                    child: Column(children: [
+                      Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: c.bg,
+                          shape: BoxShape.circle,
+                          boxShadow: const [
+                            BoxShadow(
+                                color: Color(0x330A5FC2),
+                                blurRadius: 26,
+                                offset: Offset(0, 10)),
+                          ],
+                        ),
+                        child: InitialsAvatar(
+                            name: loaded ? name : null,
+                            imageUrl: d['profileImage'] as String?,
+                            size: 88),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(loaded ? name : ' ',
+                          textAlign: TextAlign.center,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: context.tt.headlineMedium
+                              ?.copyWith(fontSize: 22)),
+                      const SizedBox(height: 8),
+                      if (loaded)
+                        Container(
+                          height: 30,
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.75),
+                            borderRadius: BorderRadius.circular(999),
+                            border: Border.all(color: c.line),
+                          ),
+                          child: Row(mainAxisSize: MainAxisSize.min, children: [
+                            FIcon(agency ? FIcons.building : FIcons.user,
+                                size: 15, color: FindarColors.brandBlue),
+                            const SizedBox(width: 6),
+                            Text(
+                                agency
+                                    ? l10n.agencyAccount
+                                    : l10n.individualLabel,
+                                style: const TextStyle(
+                                    color: FindarColors.brandBlue,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w800)),
+                          ]),
+                        ),
+                    ]),
+                  ),
+                ]),
+              ),
+            ),
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+              sliver: SliverToBoxAdapter(
+                child: Row(children: [
+                  Expanded(
+                    child: FButton(
+                      label: l10n.message,
+                      icon: FIcons.message,
+                      kind: FButtonKind.secondary,
+                      height: 48,
+                      onPressed: phone.isEmpty
+                          ? null
+                          : () => _launch(Uri(scheme: 'sms', path: phone)),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: FButton(
+                      label: l10n.call,
+                      icon: FIcons.phone,
+                      height: 48,
+                      onPressed: phone.isEmpty
+                          ? null
+                          : () => _launch(Uri(scheme: 'tel', path: phone)),
+                    ),
+                  ),
+                ]),
+              ),
+            ),
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 14),
+              sliver: SliverToBoxAdapter(
+                child: SectionHeader(loaded
+                    ? l10n.listingsCount(listings.length)
+                    : l10n.listings),
+              ),
+            ),
+            if (!loaded)
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                sliver: SliverToBoxAdapter(
+                  child: Shimmer(
+                    child: Row(children: const [
+                      Expanded(child: SkeletonCard(photoHeight: 130)),
+                      SizedBox(width: 14),
+                      Expanded(child: SkeletonCard(photoHeight: 130)),
+                    ]),
                   ),
                 ),
-                Text(
-                  email,
-                  style: const TextStyle(color: Colors.grey),
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 1,
+              )
+            else if (listings.isEmpty)
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                sliver: SliverToBoxAdapter(
+                  child: Text(l10n.noListingsYet,
+                      style: context.tt.bodyMedium?.copyWith(color: c.muted)),
                 ),
-                const SizedBox(height: 25),
-                // Profile info card
-                ProfileInfoCard(
-                  phone: phone,
-                  email: email,
-                ),
-                const SizedBox(height: 30),
-                // Listings section (without "Add New" button)
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Listings',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: theme.colorScheme.onSurface,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 15),
-                SizedBox(
-                  height: 280,
-                  child: myListings.isEmpty
-                      ? Center(
-                          child: Text(
-                            'No listings yet',
-                            style: TextStyle(
-                              color: theme.colorScheme.onSurface.withOpacity(
-                                0.5,
-                              ),
-                              fontSize: 16,
-                            ),
+              )
+            else
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                sliver: SliverGrid.builder(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 18,
+                    crossAxisSpacing: 14,
+                    mainAxisExtent: 212,
+                  ),
+                  itemCount: listings.length,
+                  itemBuilder: (context, i) {
+                    final l = listings[i];
+                    return Entrance(
+                      index: i,
+                      child: SavedSelector(
+                        id: l.id,
+                        builder: (context, isSaved) => ListingGridTile(
+                          listing: l,
+                          photoHeight: 130,
+                          heroPrefix: 'up',
+                          saved: isSaved,
+                          onToggleSave: (save) => toggleSaveWithUndo(
+                            context,
+                            save: save,
+                            doSave: () => saved.saveListing(l.id),
+                            doUnsave: () => saved.unsaveListing(l.id),
                           ),
-                        )
-                      : ListView(
-                          scrollDirection: Axis.horizontal,
-                          children: myListings
-                              .map(
-                                (listing) => ListingCard(
-                                  listingId: listing['id'] as int?,
-                                  imagePath:
-                                      listing['imagePath'] ??
-                                      'assets/find-dar-test1.jpg',
-                                  title: listing['title'] ?? 'house',
-                                  price: (listing['price'] is double) 
-                                      ? listing['price'] 
-                                      : (listing['price'] is int) 
-                                          ? (listing['price'] as int).toDouble()
-                                          : 0.0,
-                                ),
-                              )
-                              .toList(),
                         ),
+                      ),
+                    );
+                  },
                 ),
-                const SizedBox(height: 30),
-              ],
-            ),
-          );
+              ),
+            SliverToBoxAdapter(
+                child: SizedBox(
+                    height: 32 + MediaQuery.paddingOf(context).bottom)),
+          ]);
         },
       ),
     );

@@ -7,7 +7,7 @@ The owner wants this done in discrete steps, **stopping for review after each st
 | 1 | Analyze project; write CLAUDE.md + docs; install skills/MCPs/tools (graphify, apple-design, Flutter plugin, mobile-mcp) | done 2026-10-30 |
 | 2 | Investigate code + run analysis/tests; find and fix all issues (app + backend) | done 2026-10-30 (see below) |
 | 3 | E2E + real-device tests so every flow works (integration_test, mobile-mcp driving the emulator, backend API tests) | done 2026-10-31 (see below; how to run: [testing.md](testing.md)) |
-| 4 | Redesign screens/components, app icon, splash with Claude Design; implement it; add motion/animations (use `apple-design` skill for HIG review) | 4a design **approved 2026-11-01**: spec in [design/README.md](design/README.md), [canvas](https://claude.ai/artifact/NXLyPR63DLLKiY4ezRvt4D). 4b implementation not started; follow the plan in design/README.md §5 |
+| 4 | Redesign screens/components, app icon, splash with Claude Design; implement it; add motion/animations (use `apple-design` skill for HIG review) | 4a design **approved 2026-11-01**: spec in [design/README.md](design/README.md), [canvas](https://claude.ai/artifact/NXLyPR63DLLKiY4ezRvt4D). 4b **implemented 2026-11-01** on branch `feature/redesign-4b` (see below); waiting for owner review |
 | 5 | Owner tests manually, reports remaining issues | — |
 
 ## Step 2 results (2026-10-30)
@@ -80,6 +80,23 @@ Side effects to clean up: two generated test images uploaded to the real Cloudin
 - Uncached listing images show an endless spinner offline instead of a placeholder.
 - The login success snackbar floats over the bottom bar for 2 s and swallows the first tab tap.
 - More hard-coded English: My Listings tabs and menu ("Online", "Make Offline"), avatar sheet ("Choose from Gallery", "Remove Photo"), snackbars.
+
+## Step 4b results (2026-11-01)
+
+Implemented the approved redesign (docs/design/README.md) in `findar_app/`:
+- **Foundations**: Manrope + IBM Plex Sans Arabic bundled (offline), token theme (`FindarColors`, light/dark), text scale, component themes; one price format (`52 000 000 DA`, `/ month`, Arabic `دج`); the generator's outline icon set (`FIcon`, flutter_svg, cached).
+- **Brand**: new app icon (legacy + adaptive + monochrome, `flutter_launcher_icons`), native splash (light/dark, Android 12) with the gradient tile, notification icon = monochrome mark. Source PNGs in `assets/brand/` (rendered from docs/design/brand by PIL). App label "Findar".
+- **Screens**: every route rebuilt — splash → welcome, login, register (account cards, live password rules), profile photo, forgot/reset password, home (hero search with floating hashtags, promo banner, type cards, sponsored carousel, recent rows), advanced search, search results (query field, active-filter chips, count, sort incl. Nearest), details (Hero photo carousel, overlapping sheet, stat tiles, Read more, owner card, sticky Call), report sheet, saved grid, my listings (status pills, ⋯ menu; Boost hidden when boosted), create/edit (one form; **edit now has Area, location coords and visibility**), boost plans (no analytics), checkout, boost confirmed (new), profile (wave header, stats, boost card with listing picker), owner profile, edit profile, settings (log out moved here, with confirm). 5-slot floating tab bar with the raised Post button.
+- **Motion** (§4): list stagger, card→details Hero + sheet rise, search-pill shared element, bookmark spring + haptic + Undo snackbar, segmented thumb slide, chip cross-fade, rolling result count, button→spinner morph, error shake + haptic, rule-chip ticks, type-card press/chevron nudge, Post button spring, tab fade-through, Create listing rises as a sheet, theme cross-fade 250 ms, splash (tile spring, mark stroke reveal, ring ripple, tile drift/bob, progress loop). Reduced motion: fades only, no loops/shimmer.
+- **Performance**: no BackdropFilter (blur) anywhere — frosted look comes from gradients; one ticker drives all five hero hashtags and it pauses while scrolling / off-screen; animated pieces behind RepaintBoundary; network images decoded at display size (`memCacheWidth`); TomTom autocomplete debounced 300 ms; theme objects cached; ~3.3 MB of unused assets removed and the welcome photo shrunk from 4608 px / 716 KB to 1080 px / 83 KB.
+- **Fixes on the way**: the old "Recent/Search crash" pattern avoided via `SavedSelector` (BlocSelector) in lazy lists; Home search/filter flows send backend values; login success snackbar removed (it swallowed the first tab tap); stock person avatar replaced by initials; uncached images show "No photo" instead of a spinner; password-reset screens go through `AuthRepository`; hard-coded English in the touched screens localized (en/ar/fr).
+- Tests: `flutter test` 67 (6 new widget tests in `test/core/redesign_widgets_test.dart`); `integration_test/app_flow_test.dart` updated for the new UI and **passing** on emulator-5554 against the seeded local backend (it caught two layout bugs that were fixed: the Welcome sheet was untappable below the photo, and the details price bar filled the screen). Checked by hand on the emulator: splash, welcome, login (focus + error states), home, search, details, save + Undo, Saved, Profile, Settings, dark mode, Arabic RTL. `flutter analyze`: 0 errors, 0 warnings, 85 infos (all 67 deprecated-API infos gone).
+
+Open (needs the owner):
+- **Checkout** still uses the old card form (restyled); the Chargily flow in the design needs the backend checkout + webhook decision.
+- **Support contact** for Settings → Contact us: fill `lib/core/config/support_config.dart`; the group is hidden until then.
+- Production API returned 500 on token refresh on 2026-11-01 (details/saved fail there; local backend fine).
+- Not done from the spec: language-change fade (would rebuild the navigator), photo drag-to-reorder in Create listing, the Home "Sponsored → View all" link (there is no boosted-only search endpoint).
 
 ## Remaining backlog
 

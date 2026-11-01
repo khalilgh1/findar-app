@@ -36,13 +36,13 @@ class PaymentValidator {
     if (digitsOnly.length != 4) {
       return 'Expiry date must be in MM/YY format';
     }
-    
+
     // Validate month (first 2 digits)
     final month = int.tryParse(digitsOnly.substring(0, 2));
     if (month == null || month < 1 || month > 12) {
       return 'Enter valid month between 01 and 12';
     }
-    
+
     return null;
   }
 

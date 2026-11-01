@@ -58,6 +58,8 @@ class SearchCubit extends Cubit<Map<String, dynamic>> {
       'maxSqft': maxSqft,
       'listedBy': listedBy ?? 'Any',
       'sortBy': sortBy ?? 'date_newest',
+      'latitude': latitude,
+      'longitude': longitude,
     };
 
     emit({...state, 'state': 'loading', 'message': '', 'filters': filters});

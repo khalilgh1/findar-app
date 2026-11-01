@@ -1,6 +1,6 @@
 # Findar redesign: implementation spec (step 4b)
 
-The design was approved by the owner on 2026-11-01. This file has everything needed to build it in `findar_app/` without the original chat.
+The design was approved by the owner on 2026-11-01 and **implemented in step 4b the same day** (status and deviations: docs/roadmap.md, "Step 4b results"). This file has everything needed to build it in `findar_app/` without the original chat.
 
 - **Canvas (visual source)**: https://claude.ai/artifact/NXLyPR63DLLKiY4ezRvt4D (Claude Design, slug `ae4c8883-4a74-402f-aa01-6bfe85b6530e`, owner-private). It has 29 artboards on 5 pages, with blue sticky notes holding the motion specs.
 - **Exact values**: [generator/gen.py](generator/gen.py) produced every artboard. Each screen is an `s_<name>()` function, and the shared pieces are helpers (`feature_card`, `row_card`, `type_card`, `hero_search`, `glass_tile`, `wave_header`, `tabbar`, …). When a pixel value, colour or string is in doubt, read the function. Functions in the "v3 overrides" block near the end replace earlier ones with the same name.

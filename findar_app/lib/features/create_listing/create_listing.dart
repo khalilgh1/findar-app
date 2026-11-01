@@ -1,682 +1,590 @@
-//flutter imports
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:findar/l10n/app_localizations.dart';
-import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 
-//widgets
-import 'package:findar/features/create_listing/widgets/property_title.dart';
-import 'package:findar/features/create_listing/widgets/description.dart';
-import 'package:findar/features/create_listing/widgets/custom_selector.dart';
-import 'package:findar/features/create_listing/widgets/price_field.dart';
-import 'package:findar/features/create_listing/widgets/numeric_field.dart';
+import 'package:findar/core/models/property_listing_model.dart';
+import 'package:findar/core/motion/motion.dart';
+import 'package:findar/core/theme/findar_tokens.dart';
+import 'package:findar/core/widgets/f_icon.dart';
+import 'package:findar/core/widgets/listing_widgets.dart';
+import 'package:findar/core/widgets/ui.dart';
 import 'package:findar/features/create_listing/widgets/location_autocomplete_field.dart';
-//package imports
+import 'package:findar/l10n/app_localizations.dart';
 import 'package:findar/logic/cubits/my_listings_cubit.dart';
+import 'package:findar/logic/cubits/property_details_cubit.dart';
 
-//widgets
-import 'package:findar/core/widgets/progress_button.dart';
-
+/// New listing (no [listing]) or Edit listing (with [listing]). Pops `true`
+/// after a successful publish/save/delete.
 class CreateListingScreen extends StatefulWidget {
-  const CreateListingScreen({super.key});
+  const CreateListingScreen({super.key, this.listing});
+  final PropertyListing? listing;
 
   @override
   State<CreateListingScreen> createState() => _CreateListingScreenState();
 }
 
 class _CreateListingScreenState extends State<CreateListingScreen> {
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final _titleController = TextEditingController();
-  final _descriptionController = TextEditingController();
-  final _priceController = TextEditingController();
-  final _bathroomsController = TextEditingController();
-  final _areaController = TextEditingController();
-  final _bedroomsController = TextEditingController();
-  final _locationController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  final _title = TextEditingController();
+  final _description = TextEditingController();
+  final _price = TextEditingController();
+  final _area = TextEditingController();
+  final _location = TextEditingController();
+  final _picker = ImagePicker();
 
-  String _classification = 'For Sale';
-  String _propertyType = 'Apartment';
-  String _status = 'Online';
-  bool _isSubmitting = false;
-  final List<File> _selectedImages = [];
-  final ImagePicker _imagePicker = ImagePicker();
+  /// Photo sources in order: http URLs (existing) or local file paths.
+  final List<String> _photos = [];
+  bool _rent = false;
+  String _type = 'apartment';
+  int _bedrooms = 2;
+  int _bathrooms = 1;
+  bool _visible = true;
+  double? _lat, _lng;
+  bool _busy = false;
+  bool _deleting = false;
+  int _photoShake = 0;
 
-  /// Pick images from gallery or camera
-  Future<void> _pickImages({bool fromCamera = false}) async {
-    try {
-      if (fromCamera) {
-        final XFile? image = await _imagePicker.pickImage(
-          source: ImageSource.camera,
-          maxWidth: 1920,
-          maxHeight: 1080,
-          imageQuality: 85,
-        );
-        if (image != null) {
-          setState(() {
-            _selectedImages.add(File(image.path));
-          });
-        }
-      } else {
-        final List<XFile> images = await _imagePicker.pickMultiImage(
-          maxWidth: 1920,
-          maxHeight: 1080,
-          imageQuality: 85,
-        );
-        if (images.isNotEmpty) {
-          setState(() {
-            _selectedImages.addAll(images.map((xFile) => File(xFile.path)));
-          });
-        }
-      }
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to pick image: $e')),
-      );
-    }
-  }
-
-  /// Show image source selection dialog
-  void _showImageSourceDialog() {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) => SafeArea(
-        child: Wrap(
-          children: [
-            ListTile(
-              leading: const Icon(Icons.photo_library),
-              title: const Text('Choose from Gallery'),
-              onTap: () {
-                Navigator.pop(context);
-                _pickImages(fromCamera: false);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.camera_alt),
-              title: const Text('Take a Photo'),
-              onTap: () {
-                Navigator.pop(context);
-                _pickImages(fromCamera: true);
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// Remove an image from the list
-  void _removeImage(int index) {
-    setState(() {
-      _selectedImages.removeAt(index);
-    });
-  }
-  
-  // Location coordinates
-  double? _latitude;
-  double? _longitude;
-
-  String? _validateTitle(String? value) {
-    final l10n = AppLocalizations.of(context)!;
-    if (value == null || value.isEmpty) {
-      return l10n.validateTitleEmpty;
-    }
-    if (value.length < 5) {
-      return l10n.validateTitleMinLength;
-    }
-    return null;
-  }
-
-  String? _validateDescription(String? value) {
-    final l10n = AppLocalizations.of(context)!;
-    if (value == null || value.isEmpty) {
-      return l10n.validateDescriptionEmpty;
-    }
-    if (value.length < 20) {
-      return l10n.validateDescriptionMinLength;
-    }
-    return null;
-  }
-
-  String? _validatePrice(String? value) {
-    final l10n = AppLocalizations.of(context)!;
-    if (value == null || value.isEmpty) {
-      return l10n.validatePriceEmpty;
-    }
-    if (double.tryParse(value) == null) {
-      return l10n.validatePriceInvalid;
-    }
-    if (double.parse(value) <= 0) {
-      return l10n.validatePricePositive;
-    }
-    return null;
-  }
-
-  String? _validateLocation(String? value) {
-    final l10n = AppLocalizations.of(context)!;
-    if (value == null || value.isEmpty) {
-      return l10n.validateLocationEmpty;
-    }
-    return null;
-  }
-
-  String? _validateBedrooms(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please enter number of bedrooms';
-    }
-    if (int.tryParse(value) == null || int.parse(value) < 0) {
-      return 'Please enter a valid number';
-    }
-    return null;
-  }
+  bool get _editing => widget.listing != null;
 
   @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Scaffold(
-      backgroundColor: theme.colorScheme.surface,
-      appBar: AppBar(
-        forceMaterialTransparency: false,
-        primary: true,
-        toolbarOpacity: 1,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Builder(
-          builder: (context) {
-            var l10n = AppLocalizations.of(context);
-            return Text(
-              l10n?.createNewListing ?? 'Create New Listing',
-              style: theme.textTheme.headlineLarge?.copyWith(
-                color: theme.colorScheme.onSurface,
-              ),
-            );
-          },
-        ),
-        centerTitle: true,
-        elevation: 0,
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Property Title Section
-                Builder(
-                  builder: (context) {
-                    var l10n = AppLocalizations.of(context);
-                    return Text(l10n?.propertyTitle ?? 'Property Title',
-                        style: theme.textTheme.headlineSmall);
-                  },
-                ),
-                const SizedBox(height: 12),
-                PropertyTitle(
-                  titleController: _titleController,
-                  theme: theme,
-                  validator: _validateTitle,
-                ),
-                const SizedBox(height: 24),
-                // Description Section
-                Builder(
-                  builder: (context) {
-                    var l10n = AppLocalizations.of(context);
-                    return Text(l10n?.description ?? 'Description',
-                        style: theme.textTheme.headlineSmall);
-                  },
-                ),
-                const SizedBox(height: 12),
-                Description(
-                  descriptionController: _descriptionController,
-                  theme: theme,
-                  validator: _validateDescription,
-                ),
-                const SizedBox(height: 24),
-                // Classification Section
-                Builder(
-                  builder: (context) {
-                    var l10n = AppLocalizations.of(context);
-                    return Text(l10n?.classification ?? 'Classification',
-                        style: theme.textTheme.headlineSmall);
-                  },
-                ),
-                const SizedBox(height: 12),
-                CustomSelector(
-                  selectedOption: _classification,
-                  theme: theme,
-                  options: ['For Sale', 'For Rent'],
-                  onChanged: (value) {
-                    setState(() {
-                      _classification = value;
-                    });
-                  },
-                ),
-                const SizedBox(height: 24),
-
-                // Price and Property Type Row
-                Builder(
-                  builder: (context) {
-                    var l10n = AppLocalizations.of(context);
-                    return Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(l10n?.price ?? 'Price',
-                                  style: theme.textTheme.headlineSmall),
-                              const SizedBox(height: 12),
-                              priceField(
-                                priceController: _priceController,
-                                theme: theme,
-                                validator: _validatePrice,
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                l10n?.propertyType ?? 'Property Type',
-                                style: theme.textTheme.headlineSmall,
-                              ),
-                              const SizedBox(height: 12),
-                              Container(
-                                height: 52,
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 16),
-                                decoration: BoxDecoration(
-                                  color: theme.colorScheme.secondaryContainer,
-                                  borderRadius: BorderRadius.circular(12),
-                                  border:
-                                      Border.all(color: Colors.grey.shade300),
-                                ),
-                                child: DropdownButtonHideUnderline(
-                                  child: DropdownButton(
-                                    dropdownColor:
-                                        theme.colorScheme.secondaryContainer,
-                                    value: _propertyType,
-                                    isExpanded: true,
-                                    icon: Icon(
-                                      Icons.keyboard_arrow_down,
-                                      color: theme.colorScheme.onSurface,
-                                    ),
-                                    style: TextStyle(
-                                      fontSize: 15,
-                                      color: theme.colorScheme.onSurface,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                    items: [
-                                      'Apartment',
-                                      'House',
-                                      'Villa',
-                                      'Studio',
-                                      'Office'
-                                    ]
-                                        .map(
-                                          (String value) =>
-                                              DropdownMenuItem<String>(
-                                            value: value,
-                                            child: Text(value),
-                                          ),
-                                        )
-                                        .toList(),
-                                    onChanged: (String? newValue) {
-                                      if (newValue != null) {
-                                        setState(
-                                            () => _propertyType = newValue);
-                                      }
-                                    },
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    );
-                  },
-                ),
-                const SizedBox(height: 24),
-
-                // Bedrooms, Bathrooms, Area Row
-                Builder(
-                  builder: (context) {
-                    var l10n = AppLocalizations.of(context);
-                    return Row(
-                      children: [
-                        Expanded(
-                          child: NumericField(
-                            label: l10n?.bedrooms ?? 'Bedrooms',
-                            hint: '3',
-                            controller: _bedroomsController,
-                            keyboardType: TextInputType.number,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly
-                            ],
-                            validator: _validateBedrooms,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: NumericField(
-                            label: l10n?.bathrooms ?? 'Bathrooms',
-                            hint: '1',
-                            controller: _bathroomsController,
-                            keyboardType: TextInputType.number,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: NumericField(
-                            label: l10n?.areaSqm ?? 'Area (m²)',
-                            hint: '120',
-                            controller: _areaController,
-                            keyboardType: TextInputType.number,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly
-                            ],
-                          ),
-                        ),
-                      ],
-                    );
-                  },
-                ),
-
-                const SizedBox(height: 24),
-
-              // Location Section
-              Builder(
-                builder: (context) {
-                  var l10n = AppLocalizations.of(context);
-                  return Text(l10n?.location ?? 'Location', style: theme.textTheme.headlineSmall);
-                },
-              ),
-              const SizedBox(height: 12),
-              LocationAutocompleteField(
-                controller: _locationController,
-                theme: theme,
-                validator: _validateLocation,
-                onLocationSelected: (latitude, longitude) {
-                  setState(() {
-                    _latitude = latitude;
-                    _longitude = longitude;
-                  });
-                  print('Selected location: $latitude, $longitude'); // Debug print
-                },
-              ),
-              const SizedBox(height: 24),
-
-                // Photos Section
-                Builder(
-                  builder: (context) {
-                    var l10n = AppLocalizations.of(context);
-                    return Text(l10n?.photos ?? 'Photos',
-                        style: theme.textTheme.headlineSmall);
-                  },
-                ),
-                const SizedBox(height: 12),
-                // Display selected images
-                if (_selectedImages.isNotEmpty)
-                  SizedBox(
-                    height: 120,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: _selectedImages.length,
-                      itemBuilder: (context, index) {
-                        return Padding(
-                          padding: const EdgeInsets.only(right: 12),
-                          child: Stack(
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: Image.file(
-                                  _selectedImages[index],
-                                  width: 120,
-                                  height: 120,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                              // Main image badge for first image
-                              if (index == 0)
-                                Positioned(
-                                  bottom: 8,
-                                  left: 8,
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 4,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: theme.colorScheme.primary,
-                                      borderRadius: BorderRadius.circular(4),
-                                    ),
-                                    child: Text(
-                                      'Main',
-                                      style: TextStyle(
-                                        color: theme.colorScheme.onPrimary,
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              // Delete button
-                              Positioned(
-                                top: 8,
-                                right: 8,
-                                child: GestureDetector(
-                                  onTap: () => _removeImage(index),
-                                  child: Container(
-                                    width: 28,
-                                    height: 28,
-                                    decoration: BoxDecoration(
-                                      color: theme.colorScheme.onSurface
-                                          .withAlpha(150),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Icon(
-                                      Icons.close,
-                                      color: theme.colorScheme.surface,
-                                      size: 18,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                if (_selectedImages.isNotEmpty) const SizedBox(height: 12),
-                // Add photos button
-                GestureDetector(
-                  onTap: _showImageSourceDialog,
-                  child: Container(
-                    height: 100,
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.secondary,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Colors.grey.shade300,
-                        style: BorderStyle.solid,
-                        width: 2,
-                      ),
-                    ),
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.add_photo_alternate_outlined,
-                            color: Colors.grey[400],
-                            size: 32,
-                          ),
-                          const SizedBox(height: 8),
-                          Builder(
-                            builder: (context) {
-                              var l10n = AppLocalizations.of(context);
-                              return Text(
-                                _selectedImages.isEmpty
-                                    ? (l10n?.addPhotos ?? 'Add Photos')
-                                    : 'Add More Photos',
-                                style: TextStyle(
-                                  color: Colors.grey[400],
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-
-                // Status Section
-                Builder(
-                  builder: (context) {
-                    var l10n = AppLocalizations.of(context);
-                    return Text(l10n?.status ?? 'Status',
-                        style: theme.textTheme.headlineSmall);
-                  },
-                ),
-                const SizedBox(height: 12),
-                CustomSelector(
-                  selectedOption: _status,
-                  theme: theme,
-                  options: ['Online', 'Offline'],
-                  onChanged: (value) {
-                    setState(() {
-                      _status = value;
-                    });
-                  },
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-
-      // Create Listing Button
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Builder(
-          builder: (context) {
-            final l10n = AppLocalizations.of(context);
-            return ProgressButton(
-              label: l10n?.createListing ?? 'Create Listing',
-              backgroundColor: theme.colorScheme.primary,
-              textColor: theme.colorScheme.onPrimary,
-              isLoading: _isSubmitting,
-              onPressed: _submit,
-            );
-          },
-        ),
-      ),
-    );
-  }
-
-  Future<void> _submit() async {
-    if (_isSubmitting) return;
-    final l10n = AppLocalizations.of(context)!;
-
-    // Validate form
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
-
-    // Validate at least one image is selected
-    if (_selectedImages.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please add at least one photo'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    final price = double.tryParse(_priceController.text.trim());
-    if (price == null || price <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter a valid price'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    // Get image paths
-    final mainImage = _selectedImages.first.path;
-    final additionalImages = _selectedImages.length > 1
-        ? _selectedImages.skip(1).map((f) => f.path).toList()
-        : <String>[];
-
-    setState(() => _isSubmitting = true);
-    final result = await context.read<MyListingsCubit>().createListing(
-          title: _titleController.text.trim(),
-          description: _descriptionController.text.trim(),
-          price: price,
-          location: _locationController.text.trim(),
-          latitude: _latitude,
-          longitude: _longitude,
-          bedrooms: int.tryParse(_bedroomsController.text) ?? 0,
-          bathrooms: int.tryParse(_bathroomsController.text) ?? 0,
-          area: double.tryParse(_areaController.text),
-          classification: _classification,
-          propertyType: _propertyType,
-          image: mainImage,
-          additionalImages: additionalImages,
-          isOnline: _status == 'Online',
-        );
-    if (!mounted) return;
-    setState(() => _isSubmitting = false);
-
-    if (result.state) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(l10n.listingCreatedSuccessfully),
-          backgroundColor: Colors.green,
-        ),
-      );
-      // Return to previous screen and signal that a listing was created
-      Navigator.pop(context, true);
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-              result.message.isNotEmpty ? result.message : l10n.listingCreateFailed),
-          backgroundColor: Colors.red,
-        ),
-      );
+  void initState() {
+    super.initState();
+    final l = widget.listing;
+    if (l == null) return;
+    _title.text = l.title;
+    _description.text = l.description;
+    _price.text = l.price.round().toString();
+    if (l.area != null && l.area! > 0) _area.text = l.area!.round().toString();
+    _location.text = l.location;
+    _rent = isRent(l.classification);
+    final t = l.propertyType.toLowerCase();
+    _type = kPropertyTypes.contains(t) ? t : 'apartment';
+    _bedrooms = l.bedrooms;
+    _bathrooms = l.bathrooms;
+    _visible = l.isOnline;
+    _lat = l.latitude;
+    _lng = l.longitude;
+    if (ListingPhoto.hasImage(l.image)) _photos.add(l.image);
+    for (final p in l.additionalImages ?? const <String>[]) {
+      if (ListingPhoto.hasImage(p) && !_photos.contains(p)) _photos.add(p);
     }
   }
 
   @override
   void dispose() {
-    _titleController.dispose();
-    _descriptionController.dispose();
-    _priceController.dispose();
-    _bathroomsController.dispose();
-    _areaController.dispose();
-    _bedroomsController.dispose();
-    _locationController.dispose();
+    _title.dispose();
+    _description.dispose();
+    _price.dispose();
+    _area.dispose();
+    _location.dispose();
     super.dispose();
   }
+
+  // ---------------------------------------------------------------- photos
+
+  Future<void> _pick({required bool camera}) async {
+    try {
+      if (camera) {
+        final x = await _picker.pickImage(
+            source: ImageSource.camera,
+            maxWidth: 1920,
+            maxHeight: 1080,
+            imageQuality: 85);
+        if (x != null) setState(() => _photos.add(x.path));
+      } else {
+        final xs = await _picker.pickMultiImage(
+            maxWidth: 1920, maxHeight: 1080, imageQuality: 85);
+        if (xs.isNotEmpty) {
+          setState(() => _photos.addAll(xs.map((x) => x.path)));
+        }
+      }
+    } catch (e) {
+      if (mounted) showAppSnack(context, '$e');
+    }
+  }
+
+  void _addPhoto() {
+    final l10n = AppLocalizations.of(context)!;
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            MenuRow(
+              icon: FIcons.image,
+              title: l10n.chooseFromGallery,
+              onTap: () {
+                Navigator.pop(ctx);
+                _pick(camera: false);
+              },
+            ),
+            MenuRow(
+              icon: FIcons.camera,
+              title: l10n.takePhoto,
+              onTap: () {
+                Navigator.pop(ctx);
+                _pick(camera: true);
+              },
+            ),
+          ]),
+        ),
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------- submit
+
+  Future<void> _submit() async {
+    final l10n = AppLocalizations.of(context)!;
+    final formOk = _formKey.currentState!.validate();
+    if (_photos.isEmpty) {
+      setState(() => _photoShake++);
+      showAppSnack(context, l10n.addAtLeastOnePhoto);
+      return;
+    }
+    if (!formOk) {
+      HapticFeedback.mediumImpact();
+      return;
+    }
+
+    final cubit = context.read<MyListingsCubit>();
+    final details = context.read<PropertyDetailsCubit>();
+    final price = double.parse(_price.text.trim());
+    final area = double.tryParse(_area.text.trim());
+    setState(() => _busy = true);
+
+    final result = _editing
+        ? await cubit.editListing(
+            id: widget.listing!.id,
+            title: _title.text.trim(),
+            description: _description.text.trim(),
+            price: price,
+            location: _location.text.trim(),
+            bedrooms: _bedrooms,
+            bathrooms: _bathrooms,
+            classification: _rent ? 'For Rent' : 'For Sale',
+            propertyType: _type,
+            image: _photos.first,
+            // Always send the list so removed photos go server-side too.
+            additionalImages: _photos.skip(1).toList(),
+            isOnline: _visible,
+            area: area,
+            latitude: _lat,
+            longitude: _lng,
+          )
+        : await cubit.createListing(
+            title: _title.text.trim(),
+            description: _description.text.trim(),
+            price: price,
+            location: _location.text.trim(),
+            latitude: _lat,
+            longitude: _lng,
+            bedrooms: _bedrooms,
+            bathrooms: _bathrooms,
+            area: area,
+            classification: _rent ? 'For Rent' : 'For Sale',
+            propertyType: _type,
+            image: _photos.first,
+            additionalImages: _photos.skip(1).toList(),
+            isOnline: _visible,
+          );
+    if (!mounted) return;
+    setState(() => _busy = false);
+    if (result.state) {
+      if (_editing) details.invalidateCache(widget.listing!.id);
+      showAppSnack(
+          context, _editing ? result.message : l10n.listingCreatedSuccessfully);
+      Navigator.pop(context, true);
+    } else {
+      showAppSnack(
+          context,
+          result.message.isNotEmpty
+              ? result.message
+              : l10n.listingCreateFailed);
+    }
+  }
+
+  Future<void> _delete() async {
+    final l10n = AppLocalizations.of(context)!;
+    final c = context.fc;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.deleteListingTitle),
+        content: Text(l10n.deleteListingBody(widget.listing!.title)),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              style: TextButton.styleFrom(foregroundColor: c.ink),
+              child: Text(l10n.cancel)),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              style: TextButton.styleFrom(foregroundColor: c.red),
+              child: Text(l10n.delete)),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+    setState(() => _deleting = true);
+    final r =
+        await context.read<MyListingsCubit>().deleteListing(widget.listing!.id);
+    if (!mounted) return;
+    setState(() => _deleting = false);
+    showAppSnack(context, r.state ? l10n.listingRemoved : r.message);
+    if (r.state) Navigator.pop(context, true);
+  }
+
+  // ---------------------------------------------------------------- build
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.fc;
+    final l10n = AppLocalizations.of(context)!;
+    final digits = [FilteringTextInputFormatter.digitsOnly];
+
+    Widget label(String t) => Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: Text(t, style: context.tt.labelMedium),
+        );
+
+    return Scaffold(
+      backgroundColor: c.bg,
+      body: SafeArea(
+        bottom: false,
+        child: Column(children: [
+          FTopBar(
+            title: _editing ? l10n.editListingTitle : l10n.newListing,
+            close: true,
+          ),
+          Expanded(
+            child: Form(
+              key: _formKey,
+              child: ListView(
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                padding: const EdgeInsets.fromLTRB(20, 4, 20, 32),
+                children: [
+                  Text(l10n.photos,
+                      style: context.tt.titleSmall
+                          ?.copyWith(fontWeight: FontWeight.w800)),
+                  const SizedBox(height: 10),
+                  ShakeOnChange(
+                    trigger: _photoShake == 0 ? null : _photoShake,
+                    child: _PhotosRow(
+                      photos: _photos,
+                      onAdd: _addPhoto,
+                      onRemove: (i) => setState(() => _photos.removeAt(i)),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(l10n.photosHint,
+                      style: context.tt.bodySmall?.copyWith(fontSize: 12)),
+                  const SizedBox(height: 20),
+                  AppField(
+                    label: l10n.titleLabel,
+                    controller: _title,
+                    hint: l10n.examplePropertyTitleHint,
+                    textInputAction: TextInputAction.next,
+                    validator: (v) {
+                      final t = v?.trim() ?? '';
+                      if (t.isEmpty) return l10n.validateTitleEmpty;
+                      if (t.length < 5) return l10n.validateTitleMinLength;
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  AppField(
+                    label: l10n.description,
+                    controller: _description,
+                    hint: l10n.describeHint,
+                    maxLines: 6,
+                    minLines: 4,
+                    validator: (v) {
+                      final t = v?.trim() ?? '';
+                      if (t.isEmpty) return l10n.validateDescriptionEmpty;
+                      if (t.length < 20) {
+                        return l10n.validateDescriptionMinLength;
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  label(l10n.listingType),
+                  PillSegmented<bool>(
+                    values: const [false, true],
+                    labels: [l10n.forSale, l10n.forRent],
+                    selected: _rent,
+                    onChanged: (v) => setState(() => _rent = v),
+                  ),
+                  const SizedBox(height: 20),
+                  label(l10n.propertyType),
+                  Wrap(spacing: 8, runSpacing: 8, children: [
+                    for (final t in kPropertyTypes)
+                      SelectChip(
+                        label: propertyTypeLabel(t, l10n),
+                        icon: propertyTypeIcon(t),
+                        selected: _type == t,
+                        onTap: () => setState(() => _type = t),
+                      ),
+                  ]),
+                  const SizedBox(height: 20),
+                  AppField(
+                    label: _rent ? l10n.pricePerMonth : l10n.price,
+                    controller: _price,
+                    hint: '0',
+                    keyboardType: TextInputType.number,
+                    inputFormatters: digits,
+                    trailing: UnitSuffix(l10n.currencyDa),
+                    validator: (v) {
+                      final t = v?.trim() ?? '';
+                      if (t.isEmpty) return l10n.validatePriceEmpty;
+                      final p = double.tryParse(t);
+                      if (p == null) return l10n.validatePriceInvalid;
+                      if (p <= 0) return l10n.validatePricePositive;
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  Row(children: [
+                    Expanded(
+                      child: FStepper(
+                        label: l10n.bedrooms,
+                        value: _bedrooms,
+                        onChanged: (v) => setState(() => _bedrooms = v),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: FStepper(
+                        label: l10n.bathrooms,
+                        value: _bathrooms,
+                        onChanged: (v) => setState(() => _bathrooms = v),
+                      ),
+                    ),
+                  ]),
+                  const SizedBox(height: 20),
+                  AppField(
+                    label: l10n.areaSqm,
+                    controller: _area,
+                    hint: '0',
+                    keyboardType: TextInputType.number,
+                    inputFormatters: digits,
+                    trailing: const UnitSuffix('m²'),
+                  ),
+                  const SizedBox(height: 20),
+                  LocationAutocompleteField(
+                    controller: _location,
+                    label: l10n.location,
+                    hint: l10n.searchAddress,
+                    validator: (v) => (v == null || v.trim().isEmpty)
+                        ? l10n.validateLocationEmpty
+                        : null,
+                    onLocationSelected: (lat, lng) {
+                      _lat = lat;
+                      _lng = lng;
+                    },
+                    onCleared: () => _lat = _lng = null,
+                  ),
+                  const SizedBox(height: 20),
+                  Container(
+                    padding: const EdgeInsets.fromLTRB(16, 10, 10, 10),
+                    decoration: BoxDecoration(
+                        color: c.surf, borderRadius: BorderRadius.circular(16)),
+                    child: Row(children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(l10n.visibleToBuyers,
+                                style: context.tt.titleSmall
+                                    ?.copyWith(fontWeight: FontWeight.w800)),
+                            Text(l10n.visibleToBuyersSub,
+                                style: context.tt.bodySmall
+                                    ?.copyWith(fontWeight: FontWeight.w500)),
+                          ],
+                        ),
+                      ),
+                      Switch(
+                        value: _visible,
+                        onChanged: (v) {
+                          Motion.softHaptic();
+                          setState(() => _visible = v);
+                        },
+                      ),
+                    ]),
+                  ),
+                  if (_editing) ...[
+                    const SizedBox(height: 28),
+                    FButton(
+                      label: l10n.deleteListing,
+                      icon: FIcons.trash,
+                      kind: FButtonKind.danger,
+                      loading: _deleting,
+                      onPressed: _busy ? null : _delete,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+          StickyBar(
+            child: FButton(
+              label: _editing ? l10n.saveChanges : l10n.publishListing,
+              loading: _busy,
+              onPressed: _deleting ? null : _submit,
+            ),
+          ),
+        ]),
+      ),
+    );
+  }
+}
+
+class _PhotosRow extends StatelessWidget {
+  const _PhotosRow(
+      {required this.photos, required this.onAdd, required this.onRemove});
+  final List<String> photos;
+  final VoidCallback onAdd;
+  final ValueChanged<int> onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.fc;
+    final l10n = AppLocalizations.of(context)!;
+    return SizedBox(
+      height: 108,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        clipBehavior: Clip.none,
+        padding: const EdgeInsets.only(top: 6),
+        itemCount: photos.length + 1,
+        separatorBuilder: (_, __) => const SizedBox(width: 12),
+        itemBuilder: (context, i) {
+          if (i == 0) {
+            return Semantics(
+              button: true,
+              label: l10n.addPhotos,
+              excludeSemantics: true,
+              child: Pressable(
+                button: false,
+                onTap: onAdd,
+                child: CustomPaint(
+                  painter: _DashedRRect(c.muted),
+                  child: Container(
+                    width: 96,
+                    height: 96,
+                    decoration: BoxDecoration(
+                        color: c.surf, borderRadius: BorderRadius.circular(16)),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        FIcon(FIcons.camera, size: 22, color: c.ink),
+                        const SizedBox(height: 6),
+                        Text(l10n.addLabel,
+                            style:
+                                context.tt.labelMedium?.copyWith(fontSize: 12)),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }
+          final idx = i - 1;
+          final src = photos[idx];
+          return SizedBox(
+            width: 96,
+            height: 96,
+            child: Stack(clipBehavior: Clip.none, children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: src.startsWith('http')
+                    ? ListingPhoto(url: src, width: 96, height: 96, radius: 16)
+                    : Image.file(File(src),
+                        width: 96,
+                        height: 96,
+                        fit: BoxFit.cover,
+                        cacheWidth:
+                            (96 * MediaQuery.devicePixelRatioOf(context))
+                                .round()),
+              ),
+              if (idx == 0)
+                PositionedDirectional(
+                  start: 6,
+                  bottom: 6,
+                  child: Container(
+                    height: 22,
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: const Color(0xBF111317),
+                      borderRadius: BorderRadius.circular(99),
+                    ),
+                    child: Text(l10n.coverLabel,
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w800)),
+                  ),
+                ),
+              PositionedDirectional(
+                top: -6,
+                end: -6,
+                child: Semantics(
+                  button: true,
+                  label: l10n.removePhoto,
+                  excludeSemantics: true,
+                  child: GestureDetector(
+                    onTap: () => onRemove(idx),
+                    child: Container(
+                      width: 26,
+                      height: 26,
+                      decoration: BoxDecoration(
+                        color: c.btn,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: c.bg, width: 2),
+                      ),
+                      alignment: Alignment.center,
+                      child: FIcon(FIcons.x,
+                          size: 14, strokeWidth: 2.4, color: c.btnText),
+                    ),
+                  ),
+                ),
+              ),
+            ]),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _DashedRRect extends CustomPainter {
+  _DashedRRect(this.color);
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final path = Path()
+      ..addRRect(RRect.fromRectAndRadius(
+          Offset.zero & size, const Radius.circular(16)));
+    final p = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5;
+    for (final m in path.computeMetrics()) {
+      var d = 0.0;
+      while (d < m.length) {
+        canvas.drawPath(m.extractPath(d, d + 5), p);
+        d += 9;
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(_DashedRRect old) => old.color != color;
 }
